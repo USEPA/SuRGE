@@ -13,6 +13,7 @@
 # EXTRACT ATTRIBUTE TABLE -----------  
 # nla2012Alb is a spatialPointsDataFrame created in mapNla2012.R
 attRes <- as.data.frame(nla2012Alb@data)
+# openxlsx::write.xlsx(attRes, "output/ReservoirAttributes_NLA_2012.xlsx")
 
 # Create the design list
 stratDsgn <- list(CPL = list(panel=c(PanelOne=7), seltype="Equal", over = 10), #50
