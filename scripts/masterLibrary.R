@@ -26,4 +26,4 @@ if(length(newPackages) > 0) install.packages(newPackages)
 # Load all packages
 for(i in 1:length(packageList)){
   library(package = packageList[i], character.only = TRUE)
-} 
+}
