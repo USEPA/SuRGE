@@ -55,7 +55,9 @@ strataTbl = with(grtsResM@data, table(stratum)) # Check numbers
 ## Number of simulations
 nSamp = 1000
 ## Simulated methane emission rates
-ch4MnsMat = MASS::mvrnorm(n = 1000, mu = grtsResM$ch4Mn, Sigma = diag(grtsResM$ch4Var ))
+## This function produces nSamp rows of emission rate estimates, where each row is a draw
+## from the 63 reservoirs sampled.
+ch4MnsMat = MASS::mvrnorm(n = nSamp, mu = grtsResM$ch4Mn, Sigma = diag(grtsResM$ch4Var ))
 
 ## Choose which method you want
 calcMethod = "Second"
@@ -154,11 +156,11 @@ if(calcMethod == "Second"){
   ## Read in the stratified surface area totals
   arealEst <- read.csv("inputData/nla2012/NLA12_Extent_Areal_Estimates_Target_20170809.csv",
                        stringsAsFactors = FALSE)
+  ## The Category column needs to be set to 'Total' because the scaling up for surface area presumably is done on 
+  ## the entire eco-region, not just the sites sampled. The Indicator column needs to be subset to avoid duplicate entries.
+  ## We arbitrarily chose Indicator == "Evaluation_Status" instead of "Target_nonTarget"
   arealEcoReg <- subset(arealEst, Type == "WSA9_by_Lake_Origin" & grepl("Man_Made", arealEst$Subpopulation) &
-                          Category == "Target_Sampled")
-  ## The sum of the number of responses should be the same as the number of unique man-made reservoirs in the 
-  ## summary NLA 2012 file we have -- 581
-  sum(arealEcoReg$NResp) == 581
+                          Category == "Total" & Indicator == "Evaluation_Status")
   
   ## Assign a stratum designation
   arealEcoReg$stratum = substr(arealEcoReg$Subpopulation, 1,3)
@@ -166,10 +168,13 @@ if(calcMethod == "Second"){
   ## Generate random eco-region size reservoir surface area estimates
   ecoSAEst = MASS::mvrnorm(nSamp, mu = arealEcoReg$Estimate.U, Sigma = diag(arealEcoReg$StdError.U^2))
   
+  ## The mvrnorm call above will allow for negative surface area estimates becasue the normal distribution does that.
+  ## If there are any 0's, we need to get rid of them because negative surface area is unrealistic.
   ## Get rid of 0's
   for(i in 1:ncol(ecoSAEst)){
     # i = 1
     zeroInd = which(ecoSAEst[,i] <= 0)
+    ## Choose the median for replacement because it's probably reasonable.
     ecoSAEst[zeroInd,i] = median(ecoSAEst[,i])
   }
   
@@ -191,6 +196,10 @@ if(calcMethod == "Second"){
   for(i in 1:nSamp){
     # i = 1
     # Aggregate the simulated means by eco-region, calclulate mean
+    # The arithmetic mean for each stratum is an unbiased estimate. There is error
+    # in that strata means, which we could account for using the local neighborhood
+    # variance estimator. But that assumes a spatial structure among 7 sites,
+    # which is probably unreasonable. So we ignore it for now.
     tmpMethMns = aggregate(ch4MnsMat[i,] ~ grtsResM$stratum, FUN = mean)
     names(tmpMethMns) = c("stratum", "ch4Mn")
     # Add on the estimated total surface area by eco-region
