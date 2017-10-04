@@ -18,7 +18,7 @@
 # First, create fortified dataframe derived from Albers projection.
 ecoRegAlb <- readOGR("inputData/nla2012", # provided in Albers
                      "Aggr_Ecoregions9_2015")
-# "Temperate" is missspelled.
+# "Temperate" is misspelled.
 ecoRegAlb@data$WSA9_NAME <- as.character(ecoRegAlb@data$WSA9_NAME) # conv to char
 ecoRegAlb@data <- mutate(ecoRegAlb@data, 
                          WSA9_NAME = ifelse(WSA9_NAME == "Temporate Plains",
