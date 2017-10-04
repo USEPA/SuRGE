@@ -215,8 +215,10 @@ if(calcMethod == "Second"){
 } # End if statement
 
 ## Plot results
-ggplot(methaneTotDf2, aes(Total)) + geom_histogram(bins = 50) +
-  xlab("CH4 Emissions [mg C d^(-1)]") + ylab("Frequency") + ggtitle("GRTS design-based estimate of CH4")
+ggplot(methaneTotDf2, aes(Total* (365 / (1000*1000*1000*1000*1000)))) + 
+  geom_histogram(bins = 50) +
+  xlab("CH4 Emissions [Tg C yr^(-1)]") + ylab("Frequency") + 
+  ggtitle("GRTS design-based estimate of CH4")
 
 # Method 1 vs Method 2
 # Method 1: 38 Tg CH4-C yr-1, 29 - 47
@@ -227,4 +229,4 @@ method195ci <- quantile(methaneTotDf1$Total, c(0.025, 0.975)) * (365 / (1000*100
 method2mn <- mean(methaneTotDf2$Total) * (365 / (1000*1000*1000*1000*1000)) # d->yr, mg->Tg
 method295ci <- quantile(methaneTotDf2$Total, c(0.025, 0.975)) * (365 / (1000*1000*1000*1000*1000))
 
-# Beaulieu et al. 2014 estimated 2.2Tg CH4-C yr-1
+# Beaulieu et al. 2014 estimated 2.2 Tg CH4-C yr-1
