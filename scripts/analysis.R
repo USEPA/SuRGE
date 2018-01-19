@@ -13,10 +13,10 @@ set.seed(12321)
 ## Rates should be in mg C m^(-2) d^(-1), so we'll need to convert.
 ## m^(-2) h(-1) * [(24 h) / (1 day)]
 mnMethaneRate = 6.3 * 24 ## See above conversion
-sdMethaneRate = 1.0 * 24
+seMethaneRate = 1.0 * 24
 ## Reservoir-level simulated means
-grtsRes$ch4Mn = rnorm(nrow(grtsRes), mean = mnMethaneRate, sd = sdMethaneRate)
-# Reservoir-level GRTS variance
+grtsRes$ch4Mn = rnorm(nrow(grtsRes), mean = mnMethaneRate, sd = seMethaneRate)
+# Reservoir-level GRTS variance RSD = sd / mn, usually between 1/3 and 1/6.
 grtsRes$ch4Var = (grtsRes$ch4Mn / runif(nrow(grtsRes),3,6))^2
 # Make the 'oversample' results NA
 grtsRes$ch4Mn[grtsRes$panel == "OverSamp"] = NA
@@ -100,19 +100,19 @@ if(calcMethod == "First"){
   ## or otherwise didn't meet the criteria. So there are two ways to find the unique water bodies number.
   ## The first calculation below is the the number of water bodies in wbAreasEco, minus the known 
   ## overcount in the reservoirs.
-  nWater = length(unlist(wbAreasEco)) - (nrow(nla2012Alb) - nrow(nla2012AlbUnique)) 
+  # nWater = length(unlist(wbAreasEco)) - (nrow(nla2012Alb) - nrow(nla2012AlbUnique)) 
   ## This calculation is just the number from the NLA report. This one might be safer.
   nWater = 1038
   
   ## Sample proportion and SE
   pHat = nRes / nWater
-  sdProp = sqrt ( pHat * (1 - pHat) ) / sqrt(nWater) # This is just the sd of the data / sqrt(n)
+  seProp = sqrt ( pHat * (1 - pHat) ) / sqrt(nWater) # This is just the sd of the data / sqrt(n)
   
   ## Total number of water bodies - from NLA 2012 report
   nWaterUSA = 159652
   
   ## Simulated proportion of water bodies that are man-made reservoirs.
-  pSims = rnorm(nSamp, mean = pHat, sd = sdProp)
+  pSims = rnorm(nSamp, mean = pHat, sd = seProp)
   methaneTots = NULL
   for(i in 1:nSamp){
     # i = 1

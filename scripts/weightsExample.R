@@ -79,7 +79,7 @@ total1Res <- total.est(z = sites1$ch4, wgt = sites1$wgt,
                        popsize = c("High"=allPtsTbl[1,1], "Middle" = allPtsTbl[1,3],
                                    "Low" = allPtsTbl[1,2]))
 total1Res # Nothing changed. Weird.
-sum(subset(allPts@data, type = "reservoir")$ch4) 
+sum(subset(allPts@data, type == "reservoir")$ch4) 
 # True population total emissions rate is much higher.
 # What if we scale the weights manually so they add up to the number
 # of known reservoirs in our world?
@@ -102,7 +102,7 @@ total1Res <- total.est(z = sites1$ch4, wgt = sites1$wgt *wtMult,
                        popsize = c("High"=allPtsTbl[1,1], "Middle" = allPtsTbl[1,3],
                                    "Low" = allPtsTbl[1,2]))
 total1Res
-sum(subset(allPts@data, type = "reservoir")$ch4)
+sum(subset(allPts@data, type == "reservoir")$ch4)
 # Less of a difference this time. Probably because the equal probability scheme
 # missed some of the larger reservoirs. 
 
@@ -112,7 +112,7 @@ set.seed(3333)
 dat2 <- subset(dat, type == "reservoir") # same as dat1, but that's OK. Keep naming convention.
 # Cut the logSize into factor levels for the weighting.
 # This probably needs tweaking based on knowledge of how ch4 varies with size.
-brks <- c(0,1:4,9) 
+brks <- c(0,1:4,9)
 dat2$logSizeCat <- cut(dat2$logSize, breaks = brks)
 # One weird part is that you have to specify the target sample sizes for the 
 # 'multi density categories' - spsurvey's verbage for the binned categories
