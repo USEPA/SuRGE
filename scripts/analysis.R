@@ -12,7 +12,7 @@ set.seed(12321)
 ## 1.0 mg CH4 m-2 h-1, respectively. 
 ## Rates should be in mg C m^(-2) d^(-1), so we'll need to convert.
 ## m^(-2) h(-1) * [(24 h) / (1 day)]
-mnMethaneRate = 6.3 * 24 ## See above conversion
+mnMethaneRate = 6.3 * 24 ## See above conversion 
 seMethaneRate = 1.0 * 24
 ## Reservoir-level simulated means
 grtsRes$ch4Mn = rnorm(nrow(grtsRes), mean = mnMethaneRate, sd = seMethaneRate)
