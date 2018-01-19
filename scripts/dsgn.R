@@ -48,7 +48,8 @@ head(nrsSites@data)
 # Print the survey design summary
 summary(nrsSites)
 
-plotIt <- FALSE # Plotting isn't working on my machine...
+plotIt <- TRUE # Can use FALSE if having problem w/ plotting.
+               # Plotting not working on Will's machine...
 if(plotIt){
   # Plot survey design
   ggplot() + 

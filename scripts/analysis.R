@@ -57,7 +57,7 @@ nSamp = 1000
 ## Simulated methane emission rates
 ## This function produces nSamp rows of emission rate estimates, where each row is a draw
 ## from the 63 reservoirs sampled.
-ch4MnsMat = MASS::mvrnorm(n = nSamp, mu = grtsResM$ch4Mn, Sigma = diag(grtsResM$ch4Var ))
+ch4MnsMat = MASS::mvrnorm(n = nSamp, mu = grtsResM$ch4Mn, Sigma = diag(grtsResM$ch4Var))
 
 ## Choose which method you want
 calcMethod = "Second"
@@ -166,6 +166,7 @@ if(calcMethod == "Second"){
   arealEcoReg$stratum = substr(arealEcoReg$Subpopulation, 1,3)
   
   ## Generate random eco-region size reservoir surface area estimates
+  ## Each of 1000 rows represents simulated reservoir SA for each of 9 ecoregions (9 columns)
   ecoSAEst = MASS::mvrnorm(nSamp, mu = arealEcoReg$Estimate.U, Sigma = diag(arealEcoReg$StdError.U^2))
   
   ## The mvrnorm call above will allow for negative surface area estimates becasue the normal distribution does that.
@@ -208,10 +209,24 @@ if(calcMethod == "Second"){
   }
   
   methaneTotDf2$Total = apply(methaneTotDf2, 1, sum)
-  
-}
+
+# This is total emissions for the US in units of mg CH4-C day. 
+
+} # End if statement
 
 ## Plot results
-ggplot(methaneTotDf2, aes(Total)) + geom_histogram(bins = 50) +
-  xlab("CH4 Emissions [mg C d^(-1)]") + ylab("Frequency") + ggtitle("GRTS design-based estimate of CH4")
+ggplot(methaneTotDf2, aes(Total* (365 / (1000*1000*1000*1000*1000)))) + 
+  geom_histogram(bins = 50) +
+  xlab("CH4 Emissions [Tg C yr^(-1)]") + ylab("Frequency") + 
+  ggtitle("GRTS design-based estimate of CH4")
 
+# Method 1 vs Method 2
+# Method 1: 38 Tg CH4-C yr-1, 29 - 47
+method1mn <- mean(methaneTotDf1$Total) * (365 / (1000*1000*1000*1000*1000)) # d->yr, mg->Tg
+method195ci <- quantile(methaneTotDf1$Total, c(0.025, 0.975)) * (365 / (1000*1000*1000*1000*1000))
+
+# Method 2: 5.3 Tg CH4-C yr, 3.2 - 8.1
+method2mn <- mean(methaneTotDf2$Total) * (365 / (1000*1000*1000*1000*1000)) # d->yr, mg->Tg
+method295ci <- quantile(methaneTotDf2$Total, c(0.025, 0.975)) * (365 / (1000*1000*1000*1000*1000))
+
+# Beaulieu et al. 2014 estimated 2.2 Tg CH4-C yr-1
