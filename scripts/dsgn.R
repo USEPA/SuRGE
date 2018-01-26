@@ -52,6 +52,18 @@ plotIt <- TRUE # Can use FALSE if having problem w/ plotting.
                # Plotting not working on Will's machine...
 if(plotIt){
   # Plot survey design
+  # Custom color pallette for ecoregion polygons.  Attempted to mirror
+  # https://www.epa.gov/national-aquatic-resource-surveys/
+  # ecoregional-results-national-lakes-assessment-2012
+  cols <- c("Coastal Plains" = "orange1",
+            "Northern Appalachians" = "lightpink1",
+            "Northern Plains" = "darksalmon",
+            "Southern Appalachians" = "mediumturquoise",
+            "Southern Plains" = "khaki4",
+            "Temperate Plains" = "forestgreen", 
+            "Upper Midwest" = "deepskyblue4",
+            "Western Mountains" = "saddlebrown",
+            "Xeric" = "lightskyblue4")
   ggplot() + 
     geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Coastal Plains"),
                  aes(long,lat,group=group,fill=WSA9_NAME)) +

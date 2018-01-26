@@ -67,8 +67,8 @@ nSamp = 1000
 ch4MnsMat = MASS::mvrnorm(n = nSamp, mu = grtsResM$ch4Mn, Sigma = diag(grtsResM$ch4Var))
 
 ## Choose which method you want
-calcMethod = "Second"
-# calcMethod = "First"
+# calcMethod = "Second"
+ calcMethod = "First"
 
 if(calcMethod == "First"){
   ######## Notes ########
@@ -106,7 +106,8 @@ if(calcMethod == "First"){
   ## GIS shapefile originally,contains both sites visited and sites that couldn't be accessed 
   ## or otherwise didn't meet the criteria. So there are two ways to find the unique water bodies number.
   ## The first calculation below is the the number of water bodies in wbAreasEco, minus the known 
-  ## overcount in the reservoirs.
+  ## overcount in the reservoirs.  This approach produces a large number than reported in NLA
+  ## report, probably because it doesn't account for repeat visits to lakes.
   # nWater = length(unlist(wbAreasEco)) - (nrow(nla2012Alb) - nrow(nla2012AlbUnique)) 
   ## This calculation is just the number from the NLA report. This one might be safer.
   nWater = 1038
@@ -228,11 +229,11 @@ ggplot(methaneTotDf2, aes(Total* (365 / (1000*1000*1000*1000*1000)))) +
   ggtitle("GRTS design-based estimate of CH4")
 
 # Method 1 vs Method 2
-# Method 1: 38 Tg CH4-C yr-1, 29 - 47
+# Method 1: 31 Tg CH4-C yr-1, 23 - 38
 method1mn <- mean(methaneTotDf1$Total) * (365 / (1000*1000*1000*1000*1000)) # d->yr, mg->Tg
 method195ci <- quantile(methaneTotDf1$Total, c(0.025, 0.975)) * (365 / (1000*1000*1000*1000*1000))
 
-# Method 2: 5.3 Tg CH4-C yr, 3.2 - 8.1
+# Method 2: 6.0 Tg CH4-C yr, 3.5 - 9.0
 method2mn <- mean(methaneTotDf2$Total) * (365 / (1000*1000*1000*1000*1000)) # d->yr, mg->Tg
 method295ci <- quantile(methaneTotDf2$Total, c(0.025, 0.975)) * (365 / (1000*1000*1000*1000*1000))
 
