@@ -7,15 +7,22 @@ grtsRes = readOGR("output/nrs.shp")
 ## Since there aren't results yet, let's make some up.
 set.seed(12321)
 ## Methane for each sampled reservoir. 
-## Per the GitHub Wiki entry by Jake, 32 reservoirs were sampled.
-## The mean and standard error of the measured emission rates was 6.3 and
-## 1.0 mg CH4 m-2 h-1, respectively. 
+## Per the GitHub Wiki entry by Jake, 34 reservoirs were sampled.
+## The mean and standard deviation of the measured emission rates was 6.3 and
+## 5.84 mg CH4 m-2 h-1, respectively. 
 ## Rates should be in mg C m^(-2) d^(-1), so we'll need to convert.
 ## m^(-2) h(-1) * [(24 h) / (1 day)]
 mnMethaneRate = 6.3 * 24 ## See above conversion 
-seMethaneRate = 1.0 * 24
+sdMethaneRate = 5.84 * 24
 ## Reservoir-level simulated means
-grtsRes$ch4Mn = rnorm(nrow(grtsRes), mean = mnMethaneRate, sd = seMethaneRate)
+## Simulate from a lognormal since mean and sd are relatively close.
+## The arithmetic mean and standard deviation are related to the lognormal
+## parameters 'mu' and 'sigma' via the formulas:
+## mu = log( E[X]^2 / sqrt( Var[X] + E[X]^2) )
+## sigma^2 = log( 1 + Var[X] / E[X]^2 )
+mu <- log(mnMethaneRate^2 / sqrt(sdMethaneRate^2 + mnMethaneRate^2))
+sigma <- sqrt(log(1 + sdMethaneRate^2 / mnMethaneRate^2))
+grtsRes$ch4Mn = rlnorm(nrow(grtsRes), meanlog = mu, sdlog = sigma)
 # Reservoir-level GRTS variance RSD = sd / mn, usually between 1/3 and 1/6.
 grtsRes$ch4Var = (grtsRes$ch4Mn / runif(nrow(grtsRes),3,6))^2
 # Make the 'oversample' results NA
