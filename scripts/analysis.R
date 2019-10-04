@@ -2,7 +2,15 @@
 
 
 ## Read in the GRTS sites selected
-grtsRes = readOGR("output/nrs.shp")
+# Column names in .shp get truncated
+# Better to create sf object from 'SpatialDesign' object created with grts function
+# nrs <- st_read(dsn = "C:/Users/JBEAULIE/GitRepository/NRS/output",
+#                         layer = "nrsSF", crs = 5070)
+# Also created in dsgn.R
+nrs <- st_as_sf(as.data.frame(nrsSites), 
+                coords = c("xcoord", "ycoord"), 
+                crs = 5070)  # inherited CONUS Albers from nla2012Unique
+
 
 ## Since there aren't results yet, let's make some up.
 set.seed(12321)
@@ -22,12 +30,12 @@ sdMethaneRate = 5.84 * 24
 ## sigma^2 = log( 1 + Var[X] / E[X]^2 )
 mu <- log(mnMethaneRate^2 / sqrt(sdMethaneRate^2 + mnMethaneRate^2))
 sigma <- sqrt(log(1 + sdMethaneRate^2 / mnMethaneRate^2))
-grtsRes$ch4Mn = rlnorm(nrow(grtsRes), meanlog = mu, sdlog = sigma)
+nrs$ch4Mn = rlnorm(nrow(nrs), meanlog = mu, sdlog = sigma)
 # Reservoir-level GRTS variance RSD = sd / mn, usually between 1/3 and 1/6.
-grtsRes$ch4Var = (grtsRes$ch4Mn / runif(nrow(grtsRes),3,6))^2
+nrs$ch4Var = (nrs$ch4Mn / runif(nrow(nrs),3,6))^2
 # Make the 'oversample' results NA
-grtsRes$ch4Mn[grtsRes$panel == "OverSamp"] = NA
-grtsRes$ch4Var[grtsRes$panel == "OverSamp"] = NA
+nrs$ch4Mn[nrs$panel == "OverSamp"] = NA
+nrs$ch4Var[nrs$panel == "OverSamp"] = NA
 
 
 
@@ -57,14 +65,14 @@ grtsRes$ch4Var[grtsRes$panel == "OverSamp"] = NA
 
 ## Upfront stuff common to both methods
 ## Subset the GRTS results to only include sampled sites
-grtsResM = subset(grtsRes, !is.na(ch4Mn))
-strataTbl = with(grtsResM@data, table(stratum)) # Check numbers
+nrsM = subset(nrs, !is.na(ch4Mn))
+strataTbl = with(nrsM, table(stratum)) # Check numbers
 ## Number of simulations
 nSamp = 1000
 ## Simulated methane emission rates
 ## This function produces nSamp rows of emission rate estimates, where each row is a draw
 ## from the 63 reservoirs sampled.
-ch4MnsMat = MASS::mvrnorm(n = nSamp, mu = grtsResM$ch4Mn, Sigma = diag(grtsResM$ch4Var))
+ch4MnsMat = MASS::mvrnorm(n = nSamp, mu = nrsM$ch4Mn, Sigma = diag(nrsM$ch4Var))
 
 ## Choose which method you want
 # calcMethod = "Second"
@@ -92,13 +100,14 @@ if(calcMethod == "First"){
   
   ######## End Notes ########
 
-  ## Get a list of the water bodies in the ecoRegAlb object. Grab something unique
+  ## Get a list of the water bodies in the ecoReg object. Grab something unique
   ## from each polygon. The 'area' slot might be useful later, though we don't particularly
   ## care about it at the moment.
-  wbAreasEco = sapply(slot(ecoRegAlb, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))
+  #wbAreasEco = sapply(slot(ecoRegAlb, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))
+  wbAreasEco = ecoR$Area_km2 # sf approach, not sure if this is right
   
   ## Unique reservoirs from NLA 2012
-  nRes = nrow(nla2012AlbUnique)
+  nRes = nrow(nla2012Unique)
   
   ## Known unique water bodies in NLA 2012. The NLA report puts this number at 1,038.
   ## We try to calculate it below, but get a different number. The difference isn't huge, 
@@ -125,12 +134,12 @@ if(calcMethod == "First"){
   for(i in 1:nSamp){
     # i = 1
     # Need to scale up the grts design weights using the i'th simulated proportion
-    wtMult = ( pSims[i] * nWaterUSA ) / sum(grtsResM$wgt) 
+    wtMult = ( pSims[i] * nWaterUSA ) / sum(nrsM$wgt) 
     # The simulated means at each site * the area converted to square meters
-    sampch4 = ch4MnsMat[i,] * grtsResM$AREA_HA * 10000
-    overallMns = total.est(z = sampch4, wgt = grtsResM$wgt * wtMult,
-                            x = grtsResM$xcoord, y = grtsResM$ycoord,
-                            stratum = grtsResM$stratum,
+    sampch4 = ch4MnsMat[i,] * nrsM$AREA_HA * 10000
+    overallMns = total.est(z = sampch4, wgt = nrsM$wgt * wtMult,
+                            x = nrsM$X, y = nrsM$Y,
+                            stratum = nrsM$stratum,
                             vartype = "Local")
     methaneTots = c(methaneTots, overallMns$Estimate[overallMns$Statistic == "Total"])
   }
@@ -209,7 +218,7 @@ if(calcMethod == "Second"){
     # in that strata means, which we could account for using the local neighborhood
     # variance estimator. But that assumes a spatial structure among 7 sites,
     # which is probably unreasonable. So we ignore it for now.
-    tmpMethMns = aggregate(ch4MnsMat[i,] ~ grtsResM$stratum, FUN = mean)
+    tmpMethMns = aggregate(ch4MnsMat[i,] ~ nrsM$stratum, FUN = mean) # JB, hmm, but this approach ignores weights
     names(tmpMethMns) = c("stratum", "ch4Mn")
     # Add on the estimated total surface area by eco-region
     tmpMethMns$sa = ecoSAEst[i,]

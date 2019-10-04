@@ -11,12 +11,11 @@
 
 # STRATIFIED, EQUAL PROBABILITY, OVERSAMPLE, GRTS SURVEY DESIGN--------------
 # EXTRACT ATTRIBUTE TABLE -----------  
-# nla2012Alb is a spatialPointsDataFrame created in mapNla2012.R
+# nla2012 is a spatialPointsDataFrame created in readSpatial.R
 # This has non-unique records, because some sites were visited twice.
-nla2012AlbUnique <- subset(nla2012Alb, !duplicated(SITE_ID))
+nla2012Unique <- subset(nla2012, !duplicated(SITE_ID))
 
 #attRes <- as.data.frame(nla2012Alb@data)
-
 
 
 # Create the design list
@@ -36,11 +35,14 @@ set.seed(4447864) # allows design to be replicated
 nrsSites <- grts(design=stratDsgn,
                  DesignID="STRATIFIED",
                  type.frame="finite",
-                 src.frame="sp.object", # if df is used, could use shp
-                 sp.object = nla2012AlbUnique,
+                 src.frame="sf.object", # if df is used, could use shp
+                 sf.object = nla2012Unique,
                  att.frame=NULL,
-                 stratum="FW_ECO9",
-                 out.shape = "output/nrs") 
+                 stratum="FW_ECO9"
+                 #column names get chopped off in written shapefile
+                 #better to create sf object from nrsSites (below)
+                 #out.shape = "output/nrs" 
+                 ) 
 
 # Print the initial six lines of the survey design
 head(nrsSites@data)
@@ -48,53 +50,14 @@ head(nrsSites@data)
 # Print the survey design summary
 summary(nrsSites)
 
-plotIt <- TRUE # Can use FALSE if having problem w/ plotting.
-               # Plotting not working on Will's machine...
-if(plotIt){
-  # Plot survey design
-  # Custom color pallette for ecoregion polygons.  Attempted to mirror
-  # https://www.epa.gov/national-aquatic-resource-surveys/
-  # ecoregional-results-national-lakes-assessment-2012
-  cols <- c("Coastal Plains" = "orange1",
-            "Northern Appalachians" = "lightpink1",
-            "Northern Plains" = "darksalmon",
-            "Southern Appalachians" = "mediumturquoise",
-            "Southern Plains" = "khaki4",
-            "Temperate Plains" = "forestgreen", 
-            "Upper Midwest" = "deepskyblue4",
-            "Western Mountains" = "saddlebrown",
-            "Xeric" = "lightskyblue4")
-  ggplot() + 
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Coastal Plains"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Northern Appalachians"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Northern Plains"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Southern Appalachians"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Southern Plains"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Upper Midwest"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Xeric"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Western Mountains"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data = subset(ecoRegAlb.df, WSA9_NAME == "Temperate Plains"),
-                 aes(long,lat,group=group,fill=WSA9_NAME)) +
-    geom_polygon(data=statesAlb.df, aes(x=long, y=lat, group = group),
-                 colour="cornsilk3", fill=NA, size = 0.1 ) + 
-    scale_fill_manual("Ecoregion", values = cols) +
-    geom_point(data = filter(data.frame(nrsSites), panel != "OverSamp"),
-               aes(xcoord, ycoord), # columns created by grts
-               size = 1)  +
-    ggtitle("NRS Main Sites") +
-    coord_equal()
-  
-  # Optional
-  ggsave(filename="output/figures/nrsMainSites.tiff",
-         width=8,height=5.5, units="in",
-         dpi=800,compression="lzw")
-}
+# Conver to sf object for subsequent processing/mapping
+# nrs <- st_read(dsn = "C:/Users/JBEAULIE/GitRepository/NRS/output",
+#                       layer = "nrs", crs = 5070)
+
+nrs <- st_as_sf(as.data.frame(nrsSites), 
+                coords = c("xcoord", "ycoord"), 
+                crs = 5070)  # inherited CONUS Albers from nla2012Unique
+
+st_crs(nrs) # 5070
+
 

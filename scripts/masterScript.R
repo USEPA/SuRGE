@@ -1,16 +1,15 @@
 # Packages needed
 source("scripts/masterLibrary.R")
 
-# Read in data and make some initial maps
-# source("scripts/mapNla2012.R")
-# Edit - Will Barnett, May 2017
-# The mapping code hangs on my computer. 
-# Just read data in.
-source("scripts/readData.R")
+# NLA2012 manmade sampled, ecoregions
+source("scripts/readSpatial.R") 
 
 # GRTS Design
 source("scripts/dsgn.R")
 
+
 # Analyze 'results'
 source("scripts/analysis.R")
 
+# all manmade sampled 2012 / NRS main sites
+source("scripts/makeMap.R")
