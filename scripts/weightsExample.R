@@ -55,8 +55,10 @@ sites1 <- grts(design=dsgnList1,
                att.frame=NULL,
                stratum="region")
 
+print(sites1) # 45 sites, 15 per ecoregion
+
 ## Interesting tidbits here.
-sum(sites1$wgt) # 163.
+sum(sites1$wgt) # 166
 # This is the number of 'reservoirs' in the sub-sampled sampling frame - dat1
 # This is intentional in GRTS methodology. It also means the total estimate
 # will be an inference on the sub-sampled sampling frame, not the larger 'true'
@@ -68,16 +70,16 @@ total1Sub <- total.est(z = sites1$ch4, wgt = sites1$wgt,
                       popsize = c("High"=dat1Tbl[1,1],
                                   "Middle" = dat1Tbl[1,3],
                                   "Low" = dat1Tbl[1,2]))
-total1Sub
-sum(dat1$ch4) # Pretty dang good! But it's the wrong level of the hierarchy.
+total1Sub # total = 267
+sum(dat1$ch4) # 271, Pretty dang good! But it's the wrong level of the hierarchy.
 # What happens if we change the population size?
 allPtsTbl <- with(allPts@data, table(type,region))
 total1Res <- total.est(z = sites1$ch4, wgt = sites1$wgt, 
                        x = sites1$xcoord, y = sites1$ycoord,
                        stratum = sites1$stratum,
                        vartype = "Local", 
-                       popsize = c("High"=allPtsTbl[1,1], "Middle" = allPtsTbl[1,3],
-                                   "Low" = allPtsTbl[1,2]))
+                       popsize = c("High"=allPtsTbl[2,1], "Middle" = allPtsTbl[2,3],
+                                   "Low" = allPtsTbl[2,2]))
 total1Res # Nothing changed. Weird.
 sum(subset(allPts@data, type == "reservoir")$ch4) 
 # True population total emissions rate is much higher.
@@ -93,14 +95,14 @@ sum(subset(allPts@data, type == "reservoir")$ch4)
 # c = (k+z) / k
 # So the constant we need is the total number of reservoirs in our world divided by the
 # number of sub-sampled reservoirs in our sampling frame.
-# i.e., 333 / 163
-wtMult <- 333/163
+# i.e., 333 / 166
+wtMult <- 333/166
 total1Res <- total.est(z = sites1$ch4, wgt = sites1$wgt *wtMult, 
                        x = sites1$xcoord, y = sites1$ycoord,
                        stratum = sites1$stratum,
                        vartype = "Local", 
-                       popsize = c("High"=allPtsTbl[1,1], "Middle" = allPtsTbl[1,3],
-                                   "Low" = allPtsTbl[1,2]))
+                       popsize = c("High"=allPtsTbl[2,1], "Middle" = allPtsTbl[2,3],
+                                   "Low" = allPtsTbl[2,2]))
 total1Res
 sum(subset(allPts@data, type == "reservoir")$ch4)
 # Less of a difference this time. Probably because the equal probability scheme
@@ -150,7 +152,7 @@ total2Res <- total.est(z = sites2$ch4, wgt = sites2$wgt *wtMult,
                                    "Low" = allPtsTbl[2,2]))
 total2Res
 sum(subset(as.data.frame(allPts@data), type == "reservoir")$ch4)
-
+# still pretty good
 
 # Sample 3 - stratified, unequal probability, continuous probability
 dsgnList3 <- list("High" = list(panel=c(PanelOne=10), seltype="Continuous"),
