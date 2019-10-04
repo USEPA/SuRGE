@@ -4,6 +4,9 @@ source("scripts/masterLibrary.R")
 # Review weight adjustment tutorial
 # scripts/weightsExample.R
 
+# Review size distribution of 2007 NLA waterbodies
+source("scripts/sizeDistribution.R")
+
 
 # Read spatial data
 # NLA2012 manmade sampled, ecoregion polygons
