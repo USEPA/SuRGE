@@ -1,0 +1,537 @@
+"Lake_Name" "siteID" "ch4.trate.mg.h"
+"Acton Lake Aug" "U-01" 18.0263284714791
+"Acton Lake Aug" "U-04" 10.951400232907
+"Acton Lake Aug" "U-05" 3.6043607507246
+"Acton Lake Aug" "U-06" 0.537375108518571
+"Acton Lake Aug" "U-07" 2.64161261114627
+"Acton Lake Aug" "U-08" 15.0650517463995
+"Acton Lake Aug" "U-09" 0.392398530157685
+"Acton Lake Aug" "U-11" 14.2526070619497
+"Acton Lake Aug" "U-12" 9.22094684901029
+"Acton Lake Aug" "U-13" 13.3444131364293
+"Acton Lake Aug" "U-14" 3.64680507388764
+"Acton Lake Aug" "U-15" 19.501955302535
+"Acton Lake Aug" "U-16" 27.9174952718061
+"Acton Lake Aug" "U-17" 23.0024615920639
+"Acton Lake Aug" "U-18" 6.30335207701402
+"Acton Lake July" "U-01" 10.2972901180201
+"Acton Lake July" "U-04" 27.0948616594926
+"Acton Lake July" "U-05" 3.37778630197104
+"Acton Lake July" "U-06" 2.70541706289498
+"Acton Lake July" "U-07" 8.63940493435913
+"Acton Lake July" "U-08" 9.37220367999103
+"Acton Lake July" "U-09" 0.840821901604756
+"Acton Lake July" "U-11" 3.24559547552836
+"Acton Lake July" "U-12" 3.16614459577048
+"Acton Lake July" "U-13" 5.38340272663721
+"Acton Lake July" "U-14" 4.74314454200856
+"Acton Lake July" "U-15" 8.5248152512281
+"Acton Lake July" "U-16" 19.4177503823573
+"Acton Lake July" "U-17" 11.985303638704
+"Acton Lake July" "U-18" 4.49015970273832
+"Acton Lake Oct" "U-01" 24.1138258657382
+"Acton Lake Oct" "U-04" 6.59659633422218
+"Acton Lake Oct" "U-05" 9.82611167984754
+"Acton Lake Oct" "U-06" 0.783982426373525
+"Acton Lake Oct" "U-07" 3.34022157917484
+"Acton Lake Oct" "U-08" 19.3734794949937
+"Acton Lake Oct" "U-09" 0.433496324263052
+"Acton Lake Oct" "U-11" 13.2770855027097
+"Acton Lake Oct" "U-12" 18.4263499991235
+"Acton Lake Oct" "U-13" 17.6389504914439
+"Acton Lake Oct" "U-14" 0.639031259362798
+"Acton Lake Oct" "U-15" 25.2135178594346
+"Acton Lake Oct" "U-16" 11.6649452661334
+"Acton Lake Oct" "U-17" 23.1592434129785
+"Acton Lake Oct" "U-18" 10.6697331465926
+"Acton Lake" "U-01" 5.04732613328809
+"Acton Lake" "U-04" 6.98907427291047
+"Acton Lake" "U-05" 3.07979815045643
+"Acton Lake" "U-06" 1.51222138887365
+"Acton Lake" "U-07" 8.83158515763755
+"Acton Lake" "U-08" 2.92052262741869
+"Acton Lake" "U-09" 2.25670782145952
+"Acton Lake" "U-11" 1.32172137833561
+"Acton Lake" "U-12" 7.15825508011408
+"Acton Lake" "U-13" 3.02895562201067
+"Acton Lake" "U-14" 7.20845754470345
+"Acton Lake" "U-15" 10.1461570048286
+"Acton Lake" "U-16" 8.96736446528591
+"Acton Lake" "U-17" 7.02590010908
+"Acton Lake" "U-18" 0.818825995590463
+"Alum Creek Lake" "SU-01" 2.5029698701614
+"Alum Creek Lake" "SU-02" 0.990779585228824
+"Alum Creek Lake" "SU-03" 1.22865459616451
+"Alum Creek Lake" "SU-04" 1.46796976524148
+"Alum Creek Lake" "SU-05" 0.680896733332164
+"Alum Creek Lake" "SU-06" 0.861809592819672
+"Alum Creek Lake" "SU-07" 1.31911077084091
+"Alum Creek Lake" "SU-08" 0.7981417763533
+"Alum Creek Lake" "SU-29" 0.750035167429771
+"Alum Creek Lake" "SU-30" 1.83135704752712
+"Alum Creek Lake" "SU-31" 4.85990561876907
+"Alum Creek Lake" "SU-32" 2.06014323363854
+"Alum Creek Lake" "SU-33" 4.92771910504979
+"Alum Creek Lake" "SU-34" 2.43438508169953
+"Alum Creek Lake" "SU-35" 2.61904343639182
+"Apple Valley Lake" "S-01" 1.96923899678044
+"Apple Valley Lake" "S-02" 0.945445812336765
+"Apple Valley Lake" "S-03" 16.3828732209597
+"Apple Valley Lake" "S-04" 1.76214117922132
+"Apple Valley Lake" "S-05" 4.37611728649535
+"Apple Valley Lake" "S-06" 1.01207818656283
+"Apple Valley Lake" "S-07" 0.973625145143309
+"Apple Valley Lake" "S-08" 1.46898249538784
+"Apple Valley Lake" "S-09" 1.2549944011972
+"Apple Valley Lake" "S-10" 1.51800746028404
+"Apple Valley Lake" "S-31" 33.5517042303752
+"Apple Valley Lake" "S-32" 21.0416161227432
+"Apple Valley Lake" "S-33" 1.8100147353218
+"Apple Valley Lake" "S-35" 19.0893701658113
+"Apple Valley Lake" "S-37" 2.34792839269166
+"Atwood Lake" "SU-01" 1.27028102778341
+"Atwood Lake" "SU-02" 0.636848656083447
+"Atwood Lake" "SU-03" 0.489504312419577
+"Atwood Lake" "SU-04" 0.904583042092214
+"Atwood Lake" "SU-05" 0.662402813142444
+"Atwood Lake" "SU-06" 0.49061349880466
+"Atwood Lake" "SU-07" 0.294688646041866
+"Atwood Lake" "SU-08" 1.33332635989067
+"Atwood Lake" "SU-09" 0.473554125956869
+"Atwood Lake" "SU-10" 0.470477412062138
+"Atwood Lake" "SU-31" 3.11485688812304
+"Atwood Lake" "SU-33" 1.54749130902346
+"Atwood Lake" "SU-34" 2.63460807917518
+"Atwood Lake" "SU-35" 8.84804977725448
+"Atwood Lake" "SU-36" 2.9457455625565
+"Brookville Lake" "SU-01" 1.67671555889087
+"Brookville Lake" "SU-02" 0.5282622669286
+"Brookville Lake" "SU-03" 3.11371776591907
+"Brookville Lake" "SU-04" 0.325317733093331
+"Brookville Lake" "SU-05" 0.499858536543953
+"Brookville Lake" "SU-06" 1.5535581669252
+"Brookville Lake" "SU-07" 0.112664057644453
+"Brookville Lake" "SU-09" 0.434752512503991
+"Brookville Lake" "SU-10" 0.174257222273796
+"Brookville Lake" "SU-11" 43.0587044282668
+"Brookville Lake" "SU-12" 9.71383650386447
+"Brookville Lake" "SU-14" 1.49494456482725
+"Brookville Lake" "SU-15" 0.203724889230312
+"Brookville Lake" "SU-31" 25.8490492859638
+"Brookville Lake" "SU-32" 2.35777753569572
+"Brookville Lake" "SU-33" 1.24857876178209
+"Brookville Lake" "SU-34" 1.78942244475655
+"Brookville Lake" "SU-35" 25.0048249911719
+"Buckhorn Lake" "SU-01" 2.94492513888828
+"Buckhorn Lake" "SU-02" 6.98318269567704
+"Buckhorn Lake" "SU-03" 0.610523809877662
+"Buckhorn Lake" "SU-04" 1.99474428112798
+"Buckhorn Lake" "SU-05" 127.499938930781
+"Buckhorn Lake" "SU-06" 1.39015446714077
+"Buckhorn Lake" "SU-07" 2.35696068213725
+"Buckhorn Lake" "SU-08" 67.7424940679422
+"Buckhorn Lake" "SU-09" 1.83489790803915
+"Buckhorn Lake" "SU-29" 11.8115390144418
+"Buckhorn Lake" "SU-30" 44.7847694766038
+"Buckhorn Lake" "SU-31" 13.2017897735485
+"Buckhorn Lake" "SU-32" 1.06855292468609
+"Buckhorn Lake" "SU-33" 0.87605769074363
+"Buckhorn Lake" "SU-39" 1.465660170419
+"Burr Oak Reservoir" "S-01" 3.19016898905886
+"Burr Oak Reservoir" "S-02" 1.68548813719123
+"Burr Oak Reservoir" "S-03" 1.54140130627952
+"Burr Oak Reservoir" "S-04" 3.47351135558724
+"Burr Oak Reservoir" "S-05" 3.49362897037294
+"Burr Oak Reservoir" "S-06" 3.0874671612694
+"Burr Oak Reservoir" "S-07" 0.585646546879305
+"Burr Oak Reservoir" "S-08" 2.10303787697459
+"Burr Oak Reservoir" "S-19" 4.53985559479155
+"Burr Oak Reservoir" "S-20" 4.34231513171008
+"Burr Oak Reservoir" "S-21" 4.26812445130389
+"Burr Oak Reservoir" "S-22" 1.51507257552268
+"Burr Oak Reservoir" "S-23" 2.20776899777617
+"Burr Oak Reservoir" "S-24" 3.11426968720228
+"Burr Oak Reservoir" "S-25" 5.03828586148766
+"Caesar Creek Lake" "SU-02" 4.40579214165021
+"Caesar Creek Lake" "SU-03" 2.11257086145701
+"Caesar Creek Lake" "SU-04" 2.60876288116168
+"Caesar Creek Lake" "SU-05" 1.57989618895819
+"Caesar Creek Lake" "SU-06" 1.81231271474176
+"Caesar Creek Lake" "SU-07" 1.23919822776079
+"Caesar Creek Lake" "SU-08" 2.94071983456222
+"Caesar Creek Lake" "SU-09" 2.57427132218851
+"Caesar Creek Lake" "SU-10" 6.41356611374867
+"Caesar Creek Lake" "SU-32" 61.9273830635239
+"Caesar Creek Lake" "SU-33" 10.7100964433815
+"Caesar Creek Lake" "SU-34" 12.0393552153347
+"Caesar Creek Lake" "SU-35" 22.1360997177626
+"Caesar Creek Lake" "SU-36" 67.7966644201203
+"Carr Fork Lake" "SU-01" 1.00386280699314
+"Carr Fork Lake" "SU-02" 0.472270036484674
+"Carr Fork Lake" "SU-03" 0.373852877375001
+"Carr Fork Lake" "SU-04" 0.325821964859028
+"Carr Fork Lake" "SU-05" 1.66971840688528
+"Carr Fork Lake" "SU-06" 0.385217291025113
+"Carr Fork Lake" "SU-07" 0.438787433548911
+"Carr Fork Lake" "SU-29" 0.888497734606453
+"Carr Fork Lake" "SU-30" 0.544321053078021
+"Carr Fork Lake" "SU-31" 1.9962399807834
+"Carr Fork Lake" "SU-32" 1.70946852543316
+"Carr Fork Lake" "SU-33" 2.02287264768842
+"Carr Fork Lake" "SU-34" 1.66040645778667
+"Carr Fork Lake" "SU-35" 0.731185330076352
+"Carr Fork Lake" "SU-36" 0.136044907443977
+"Cave Run Lake" "SU-01" 2.01602948851236
+"Cave Run Lake" "SU-02" 1.05288593714613
+"Cave Run Lake" "SU-03" 0.808534427239292
+"Cave Run Lake" "SU-05" 1.14632821409667
+"Cave Run Lake" "SU-06" 3.09630356786127
+"Cave Run Lake" "SU-07" 2.79068321356327
+"Cave Run Lake" "SU-08" 1.10962805531428
+"Cave Run Lake" "SU-09" 0.775775945743625
+"Cave Run Lake" "SU-10" 1.46155738369898
+"Cave Run Lake" "SU-11" 3.18545357135143
+"Cave Run Lake" "SU-12" 2.49653078040597
+"Cave Run Lake" "SU-13" 1.5783786782711
+"Cave Run Lake" "SU-14" 1.0558413476153
+"Cave Run Lake" "SU-15" 0.777542340402776
+"Cave Run Lake" "SU-46" 12.6629788936044
+"Cave Run Lake" "SU-47" 4.5151331834507
+"Cave Run Lake" "SU-48" 6.59103397791466
+"Cave Run Lake" "SU-49" 1.11615441905584
+"Cave Run Lake" "SU-50" 38.9329625908758
+"Cave Run Lake" "SU-51" 14.928139102375
+"Cave Run Lake" "SU-52" 25.8500299820139
+"Cave Run Lake" "SU-53" 1.90755884674351
+"Cave Run Lake" "SU-54" 6.63664029593385
+"Cave Run Lake" "SU-55" 41.9108697753977
+"Cave Run Lake" "SU-56" 18.1755962665766
+"Cave Run Lake" "SU-57" 2.41555779757731
+"Cave Run Lake" "SU-58" 3.57144862022792
+"Charles Mill Lake" "US-01" 2.49314632550144
+"Charles Mill Lake" "US-02" 4.68484727331013
+"Charles Mill Lake" "US-03" 2.13463156838677
+"Charles Mill Lake" "US-04" 4.26139362557722
+"Charles Mill Lake" "US-05" 2.76146967351678
+"Charles Mill Lake" "US-07" 1.93636912057581
+"Charles Mill Lake" "US-08" 7.49550356552466
+"Charles Mill Lake" "US-09" 2.96215908544633
+"Charles Mill Lake" "US-11" 16.5978398457353
+"Charles Mill Lake" "US-12" 3.91036059865809
+"Charles Mill Lake" "US-13" 2.19066066670215
+"Charles Mill Lake" "US-14" 6.9208547876909
+"Charles Mill Lake" "US-15" 1.57677107759226
+"Charles Mill Lake" "US-16" 2.21244837469098
+"Charles Mill Lake" "US-17" 0.693209069063713
+"Cowan Lake" "S-01" 0.0212895065925428
+"Cowan Lake" "S-02" 0.418153397815671
+"Cowan Lake" "S-03" 0.186760299703937
+"Cowan Lake" "S-04" 1.36333308951671
+"Cowan Lake" "S-05" 0.00971056618411708
+"Cowan Lake" "S-06" 0.0124917991885245
+"Cowan Lake" "S-07" 0.0106546642479882
+"Cowan Lake" "S-08" 1.10861348854433
+"Cowan Lake" "S-09" 1.62372097879924
+"Cowan Lake" "S-10" 0.357051140431001
+"Cowan Lake" "S-11" 0.0580617021472228
+"Cowan Lake" "S-13" 0.0811752863667457
+"Cowan Lake" "S-14" 0.0433507450202014
+"Cowan Lake" "S-38" 6.29894160412525
+"Cowan Lake" "S-41" 0.0430018544626137
+"Delaware Reservoir" "S-01" 5.52818127811378
+"Delaware Reservoir" "S-02" 2.63582681304364
+"Delaware Reservoir" "S-03" 0.95244078819441
+"Delaware Reservoir" "S-04" 2.08846672437722
+"Delaware Reservoir" "S-05" 5.26896150834009
+"Delaware Reservoir" "S-06" 0.440851564039471
+"Delaware Reservoir" "S-08" 1.44917566883803
+"Delaware Reservoir" "S-29" 6.39021145944663
+"Delaware Reservoir" "S-30" 1.3477274616123
+"Delaware Reservoir" "S-31" 16.5613351710637
+"Delaware Reservoir" "S-32" 2.92493829103395
+"Delaware Reservoir" "S-33" 5.93417294118486
+"Delaware Reservoir" "S-34" 1.37012043441861
+"Delaware Reservoir" "S-35" 24.098475334375
+"Dillon Lake" "S-01" 28.3959096399073
+"Dillon Lake" "S-02" 20.4499451027111
+"Dillon Lake" "S-03" 15.5900266403078
+"Dillon Lake" "S-04" 5.47424307515251
+"Dillon Lake" "S-05" 27.2150292018109
+"Dillon Lake" "S-06" 0.158172935040881
+"Dillon Lake" "S-07" 0.809506650891438
+"Dillon Lake" "S-08" 27.2424336834175
+"Dillon Lake" "S-19" 2.77551370859477
+"Dillon Lake" "S-20" 17.1371575979644
+"Dillon Lake" "S-22" 7.24740909409433
+"Dillon Lake" "S-23" 0.0807177653001941
+"Dillon Lake" "S-24" 8.83797526838323
+"Dillon Lake" "S-25" 37.8853766133049
+"Dillon Lake" "S-27" 7.3928648352652
+"Hocking County Lake" "US-02" 4.26963474457652
+"Hocking County Lake" "US-03" 4.18738566311688
+"Hocking County Lake" "US-04" 5.01783148363256
+"Hocking County Lake" "US-06" 5.19361584722404
+"Hocking County Lake" "US-07" 4.18733269852552
+"Hocking County Lake" "US-08" 2.95316788816704
+"Hocking County Lake" "US-10" 3.69606846897583
+"Hocking County Lake" "US-11" 14.4956881651406
+"Hocking County Lake" "US-13" 4.53405617913428
+"Hocking County Lake" "US-14" 4.04639578633488
+"Hocking County Lake" "US-15" 2.83905840693468
+"Hocking County Lake" "US-16" 4.76199578172188
+"Hocking County Lake" "US-18" 8.07213289085182
+"Hocking County Lake" "US-19" 4.26567610085059
+"Hocking County Lake" "US-20" 4.71891620239729
+"Kiser Lake" "U-01" 0.912459048824892
+"Kiser Lake" "U-02" 9.95350236383044
+"Kiser Lake" "U-03" 1.50970673470245
+"Kiser Lake" "U-04" 75.4577968609107
+"Kiser Lake" "U-05" 11.6279939075036
+"Kiser Lake" "U-06" 7.81286365156643
+"Kiser Lake" "U-07" 2.98831929281343
+"Kiser Lake" "U-08" 18.3475762284694
+"Kiser Lake" "U-09" 7.38926405327509
+"Kiser Lake" "U-10" 21.2452783632395
+"Kiser Lake" "U-11" 6.82009711405119
+"Kiser Lake" "U-12" 6.83386241820902
+"Kiser Lake" "U-13" 2.80540139995014
+"Kiser Lake" "U-14" 10.5313329133661
+"Kiser Lake" "U-15" 43.866947623133
+"Knox Lake" "S-01" 4.40241635530527
+"Knox Lake" "S-02" 10.0862880565555
+"Knox Lake" "S-03" 0.160602915849162
+"Knox Lake" "S-04" 3.87934731375839
+"Knox Lake" "S-05" 1.42223918811173
+"Knox Lake" "S-06" 1.42250640189055
+"Knox Lake" "S-07" 4.50325973041435
+"Knox Lake" "S-08" 7.98401891387529
+"Knox Lake" "S-09" 0.236683721293048
+"Knox Lake" "S-10" 0.906423545082237
+"Knox Lake" "S-31" 2.45464646645273
+"Knox Lake" "S-32" 3.14494343148732
+"Knox Lake" "S-33" 2.51730591934814
+"Knox Lake" "S-35" 0.722835935890999
+"Knox Lake" "S-37" 1.38167783997522
+"La Due Reservoir" "SU-01" 5.07460464202932
+"La Due Reservoir" "SU-02" 5.9177144049862
+"La Due Reservoir" "SU-03" 0.207121057872217
+"La Due Reservoir" "SU-04" 2.33484579446225
+"La Due Reservoir" "SU-05" 0.342391605938069
+"La Due Reservoir" "SU-06" 0.216558816567141
+"La Due Reservoir" "SU-07" 0
+"La Due Reservoir" "SU-08" 21.7883703712152
+"La Due Reservoir" "SU-09" 3.98523475659498
+"La Due Reservoir" "SU-11" 5.89449819500294
+"La Due Reservoir" "SU-14" 5.08119441134458
+"La Due Reservoir" "SU-15" 6.7772117903254
+"La Due Reservoir" "SU-34" 7.06972130371305
+"La Due Reservoir" "SU-37" 5.87206739502861
+"La Due Reservoir" "SU-40" 20.9827565271505
+"Lake Loramie" "S-01" 0.721627452091948
+"Lake Loramie" "S-03" 10.4831062065539
+"Lake Loramie" "S-04" 5.9964736768475
+"Lake Loramie" "S-05" 0.128637012313623
+"Lake Loramie" "S-06" 2.70354734252983
+"Lake Loramie" "S-07" 5.04749744422265
+"Lake Loramie" "S-08" 0.398465200059295
+"Lake Loramie" "S-09" 12.6543973901149
+"Lake Loramie" "S-10" 5.55590371728255
+"Lake Loramie" "S-11" 51.0085497387272
+"Lake Loramie" "S-31" 1.89907019283802
+"Lake Loramie" "S-32" 72.9461458491093
+"Lake Loramie" "S-33" 13.7729069136417
+"Lake Loramie" "S-34" 8.8799634353358
+"Lake Loramie" "S-35" 11.5713668002568
+"Lake Milton" "SU-01" 5.9759848723752
+"Lake Milton" "SU-02" 0.95941502917618
+"Lake Milton" "SU-03" 0.81742269725354
+"Lake Milton" "SU-04" 0.382889539205822
+"Lake Milton" "SU-05" 1.98928561291263
+"Lake Milton" "SU-06" 17.6772320515933
+"Lake Milton" "SU-07" 1.03706328480543
+"Lake Milton" "SU-08" 6.56342883883923
+"Lake Milton" "SU-09" 6.77529851720797
+"Lake Milton" "SU-10" 6.50589245026685
+"Lake Milton" "SU-31" 0.509340883348877
+"Lake Milton" "SU-32" 0.653996584090612
+"Lake Milton" "SU-33" 0.516012166772399
+"Lake Milton" "SU-34" 0.164058183348172
+"Lake Milton" "SU-35" 1.23906387631084
+"Lake Mohawk" "S-01" 1.19171667177682
+"Lake Mohawk" "S-02" 3.06054015062783
+"Lake Mohawk" "S-03" 0.234133065370172
+"Lake Mohawk" "S-04" 4.75183634838593
+"Lake Mohawk" "S-05" 4.61260639581855
+"Lake Mohawk" "S-06" 2.98896330719274
+"Lake Mohawk" "S-07" 3.27495112650479
+"Lake Mohawk" "S-28" 0.991260361207939
+"Lake Mohawk" "S-29" 3.38591291188109
+"Lake Mohawk" "S-30" 2.06964255140666
+"Lake Mohawk" "S-31" 6.29388732249615
+"Lake Mohawk" "S-32" 26.3164734308148
+"Lake Mohawk" "S-33" 5.45474550898079
+"Lake Mohawk" "S-34" 2.99800789114467
+"Lake Mohawk" "S-35" 16.0513497749831
+"Lake Roaming Rock" "S-01" 0.979172052399305
+"Lake Roaming Rock" "S-02" 12.9657797183514
+"Lake Roaming Rock" "S-03" 8.98160615342297
+"Lake Roaming Rock" "S-04" 0.471006305529044
+"Lake Roaming Rock" "S-05" 4.67033782929339
+"Lake Roaming Rock" "S-06" 6.66014866878703
+"Lake Roaming Rock" "S-07" 2.25904027973597
+"Lake Roaming Rock" "S-08" 2.24415497973892
+"Lake Roaming Rock" "S-09" 1.42387441244805
+"Lake Roaming Rock" "S-10" 3.76212862842266
+"Lake Roaming Rock" "S-31" 9.84833804417775
+"Lake Roaming Rock" "S-32" 15.1090599933812
+"Lake Roaming Rock" "S-33" 0.811717822447806
+"Lake Roaming Rock" "S-34" 10.6021483028305
+"Lake Roaming Rock" "S-36" 0.521468015977363
+"Lake Waynoka" "SU-01" 1.44979458201687
+"Lake Waynoka" "SU-02" 12.178627692655
+"Lake Waynoka" "SU-03" 1.92373882596847
+"Lake Waynoka" "SU-04" 0.814796210465795
+"Lake Waynoka" "SU-05" 1.02369105664212
+"Lake Waynoka" "SU-06" 0.951142375537994
+"Lake Waynoka" "SU-07" 1.29835558762988
+"Lake Waynoka" "SU-08" 1.40702564426263
+"Lake Waynoka" "SU-25" 2.46528105185914
+"Lake Waynoka" "SU-26" 6.42427620376271
+"Lake Waynoka" "SU-27" 1.32547770817202
+"Lake Waynoka" "SU-28" 2.27465861233147
+"Lake Waynoka" "SU-29" 3.57623990206678
+"Lake Waynoka" "SU-30" 2.8881714593629
+"Lake Waynoka" "SU-31" 2.40840939803567
+"Michael J Kirwan Reservoir" "S-01" 3.74393452444248
+"Michael J Kirwan Reservoir" "S-02" 0.543927269619859
+"Michael J Kirwan Reservoir" "S-03" 0.633869182535975
+"Michael J Kirwan Reservoir" "S-04" 0.360308580066495
+"Michael J Kirwan Reservoir" "S-05" 2.60871002098303
+"Michael J Kirwan Reservoir" "S-06" 1.88183408693479
+"Michael J Kirwan Reservoir" "S-07" 1.42155561573582
+"Michael J Kirwan Reservoir" "S-08" 2.01482509891487
+"Michael J Kirwan Reservoir" "S-09" 1.18998788298651
+"Michael J Kirwan Reservoir" "S-21" 0.643838746452874
+"Michael J Kirwan Reservoir" "S-22" 1.91567776655641
+"Michael J Kirwan Reservoir" "S-23" 2.81453334535685
+"Michael J Kirwan Reservoir" "S-25" 9.95678896204597
+"Michael J Kirwan Reservoir" "S-26" 5.43315090230994
+"Michael J Kirwan Reservoir" "S-27" 9.92872413506001
+"Paint Creek Lake" "S-01" 2.34234770568124
+"Paint Creek Lake" "S-02" 36.5177705521456
+"Paint Creek Lake" "S-03" 21.391760742715
+"Paint Creek Lake" "S-04" 23.3604297339872
+"Paint Creek Lake" "S-05" 8.73230760622593
+"Paint Creek Lake" "S-06" 45.7971266172611
+"Paint Creek Lake" "S-07" 0.786391189048954
+"Paint Creek Lake" "S-08" 21.9743198147407
+"Paint Creek Lake" "S-09" 57.1800691001639
+"Paint Creek Lake" "S-10" 41.7853991444292
+"Paint Creek Lake" "S-31" 1.7656929355023
+"Paint Creek Lake" "S-33" 30.7778401198278
+"Paint Creek Lake" "S-34" 15.0683987851751
+"Paint Creek Lake" "S-35" 8.22984553635892
+"Paint Creek Lake" "S-36" 2.93325853250498
+"Piedmont Lake" "SU-01" 0.972256792852181
+"Piedmont Lake" "SU-02" 0.320786222453119
+"Piedmont Lake" "SU-03" 0.265530300425801
+"Piedmont Lake" "SU-04" 0.388243022996633
+"Piedmont Lake" "SU-05" 0.199870314321317
+"Piedmont Lake" "SU-06" 0.792248599180798
+"Piedmont Lake" "SU-07" 0.442839362804067
+"Piedmont Lake" "SU-08" 0.187664409364845
+"Piedmont Lake" "SU-09" 0.600543785907164
+"Piedmont Lake" "SU-10" 0.110648493347099
+"Piedmont Lake" "SU-32" 0.841527019423851
+"Piedmont Lake" "SU-33" 0.698817841351716
+"Piedmont Lake" "SU-35" 2.22975610286731
+"Piedmont Lake" "SU-36" 1.03202037295971
+"Piedmont Lake" "SU-39" 0.450187045318258
+"Pleasant Hill Lake" "S-01" 2.43229534584379
+"Pleasant Hill Lake" "S-02" 1.68306925809953
+"Pleasant Hill Lake" "S-03" 8.35845021865299
+"Pleasant Hill Lake" "S-04" 1.89460804634014
+"Pleasant Hill Lake" "S-06" 1.34384909095348
+"Pleasant Hill Lake" "S-07" 4.6507432778552
+"Pleasant Hill Lake" "S-08" 2.50096650379434
+"Pleasant Hill Lake" "S-09" 0.987911519200566
+"Pleasant Hill Lake" "S-10" 0.630797548433452
+"Pleasant Hill Lake" "S-31" 13.2722085835882
+"Pleasant Hill Lake" "S-32" 43.7935247278893
+"Pleasant Hill Lake" "S-33" 1.71141736862035
+"Pleasant Hill Lake" "S-34" 4.21319393633342
+"Pleasant Hill Lake" "S-35" 1.23053932628636
+"Rocky Fork Lake" "S-01" 4.81048866487547
+"Rocky Fork Lake" "S-02" 5.02247748964576
+"Rocky Fork Lake" "S-04" 3.03133633999602
+"Rocky Fork Lake" "S-05" 2.12866574227983
+"Rocky Fork Lake" "S-06" 1.63050477736928
+"Rocky Fork Lake" "S-07" 1.58127368270006
+"Rocky Fork Lake" "S-08" 1.42063375920934
+"Rocky Fork Lake" "S-09" 0.884135537397685
+"Rocky Fork Lake" "S-10" 1.34666628449948
+"Rocky Fork Lake" "S-31" 5.33104583880065
+"Rocky Fork Lake" "S-32" 5.9482399593022
+"Rocky Fork Lake" "S-33" 13.2358983485347
+"Rocky Fork Lake" "S-34" 0.529823769868051
+"Rocky Fork Lake" "S-35" 19.2758716735841
+"Senecaville Lake" "S-01" 7.88930859825692
+"Senecaville Lake" "S-02" 2.82975326291288
+"Senecaville Lake" "S-03" 3.5156976201129
+"Senecaville Lake" "S-04" 8.58933753284444
+"Senecaville Lake" "S-05" 4.88611649469663
+"Senecaville Lake" "S-06" 2.38007485538474
+"Senecaville Lake" "S-07" 5.91033939846093
+"Senecaville Lake" "S-08" 0.147273803052495
+"Senecaville Lake" "S-20" 0.801461027164109
+"Senecaville Lake" "S-21" 0.939277320867484
+"Senecaville Lake" "S-22" 1.58070835576304
+"Senecaville Lake" "S-23" 2.43934273856727
+"Senecaville Lake" "S-24" 2.31911810383832
+"Senecaville Lake" "S-25" 0.775252751536956
+"Senecaville Lake" "S-26" 0.744807682483339
+"Tappan Lake" "SU-01" 0.713082862328027
+"Tappan Lake" "SU-02" 0.103966286325645
+"Tappan Lake" "SU-03" 0.235618055537035
+"Tappan Lake" "SU-04" 0.0557485199445152
+"Tappan Lake" "SU-05" 0.605541213783566
+"Tappan Lake" "SU-06" 0.704406074250571
+"Tappan Lake" "SU-07" 0.357747145425496
+"Tappan Lake" "SU-08" 0.602555623852205
+"Tappan Lake" "SU-09" 0.628478635046964
+"Tappan Lake" "SU-28" 2.14753482980677
+"Tappan Lake" "SU-30" 2.11659147788516
+"Tappan Lake" "SU-31" 1.71912442156987
+"Tappan Lake" "SU-33" 1.96985562605878
+"Tappan Lake" "SU-34" 2.14695559811165
+"Tappan Lake" "SU-35" 1.18067543740717
+"William H Harsha Lake" "SU-01" 9.43665938714758
+"William H Harsha Lake" "SU-02" 1.64059746728869
+"William H Harsha Lake" "SU-03" 0.696163406266934
+"William H Harsha Lake" "SU-04" 3.15469281995935
+"William H Harsha Lake" "SU-05" 3.88300272469096
+"William H Harsha Lake" "SU-06" 27.472638388465
+"William H Harsha Lake" "SU-07" 0.782515911635044
+"William H Harsha Lake" "SU-08" 7.46039994228987
+"William H Harsha Lake" "SU-09" 16.1005305517556
+"William H Harsha Lake" "SU-10" 0.652889178766918
+"William H Harsha Lake" "SU-31" 89.0507536859263
+"William H Harsha Lake" "SU-32" 0.621802252733346
+"William H Harsha Lake" "SU-33" 155.395765867016
+"William H Harsha Lake" "SU-34" 24.0730995946719
+"William H Harsha Lake" "SU-35" 2.04760940428819
+"Wingfoot Lake" "U-02" 38.8781602834934
+"Wingfoot Lake" "U-03" 5.208121103937
+"Wingfoot Lake" "U-04" 11.5131894079162
+"Wingfoot Lake" "U-06" 9.0714546297306
+"Wingfoot Lake" "U-07" 52.3302387069641
+"Wingfoot Lake" "U-08" 4.70256655515307
+"Wingfoot Lake" "U-10" 17.1175194849993
+"Wingfoot Lake" "U-12" 10.738721274029
+"Wingfoot Lake" "U-14" 9.71466578761406
+"Wingfoot Lake" "U-15" 12.482359091303
+"Wingfoot Lake" "U-16" 9.04489973689226
+"Wingfoot Lake" "U-17" 14.9709253685789
+"Wingfoot Lake" "U-19" 18.5086695590696
+"Wingfoot Lake" "U-20" 30.0468692405483
+"Wingfoot Lake" "U-21" 20.8724454307105
