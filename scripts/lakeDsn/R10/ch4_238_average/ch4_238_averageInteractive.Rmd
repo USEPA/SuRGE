@@ -86,36 +86,36 @@ leaflet() %>%
 ## Oversample Sites
 ```{r, echo=FALSE, out.width="100%"}
 
-# this throwing error
-# leaflet() %>%
-#   addProviderTiles(providers$Esri.WorldImagery) %>%
-#   fitBounds(lng1 = min(st_coordinates(averageSitesWGS238)[,1]),
-#             lng2 = max(st_coordinates(averageSitesWGS238)[,1]),
-#             lat1 = min(st_coordinates(averageSitesWGS238)[,2]),
-#             lat2 = max(st_coordinates(averageSitesWGS238)[,2])) %>%
-#   addPolygons(data = averageWGS238,
-#               color = "black", weight = 1,
-#               fillColor = ~factpal(section)) %>%
-#   addCircleMarkers(data = filter(averageSitesWGS238, panel == "OverSamp"),
-#                    fillColor = "black", # manual color specification
-#                    fillOpacity = 1,
-#                    stroke = FALSE,
-#                    radius = 6,
-#                    label = ~siteID,
-#                    labelOptions = labelOptions(noHide = T, textOnly = TRUE,
-#                                                style = list(
-#                                                  color = "white",
-#                                                  "font-size" = "15px",
-#                                                  "font-family" = "serif"))) %>%
-#   # Rather than using pal and values, you can explicitly pass in colors and labels
-#   addLegend(position = "bottomright",
-#             color = "black", # manual 'color' specification
-#             labels = "OverSamp", # manual 'labels' specification
-#             title = "Sample sites") %>%
-#   addLegend(position = "bottomright", pal = factpal,
-#             values = as.character(averageWGS238$section),
-#             title = "sections") %>%
-#   addScaleBar()
+#this throwing error
+leaflet() %>%
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  fitBounds(lng1 = min(st_coordinates(averageSitesWGS238)[,1]),
+            lng2 = max(st_coordinates(averageSitesWGS238)[,1]),
+            lat1 = min(st_coordinates(averageSitesWGS238)[,2]),
+            lat2 = max(st_coordinates(averageSitesWGS238)[,2])) %>%
+  addPolygons(data = averageWGS238,
+              color = "black", weight = 1,
+              fillColor = ~factpal(section)) %>%
+  addCircleMarkers(data = filter(averageSitesWGS238, panel == "OverSamp"),
+                   fillColor = "black", # manual color specification
+                   fillOpacity = 1,
+                   stroke = FALSE,
+                   radius = 6,
+                   label = ~siteID,
+                   labelOptions = labelOptions(noHide = T, textOnly = TRUE,
+                                               style = list(
+                                                 color = "white",
+                                                 "font-size" = "15px",
+                                                 "font-family" = "serif"))) %>%
+  # Rather than using pal and values, you can explicitly pass in colors and labels
+  addLegend(position = "bottomright",
+            color = "black", # manual 'color' specification
+            labels = "OverSamp", # manual 'labels' specification
+            title = "Sample sites") %>%
+  addLegend(position = "bottomright", pal = factpal,
+            values = as.character(averageWGS238$section),
+            title = "sections") %>%
+  addScaleBar()
 ```
 
 <P style="page-break-before: always">

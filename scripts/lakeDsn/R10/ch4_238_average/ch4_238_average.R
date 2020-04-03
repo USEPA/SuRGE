@@ -39,10 +39,10 @@
 # dir("../../../") # two dots brings you up one level in data hierarchy.  This code brings you up three levels into SuRGE.
 
 # LIBRARIES------
-library(tidyverse)
-library(spsurvey)
-library(leaflet)
-library(mapview)
+# library(tidyverse) # load from masterLibrary.R
+# library(spsurvey) # load from masterLibrary.R
+# library(leaflet) # load from masterLibrary.R
+# library(mapview) # load from masterLibrary.R
 
 
 # READ POLYGON SHAPEFILE-----
