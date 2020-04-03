@@ -1,4 +1,10 @@
-.Rproj.user
 .Rhistory
-.RData
-.Ruserdata
+*.Rproj
+.Rproj.user
+
+inputData/lMorpho
+
+# big files in Tony Olsen's script
+/scripts/surgeDsn/olsenCode
+
+surgeOverview.html
