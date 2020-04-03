@@ -1,0 +1,234 @@
+---
+title: "SuRGE Survey Design Review"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: false
+    fig_caption: yes
+    depth: 2
+    number_sections: true
+---
+```{r echo=FALSE, eval=FALSE}
+# this is an enitrely self contained .rmd and can be rendered to .html via knit.
+
+```
+
+```{r}
+library(sf)
+library(USAboundaries)
+library(readxl)
+library(tidyverse)
+```
+
+# Data Sources
+On 10/30/2019 Tony Olsen provided a list of the 522 waterbodies in NLA 17 that were EVAL_CAT == "Target_Sampled" and LAKE_ORGN == "MAN_MADE".  Read in data below.
+
+```{r}
+getwd()
+nla17.site <- read_excel("../../inputData/nla2017/NLA17_Man_Made_Target_Sampled_Sites.xlsx")
+```
+
+On 12/6/2019 Tony Olsen provided a preliminary design for the National Reservoir Methane Survey.  Read in design below.
+```{r}
+dsn <- read_sf("../../output/surveyDsgnOutput/NLA_Methane_Design_Lakes_20191206.shp")
+```
+
+
+# SITE_ID review
+All SITE_ID values in the survey design are present in the list of 522 nla17 sites.  Good.
+
+```{r}
+# SITE_ID values from design value absent from list of NLA17 man-made target-sampled
+dsn %>% as.data.frame %>% filter(!(SITE_ID %in% nla17.site$SITE_ID)) %>% select(SITE_ID) %>% pull()
+
+```
+
+
+# Chlorophyll review
+Three sites are missing chlorophyll values, but are categorized as chl < 7.  Per Tony "They all are in Oregon.  I actually checked were they were located in the state and “determined” that it was unlikely that they would have high Chla values (no strong ag influence) and assigned them to <7."
+```{r}
+dsn %>% as.data.frame() %>% filter(is.na(CHLA_UG_L)) %>% select(SITE_ID, CHLA_UG_L, Chla_Cat, panel)
+
+```
+# Review number of sites by ecoregion, unequal probability category.
+The design entailed stratification by 9 ecoregions and unequal probability categories  based on depth and chla.  There are two levels of depth and two levels of chla.  These two categories combine for four unique combinations of depth and chla per ecoregion.  The design specifies a target of three replicates per unique combination, summing up to 12 (4 x 3) sites per ecoregion and 108 (12 x 9) for the entire design. Where specific ecoregions didn't have enough sites to fully satisfy the design, additional sites were added to other ecoregions. Per Tony Olsen "Chose the additional sites in same category but from different ecoregion that was nearby if it made sense. Otherwise put them in CPL.".   
+
+The design contains 108 "Base" sites and "228" oversample sites.
+
+``` {r}
+dsn %>% {table(.$panel)}
+```
+
+The Northen Appalachian, Northern Plains, and Upper Midwest ecoregions have fewer total sites than were targeted.  This is compensated with 5 extra sites in Coastal Plains, 2 in Southern Appalachians, 1 in Southern Plains, and 3 in Temperate Plains.
+
+``` {r}
+dsn %>% filter(panel == "Base") %>% {table(.$AG_ECO9_NM)} %>% sort()
+```
+
+This reallocation of sites is largely consistent with the number of NLA17 man-made sites per ecoregion.  The four ecoregions given extra sites are the four ecoregions with the most man-made sites to choose from.
+``` {r}
+table(nla17.site$AG_ECO9_NM) %>% sort()
+```
+
+The design contains 228 oversample sites, but many groups (i.e. eco x depth x chl) do not have oversample sites.  Normally, oversample sites are used to maintain spatial balance when a "Base" site can't be sampled.  Is the lack of replacement sites an issue if a Base site can't be sampled?
+``` {r}
+dsn %>% filter(panel == "OverSamp") %>% {table(.$Chla_Cat, .$Depth_Cat, .$AG_ECO9_NM)}
+```
+
+# Review other components of design file
+The 'mdcaty' column refers to the 'multi-density' categories (a.k.a. unequal probability categories) in the design.  All sites were assigned a value of 'Equal' for this column, therefore no unequal probability categories were used.  Allocation among ecoregions, depths, and chla must have been accomplished via stratification rather than unequal probability categories.
+``` {r}
+table(dsn$mdcaty)
+```
+
+If site allocation was accomplished via stratification, the file should contain 36 strata (9 ecoregion * 2 depth bins * 2 chla bins). The file contains `r dsn %>% as.data.frame() %>% filter(panel == "Base") %>% distinct(stratum) %>% {length(.$stratum)}`, indicating that one strata is absent from the design.  This strata is low chlorophyl and deep in Upper Midwest.
+``` {r}
+dsn %>% as.data.frame() %>% filter(panel == "Base") %>% {table(.$Chla_Cat, .$Depth_Cat, .$AG_ECO9_NM)}
+```
+
+The file contains a column for NHDPlusV2 COMID values.  This identifier will be important for linking to NHD, lakeCat, and lakeMorpho.  There are `r dsn %>% as.data.frame() %>% filter(is.na(COMID)) %>% select(COMID) %>% {length(.$COMID)}` missing COMID values.  The file also contains NLA SITE_ID values.  These values will be important for linking to other NLA products.  There are `r dsn %>% as.data.frame() %>% filter(is.na(SITE_ID)) %>% select(SITE_ID) %>% {length(.$SITE_ID)}` missing SITE_ID values.
+
+# Design map
+
+``` {r echo = FALSE, message = FALSE}
+# Get states map
+states <- us_states() %>%
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
+  st_transform(5070)
+
+# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+
+ecoR <- st_read(dsn = "../..//inputData/nla2012",
+                layer = "Aggr_Ecoregions9_2015")
+
+# "Temperate" is misspelled.
+ecoR <- ecoR %>% 
+  mutate(WSA9_NAME = as.character(WSA9_NAME), # conv to char
+         WSA9_NAME = ifelse(WSA9_NAME == "Temporate Plains",
+                            "Temperate Plains", # correct sp
+                            WSA9_NAME),
+         WSA9_NAME = as.factor(WSA9_NAME)) # back to factor
+
+# Check CRS
+st_crs(ecoR) # no EPSG code
+ecoR <- st_transform(ecoR, 5070) # convert to CONUS Albers
+st_crs(ecoR) # 5070
+
+# Ecoregion colors
+# Custom color pallette for ecoregion polygons.  Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
+
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+  geom_sf(data = filter(dsn, panel == "Base"), size = 1) +
+  scale_fill_manual("Ecoregion", values = cols) +
+  ggtitle("SuRGE Survey Sites") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position = c(1.08, .5), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm"),
+        plot.title = element_text(hjust = 0.5)) 
+
+
+```
+
+# Upscaling
+Per Tony Olsen (10/21/2019 e-mail):
+After complete the methane sampling and lab analyses for each of the sampled 70-90 man-made lakes, have two options for population estimation:
+*	Estimate target population methane emissions based on results for the sampled lakes. Straightforward survey population estimation.
+*	Construct new methane model based on sampled lakes, use that model to predict methane emissions for all 955 target man-made lakes, and then estimate target population methane emissions based on all those.
+
+To demonstrate these upscaling approaches we will simulate the results of the survey.
+
+``` {r}
+## Since there aren't results yet, let's make some up.
+set.seed(12321)
+
+## Central tendency and variance for simulation 
+## Per results from Jake's previous survey work, assume a mean and standard deviation 
+## of the measured emission rates of 6.3 and 5.84 mg CH4 m-2 h-1, respectively. 
+## Rates should be in mg C m^(-2) d^(-1), so we'll need to convert.
+## m^(-2) h(-1) * [(24 h) / (1 day)]
+mnMethaneRate = 6.3 * 24 ## See above conversion 
+sdMethaneRate = 5.84 * 24
+
+## Reservoir-level simulated means
+## Simulate from a lognormal since mean and sd are relatively close.
+## The arithmetic mean and standard deviation are related to the lognormal
+## parameters 'mu' and 'sigma' via the formulas:
+## mu = log( E[X]^2 / sqrt( Var[X] + E[X]^2) )
+## sigma^2 = log( 1 + Var[X] / E[X]^2 )
+mu <- log(mnMethaneRate^2 / sqrt(sdMethaneRate^2 + mnMethaneRate^2))
+sigma <- sqrt(log(1 + sdMethaneRate^2 / mnMethaneRate^2))
+dsn$ch4Mn = rlnorm(nrow(dsn), meanlog = mu, sdlog = sigma)
+# Reservoir-level GRTS variance RSD = sd / mn, usually between 1/3 and 1/6.
+dsn$ch4Var = (dsn$ch4Mn / runif(nrow(dsn),3,6))^2
+
+# Make the 'oversample' results NA
+dsn$ch4Mn[dsn$panel == "OverSamp"] = NA
+dsn$ch4Var[dsn$panel == "OverSamp"] = NA
+
+# Too add realism to survey, assume:
+
+# SAP 
+# one base site not sampled due to land owner issues.
+# one base site no sampled because dam had been removed and reservoir drained
+# both sites replaced w/oversample.
+# Set unsampled "Base" sites in SAP to NA
+rIndex <- which(dsn$stratum == "SAP_GT_6m_GT_7" & # any stratum w/oversample sites will do
+                  dsn$panel == "Base")[1:2] # select first two rows
+
+dsn[rIndex, "ch4Mn"] = NA # set to NA for landowner denial or dam maintenance
+
+
+# Simulated values for oversample sites in SAP
+rIndex <- which(dsn$stratum == "SAP_GT_6m_GT_7" & # corresponding to above
+                  dsn$panel == "OverSamp")[1:2] # select first two rows
+
+dsn[rIndex, "ch4Mn"] = rlnorm(length(rIndex), meanlog = mu, sdlog = sigma) # simulate oversamp value
+dsn[rIndex, "ch4Var"] = (dsn %>% as.data.frame() %>% .[rIndex, "ch4Mn"])  / (runif(length(rIndex), 3, 6))^2 # simulate oversamp value
+
+
+
+# NPL
+# one "Base" site from middle of list not sampled because it was inaccesible (damaged boat ramp).
+# No oversample available in this stratum.  Does this violate spatial balance and complicate population estimates?
+rIndex <- which(dsn$stratum == "NPL_LE_6m_GT_7" & # any stratum w/out oversample sites will do
+                  dsn$panel == "Base")
+dsn[rIndex[2], "ch4Mn"] = NA # second site in list
+
+
+
+# CPL 
+# Ran out of resources to sample final "Base" site in CPL.
+rIndex <- which(dsn$AG_ECO9 == "CPL" & dsn$panel == "Base")
+dsn[rIndex[length(rIndex)], "ch4Mn"] = NA # set last site in list to NA
+
+# write.table(as.data.frame(dsn), file = "C:/Users/JBEAULIE/GitRepository/NRS/output/reservoirCh4Sim.txt", row.names = FALSE)
+```

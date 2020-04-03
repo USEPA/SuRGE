@@ -1,0 +1,159 @@
+---
+title: 'SuRGE - Narragansett'
+author: "Dr. Jake Beaulieu"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+    fig_caption: yes
+    depth: 2
+    number_sections: true
+    code_folding: hide
+  editor_options: 
+  chunk_output_type: console
+---
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# load libraries
+library(sf) # spatial data
+library(tidyverse) # dplyr, ggplot
+library(USAboundaries)
+
+# Load data, from Olsen
+dsn <- read_sf("../../output/surveyDsgnOutput/Surge_design_20191206.shp")
+```
+
+
+
+# Background
+The USEPA Office of Air and Radiation has requested that methane (CH4) and carbon dioxide (CO2) emissions from reservoirs be included in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks*.  The Intergovernmental Panel on Climate Change (IPCC) has issued guidance for estimating these emissions, but the model used to derive the IPCC emission factors was trained with a global data set which included very few measurements from the US.  It is therefore uncertain how accurate the IPCC emission factors are for US reservoirs.  Methane emission rates vary by three orders of magnitude across US reservoirs and a small bias in IPCC emission factors could strongly bias the inventory estimate.
+To address this problem, the Office of Research and Development established the SuRGE (Survey of Reservoir Greenhouse gas Emissions) project, a three-year survey of CH4 and CO2 emission rates from US reservoirs.  This will be a collaborative effort involving several ORD locations, EPA Regional Biologists, and other collaborators.  The effort is supported under the FY 19-22 AE StRAP:
+
+**Topic 2**: Science for Air Quality Decisions
+
+**Research Area 2**: Approaches for characterizing source emissions, air quality, exposure, and mitigation strategies
+
+**Output**: AE.04 Methods for Estimating Methane Emissions from Surface Water Reservoirs for the U.S. GHG Inventory Report
+“*National-scale survey of methane emissions from reservoirs in the United States to reduce uncertainty in inventory estimates*" by improving the characterization of previously under-reported biogenic methane emissions and how water level changes, nutrient content, and ambient conditions may affect the timing and rate of emissions; this research will address a key gap in monitoring data for the Greenhouse Gas Emissions Inventory United Nations Framework Convention on Climate Change (UNFCCC) reporting requirements”
+
+# Survey Design
+
+The sample frame for the survey design is the 522 man-made waterbodies sampled during the 2017 National Lakes Assessment.  These sites are a probabilistic sample of US reservoirs, therefore a probabilistic subsample of these sites will allow for inference to the population of US man-made waterbodies.  The survey contains 108 of the 522 NLA man-made sites and is  stratified by ecorgeion, depth, and chlorophyll. This design will ensure large gradients in environmental drivers (i.e. depth, chla) to inform subsequent modeling efforts.
+
+```{r warning=FALSE, message=FALSE, results="hide"}
+# Get states map
+states <- us_states() %>%
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
+  st_transform(5070)
+
+# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+
+ecoR <- st_read(dsn = "../..//inputData/nla2012",
+                layer = "Aggr_Ecoregions9_2015")
+
+# "Temperate" is misspelled.
+ecoR <- ecoR %>% 
+  mutate(WSA9_NAME = as.character(WSA9_NAME), # conv to char
+         WSA9_NAME = ifelse(WSA9_NAME == "Temporate Plains",
+                            "Temperate Plains", # correct sp
+                            WSA9_NAME),
+         WSA9_NAME = as.factor(WSA9_NAME)) # back to factor
+
+# Check CRS
+# st_crs(ecoR) # no EPSG code
+ecoR <- st_transform(ecoR, 5070) # convert to CONUS Albers
+# st_crs(ecoR) # 5070
+
+# Ecoregion colors
+# Custom color pallette for ecoregion polygons.  Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
+
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+  geom_sf(data = filter(dsn, panel == "Base"), size = 1) +
+  scale_fill_manual("Ecoregion", values = cols) +
+  ggtitle("National Reservoir Methane Survey") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position = c(1.08, .5), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm"),
+        plot.title = element_text(hjust = 0.5)) 
+
+
+```
+  
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Get states map
+states <- us_states() %>%
+  dplyr::filter(name %in% c("Maine", "New York", "New Jersey", "Vermont", 
+                            "Massachusetts", "Rhode Island", "Connecticut", 
+                            "New Hampshire", "Pennsylvania", "Maryland", "Delaware")) %>% 
+  st_transform(5070)
+
+# clip ecoR by states
+ecoR.ne <- st_intersection(states, ecoR)
+
+ggplot() +
+  geom_sf(data = ecoR.ne,  aes(fill = WSA9_NAME)) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+  geom_sf(data = filter(dsn, panel == "Base", PSTL_CODE %in% c("ME", "NY", "NJ", "VT", "MA", "RI", "CT", "NH", "PA", "MD", "DE")), size = 1) +
+  scale_fill_manual("Ecoregion", values = cols) +
+  ggtitle("National Reservoir Methane Survey: northeast") 
+
+
+```
+
+
+
+# Measurement Details
+Each of the 108 waterbodies in the survey will be sampled only one time during the three year program (2020 - 2022). It doesn't matter which year a particular water body is sampled, but all sampling will be conducted between June 1 and Sept. 15.  Each waterbody will contain 15 - 25 sites where ebullitive (i.e. bubbling) emission rates will be measured via overnight deployments of inverted funnels.  Diffusive emissions will be measured at the sites via ~3 minute floating chamber deployments.  Ancillary measurements include water chemistry, chlorophyll, and dissolved gas concentrations.
+
+```{r, echo=FALSE, out.width="100%"}
+# This should be image of single waterbody survey design, floating chamber, and inverted funnel.
+
+knitr::include_graphics("../../scripts/surgeDsn/imagesForRmd/fieldMethods.PNG")
+```
+
+
+# Collaborators
+Dr. Jake Beaulieu (ORD/CEMM/WECD/WMB) is the project lead based out of Cincinnati.  Co-leads include Lil Herger (EPA Region 10 @ Seattle), John Walker (ORD/CEMM/AEMD @ RTP), and Ken Forshay (ORD/CESER/CGRD @ ADA).  Field crews will be deployed from these four locations.  We are also in discussion with USGS colleagues in Flagstaff, Arizona.  We are currently seeking collaborators from the northeastern US.
+
+# Contact
+Jake Beaulieu  
+ORD/CEMM/WEMD/WMB  
+513-569-7842  
+beaulieu.jake@epa.gov
+
+# Selected References
+
+DelSontro, T., Beaulieu, J. J., & Downing, J. A. (2018). Greenhouse gas emissions from lakes and impoundments: Upscaling in the face of global change. Limnology and Oceanography Letters, 3(3), 64-75. [doi:10.1002/lol2.10073](https://aslopubs.onlinelibrary.wiley.com/doi/pdf/10.1002/lol2.10073)  
+
+Prairie, Y. T., Alm, J., Beaulieu, J., Barros, N., Battin, T., Cole, J., . . . Vachon, D. (2017). Greenhouse Gas Emissions from Freshwater Reservoirs: What Does the Atmosphere See? Ecosystems. [doi:10.1007/s10021-017-0198-9](https://link.springer.com/content/pdf/10.1007%2Fs10021-017-0198-9.pdf)  
+
+Beaulieu, J. J., Smolenski, R. L., Nietch, C. T., Townsend-Small, A., & Elovitz, M. S. (2014). High Methane Emissions from a Midlatitude Reservoir Draining an Agricultural Watershed. Environmental Science & Technology, 48(19), 11100-11108. [doi:10.1021/es501871g](http://pubs.acs.org/doi/pdfplus/10.1021/es501871g)

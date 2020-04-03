@@ -1,0 +1,118 @@
+---
+title: 'National Reservoir Methane Survey: R10'
+author: "J. Beaulieu"
+date: "12/16/2019"
+output:
+  html_document:
+    df_print: paged
+    toc: FALSE
+    code_folding: hide
+  editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# load libraries
+library(sf) # spatial data
+library(tidyverse) # dplyr, ggplot
+library(USAboundaries)
+
+# Load data, from Olsen
+dsn <- read_sf("../..//output/surveyDsgnOutput/SuRGE_design_20191206.shp")
+```
+
+
+ORD and Region 10 have previously measured CH4 and CO2 emission rates from reservoirs in Washington, Idaho, and Oregon.  The methods used during the surveys are identical to those that will be used for the new national survey.  Any previously sampled sites that happen to be included in the new national survey will not be resampled.
+
+## Region 10 sites
+The new survey design contains `r dsn %>% as.data.frame() %>% filter(PSTL_CODE %in% c("WA", "OR", "ID") & panel == "Base") %>% nrow()` Base sites in R10.
+Two of these sites were sampled by R10 in 2018.  Both sites are in the Western Mountains ecoregion and will not be resampled during this new survey.  
+
+
+``` {r}
+# SITE_ID and lake names of R10 surveyed reservoirs.
+r10 <- c("NLA17_WA-10038", "Baker Lake",
+         "NLA17_WA-10006", "Swofford Pond",
+         "NLA17_WA-10002", "Wapato Lake",
+         "NLA17_OR-10006", "Phillips Reservoir",
+         "NLA17_ID-10175", "Mormon Reservoir",
+         "NLA17_ID-10032", "Lower Goose Reservoir",
+         "NLA17_ID-10007", "Springfield Reservoir")
+
+r10 <- data.frame(SITE_ID = r10[seq(1, 13, 2)],
+                  R10_NAME = r10[seq(2, 14, 2)], 
+                  stringsAsFactors = FALSE)
+
+dsn %>% as.tibble() %>% 
+  filter(panel == "Base") %>% # only Base sites
+  merge(., r10) %>% # bring in r10 sites
+  select(SITE_ID, R10_NAME, panel, AG_ECO9) # show matches
+
+```
+
+This leaves 4 new sites to sample in R10.  
+``` {r}
+# New sites to sample in R10.
+r10.new <- dsn %>% as.data.frame() %>% 
+  filter(panel == "Base", # only Base sites
+         PSTL_CODE %in% c("WA", "OR", "ID"), # only in R10
+         !(SITE_ID %in% c("NLA17_OR-10006", "NLA17_WA-10006"))) %>% 
+  select(SITE_ID, panel, AG_ECO9) # show matches
+
+r10.new
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Get states map
+states <- us_states() %>%
+  dplyr::filter(name %in% c('Washington','Oregon', 'Idaho')) %>% # CONUS
+  st_transform(5070)
+
+
+ggplot() +
+  geom_sf(data = states,  size = 0.1) +
+  geom_sf(data = filter(dsn, SITE_ID %in% r10.new$SITE_ID), size = 1) +
+  geom_label() +
+  ggtitle("Sites in R10 to sample for national survey")
+
+
+```
+```
+
+
+
+Four of the oversample sites in the Xeric ecoregion were sampled by R10 in 2018.
+
+``` {r}
+# oversample sites previously sampled by R10
+
+dsn %>% as.data.frame() %>% 
+  filter(panel == "OverSamp") %>% # only Base sites
+  merge(., r10) %>% # bring in r10 sites
+  select(SITE_ID, R10_NAME, panel, AG_ECO9) # show matches
+
+
+
+```
+Oversample sites must be used in the order in which they were designated by the survey design algorithm, as indicated by the siteID order, within each design category (stratum column in design file).  If no oversample is available within a category, then use next OverSamp site in category of choice.  
+* XER_GT_6m_GT_7: no previously sampled R10 sites are designated as oversample sites in this category.  
+* XER_GT_6m_LE_7: NLA17_ID-10032 (Lower Goose Reservoir) is third in the list.
+                  NLA17_WA-10002 (Wapato Lake) is 9th in the list
+                  NLA17_ID-10075 (Mormon Reservoir) is 14th in the list  
+* XER_LE_6m_GT_7: no previously sampled R10 sites are designated as oversample sites in this category.  
+* XER_LE_6m_LE_7: NLA17_ID-10007 (Springfield Reservoir) is 3rd in oversample list.
+
+It is possible that previously sampled R10 sites will be used as oversample sites, most likely in XER_GT_6m_LE_7 and XER_LE_6m_LE_7.  
+
+
+``` {r}
+# Oversample sites in XERIC ecoregion.
+dsn %>% as.tibble() %>% 
+  filter(panel == "OverSamp", AG_ECO9 == "XER") %>%
+  select(siteID, stratum, panel, SITE_ID, AG_ECO9) %>%
+  print(n= Inf)
+
+```
+

@@ -1,0 +1,69 @@
+---
+title: "CRS with spSurvey V4.1.2"
+author: "J. Beaulieu"
+date: "4/1/2020"
+output: html_document
+---
+
+## Load libraries and print session info
+It is strange that R reports "Version 4.1.0 of the spsurvey package was loaded successfully." but sessionInfo() indicates that V4.1.2 is attached.  Is this a minor bug in the current CRAN package?
+```{r}
+library(spsurvey)
+sessionInfo()
+```
+
+## Read the sf object
+
+Read Utah ecoregions sf object that came with package.
+```{r}
+data("UT_ecoregions")
+class(UT_ecoregions)
+st_crs(UT_ecoregions) # EPSG 5070, CONUS Albers
+```
+
+## Attribute data
+```{r}
+head(UT_ecoregions)
+```
+
+## Unstratified, equal probability, GRTS survey design
+
+Create design list:
+```{r}
+Equaldsgn <- list(None=list(panel=c(PanelOne=50), seltype="Equal"))
+```
+
+
+Select the sample.  This writes out a .shp and creates a SpatialDesign object.
+```{r warning=FALSE}
+Equalsites <- grts(design=Equaldsgn,
+                   DesignID="EQUAL",
+                   type.frame="area",
+                   src.frame="sf.object",
+                   sf.object=UT_ecoregions,
+                   maxlev = 5,
+                   shapefile=TRUE)
+```
+
+Print the initial six lines of the survey design:
+```{r}
+head(Equalsites)
+```
+
+Can convert SpatialDesign object to sf object, but sf object has no coordinate reference system.
+```{r}
+Equalsite.sf <- st_as_sf(Equalsites)
+
+st_crs(Equalsite.sf)
+```
+
+
+The written .shp does not have a defined CRS either?
+```{r}
+foo <- st_read(dsn = ".", layer = "sample")
+st_crs(foo)
+```
+
+Previous version of spSurvey had a prjfilename argument to specify projection of written .shp, but this is deprecated in 4.1.1.  How should I define CRS of design object?
+
+

@@ -1,0 +1,245 @@
+---
+title: "Review of SuRGE Final Design"
+author: "Jake Beaulieu"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+    fig_caption: yes
+    depth: 2
+    number_sections: true
+    code_folding: hide
+  editor_options: 
+  chunk_output_type: console
+---
+
+```{r echo=FALSE, eval=FALSE}
+# this is an enitrely self contained .rmd and can be rendered to .html via knit.
+
+```
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# load libraries
+library(sf) # spatial data
+library(tidyverse) # dplyr, ggplot
+library(USAboundaries)
+library(readxl) # read_excel
+
+# Load final design from Olsen.  Was delivered as NLA_Methane_Design_Lakes_20191206.shp.  I added a column
+# for laboratory 'assigned' to each site and renamed:
+dsn <- read_sf("../../output/surveyDsgnOutput/SuRGE_design_20191206.shp")
+
+# Load list of NLA17 man-made sampled
+nla17 <- read_excel("../../inputData/nla2017/NLA17_Man_Made_Target_Sampled_Sites.xlsx") 
+
+# Convert to SpatialPointsDataFrame
+nla17.sf <- st_as_sf(nla17, coords = c("LON_DD83", "LAT_DD83"),
+                     crs = 4269) %>% # NAD83 for lat/lon
+  st_transform(., 5070) # project to CONUS Albers
+```
+
+
+
+# Background
+The USEPA Office of Air and Radiation has requested that methane (CH4) and carbon dioxide (CO2) emissions from reservoirs be included in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks*.  The Intergovernmental Panel on Climate Change (IPCC) has issued guidance for estimating these emissions, but the model used to derive the IPCC emission factors was trained with a global data set which included very few measurements from the US.  It is therefore uncertain how accurate the IPCC emission factors are for US reservoirs.  Methane emission rates vary by three orders of magnitude across US reservoirs and a small bias in IPCC emission factors could strongly bias the inventory estimate.
+To address this problem, the Office of Research and Development established the SuRGE (Survey of Reservoir Greenhouse gas Emissions) project, a three-year survey of CH4 and CO2 emission rates from US reservoirs.  This will be a collaborative effort involving several ORD locations, EPA Regional Biologists, and other collaborators.  The effort is supported under the FY 19-22 AE StRAP:
+
+**Topic 2**: Science for Air Quality Decisions
+
+**Research Area 2**: Approaches for characterizing source emissions, air quality, exposure, and mitigation strategies
+
+**Output**: AE.04 Methods for Estimating Methane Emissions from Surface Water Reservoirs for the U.S. GHG Inventory Report
+“*National-scale survey of methane emissions from reservoirs in the United States to reduce uncertainty in inventory estimates*" by improving the characterization of previously under-reported biogenic methane emissions and how water level changes, nutrient content, and ambient conditions may affect the timing and rate of emissions; this research will address a key gap in monitoring data for the Greenhouse Gas Emissions Inventory United Nations Framework Convention on Climate Change (UNFCCC) reporting requirements”
+
+# Upscaling approaches
+
+## Rationale
+To maximize flexibility in upscaling approaches, the survey design should allow for upscaling to the population of US reservoirs via classical survey statistics and/or via statistical modeling.  Both approaches require knowledge of the population of US reservoirs, which is difficult to achieve because a definitive list of US reservoirs does not exist.
+
+## Survey design approach
+Upscaling via a classical survey design approach requires sample sites that represent a probabilistic subset of the population of US reservoirs.  Since a definitive list of US reservoirs does not exist, we will build on knowledge of US reservoirs from previous EPA surveys.  In 2017 the USEPA executed a probabilistic survey of ~1200 US waterbodies during the National Lakes Assessment (NLA17).  The survey design included 955 man-made waterbodies, 522 of which were sampled.  These waterbodies  represent a probabilistic subsample of the population of US man-made waterbodies.  A probabilistic subsample of these man-made waterbodies will therefore allow for inference to the population of US man-made waterbodies.  
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Figure 1.  Man-made sites sampled in NLA 2017"}
+# Get states map
+states <- us_states() %>%
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
+  st_transform(5070)
+
+# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+
+ecoR <- st_read(dsn = "../../inputData/nla2012",
+                layer = "Aggr_Ecoregions9_2015")
+
+# "Temperate" is misspelled.
+ecoR <- ecoR %>% 
+  mutate(WSA9_NAME = as.character(WSA9_NAME), # conv to char
+         WSA9_NAME = ifelse(WSA9_NAME == "Temporate Plains",
+                            "Temperate Plains", # correct sp
+                            WSA9_NAME),
+         WSA9_NAME = as.factor(WSA9_NAME)) # back to factor
+
+# Check CRS
+st_crs(ecoR) # no EPSG code
+ecoR <- st_transform(ecoR, 5070) # convert to CONUS Albers
+st_crs(ecoR) # 5070
+
+# Ecoregion colors
+# Custom color pallette for ecoregion polygons.  Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
+
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+  geom_sf(data = nla17.sf, size = 1) + # Contains all NLA17 man-made target
+  scale_fill_manual("Ecoregion", values = cols) +
+  ggtitle("NLA17 Target Sampled Man-Made") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position = c(1.08, .5), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm"),
+        plot.title = element_text(hjust = 0.5)) 
+
+
+```
+
+
+## Statistical modeling approach
+Modeling emission rates requires a data set that reflects variation in potential emission rate drivers (i.e. reservoir depth and productivity).  A probabilistic subsample of NLA17 ‘man-made’ waterbodies is certain to encompass a broad range of environmental conditions due to the national-scale distribution of sampling sites.  To further ensure variation in drivers, the design will include unequal probability categories based on water depth and productivty (see below).  
+
+The measured values will be combined with compareable measurements from the literature, and used to train a predictive model.  The model could then be used to predict emission rates at unsampled US reservoirs.  
+
+
+# Survey Design
+
+## Definition of reservoir
+The objective of the SuRGE project is to provide an estimate of methane and carbon dioxide emissions from US reservoirs for inclusion in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks* reported to the IPCC.  The IPCC defines ‘reservoirs’ as a subcategory of Flooded Lands.  Flooded Lands are defined as “water bodies where human activities have caused changes in the amount of surface area covered by water, typically through water level regulation”.  Flooded Lands contains two subcategories: ‘reservoir’ and ‘other flooded lands’.  ‘Other Flooded Lands’ includes waterbodies that have been created by excavation, such as canals, ditches and ponds.  
+
+The NLA definition of man-made is ‘waterbodies that would not exist without human intervention’.  This would include both excavated systems classified as “Other Flooded Lands” in the IPCC nomenclature and traditional reservoirs.  Natural waterbodies that have been minimally expanded through water-level management (i.e. Lake Tahoe) are considered 'natural' by the IPCC and NLA.  Therefore the NLA and IPCC defintions are well alligned, with the exception of 'excavated' systems.  
+
+## Sample frame
+The NLA includes waterbodies with surface areas ≥ 1Ha (0.01 km2).  Waterbodies near the 1 Ha cutoff will likely be too small for the sampling methods employed in this work.  Furthermore, the IPCC uses an 8 Ha threshold to discriminate between ‘reservoir’ and ‘Other Flooded Lands’.  To improve consistency between NLA and IPCC, and to eliminate waterbodies unsuitable for the sampling techniques, we will only consider the `r nla17.sf %>% as.data.frame() %>% filter(AREA_HA > 8) %>% summarize(n = n()) %>% pull()` NLA17 man-made sampled waterbodies > 8Ha. 
+
+
+## Stratification
+The survey design will include stratification by the 9 aggregated US ecoregions used throughout EPA's National Aquatic Resource Survey (NARS) program.  This stratification will further ensure that the sample sites encompass a broad range of environmental conditions, thereby providing data suitable for subsequent modeling. 
+
+## Unequal probability category: lake depth
+Beaulieu et al (In Review) found that total CH4 emission rates decreased with increasing maximum depth (Fig. 2) and West et al. (West et al. 2016) reported a similar pattern for boreal lakes.  This isn't a universal result, however, as Deemer (Deemer et al. 2016) did not detect a depth effect in the her global meta-analysis and CH4 emission rates were unrelated to depth in Rinta’s (Rinta et al. 2016) investigation of European lakes.  Nevertheless, we will use depth as an unequal probability category in this survey with depth bins for <= 6m and > 6m.
+```{r, echo=FALSE, out.width="30%", fig.cap="Figure 2.  Partial dependence plot of total CH4 emission rate as a function of maximum reservoir depth.  Training data came from a survey of 32 reservoirs in the central US."}
+# This should be image of diff CH4 vs res area, and CH4 emissions by size category
+#![alt text here](/C:/Users/JBEAULIE/GitRepository/NRS/scripts/area.PNG)
+knitr::include_graphics("../../scripts/surgeDsn/imagesForRmd/depth.PNG")
+```
+
+Water depth was measured at the index site at all NLA17 waterbodies.  The index site is located in the middle of the reservoir and likely reflects a depth somewhere between the mean and max. We will stratify on this variable. 
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Figure 3. Distribution of index site depth measurements for NLA17 man-made waterbodies >8Ha."}
+ggplot(filter(dsn, AREA_HA >8), aes(x = INDX_DEPTH)) +
+  geom_histogram(bins = 50) +
+  xlab("Index site Depth (m)") +
+  scale_x_continuous(breaks = seq(0, 90, 10)) +
+  ggtitle("NLA17 index site depth in man-made waterbodies >8Ha")
+
+
+```
+
+
+## Unequal probability category: lake productivity
+Several studies have reported relationships between productivity and CH4 emission rates (Deemer et al. 2016, West et al. 2016, DelSontro et al. 2018).  Chlorophyll a was measured in NLA17, therefore the survey design will include unequal probability categories based on chla levels.  Chlorophyll can not be used as a predictor in subsequent modeling, however, because chl values are not known for all US reservoirs.  Modeling could be based on things that might correlate with chl, such as nutrient use or agricultural activity in watershed (lakeCat variables).  NLA 2012 used the following chla-derived trophic-state categories:
+
+chla <= 2, oligotrophic  
+chla >2 and <= 7, mesotrophic  
+chla >7 and <= 30, eutrophic  
+chla > 30, hypereutrophic  
+
+Unequal probability bins of <7 and >7 will assure variation in lake productivity. 
+
+
+# Final design
+## Design map
+The final design contains `r dsn %>% as.data.frame() %>% filter(panel == "Base") %>% {nrow(.)}` "Base" sites and `r dsn %>% as.data.frame() %>% filter(panel == "OverSamp") %>% {nrow(.)}` "OverSamp" sites. Base sites are targeted for sampling and OverSample sites will be used as a replacement for Base sites that can't be sampled (i.e. landowner denial).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Figure 4.  Man-made sites sampled in NLA 2017 and targeted for sampling in this project"}
+
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+  geom_sf(data = filter(dsn, panel == "Base"), size = 1,
+          aes(shape = lab), show.legend = "point") +
+  scale_fill_manual("Ecoregion", values = cols) +
+  ggtitle("National Reservoir Methane Survey Sites") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position = c(1.08, .5), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm"),
+        plot.title = element_text(hjust = 0.5)) 
+
+# ggsave("C:/Users/JBEAULIE/GitRepository/NRS/output/figures/nrsMainSitesByLab.tiff")
+```
+
+## Review number of sites by ecoregion, unequal probability category.
+The design entailed stratification by 9 ecoregions and unequal probability categories based on depth and chla.  There are two levels of depth and two levels of chla.  These two categories combine for four unique combinations of depth and chla per ecoregion.  The design specifies a target of three replicates per unique combination, summing up to 12 (4 x 3) sites per ecoregion and 108 (12 x 9) for the entire design. Where specific ecoregions didn't have enough sites to fully satisfy the design, additional sites were added to other ecoregions. Per Tony Olsen "Chose the additional sites in same category but from different ecoregion that was nearby if it made sense. Otherwise put them in CPL.".  
+
+The final distribution of Base sites across the design elements is:
+
+```{r echo=FALSE}
+dsn %>% filter(panel == "Base") %>% {table(.$Chla_Cat, .$Depth_Cat, .$AG_ECO9_NM)}
+```
+
+
+The Northen Appalachian, Northern Plains, and Upper Midwest ecoregions have fewer total sites than were targeted.  This is compensated with 5 extra sites in Coastal Plains, 2 in Southern Appalachians, 1 in Southern Plains, and 3 in Temperate Plains.
+
+``` {r}
+dsn %>% filter(panel == "Base") %>% {table(.$AG_ECO9_NM)} %>% sort()
+```
+
+This reallocation of sites is largely consistent with the number of NLA17 man-made sites per ecoregion.  The four ecoregions given extra sites are the four ecoregions with the most man-made sites to choose from.
+``` {r}
+table(nla17$AG_ECO9) %>% sort()
+```
+
+
+The design contains 228 oversample sites, but many groups (i.e. eco x depth x chl) do not have oversample sites.  
+``` {r}
+dsn %>% filter(panel == "OverSamp") %>% {table(.$Chla_Cat, .$Depth_Cat, .$AG_ECO9_NM)}
+```
+
+
+
+
+

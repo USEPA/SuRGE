@@ -1,0 +1,147 @@
+---
+title: "SuRGE"
+author: "Survey of Reservoir Greenhouse gas Emissions <br> <br> <br> Dr. Jake Beaulieu"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+    fig_caption: yes
+    depth: 2
+    number_sections: true
+    code_folding: hide
+  editor_options: 
+  chunk_output_type: console
+---
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# load libraries
+library(sf) # spatial data
+library(tidyverse) # dplyr, ggplot
+library(leaflet)
+
+```
+
+
+
+# Background
+The USEPA Office of Air and Radiation has requested that methane (CH4) and carbon dioxide (CO2) emissions from reservoirs be included in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks*.  The Intergovernmental Panel on Climate Change (IPCC) has issued guidance for estimating these emissions, but the model used to derive the IPCC emission factors was trained with a global data set which included very few measurements from the US.  It is therefore uncertain how accurate the IPCC emission factors are for US reservoirs.  Methane emission rates vary by three orders of magnitude across US reservoirs and a small bias in IPCC emission factors could strongly bias the inventory estimate.
+To address this problem, the Office of Research and Development will execute a three-year survey of CH4 and CO2 emission rates from US reservoirs.  This will be a collaborative effort involving several ORD locations, EPA Regional Biologists, and other collaborators.
+
+
+# Survey Design
+
+The SuRGE project (Survey of Reservoir Greenhouse gas Emissions) is a statistical survey of CH4 and CO2 emission rates from 108 U.S. reservoirs.  The survey design includes stratification by ecoregion, depth, and chlorophyll, thereby ensuring large gradients in environmental drivers (i.e. depth, chla) to inform subsequent modeling efforts.  Each waterbody was previously sampled by the US EPA during the [2017 National Lakes Assessment](https://www.epa.gov/national-aquatic-resource-surveys).
+
+```{r message=FALSE, warning=FALSE}
+# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+
+ecoR <- st_read(dsn = "../../inputData/nla2012",
+                layer = "Aggr_Ecoregions9_2015",
+                quiet = TRUE)
+
+# "Temperate" is misspelled.
+ecoR <- ecoR %>% 
+  mutate(WSA9_NAME = as.character(WSA9_NAME), # conv to char
+         WSA9_NAME = ifelse(WSA9_NAME == "Temporate Plains",
+                            "Temperate Plains", # correct sp
+                            WSA9_NAME),
+         WSA9_NAME = as.factor(WSA9_NAME)) # back to factor
+
+# Check CRS
+#st_crs(ecoR) # no EPSG code
+ecoR <- st_transform(ecoR, 4326) # convert to CONUS Albers
+
+
+# READ EPA REGIONS SHAPEFILE
+epaR <- st_read(dsn = "../../inputData/epaRegions",
+                layer = "EPA_Regions",
+                quiet = TRUE)
+# Check CRS
+#st_crs(epaR) # no EPSG code
+epaR <- st_transform(epaR, 4326) # convert to CONUS Albers
+
+
+# READ SURVEY DESIGN FILE
+surge <- st_read(dsn = "../../../../../GIS/modifiedDesign",
+                 layer = "SuRGE_design_20191206",
+                 quiet = TRUE)
+
+# Check CRS
+#st_crs(surge) # no EPSG code
+surge <- st_transform(surge, 4326) # convert to CONUS Albers
+
+#  SET UP MAP
+# Call the color function (colorNumeric) to create a new palette function 
+factpal <- colorFactor(palette = c("red", "green", "blue"), domain = ecoR$WSA9_NAME) # ecoregions
+factpal.regions <- colorFactor(palette = c("red", "green", "blue"), domain = epaR$EPAREGION) # ecoregions
+
+
+
+map <- leaflet() %>%
+  addProviderTiles(providers$Esri.WorldTopoMap) %>%
+  setView(lng = -98.583, lat = 39.833, zoom = 4) %>%
+  addPolygons(data = ecoR, 
+              label = ~WSA9_NAME,
+              color = "black", weight = 1, fillOpacity = 0.5,
+              fillColor = ~factpal(WSA9_NAME),
+              group = "Ecoregions",
+              highlightOptions = highlightOptions(color = "white",
+                                                  weight = 5,
+                                                  bringToFront = TRUE)) %>%
+  addPolygons(data = epaR,
+              label = ~EPAREGION,
+              color = "black", weight = 1, fillOpacity = 0.5,
+              fillColor = ~factpal.regions(EPAREGION),
+              group = "Regions",
+               highlightOptions = highlightOptions(color = "white",
+                                                  weight = 5,
+                                                  bringToFront = TRUE)) %>%
+  addCircleMarkers(data = filter(surge, panel == "Base"),
+                   label = ~siteID,
+                   radius = 4, 
+                   color = "black", 
+                   fillOpacity = 1, 
+                   stroke = FALSE) %>%
+  #addLegend(pal = factpal, values = as.character(ecoR$WSA9_NAME), opacity = 0.5, title = "Ecoregion") %>%
+  addLayersControl(overlayGroups = c("Ecoregions", "Regions"),
+                   options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup("Ecoregions")
+
+map
+
+```
+
+
+
+```
+  
+
+
+# Measurement Details
+Each of the 108 waterbodies in the survey will be sampled one time during the three year program (2020 - 2022). All sampling will be conducted between June 1 and Sept. 15.  Each waterbody will contain 15 - 25 sites where ebullitive (i.e. bubbling) emission rates will be measured via overnight deployments of inverted funnels.  Diffusive emissions will be measured at the sites via ~3 minute floating chamber deployments.  Ancillary measurements include water chemistry, chlorophyll, and dissolved gas concentrations.  
+
+```{r, echo=FALSE, out.width="100%"}
+# This should be image of single waterbody survey design, floating chamber, and inverted funnel.
+knitr::include_graphics("../../scripts/surgeDsn/imagesForRmd/fieldMethods.PNG")
+```
+
+
+# Collaborators
+Dr. Jake Beaulieu (ORD/CEMM/WECD/WMB) is the project lead based out of Cincinnati.  Co-leads include Lil Herger (EPA Region 10 @ Seattle), John Walker (ORD/CEMM/AEMD @ Research Triangle Park, NC), Ken Forshay (ORD/CESER/CGRD @ Ada, OK), Jeff Hollister (ORD/CEMM/ACESD @ Narragansett, RI), and Bridget Deemer (USGS @ Flagstaff, AZ).  Field crews will be deployed from these six locations.  
+
+# Contact
+Jake Beaulieu  
+ORD/CEMM/WECD/WMB  
+513-569-7842  
+beaulieu.jake@epa.gov
+
+# Selected References
+
+DelSontro, T., Beaulieu, J. J., & Downing, J. A. (2018). Greenhouse gas emissions from lakes and impoundments: Upscaling in the face of global change. Limnology and Oceanography Letters, 3(3), 64-75. [doi:10.1002/lol2.10073](https://aslopubs.onlinelibrary.wiley.com/doi/pdf/10.1002/lol2.10073)  
+
+Prairie, Y. T., Alm, J., Beaulieu, J., Barros, N., Battin, T., Cole, J., . . . Vachon, D. (2017). Greenhouse Gas Emissions from Freshwater Reservoirs: What Does the Atmosphere See? Ecosystems. [doi:10.1007/s10021-017-0198-9](https://link.springer.com/content/pdf/10.1007%2Fs10021-017-0198-9.pdf)  
+
+Beaulieu, J. J., Smolenski, R. L., Nietch, C. T., Townsend-Small, A., & Elovitz, M. S. (2014). High Methane Emissions from a Midlatitude Reservoir Draining an Agricultural Watershed. Environmental Science & Technology, 48(19), 11100-11108. [doi:10.1021/es501871g](http://pubs.acs.org/doi/pdfplus/10.1021/es501871g)
