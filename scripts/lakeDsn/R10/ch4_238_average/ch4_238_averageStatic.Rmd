@@ -1,0 +1,42 @@
+---
+title: "Design files for ch4-238, Beulah reservoir, under 'average' water levels"
+author: "J. Beaulieu"
+date: "4/2/2020"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/238_averageMain.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/238_averageOver.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+# this is failing.  Can't figure out why ch4_238_averageSites
+# coords <- read.table(file = "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/ch4_238_averageSites.txt",
+#                       header = TRUE, sep = "\t")
+
+# Absolute path approach.  Need to fix
+coords <- read.table(file = "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/lakeDsn/R10/ch4_238 beulah/ch4_238_average/ch4_238_averageSites.txt",
+                     header = TRUE, sep = "\t")
+
+knitr::kable(coords, caption = "Site coordinates")
+```
