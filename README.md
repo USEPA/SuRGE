@@ -1,4 +1,4 @@
-# National Reservoir Survey (NRS)
+# Survey of Reservoir Greenhouse gas Emissions (SuRGE)
 
 Code to design and analyze a national-scale survey of methane emission rates from US reservoirs.
 
