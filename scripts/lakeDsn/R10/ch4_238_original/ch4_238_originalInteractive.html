@@ -13,7 +13,7 @@
 <meta name="author" content="J. Beaulieu" />
 
 
-<title>Design files for ch4-238, Beulah reservoir, under ‘average’ water levels</title>
+<title>Design files for ch4-238, Beulah reservoir, under ‘original’ water levels</title>
 
 <script>/*! jQuery v1.12.4 | (c) jQuery Foundation | jquery.org/license */
 !function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=a.document,e=c.slice,f=c.concat,g=c.push,h=c.indexOf,i={},j=i.toString,k=i.hasOwnProperty,l={},m="1.12.4",n=function(a,b){return new n.fn.init(a,b)},o=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,p=/^-ms-/,q=/-([\da-z])/gi,r=function(a,b){return b.toUpperCase()};n.fn=n.prototype={jquery:m,constructor:n,selector:"",length:0,toArray:function(){return e.call(this)},get:function(a){return null!=a?0>a?this[a+this.length]:this[a]:e.call(this)},pushStack:function(a){var b=n.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a){return n.each(this,a)},map:function(a){return this.pushStack(n.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(e.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0>a?b:0);return this.pushStack(c>=0&&b>c?[this[c]]:[])},end:function(){return this.prevObject||this.constructor()},push:g,sort:c.sort,splice:c.splice},n.extend=n.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||n.isFunction(g)||(g={}),h===i&&(g=this,h--);i>h;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&&(j&&c&&(n.isPlainObject(c)||(b=n.isArray(c)))?(b?(b=!1,f=a&&n.isArray(a)?a:[]):f=a&&n.isPlainObject(a)?a:{},g[d]=n.extend(j,f,c)):void 0!==c&&(g[d]=c));return g},n.extend({expando:"jQuery"+(m+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===n.type(a)},isArray:Array.isArray||function(a){return"array"===n.type(a)},isWindow:function(a){return null!=a&&a==a.window},isNumeric:function(a){var b=a&&a.toString();return!n.isArray(a)&&b-parseFloat(b)+1>=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||"object"!==n.type(a)||a.nodeType||n.isWindow(a))return!1;try{if(a.constructor&&!k.call(a,"constructor")&&!k.call(a.constructor.prototype,"isPrototypeOf"))return!1}catch(c){return!1}if(!l.ownFirst)for(b in a)return k.call(a,b);for(b in a);return void 0===b||k.call(a,b)},type:function(a){return null==a?a+"":"object"==typeof a||"function"==typeof a?i[j.call(a)]||"object":typeof a},globalEval:function(b){b&&n.trim(b)&&(a.execScript||function(b){a.eval.call(a,b)})(b)},camelCase:function(a){return a.replace(p,"ms-").replace(q,r)},nodeName:function(a,b){return a.nodeName&&a.nodeName.toLowerCase()===b.toLowerCase()},each:function(a,b){var c,d=0;if(s(a)){for(c=a.length;c>d;d++)if(b.call(a[d],d,a[d])===!1)break}else for(d in a)if(b.call(a[d],d,a[d])===!1)break;return a},trim:function(a){return null==a?"":(a+"").replace(o,"")},makeArray:function(a,b){var c=b||[];return null!=a&&(s(Object(a))?n.merge(c,"string"==typeof a?[a]:a):g.call(c,a)),c},inArray:function(a,b,c){var d;if(b){if(h)return h.call(b,a,c);for(d=b.length,c=c?0>c?Math.max(0,d+c):c:0;d>c;c++)if(c in b&&b[c]===a)return c}return-1},merge:function(a,b){var c=+b.length,d=0,e=a.length;while(c>d)a[e++]=b[d++];if(c!==c)while(void 0!==b[d])a[e++]=b[d++];return a.length=e,a},grep:function(a,b,c){for(var d,e=[],f=0,g=a.length,h=!c;g>f;f++)d=!b(a[f],f),d!==h&&e.push(a[f]);return e},map:function(a,b,c){var d,e,g=0,h=[];if(s(a))for(d=a.length;d>g;g++)e=b(a[g],g,c),null!=e&&h.push(e);else for(g in a)e=b(a[g],g,c),null!=e&&h.push(e);return f.apply([],h)},guid:1,proxy:function(a,b){var c,d,f;return"string"==typeof b&&(f=a[b],b=a,a=f),n.isFunction(a)?(c=e.call(arguments,2),d=function(){return a.apply(b||this,c.concat(e.call(arguments)))},d.guid=a.guid=a.guid||n.guid++,d):void 0},now:function(){return+new Date},support:l}),"function"==typeof Symbol&&(n.fn[Symbol.iterator]=c[Symbol.iterator]),n.each("Boolean Number String Function Array Date RegExp Object Error Symbol".split(" "),function(a,b){i["[object "+b+"]"]=b.toLowerCase()});function s(a){var b=!!a&&"length"in a&&a.length,c=n.type(a);return"function"===c||n.isWindow(a)?!1:"array"===c||0===b||"number"==typeof b&&b>0&&b-1 in a}var t=function(a){var b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u="sizzle"+1*new Date,v=a.document,w=0,x=0,y=ga(),z=ga(),A=ga(),B=function(a,b){return a===b&&(l=!0),0},C=1<<31,D={}.hasOwnProperty,E=[],F=E.pop,G=E.push,H=E.push,I=E.slice,J=function(a,b){for(var c=0,d=a.length;d>c;c++)if(a[c]===b)return c;return-1},K="checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",L="[\\x20\\t\\r\\n\\f]",M="(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",N="\\["+L+"*("+M+")(?:"+L+"*([*^$|!~]?=)"+L+"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|("+M+"))|)"+L+"*\\]",O=":("+M+")(?:\\((('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|((?:\\\\.|[^\\\\()[\\]]|"+N+")*)|.*)\\)|)",P=new RegExp(L+"+","g"),Q=new RegExp("^"+L+"+|((?:^|[^\\\\])(?:\\\\.)*)"+L+"+$","g"),R=new RegExp("^"+L+"*,"+L+"*"),S=new RegExp("^"+L+"*([>+~]|"+L+")"+L+"*"),T=new RegExp("="+L+"*([^\\]'\"]*?)"+L+"*\\]","g"),U=new RegExp(O),V=new RegExp("^"+M+"$"),W={ID:new RegExp("^#("+M+")"),CLASS:new RegExp("^\\.("+M+")"),TAG:new RegExp("^("+M+"|[*])"),ATTR:new RegExp("^"+N),PSEUDO:new RegExp("^"+O),CHILD:new RegExp("^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\("+L+"*(even|odd|(([+-]|)(\\d*)n|)"+L+"*(?:([+-]|)"+L+"*(\\d+)|))"+L+"*\\)|)","i"),bool:new RegExp("^(?:"+K+")$","i"),needsContext:new RegExp("^"+L+"*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\("+L+"*((?:-\\d)?\\d*)"+L+"*\\)|)(?=[^-]|$)","i")},X=/^(?:input|select|textarea|button)$/i,Y=/^h\d$/i,Z=/^[^{]+\{\s*\[native \w/,$=/^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,_=/[+~]/,aa=/'|\\/g,ba=new RegExp("\\\\([\\da-f]{1,6}"+L+"?|("+L+")|.)","ig"),ca=function(a,b,c){var d="0x"+b-65536;return d!==d||c?b:0>d?String.fromCharCode(d+65536):String.fromCharCode(d>>10|55296,1023&d|56320)},da=function(){m()};try{H.apply(E=I.call(v.childNodes),v.childNodes),E[v.childNodes.length].nodeType}catch(ea){H={apply:E.length?function(a,b){G.apply(a,I.call(b))}:function(a,b){var c=a.length,d=0;while(a[c++]=b[d++]);a.length=c-1}}}function fa(a,b,d,e){var f,h,j,k,l,o,r,s,w=b&&b.ownerDocument,x=b?b.nodeType:9;if(d=d||[],"string"!=typeof a||!a||1!==x&&9!==x&&11!==x)return d;if(!e&&((b?b.ownerDocument||b:v)!==n&&m(b),b=b||n,p)){if(11!==x&&(o=$.exec(a)))if(f=o[1]){if(9===x){if(!(j=b.getElementById(f)))return d;if(j.id===f)return d.push(j),d}else if(w&&(j=w.getElementById(f))&&t(b,j)&&j.id===f)return d.push(j),d}else{if(o[2])return H.apply(d,b.getElementsByTagName(a)),d;if((f=o[3])&&c.getElementsByClassName&&b.getElementsByClassName)return H.apply(d,b.getElementsByClassName(f)),d}if(c.qsa&&!A[a+" "]&&(!q||!q.test(a))){if(1!==x)w=b,s=a;else if("object"!==b.nodeName.toLowerCase()){(k=b.getAttribute("id"))?k=k.replace(aa,"\\$&"):b.setAttribute("id",k=u),r=g(a),h=r.length,l=V.test(k)?"#"+k:"[id='"+k+"']";while(h--)r[h]=l+" "+qa(r[h]);s=r.join(","),w=_.test(a)&&oa(b.parentNode)||b}if(s)try{return H.apply(d,w.querySelectorAll(s)),d}catch(y){}finally{k===u&&b.removeAttribute("id")}}}return i(a.replace(Q,"$1"),b,d,e)}function ga(){var a=[];function b(c,e){return a.push(c+" ")>d.cacheLength&&delete b[a.shift()],b[c+" "]=e}return b}function ha(a){return a[u]=!0,a}function ia(a){var b=n.createElement("div");try{return!!a(b)}catch(c){return!1}finally{b.parentNode&&b.parentNode.removeChild(b),b=null}}function ja(a,b){var c=a.split("|"),e=c.length;while(e--)d.attrHandle[c[e]]=b}function ka(a,b){var c=b&&a,d=c&&1===a.nodeType&&1===b.nodeType&&(~b.sourceIndex||C)-(~a.sourceIndex||C);if(d)return d;if(c)while(c=c.nextSibling)if(c===b)return-1;return a?1:-1}function la(a){return function(b){var c=b.nodeName.toLowerCase();return"input"===c&&b.type===a}}function ma(a){return function(b){var c=b.nodeName.toLowerCase();return("input"===c||"button"===c)&&b.type===a}}function na(a){return ha(function(b){return b=+b,ha(function(c,d){var e,f=a([],c.length,b),g=f.length;while(g--)c[e=f[g]]&&(c[e]=!(d[e]=c[e]))})})}function oa(a){return a&&"undefined"!=typeof a.getElementsByTagName&&a}c=fa.support={},f=fa.isXML=function(a){var b=a&&(a.ownerDocument||a).documentElement;return b?"HTML"!==b.nodeName:!1},m=fa.setDocument=function(a){var b,e,g=a?a.ownerDocument||a:v;return g!==n&&9===g.nodeType&&g.documentElement?(n=g,o=n.documentElement,p=!f(n),(e=n.defaultView)&&e.top!==e&&(e.addEventListener?e.addEventListener("unload",da,!1):e.attachEvent&&e.attachEvent("onunload",da)),c.attributes=ia(function(a){return a.className="i",!a.getAttribute("className")}),c.getElementsByTagName=ia(function(a){return a.appendChild(n.createComment("")),!a.getElementsByTagName("*").length}),c.getElementsByClassName=Z.test(n.getElementsByClassName),c.getById=ia(function(a){return o.appendChild(a).id=u,!n.getElementsByName||!n.getElementsByName(u).length}),c.getById?(d.find.ID=function(a,b){if("undefined"!=typeof b.getElementById&&p){var c=b.getElementById(a);return c?[c]:[]}},d.filter.ID=function(a){var b=a.replace(ba,ca);return function(a){return a.getAttribute("id")===b}}):(delete d.find.ID,d.filter.ID=function(a){var b=a.replace(ba,ca);return function(a){var c="undefined"!=typeof a.getAttributeNode&&a.getAttributeNode("id");return c&&c.value===b}}),d.find.TAG=c.getElementsByTagName?function(a,b){return"undefined"!=typeof b.getElementsByTagName?b.getElementsByTagName(a):c.qsa?b.querySelectorAll(a):void 0}:function(a,b){var c,d=[],e=0,f=b.getElementsByTagName(a);if("*"===a){while(c=f[e++])1===c.nodeType&&d.push(c);return d}return f},d.find.CLASS=c.getElementsByClassName&&function(a,b){return"undefined"!=typeof b.getElementsByClassName&&p?b.getElementsByClassName(a):void 0},r=[],q=[],(c.qsa=Z.test(n.querySelectorAll))&&(ia(function(a){o.appendChild(a).innerHTML="<a id='"+u+"'></a><select id='"+u+"-\r\\' msallowcapture=''><option selected=''></option></select>",a.querySelectorAll("[msallowcapture^='']").length&&q.push("[*^$]="+L+"*(?:''|\"\")"),a.querySelectorAll("[selected]").length||q.push("\\["+L+"*(?:value|"+K+")"),a.querySelectorAll("[id~="+u+"-]").length||q.push("~="),a.querySelectorAll(":checked").length||q.push(":checked"),a.querySelectorAll("a#"+u+"+*").length||q.push(".#.+[+~]")}),ia(function(a){var b=n.createElement("input");b.setAttribute("type","hidden"),a.appendChild(b).setAttribute("name","D"),a.querySelectorAll("[name=d]").length&&q.push("name"+L+"*[*^$|!~]?="),a.querySelectorAll(":enabled").length||q.push(":enabled",":disabled"),a.querySelectorAll("*,:x"),q.push(",.*:")})),(c.matchesSelector=Z.test(s=o.matches||o.webkitMatchesSelector||o.mozMatchesSelector||o.oMatchesSelector||o.msMatchesSelector))&&ia(function(a){c.disconnectedMatch=s.call(a,"div"),s.call(a,"[s!='']:x"),r.push("!=",O)}),q=q.length&&new RegExp(q.join("|")),r=r.length&&new RegExp(r.join("|")),b=Z.test(o.compareDocumentPosition),t=b||Z.test(o.contains)?function(a,b){var c=9===a.nodeType?a.documentElement:a,d=b&&b.parentNode;return a===d||!(!d||1!==d.nodeType||!(c.contains?c.contains(d):a.compareDocumentPosition&&16&a.compareDocumentPosition(d)))}:function(a,b){if(b)while(b=b.parentNode)if(b===a)return!0;return!1},B=b?function(a,b){if(a===b)return l=!0,0;var d=!a.compareDocumentPosition-!b.compareDocumentPosition;return d?d:(d=(a.ownerDocument||a)===(b.ownerDocument||b)?a.compareDocumentPosition(b):1,1&d||!c.sortDetached&&b.compareDocumentPosition(a)===d?a===n||a.ownerDocument===v&&t(v,a)?-1:b===n||b.ownerDocument===v&&t(v,b)?1:k?J(k,a)-J(k,b):0:4&d?-1:1)}:function(a,b){if(a===b)return l=!0,0;var c,d=0,e=a.parentNode,f=b.parentNode,g=[a],h=[b];if(!e||!f)return a===n?-1:b===n?1:e?-1:f?1:k?J(k,a)-J(k,b):0;if(e===f)return ka(a,b);c=a;while(c=c.parentNode)g.unshift(c);c=b;while(c=c.parentNode)h.unshift(c);while(g[d]===h[d])d++;return d?ka(g[d],h[d]):g[d]===v?-1:h[d]===v?1:0},n):n},fa.matches=function(a,b){return fa(a,null,null,b)},fa.matchesSelector=function(a,b){if((a.ownerDocument||a)!==n&&m(a),b=b.replace(T,"='$1']"),c.matchesSelector&&p&&!A[b+" "]&&(!r||!r.test(b))&&(!q||!q.test(b)))try{var d=s.call(a,b);if(d||c.disconnectedMatch||a.document&&11!==a.document.nodeType)return d}catch(e){}return fa(b,n,null,[a]).length>0},fa.contains=function(a,b){return(a.ownerDocument||a)!==n&&m(a),t(a,b)},fa.attr=function(a,b){(a.ownerDocument||a)!==n&&m(a);var e=d.attrHandle[b.toLowerCase()],f=e&&D.call(d.attrHandle,b.toLowerCase())?e(a,b,!p):void 0;return void 0!==f?f:c.attributes||!p?a.getAttribute(b):(f=a.getAttributeNode(b))&&f.specified?f.value:null},fa.error=function(a){throw new Error("Syntax error, unrecognized expression: "+a)},fa.uniqueSort=function(a){var b,d=[],e=0,f=0;if(l=!c.detectDuplicates,k=!c.sortStable&&a.slice(0),a.sort(B),l){while(b=a[f++])b===a[f]&&(e=d.push(f));while(e--)a.splice(d[e],1)}return k=null,a},e=fa.getText=function(a){var b,c="",d=0,f=a.nodeType;if(f){if(1===f||9===f||11===f){if("string"==typeof a.textContent)return a.textContent;for(a=a.firstChild;a;a=a.nextSibling)c+=e(a)}else if(3===f||4===f)return a.nodeValue}else while(b=a[d++])c+=e(b);return c},d=fa.selectors={cacheLength:50,createPseudo:ha,match:W,attrHandle:{},find:{},relative:{">":{dir:"parentNode",first:!0}," ":{dir:"parentNode"},"+":{dir:"previousSibling",first:!0},"~":{dir:"previousSibling"}},preFilter:{ATTR:function(a){return a[1]=a[1].replace(ba,ca),a[3]=(a[3]||a[4]||a[5]||"").replace(ba,ca),"~="===a[2]&&(a[3]=" "+a[3]+" "),a.slice(0,4)},CHILD:function(a){return a[1]=a[1].toLowerCase(),"nth"===a[1].slice(0,3)?(a[3]||fa.error(a[0]),a[4]=+(a[4]?a[5]+(a[6]||1):2*("even"===a[3]||"odd"===a[3])),a[5]=+(a[7]+a[8]||"odd"===a[3])):a[3]&&fa.error(a[0]),a},PSEUDO:function(a){var b,c=!a[6]&&a[2];return W.CHILD.test(a[0])?null:(a[3]?a[2]=a[4]||a[5]||"":c&&U.test(c)&&(b=g(c,!0))&&(b=c.indexOf(")",c.length-b)-c.length)&&(a[0]=a[0].slice(0,b),a[2]=c.slice(0,b)),a.slice(0,3))}},filter:{TAG:function(a){var b=a.replace(ba,ca).toLowerCase();return"*"===a?function(){return!0}:function(a){return a.nodeName&&a.nodeName.toLowerCase()===b}},CLASS:function(a){var b=y[a+" "];return b||(b=new RegExp("(^|"+L+")"+a+"("+L+"|$)"))&&y(a,function(a){return b.test("string"==typeof a.className&&a.className||"undefined"!=typeof a.getAttribute&&a.getAttribute("class")||"")})},ATTR:function(a,b,c){return function(d){var e=fa.attr(d,a);return null==e?"!="===b:b?(e+="","="===b?e===c:"!="===b?e!==c:"^="===b?c&&0===e.indexOf(c):"*="===b?c&&e.indexOf(c)>-1:"$="===b?c&&e.slice(-c.length)===c:"~="===b?(" "+e.replace(P," ")+" ").indexOf(c)>-1:"|="===b?e===c||e.slice(0,c.length+1)===c+"-":!1):!0}},CHILD:function(a,b,c,d,e){var f="nth"!==a.slice(0,3),g="last"!==a.slice(-4),h="of-type"===b;return 1===d&&0===e?function(a){return!!a.parentNode}:function(b,c,i){var j,k,l,m,n,o,p=f!==g?"nextSibling":"previousSibling",q=b.parentNode,r=h&&b.nodeName.toLowerCase(),s=!i&&!h,t=!1;if(q){if(f){while(p){m=b;while(m=m[p])if(h?m.nodeName.toLowerCase()===r:1===m.nodeType)return!1;o=p="only"===a&&!o&&"nextSibling"}return!0}if(o=[g?q.firstChild:q.lastChild],g&&s){m=q,l=m[u]||(m[u]={}),k=l[m.uniqueID]||(l[m.uniqueID]={}),j=k[a]||[],n=j[0]===w&&j[1],t=n&&j[2],m=n&&q.childNodes[n];while(m=++n&&m&&m[p]||(t=n=0)||o.pop())if(1===m.nodeType&&++t&&m===b){k[a]=[w,n,t];break}}else if(s&&(m=b,l=m[u]||(m[u]={}),k=l[m.uniqueID]||(l[m.uniqueID]={}),j=k[a]||[],n=j[0]===w&&j[1],t=n),t===!1)while(m=++n&&m&&m[p]||(t=n=0)||o.pop())if((h?m.nodeName.toLowerCase()===r:1===m.nodeType)&&++t&&(s&&(l=m[u]||(m[u]={}),k=l[m.uniqueID]||(l[m.uniqueID]={}),k[a]=[w,t]),m===b))break;return t-=e,t===d||t%d===0&&t/d>=0}}},PSEUDO:function(a,b){var c,e=d.pseudos[a]||d.setFilters[a.toLowerCase()]||fa.error("unsupported pseudo: "+a);return e[u]?e(b):e.length>1?(c=[a,a,"",b],d.setFilters.hasOwnProperty(a.toLowerCase())?ha(function(a,c){var d,f=e(a,b),g=f.length;while(g--)d=J(a,f[g]),a[d]=!(c[d]=f[g])}):function(a){return e(a,0,c)}):e}},pseudos:{not:ha(function(a){var b=[],c=[],d=h(a.replace(Q,"$1"));return d[u]?ha(function(a,b,c,e){var f,g=d(a,null,e,[]),h=a.length;while(h--)(f=g[h])&&(a[h]=!(b[h]=f))}):function(a,e,f){return b[0]=a,d(b,null,f,c),b[0]=null,!c.pop()}}),has:ha(function(a){return function(b){return fa(a,b).length>0}}),contains:ha(function(a){return a=a.replace(ba,ca),function(b){return(b.textContent||b.innerText||e(b)).indexOf(a)>-1}}),lang:ha(function(a){return V.test(a||"")||fa.error("unsupported lang: "+a),a=a.replace(ba,ca).toLowerCase(),function(b){var c;do if(c=p?b.lang:b.getAttribute("xml:lang")||b.getAttribute("lang"))return c=c.toLowerCase(),c===a||0===c.indexOf(a+"-");while((b=b.parentNode)&&1===b.nodeType);return!1}}),target:function(b){var c=a.location&&a.location.hash;return c&&c.slice(1)===b.id},root:function(a){return a===o},focus:function(a){return a===n.activeElement&&(!n.hasFocus||n.hasFocus())&&!!(a.type||a.href||~a.tabIndex)},enabled:function(a){return a.disabled===!1},disabled:function(a){return a.disabled===!0},checked:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&!!a.checked||"option"===b&&!!a.selected},selected:function(a){return a.parentNode&&a.parentNode.selectedIndex,a.selected===!0},empty:function(a){for(a=a.firstChild;a;a=a.nextSibling)if(a.nodeType<6)return!1;return!0},parent:function(a){return!d.pseudos.empty(a)},header:function(a){return Y.test(a.nodeName)},input:function(a){return X.test(a.nodeName)},button:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&"button"===a.type||"button"===b},text:function(a){var b;return"input"===a.nodeName.toLowerCase()&&"text"===a.type&&(null==(b=a.getAttribute("type"))||"text"===b.toLowerCase())},first:na(function(){return[0]}),last:na(function(a,b){return[b-1]}),eq:na(function(a,b,c){return[0>c?c+b:c]}),even:na(function(a,b){for(var c=0;b>c;c+=2)a.push(c);return a}),odd:na(function(a,b){for(var c=1;b>c;c+=2)a.push(c);return a}),lt:na(function(a,b,c){for(var d=0>c?c+b:c;--d>=0;)a.push(d);return a}),gt:na(function(a,b,c){for(var d=0>c?c+b:c;++d<b;)a.push(d);return a})}},d.pseudos.nth=d.pseudos.eq;for(b in{radio:!0,checkbox:!0,file:!0,password:!0,image:!0})d.pseudos[b]=la(b);for(b in{submit:!0,reset:!0})d.pseudos[b]=ma(b);function pa(){}pa.prototype=d.filters=d.pseudos,d.setFilters=new pa,g=fa.tokenize=function(a,b){var c,e,f,g,h,i,j,k=z[a+" "];if(k)return b?0:k.slice(0);h=a,i=[],j=d.preFilter;while(h){c&&!(e=R.exec(h))||(e&&(h=h.slice(e[0].length)||h),i.push(f=[])),c=!1,(e=S.exec(h))&&(c=e.shift(),f.push({value:c,type:e[0].replace(Q," ")}),h=h.slice(c.length));for(g in d.filter)!(e=W[g].exec(h))||j[g]&&!(e=j[g](e))||(c=e.shift(),f.push({value:c,type:g,matches:e}),h=h.slice(c.length));if(!c)break}return b?h.length:h?fa.error(a):z(a,i).slice(0)};function qa(a){for(var b=0,c=a.length,d="";c>b;b++)d+=a[b].value;return d}function ra(a,b,c){var d=b.dir,e=c&&"parentNode"===d,f=x++;return b.first?function(b,c,f){while(b=b[d])if(1===b.nodeType||e)return a(b,c,f)}:function(b,c,g){var h,i,j,k=[w,f];if(g){while(b=b[d])if((1===b.nodeType||e)&&a(b,c,g))return!0}else while(b=b[d])if(1===b.nodeType||e){if(j=b[u]||(b[u]={}),i=j[b.uniqueID]||(j[b.uniqueID]={}),(h=i[d])&&h[0]===w&&h[1]===f)return k[2]=h[2];if(i[d]=k,k[2]=a(b,c,g))return!0}}}function sa(a){return a.length>1?function(b,c,d){var e=a.length;while(e--)if(!a[e](b,c,d))return!1;return!0}:a[0]}function ta(a,b,c){for(var d=0,e=b.length;e>d;d++)fa(a,b[d],c);return c}function ua(a,b,c,d,e){for(var f,g=[],h=0,i=a.length,j=null!=b;i>h;h++)(f=a[h])&&(c&&!c(f,d,e)||(g.push(f),j&&b.push(h)));return g}function va(a,b,c,d,e,f){return d&&!d[u]&&(d=va(d)),e&&!e[u]&&(e=va(e,f)),ha(function(f,g,h,i){var j,k,l,m=[],n=[],o=g.length,p=f||ta(b||"*",h.nodeType?[h]:h,[]),q=!a||!f&&b?p:ua(p,m,a,h,i),r=c?e||(f?a:o||d)?[]:g:q;if(c&&c(q,r,h,i),d){j=ua(r,n),d(j,[],h,i),k=j.length;while(k--)(l=j[k])&&(r[n[k]]=!(q[n[k]]=l))}if(f){if(e||a){if(e){j=[],k=r.length;while(k--)(l=r[k])&&j.push(q[k]=l);e(null,r=[],j,i)}k=r.length;while(k--)(l=r[k])&&(j=e?J(f,l):m[k])>-1&&(f[j]=!(g[j]=l))}}else r=ua(r===g?r.splice(o,r.length):r),e?e(null,g,r,i):H.apply(g,r)})}function wa(a){for(var b,c,e,f=a.length,g=d.relative[a[0].type],h=g||d.relative[" "],i=g?1:0,k=ra(function(a){return a===b},h,!0),l=ra(function(a){return J(b,a)>-1},h,!0),m=[function(a,c,d){var e=!g&&(d||c!==j)||((b=c).nodeType?k(a,c,d):l(a,c,d));return b=null,e}];f>i;i++)if(c=d.relative[a[i].type])m=[ra(sa(m),c)];else{if(c=d.filter[a[i].type].apply(null,a[i].matches),c[u]){for(e=++i;f>e;e++)if(d.relative[a[e].type])break;return va(i>1&&sa(m),i>1&&qa(a.slice(0,i-1).concat({value:" "===a[i-2].type?"*":""})).replace(Q,"$1"),c,e>i&&wa(a.slice(i,e)),f>e&&wa(a=a.slice(e)),f>e&&qa(a))}m.push(c)}return sa(m)}function xa(a,b){var c=b.length>0,e=a.length>0,f=function(f,g,h,i,k){var l,o,q,r=0,s="0",t=f&&[],u=[],v=j,x=f||e&&d.find.TAG("*",k),y=w+=null==v?1:Math.random()||.1,z=x.length;for(k&&(j=g===n||g||k);s!==z&&null!=(l=x[s]);s++){if(e&&l){o=0,g||l.ownerDocument===n||(m(l),h=!p);while(q=a[o++])if(q(l,g||n,h)){i.push(l);break}k&&(w=y)}c&&((l=!q&&l)&&r--,f&&t.push(l))}if(r+=s,c&&s!==r){o=0;while(q=b[o++])q(t,u,g,h);if(f){if(r>0)while(s--)t[s]||u[s]||(u[s]=F.call(i));u=ua(u)}H.apply(i,u),k&&!f&&u.length>0&&r+b.length>1&&fa.uniqueSort(i)}return k&&(w=y,j=v),t};return c?ha(f):f}return h=fa.compile=function(a,b){var c,d=[],e=[],f=A[a+" "];if(!f){b||(b=g(a)),c=b.length;while(c--)f=wa(b[c]),f[u]?d.push(f):e.push(f);f=A(a,xa(e,d)),f.selector=a}return f},i=fa.select=function(a,b,e,f){var i,j,k,l,m,n="function"==typeof a&&a,o=!f&&g(a=n.selector||a);if(e=e||[],1===o.length){if(j=o[0]=o[0].slice(0),j.length>2&&"ID"===(k=j[0]).type&&c.getById&&9===b.nodeType&&p&&d.relative[j[1].type]){if(b=(d.find.ID(k.matches[0].replace(ba,ca),b)||[])[0],!b)return e;n&&(b=b.parentNode),a=a.slice(j.shift().value.length)}i=W.needsContext.test(a)?0:j.length;while(i--){if(k=j[i],d.relative[l=k.type])break;if((m=d.find[l])&&(f=m(k.matches[0].replace(ba,ca),_.test(j[0].type)&&oa(b.parentNode)||b))){if(j.splice(i,1),a=f.length&&qa(j),!a)return H.apply(e,f),e;break}}}return(n||h(a,o))(f,b,!p,e,!b||_.test(a)&&oa(b.parentNode)||b),e},c.sortStable=u.split("").sort(B).join("")===u,c.detectDuplicates=!!l,m(),c.sortDetached=ia(function(a){return 1&a.compareDocumentPosition(n.createElement("div"))}),ia(function(a){return a.innerHTML="<a href='#'></a>","#"===a.firstChild.getAttribute("href")})||ja("type|href|height|width",function(a,b,c){return c?void 0:a.getAttribute(b,"type"===b.toLowerCase()?1:2)}),c.attributes&&ia(function(a){return a.innerHTML="<input/>",a.firstChild.setAttribute("value",""),""===a.firstChild.getAttribute("value")})||ja("value",function(a,b,c){return c||"input"!==a.nodeName.toLowerCase()?void 0:a.defaultValue}),ia(function(a){return null==a.getAttribute("disabled")})||ja(K,function(a,b,c){var d;return c?void 0:a[b]===!0?b.toLowerCase():(d=a.getAttributeNode(b))&&d.specified?d.value:null}),fa}(a);n.find=t,n.expr=t.selectors,n.expr[":"]=n.expr.pseudos,n.uniqueSort=n.unique=t.uniqueSort,n.text=t.getText,n.isXMLDoc=t.isXML,n.contains=t.contains;var u=function(a,b,c){var d=[],e=void 0!==c;while((a=a[b])&&9!==a.nodeType)if(1===a.nodeType){if(e&&n(a).is(c))break;d.push(a)}return d},v=function(a,b){for(var c=[];a;a=a.nextSibling)1===a.nodeType&&a!==b&&c.push(a);return c},w=n.expr.match.needsContext,x=/^<([\w-]+)\s*\/?>(?:<\/\1>|)$/,y=/^.[^:#\[\.,]*$/;function z(a,b,c){if(n.isFunction(b))return n.grep(a,function(a,d){return!!b.call(a,d,a)!==c});if(b.nodeType)return n.grep(a,function(a){return a===b!==c});if("string"==typeof b){if(y.test(b))return n.filter(b,a,c);b=n.filter(b,a)}return n.grep(a,function(a){return n.inArray(a,b)>-1!==c})}n.filter=function(a,b,c){var d=b[0];return c&&(a=":not("+a+")"),1===b.length&&1===d.nodeType?n.find.matchesSelector(d,a)?[d]:[]:n.find.matches(a,n.grep(b,function(a){return 1===a.nodeType}))},n.fn.extend({find:function(a){var b,c=[],d=this,e=d.length;if("string"!=typeof a)return this.pushStack(n(a).filter(function(){for(b=0;e>b;b++)if(n.contains(d[b],this))return!0}));for(b=0;e>b;b++)n.find(a,d[b],c);return c=this.pushStack(e>1?n.unique(c):c),c.selector=this.selector?this.selector+" "+a:a,c},filter:function(a){return this.pushStack(z(this,a||[],!1))},not:function(a){return this.pushStack(z(this,a||[],!0))},is:function(a){return!!z(this,"string"==typeof a&&w.test(a)?n(a):a||[],!1).length}});var A,B=/^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,C=n.fn.init=function(a,b,c){var e,f;if(!a)return this;if(c=c||A,"string"==typeof a){if(e="<"===a.charAt(0)&&">"===a.charAt(a.length-1)&&a.length>=3?[null,a,null]:B.exec(a),!e||!e[1]&&b)return!b||b.jquery?(b||c).find(a):this.constructor(b).find(a);if(e[1]){if(b=b instanceof n?b[0]:b,n.merge(this,n.parseHTML(e[1],b&&b.nodeType?b.ownerDocument||b:d,!0)),x.test(e[1])&&n.isPlainObject(b))for(e in b)n.isFunction(this[e])?this[e](b[e]):this.attr(e,b[e]);return this}if(f=d.getElementById(e[2]),f&&f.parentNode){if(f.id!==e[2])return A.find(a);this.length=1,this[0]=f}return this.context=d,this.selector=a,this}return a.nodeType?(this.context=this[0]=a,this.length=1,this):n.isFunction(a)?"undefined"!=typeof c.ready?c.ready(a):a(n):(void 0!==a.selector&&(this.selector=a.selector,this.context=a.context),n.makeArray(a,this))};C.prototype=n.fn,A=n(d);var D=/^(?:parents|prev(?:Until|All))/,E={children:!0,contents:!0,next:!0,prev:!0};n.fn.extend({has:function(a){var b,c=n(a,this),d=c.length;return this.filter(function(){for(b=0;d>b;b++)if(n.contains(this,c[b]))return!0})},closest:function(a,b){for(var c,d=0,e=this.length,f=[],g=w.test(a)||"string"!=typeof a?n(a,b||this.context):0;e>d;d++)for(c=this[d];c&&c!==b;c=c.parentNode)if(c.nodeType<11&&(g?g.index(c)>-1:1===c.nodeType&&n.find.matchesSelector(c,a))){f.push(c);break}return this.pushStack(f.length>1?n.uniqueSort(f):f)},index:function(a){return a?"string"==typeof a?n.inArray(this[0],n(a)):n.inArray(a.jquery?a[0]:a,this):this[0]&&this[0].parentNode?this.first().prevAll().length:-1},add:function(a,b){return this.pushStack(n.uniqueSort(n.merge(this.get(),n(a,b))))},addBack:function(a){return this.add(null==a?this.prevObject:this.prevObject.filter(a))}});function F(a,b){do a=a[b];while(a&&1!==a.nodeType);return a}n.each({parent:function(a){var b=a.parentNode;return b&&11!==b.nodeType?b:null},parents:function(a){return u(a,"parentNode")},parentsUntil:function(a,b,c){return u(a,"parentNode",c)},next:function(a){return F(a,"nextSibling")},prev:function(a){return F(a,"previousSibling")},nextAll:function(a){return u(a,"nextSibling")},prevAll:function(a){return u(a,"previousSibling")},nextUntil:function(a,b,c){return u(a,"nextSibling",c)},prevUntil:function(a,b,c){return u(a,"previousSibling",c)},siblings:function(a){return v((a.parentNode||{}).firstChild,a)},children:function(a){return v(a.firstChild)},contents:function(a){return n.nodeName(a,"iframe")?a.contentDocument||a.contentWindow.document:n.merge([],a.childNodes)}},function(a,b){n.fn[a]=function(c,d){var e=n.map(this,b,c);return"Until"!==a.slice(-5)&&(d=c),d&&"string"==typeof d&&(e=n.filter(d,e)),this.length>1&&(E[a]||(e=n.uniqueSort(e)),D.test(a)&&(e=e.reverse())),this.pushStack(e)}});var G=/\S+/g;function H(a){var b={};return n.each(a.match(G)||[],function(a,c){b[c]=!0}),b}n.Callbacks=function(a){a="string"==typeof a?H(a):n.extend({},a);var b,c,d,e,f=[],g=[],h=-1,i=function(){for(e=a.once,d=b=!0;g.length;h=-1){c=g.shift();while(++h<f.length)f[h].apply(c[0],c[1])===!1&&a.stopOnFalse&&(h=f.length,c=!1)}a.memory||(c=!1),b=!1,e&&(f=c?[]:"")},j={add:function(){return f&&(c&&!b&&(h=f.length-1,g.push(c)),function d(b){n.each(b,function(b,c){n.isFunction(c)?a.unique&&j.has(c)||f.push(c):c&&c.length&&"string"!==n.type(c)&&d(c)})}(arguments),c&&!b&&i()),this},remove:function(){return n.each(arguments,function(a,b){var c;while((c=n.inArray(b,f,c))>-1)f.splice(c,1),h>=c&&h--}),this},has:function(a){return a?n.inArray(a,f)>-1:f.length>0},empty:function(){return f&&(f=[]),this},disable:function(){return e=g=[],f=c="",this},disabled:function(){return!f},lock:function(){return e=!0,c||j.disable(),this},locked:function(){return!!e},fireWith:function(a,c){return e||(c=c||[],c=[a,c.slice?c.slice():c],g.push(c),b||i()),this},fire:function(){return j.fireWith(this,arguments),this},fired:function(){return!!d}};return j},n.extend({Deferred:function(a){var b=[["resolve","done",n.Callbacks("once memory"),"resolved"],["reject","fail",n.Callbacks("once memory"),"rejected"],["notify","progress",n.Callbacks("memory")]],c="pending",d={state:function(){return c},always:function(){return e.done(arguments).fail(arguments),this},then:function(){var a=arguments;return n.Deferred(function(c){n.each(b,function(b,f){var g=n.isFunction(a[b])&&a[b];e[f[1]](function(){var a=g&&g.apply(this,arguments);a&&n.isFunction(a.promise)?a.promise().progress(c.notify).done(c.resolve).fail(c.reject):c[f[0]+"With"](this===d?c.promise():this,g?[a]:arguments)})}),a=null}).promise()},promise:function(a){return null!=a?n.extend(a,d):d}},e={};return d.pipe=d.then,n.each(b,function(a,f){var g=f[2],h=f[3];d[f[1]]=g.add,h&&g.add(function(){c=h},b[1^a][2].disable,b[2][2].lock),e[f[0]]=function(){return e[f[0]+"With"](this===e?d:this,arguments),this},e[f[0]+"With"]=g.fireWith}),d.promise(e),a&&a.call(e,e),e},when:function(a){var b=0,c=e.call(arguments),d=c.length,f=1!==d||a&&n.isFunction(a.promise)?d:0,g=1===f?a:n.Deferred(),h=function(a,b,c){return function(d){b[a]=this,c[a]=arguments.length>1?e.call(arguments):d,c===i?g.notifyWith(b,c):--f||g.resolveWith(b,c)}},i,j,k;if(d>1)for(i=new Array(d),j=new Array(d),k=new Array(d);d>b;b++)c[b]&&n.isFunction(c[b].promise)?c[b].promise().progress(h(b,j,i)).done(h(b,k,c)).fail(g.reject):--f;return f||g.resolveWith(k,c),g.promise()}});var I;n.fn.ready=function(a){return n.ready.promise().done(a),this},n.extend({isReady:!1,readyWait:1,holdReady:function(a){a?n.readyWait++:n.ready(!0)},ready:function(a){(a===!0?--n.readyWait:n.isReady)||(n.isReady=!0,a!==!0&&--n.readyWait>0||(I.resolveWith(d,[n]),n.fn.triggerHandler&&(n(d).triggerHandler("ready"),n(d).off("ready"))))}});function J(){d.addEventListener?(d.removeEventListener("DOMContentLoaded",K),a.removeEventListener("load",K)):(d.detachEvent("onreadystatechange",K),a.detachEvent("onload",K))}function K(){(d.addEventListener||"load"===a.event.type||"complete"===d.readyState)&&(J(),n.ready())}n.ready.promise=function(b){if(!I)if(I=n.Deferred(),"complete"===d.readyState||"loading"!==d.readyState&&!d.documentElement.doScroll)a.setTimeout(n.ready);else if(d.addEventListener)d.addEventListener("DOMContentLoaded",K),a.addEventListener("load",K);else{d.attachEvent("onreadystatechange",K),a.attachEvent("onload",K);var c=!1;try{c=null==a.frameElement&&d.documentElement}catch(e){}c&&c.doScroll&&!function f(){if(!n.isReady){try{c.doScroll("left")}catch(b){return a.setTimeout(f,50)}J(),n.ready()}}()}return I.promise(b)},n.ready.promise();var L;for(L in n(l))break;l.ownFirst="0"===L,l.inlineBlockNeedsLayout=!1,n(function(){var a,b,c,e;c=d.getElementsByTagName("body")[0],c&&c.style&&(b=d.createElement("div"),e=d.createElement("div"),e.style.cssText="position:absolute;border:0;width:0;height:0;top:0;left:-9999px",c.appendChild(e).appendChild(b),"undefined"!=typeof b.style.zoom&&(b.style.cssText="display:inline;margin:0;border:0;padding:1px;width:1px;zoom:1",l.inlineBlockNeedsLayout=a=3===b.offsetWidth,a&&(c.style.zoom=1)),c.removeChild(e))}),function(){var a=d.createElement("div");l.deleteExpando=!0;try{delete a.test}catch(b){l.deleteExpando=!1}a=null}();var M=function(a){var b=n.noData[(a.nodeName+" ").toLowerCase()],c=+a.nodeType||1;return 1!==c&&9!==c?!1:!b||b!==!0&&a.getAttribute("classid")===b},N=/^(?:\{[\w\W]*\}|\[[\w\W]*\])$/,O=/([A-Z])/g;function P(a,b,c){if(void 0===c&&1===a.nodeType){var d="data-"+b.replace(O,"-$1").toLowerCase();if(c=a.getAttribute(d),"string"==typeof c){try{c="true"===c?!0:"false"===c?!1:"null"===c?null:+c+""===c?+c:N.test(c)?n.parseJSON(c):c}catch(e){}n.data(a,b,c)}else c=void 0;
@@ -4984,7 +4984,7 @@ summary {
 
 
 
-<h1 class="title toc-ignore">Design files for ch4-238, Beulah reservoir, under ‘average’ water levels</h1>
+<h1 class="title toc-ignore">Design files for ch4-238, Beulah reservoir, under ‘original’ water levels</h1>
 <h4 class="author">J. Beaulieu</h4>
 <h4 class="date">4/2/2020</h4>
 
@@ -4994,14 +4994,14 @@ summary {
 <p>Print from Internet Explorer for best quality.</p>
 <div id="main-sites" class="section level2">
 <h2>Main Sites</h2>
-<div id="htmlwidget-5ffc0ba0e4143b152cd1" style="width:100%;height:480px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5ffc0ba0e4143b152cd1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["Esri.WorldImagery",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addPolygons","args":[[[[{"lng":[-118.152792864509,-118.151480061887,-118.150582617218,-118.149471548727,-118.148501243027,-118.146880223225,-118.145420598359,-118.144166424708,-118.143156861095,-118.142381497448,-118.14202832299,-118.150740368,-118.155732845144,-118.161929186825,-118.167094540048,-118.167160019551,-118.167197888189,-118.16611470035,-118.164633420426,-118.163568557455,-118.163565888179,-118.163627300954,-118.162864691993,-118.161992317173,-118.160963982312,-118.159895394538,-118.159463203526,-118.159585451358,-118.158829625383,-118.157728539492,-118.155905165743,-118.153897280204,-118.152792864509],"lat":[43.9408465983285,43.9400487332706,43.9390943792642,43.9373602663007,43.9366500722677,43.9371721290748,43.9378924758808,43.9371957518204,43.9360415718197,43.9348422958443,43.9338712394098,43.9349020074295,43.935939334273,43.9334093731338,43.9307468616313,43.9317519593988,43.9337455232416,43.9339340951256,43.9350011719017,43.9359108717293,43.9374584786042,43.9386591945131,43.9392104893976,43.9390791573271,43.9393332742109,43.9391423341268,43.9396436710462,43.9404629659915,43.9410823378711,43.9415801207286,43.9420081005244,43.9414481683827,43.9408465983285]}]],[[{"lng":[-118.143500988826,-118.166250590385,-118.165699122081,-118.165594942145,-118.16540370489,-118.165272712056,-118.165403790336,-118.165502779264,-118.166049059674,-118.166233666782,-118.16716988356,-118.167337885483,-118.167624897244,-118.167583686762,-118.167492636058,-118.167039362903,-118.167088342991,-118.167094540048,-118.161929186825,-118.155732845144,-118.150740368,-118.14202832299,-118.142001038703,-118.141886515949,-118.142059569139,-118.142574807344,-118.142838589563,-118.143280866681,-118.143327192509,-118.143500988826],"lat":[43.927402208744,43.9240755865241,43.9246312268373,43.9247707044191,43.9250267339751,43.9252021067516,43.9252803022366,43.9253393544409,43.9256652369529,43.9257753627947,43.9260746398577,43.9265620824105,43.9273948057935,43.9277612772933,43.9285709486863,43.929899881537,43.9306517365606,43.9307468616313,43.9334093731338,43.935939334273,43.9349020074295,43.9338712394098,43.9337962198934,43.9325317649848,43.9312880571013,43.9296162002842,43.9290260386303,43.9280365065724,43.9279328574901,43.927402208744]}]],[[{"lng":[-118.143500988826,-118.143886839713,-118.14452280594,-118.144700705341,-118.144887765,-118.145493049012,-118.146041652053,-118.146994730976,-118.147636253098,-118.148080827175,-118.149012543144,-118.149415951216,-118.149661442345,-118.149979239413,-118.15034143648,-118.150159608682,-118.150708659723,-118.151623404542,-118.152504166434,-118.153499673362,-118.153843480469,-118.155376607182,-118.156876013969,-118.157966648014,-118.157978928763,-118.159007756434,-118.160141461413,-118.160246677125,-118.161262309013,-118.161898368057,-118.16236237002,-118.162396043929,-118.162356159536,-118.161257304836,-118.161253249751,-118.161359996401,-118.161734481447,-118.161876193449,-118.162348048282,-118.162800345064,-118.164077531675,-118.164628331434,-118.16536967816,-118.16615969497,-118.165666008902,-118.165637658185,-118.165623684805,-118.166341264684,-118.166431509483,-118.166687481773,-118.166969222177,-118.166487930081,-118.166250590385,-118.143500988826],"lat":[43.927402208744,43.9262240696802,43.9243053718943,43.9239621122421,43.923601173985,43.9229197180963,43.9221378702105,43.9216112103416,43.9202750955092,43.9193948636217,43.9186283587702,43.917818608873,43.9168446509745,43.9161419850608,43.9154027321542,43.9144494182143,43.9136665423285,43.9137592694061,43.9134755725109,43.9128768106517,43.9119317307601,43.9119939628975,43.9116795780623,43.9117279881061,43.9117285331609,43.9125378481912,43.9129858311062,43.9130274062669,43.9126335543931,43.9117421845241,43.9119439126875,43.9119585525529,43.9120171476576,43.913631459312,43.9141132742728,43.9142966932796,43.914940149762,43.9151836422443,43.9156422252511,43.916411424231,43.9173125472771,43.9181115202638,43.918901312269,43.9191726793205,43.9200568362033,43.9204500246569,43.920643816152,43.9215260906868,43.921637046147,43.9221980218643,43.9228154591019,43.9238364479749,43.9240755865241,43.927402208744]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":1,"opacity":0.5,"fill":true,"fillColor":["#FFFF00","#4C00FF","#00FF4D"],"fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[43.9139765637593,43.9349277986902,43.9311604026262,43.9189278433123,43.9170623789689,43.9279593147966,43.9295194690214,43.9191626907513,43.9220315933027,43.9330605417534,43.9323826319933,43.9334183848209,43.9368897940393,43.9397070764193,43.9380521440143],[-118.152029846831,-118.151601383292,-118.154709135174,-118.161543553354,-118.152372132363,-118.145805517816,-118.15126261564,-118.156017173163,-118.155817191104,-118.1494402707,-118.164858757551,-118.166191996279,-118.147663617866,-118.154242688235,-118.161752708504],[10,10,10,10,10,10,10,10,10,10,10,10,10,10,10],null,null,{"interactive":true,"className":"","stroke":false,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":["#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000"],"fillOpacity":1},null,null,null,null,["SU-01","SU-02","SU-03","SU-04","SU-05","SU-06","SU-07","SU-08","SU-09","SU-10","SU-31","SU-32","SU-33","SU-34","SU-35"],{"interactive":false,"permanent":true,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":true,"style":{"color":"white","font-size":"15px","font-family":"serif"},"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#FF0000","#000000"],"labels":["mainSites","OverSamp"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"factor","title":"Sample sites","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addLegend","args":[{"colors":["#4C00FF","#00FF4D","#FFFF00"],"labels":["north","south","trib"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"factor","title":"sections","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addScaleBar","args":[{"maxWidth":100,"metric":true,"imperial":true,"updateWhenIdle":true,"position":"topright"}]}],"fitBounds":[43.9123183872768,-118.166603515921,43.9415460493173,-118.143775775272,[]],"limits":{"lat":[43.9116795780623,43.9420081005244],"lng":[-118.167624897244,-118.141886515949]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9e974a134eb3c55e788d" style="width:100%;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9e974a134eb3c55e788d">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["Esri.WorldImagery",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addPolygons","args":[[[[{"lng":[-118.141618905318,-118.167508510464,-118.16754819618,-118.1671741969,-118.167174196802,-118.167487263034,-118.167426262811,-118.166350263346,-118.166472396347,-118.166694396935,-118.166945396898,-118.167296462903,-118.168090462861,-118.168845596235,-118.169008784081,-118.165234790529,-118.162695638513,-118.161859407324,-118.159050611501,-118.154055586512,-118.153875863685,-118.152861797071,-118.152197663042,-118.152006663314,-118.151312596331,-118.151060596515,-118.150808596734,-118.14995446353,-118.149572463108,-118.149290463102,-118.149031463511,-118.148939463299,-118.148214463659,-118.147581396707,-118.146055263564,-118.145613262948,-118.144796196859,-118.144155196973,-118.14384306302,-118.143461063472,-118.143087063376,-118.142797062972,-118.142041996776,-118.141721997114,-118.141309996548,-118.140233863552,-118.139760863744,-118.138844863475,-118.138020796707,-118.137479796289,-118.135617596357,-118.134824597114,-118.134030463242,-118.133145396582,-118.132543396997,-118.131627263775,-118.131947263482,-118.133687396812,-118.133435397108,-118.135114463146,-118.13589946308,-118.136189463514,-118.136441396291,-118.136662397168,-118.13698339666,-118.137868396278,-118.13907346372,-118.139455463339,-118.139676463372,-118.140088396718,-118.140210397061,-118.140431397057,-118.141133396333,-118.141324396277,-118.141618905318],"lat":[43.9289441521291,43.9306798647369,43.9308494818047,43.9317004813805,43.9322494814237,43.9332724818707,43.9340274813814,43.9357404813017,43.9364534815188,43.9366094816604,43.936960481753,43.9371634814423,43.937823481451,43.9389484817396,43.9393315990706,43.9413436242526,43.9435063295267,43.9462832705092,43.9460126282819,43.9443552278159,43.9441784813195,43.9441514817848,43.9429004814877,43.9427134816735,43.9425574813321,43.942370481727,43.9419844815198,43.9415004814053,43.9415044813701,43.9416414818418,43.942030481615,43.9429694814693,43.9432364813555,43.9434034813824,43.9431484817069,43.942759481422,43.9426214815024,43.9423054813446,43.9422514813682,43.9423934813286,43.9427824813452,43.9429384816514,43.9429194813884,43.94320948153,43.9432854818558,43.9432164818376,43.9435834817595,43.943670481808,43.9441474818749,43.9442434813664,43.9435064814244,43.9428924813515,43.9425954816286,43.9419734819037,43.941935481486,43.9420424818295,43.9414964816695,43.9419504814828,43.94113448128,43.9406304813047,43.94019948186,43.9398714815232,43.9381854817283,43.9377044813823,43.9373804817934,43.9361444815402,43.9352324816512,43.9346914816349,43.933905481438,43.9329704813598,43.9320364815932,43.9314634813771,43.9306554817763,43.9296294816952,43.9289441521291]}]],[[{"lng":[-118.162765663121,-118.161689596601,-118.15931639633,-118.1585613966,-118.158179397033,-118.157577263585,-118.157073263063,-118.155997062898,-118.154055586512,-118.159050611501,-118.161859407324,-118.162695638513,-118.165234790529,-118.169008784081,-118.169066663409,-118.169005663218,-118.168815663209,-118.168845663243,-118.169227796496,-118.169127796816,-118.168944796493,-118.168021796479,-118.167800796517,-118.167830862875,-118.167296796527,-118.167006797051,-118.166694796965,-118.166060662967,-118.165809662966,-118.165267663634,-118.164855596557,-118.164603596651,-118.164634663,-118.165076663506,-118.165046797061,-118.164763796315,-118.163688663098,-118.162765663121],"lat":[43.9480044814819,43.9479354817671,43.9475884818288,43.9476154815781,43.9478634814195,43.9479054813862,43.9474784817731,43.9462644818851,43.9443552278159,43.9460126282819,43.9462832705092,43.9435063295267,43.9413436242526,43.9393315990706,43.9394674817892,43.9400465480004,43.9404515481528,43.9410005482649,43.9416645483243,43.9424465482336,43.9427665481273,43.9432705481757,43.9436595482889,43.9450555480106,43.9452845480861,43.9452765479199,43.9451205485187,43.94443354807,43.9443004813533,43.9443234815119,43.9445974814508,43.9449144815745,43.9453764817722,43.9463795484451,43.9472875479564,43.9475235484504,43.9477065483089,43.9480044814819]}]],[[{"lng":[-118.141618905318,-118.141698263508,-118.141698263691,-118.141858263568,-118.141827196523,-118.142209197038,-118.142209196287,-118.142720196653,-118.143384196236,-118.143796196899,-118.145024196452,-118.146008263045,-118.147405262932,-118.148038263448,-118.148290263375,-118.148229263363,-118.148198196992,-118.148351196281,-118.148793263498,-118.148923263207,-118.148953196949,-118.149236196817,-118.149655263541,-118.149686263551,-118.149175196908,-118.149053196783,-118.149053063065,-118.149434063747,-118.150098196243,-118.151647263417,-118.152089263263,-118.152120263277,-118.151235196607,-118.150884063262,-118.150884063327,-118.151265196881,-118.151868196281,-118.151746196202,-118.150510063456,-118.150700063435,-118.151486063085,-118.151807196324,-118.15228019694,-118.153607263336,-118.155286396675,-118.157437596464,-118.157941597041,-118.157971596223,-118.158635662941,-118.15936079633,-118.159993796765,-118.160787863364,-118.16129886369,-118.161641863018,-118.161801796505,-118.161923796719,-118.162335862866,-118.162465863377,-118.162335863431,-118.162145996347,-118.161641996516,-118.161359996413,-118.161359996341,-118.16161099632,-118.162085063229,-118.1628780635,-118.163572063186,-118.163885196985,-118.164015196618,-118.163694196158,-118.163725196966,-118.164679263118,-118.164801397005,-118.165060396469,-118.165502396211,-118.166258463086,-118.166700596673,-118.166922596321,-118.166861596123,-118.167082596865,-118.167082596829,-118.166761596472,-118.165464463579,-118.165342596258,-118.165716596219,-118.167204663228,-118.16745666305,-118.167395796746,-118.166922796888,-118.166922796766,-118.16673179694,-118.165403663021,-118.165403796799,-118.165686796585,-118.166761863262,-118.167486862814,-118.167555996185,-118.167265996615,-118.16730399619,-118.167524996908,-118.167616996852,-118.167556063043,-118.167426063325,-118.167617062973,-118.167426063146,-118.167508510464,-118.141618905318],"lat":[43.9289441521291,43.9287594814108,43.9277334816013,43.9273284815187,43.9257224818547,43.9252004814176,43.9243684816321,43.9238264814983,43.9233884816951,43.9227704817216,43.9222894816659,43.9217024819567,43.9194814818518,43.9190894816524,43.9186544817369,43.9182234814726,43.9178834819575,43.9175824819851,43.9172614814247,43.9170554818541,43.91657848181,43.9162314815974,43.9160944814846,43.9157964815137,43.9152244818299,43.914931481664,43.9141984815311,43.9137174819869,43.9134854818947,43.9134894819821,43.91315348196,43.9128294819082,43.9122604816791,43.9118674818548,43.911497481372,43.9114594816333,43.9115514815094,43.9110014814709,43.910624481562,43.9103834814848,43.9105634816538,43.9108144816815,43.9109524816033,43.9118674814608,43.9117764814911,43.9113684814574,43.9114824815751,43.9117764817406,43.9126724816611,43.9129704818152,43.9130354819683,43.9127684817393,43.9124474817492,43.9115704816315,43.9106854819007,43.9104754814227,43.9103834819192,43.9107234815836,43.9122564813908,43.912806481451,43.9135424819737,43.9142294813726,43.91463348154,43.9148924815669,43.9150754816984,43.9149614814655,43.9146834816717,43.9146184814651,43.9148394813417,43.9155564814523,43.9158234815446,43.9169684817764,43.9177504816333,43.9180704818151,43.918318481377,43.9185894816858,43.9188634818736,43.9192604816299,43.9198714819029,43.9201494814857,43.9203554813569,43.9204924813741,43.9204434813863,43.9209774817926,43.921343481541,43.9217784813701,43.9219344818332,43.9222974818022,43.9229414818671,43.9236244815707,43.9239874815682,43.9249024813279,43.9252994815288,43.9254134814654,43.925589481713,43.9258184818289,43.9261694815433,43.9266914818967,43.9269894816549,43.9274014818604,43.9279654816659,43.9290684813353,43.9293204817547,43.9299574814814,43.9303274816734,43.9306798647369,43.9289441521291]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":1,"opacity":0.5,"fill":true,"fillColor":["#4C00FF","#FFFF00","#00FF4D"],"fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[43.9432403795224,43.9243633198579,43.9405137373671,43.9422271692202,43.9157441774375,43.9283828581396,43.9320237788541,43.9214310484601,43.911493219581,43.9299897828047,43.9407911864328,43.942328591237,43.9428578405806,43.9477728307475,43.9468745979892],[-118.135662595797,-118.150850412651,-118.159331407155,-118.146162844181,-118.155496171538,-118.148722810296,-118.157415873191,-118.159503742802,-118.151229415819,-118.142559739991,-118.166583899252,-118.166916780911,-118.166271468714,-118.161774358964,-118.158744823751],[10,10,10,10,10,10,10,10,10,10,10,10,10,10,10],null,null,{"interactive":true,"className":"","stroke":false,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":["#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000"],"fillOpacity":1},null,null,null,null,["SU-01","SU-02","SU-03","SU-04","SU-05","SU-06","SU-07","SU-08","SU-09","SU-10","SU-31","SU-32","SU-33","SU-34","SU-35"],{"interactive":false,"permanent":true,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":true,"style":{"color":"white","font-size":"15px","font-family":"serif"},"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#FF0000","#000000"],"labels":["mainSites","OverSamp"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"factor","title":"Sample sites","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addLegend","args":[{"colors":["#4C00FF","#00FF4D","#FFFF00"],"labels":["north","south","trib"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"factor","title":"sections","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addScaleBar","args":[{"maxWidth":100,"metric":true,"imperial":true,"updateWhenIdle":true,"position":"topright"}]}],"fitBounds":[43.911493219581,-118.167290630339,43.9477728307475,-118.135662595797,[]],"limits":{"lat":[43.9103834814848,43.9480044814819],"lng":[-118.169227796496,-118.131627263775]}},"evals":[],"jsHooks":[]}</script>
 <P style="page-break-before: always">
 </div>
 <div id="oversample-sites" class="section level2">
 <h2>Oversample Sites</h2>
-<div id="htmlwidget-1daa251a2f405ce1e621" style="width:100%;height:480px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1daa251a2f405ce1e621">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["Esri.WorldImagery",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addPolygons","args":[[[[{"lng":[-118.152792864509,-118.151480061887,-118.150582617218,-118.149471548727,-118.148501243027,-118.146880223225,-118.145420598359,-118.144166424708,-118.143156861095,-118.142381497448,-118.14202832299,-118.150740368,-118.155732845144,-118.161929186825,-118.167094540048,-118.167160019551,-118.167197888189,-118.16611470035,-118.164633420426,-118.163568557455,-118.163565888179,-118.163627300954,-118.162864691993,-118.161992317173,-118.160963982312,-118.159895394538,-118.159463203526,-118.159585451358,-118.158829625383,-118.157728539492,-118.155905165743,-118.153897280204,-118.152792864509],"lat":[43.9408465983285,43.9400487332706,43.9390943792642,43.9373602663007,43.9366500722677,43.9371721290748,43.9378924758808,43.9371957518204,43.9360415718197,43.9348422958443,43.9338712394098,43.9349020074295,43.935939334273,43.9334093731338,43.9307468616313,43.9317519593988,43.9337455232416,43.9339340951256,43.9350011719017,43.9359108717293,43.9374584786042,43.9386591945131,43.9392104893976,43.9390791573271,43.9393332742109,43.9391423341268,43.9396436710462,43.9404629659915,43.9410823378711,43.9415801207286,43.9420081005244,43.9414481683827,43.9408465983285]}]],[[{"lng":[-118.143500988826,-118.166250590385,-118.165699122081,-118.165594942145,-118.16540370489,-118.165272712056,-118.165403790336,-118.165502779264,-118.166049059674,-118.166233666782,-118.16716988356,-118.167337885483,-118.167624897244,-118.167583686762,-118.167492636058,-118.167039362903,-118.167088342991,-118.167094540048,-118.161929186825,-118.155732845144,-118.150740368,-118.14202832299,-118.142001038703,-118.141886515949,-118.142059569139,-118.142574807344,-118.142838589563,-118.143280866681,-118.143327192509,-118.143500988826],"lat":[43.927402208744,43.9240755865241,43.9246312268373,43.9247707044191,43.9250267339751,43.9252021067516,43.9252803022366,43.9253393544409,43.9256652369529,43.9257753627947,43.9260746398577,43.9265620824105,43.9273948057935,43.9277612772933,43.9285709486863,43.929899881537,43.9306517365606,43.9307468616313,43.9334093731338,43.935939334273,43.9349020074295,43.9338712394098,43.9337962198934,43.9325317649848,43.9312880571013,43.9296162002842,43.9290260386303,43.9280365065724,43.9279328574901,43.927402208744]}]],[[{"lng":[-118.143500988826,-118.143886839713,-118.14452280594,-118.144700705341,-118.144887765,-118.145493049012,-118.146041652053,-118.146994730976,-118.147636253098,-118.148080827175,-118.149012543144,-118.149415951216,-118.149661442345,-118.149979239413,-118.15034143648,-118.150159608682,-118.150708659723,-118.151623404542,-118.152504166434,-118.153499673362,-118.153843480469,-118.155376607182,-118.156876013969,-118.157966648014,-118.157978928763,-118.159007756434,-118.160141461413,-118.160246677125,-118.161262309013,-118.161898368057,-118.16236237002,-118.162396043929,-118.162356159536,-118.161257304836,-118.161253249751,-118.161359996401,-118.161734481447,-118.161876193449,-118.162348048282,-118.162800345064,-118.164077531675,-118.164628331434,-118.16536967816,-118.16615969497,-118.165666008902,-118.165637658185,-118.165623684805,-118.166341264684,-118.166431509483,-118.166687481773,-118.166969222177,-118.166487930081,-118.166250590385,-118.143500988826],"lat":[43.927402208744,43.9262240696802,43.9243053718943,43.9239621122421,43.923601173985,43.9229197180963,43.9221378702105,43.9216112103416,43.9202750955092,43.9193948636217,43.9186283587702,43.917818608873,43.9168446509745,43.9161419850608,43.9154027321542,43.9144494182143,43.9136665423285,43.9137592694061,43.9134755725109,43.9128768106517,43.9119317307601,43.9119939628975,43.9116795780623,43.9117279881061,43.9117285331609,43.9125378481912,43.9129858311062,43.9130274062669,43.9126335543931,43.9117421845241,43.9119439126875,43.9119585525529,43.9120171476576,43.913631459312,43.9141132742728,43.9142966932796,43.914940149762,43.9151836422443,43.9156422252511,43.916411424231,43.9173125472771,43.9181115202638,43.918901312269,43.9191726793205,43.9200568362033,43.9204500246569,43.920643816152,43.9215260906868,43.921637046147,43.9221980218643,43.9228154591019,43.9238364479749,43.9240755865241,43.927402208744]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":1,"opacity":0.5,"fill":true,"fillColor":["#FFFF00","#4C00FF","#00FF4D"],"fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[43.9123183872768,43.9299158480302,43.9253756713941,43.9261814590806,43.9192649481417,43.9278308647181,43.9250855624494,43.9146979074777,43.9239285460249,43.9167490592324,43.9204658155032,43.9225977708183,43.9338500448489,43.9226976015214,43.9322412359568,43.9261605131943,43.9341825979935,43.9249428931885,43.9306516587822,43.9316177208603,43.9369831376718,43.9357894137257,43.9354340573615,43.933897881223,43.9377025841994,43.9404076286366,43.9358326150266,43.9343798488315,43.9367972287327,43.9415460493173],[-118.161678312492,-118.162865105075,-118.155559785435,-118.154691956872,-118.165926461338,-118.166603515921,-118.147168495332,-118.156030848309,-118.14835166806,-118.161559839801,-118.149043292322,-118.161642285226,-118.157906072293,-118.161052945264,-118.143775775272,-118.163367831005,-118.149213553683,-118.161596337681,-118.155481368906,-118.159996586562,-118.150958008092,-118.151981356667,-118.148125333779,-118.162478366062,-118.158079993959,-118.157714516835,-118.146813739077,-118.160325890897,-118.155325112279,-118.155332459856],6,null,null,{"interactive":true,"className":"","stroke":false,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"black","fillOpacity":1},null,null,null,null,["SU-11","SU-12","SU-13","SU-14","SU-15","SU-16","SU-17","SU-18","SU-19","SU-20","SU-21","SU-22","SU-23","SU-24","SU-25","SU-26","SU-27","SU-28","SU-29","SU-30","SU-36","SU-37","SU-38","SU-39","SU-40","SU-41","SU-42","SU-43","SU-44","SU-45"],{"interactive":false,"permanent":true,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":true,"style":{"color":"white","font-size":"15px","font-family":"serif"},"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["black"],"labels":["OverSamp"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"unknown","title":"Sample sites","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addLegend","args":[{"colors":["#4C00FF","#00FF4D","#FFFF00"],"labels":["north","south","trib"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"factor","title":"sections","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addScaleBar","args":[{"maxWidth":100,"metric":true,"imperial":true,"updateWhenIdle":true,"position":"topright"}]}],"fitBounds":[43.9123183872768,-118.166603515921,43.9415460493173,-118.143775775272,[]],"limits":{"lat":[43.9116795780623,43.9420081005244],"lng":[-118.167624897244,-118.141886515949]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-e7fa092145472c6d7729" style="width:100%;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e7fa092145472c6d7729">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["Esri.WorldImagery",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addPolygons","args":[[[[{"lng":[-118.141618905318,-118.167508510464,-118.16754819618,-118.1671741969,-118.167174196802,-118.167487263034,-118.167426262811,-118.166350263346,-118.166472396347,-118.166694396935,-118.166945396898,-118.167296462903,-118.168090462861,-118.168845596235,-118.169008784081,-118.165234790529,-118.162695638513,-118.161859407324,-118.159050611501,-118.154055586512,-118.153875863685,-118.152861797071,-118.152197663042,-118.152006663314,-118.151312596331,-118.151060596515,-118.150808596734,-118.14995446353,-118.149572463108,-118.149290463102,-118.149031463511,-118.148939463299,-118.148214463659,-118.147581396707,-118.146055263564,-118.145613262948,-118.144796196859,-118.144155196973,-118.14384306302,-118.143461063472,-118.143087063376,-118.142797062972,-118.142041996776,-118.141721997114,-118.141309996548,-118.140233863552,-118.139760863744,-118.138844863475,-118.138020796707,-118.137479796289,-118.135617596357,-118.134824597114,-118.134030463242,-118.133145396582,-118.132543396997,-118.131627263775,-118.131947263482,-118.133687396812,-118.133435397108,-118.135114463146,-118.13589946308,-118.136189463514,-118.136441396291,-118.136662397168,-118.13698339666,-118.137868396278,-118.13907346372,-118.139455463339,-118.139676463372,-118.140088396718,-118.140210397061,-118.140431397057,-118.141133396333,-118.141324396277,-118.141618905318],"lat":[43.9289441521291,43.9306798647369,43.9308494818047,43.9317004813805,43.9322494814237,43.9332724818707,43.9340274813814,43.9357404813017,43.9364534815188,43.9366094816604,43.936960481753,43.9371634814423,43.937823481451,43.9389484817396,43.9393315990706,43.9413436242526,43.9435063295267,43.9462832705092,43.9460126282819,43.9443552278159,43.9441784813195,43.9441514817848,43.9429004814877,43.9427134816735,43.9425574813321,43.942370481727,43.9419844815198,43.9415004814053,43.9415044813701,43.9416414818418,43.942030481615,43.9429694814693,43.9432364813555,43.9434034813824,43.9431484817069,43.942759481422,43.9426214815024,43.9423054813446,43.9422514813682,43.9423934813286,43.9427824813452,43.9429384816514,43.9429194813884,43.94320948153,43.9432854818558,43.9432164818376,43.9435834817595,43.943670481808,43.9441474818749,43.9442434813664,43.9435064814244,43.9428924813515,43.9425954816286,43.9419734819037,43.941935481486,43.9420424818295,43.9414964816695,43.9419504814828,43.94113448128,43.9406304813047,43.94019948186,43.9398714815232,43.9381854817283,43.9377044813823,43.9373804817934,43.9361444815402,43.9352324816512,43.9346914816349,43.933905481438,43.9329704813598,43.9320364815932,43.9314634813771,43.9306554817763,43.9296294816952,43.9289441521291]}]],[[{"lng":[-118.162765663121,-118.161689596601,-118.15931639633,-118.1585613966,-118.158179397033,-118.157577263585,-118.157073263063,-118.155997062898,-118.154055586512,-118.159050611501,-118.161859407324,-118.162695638513,-118.165234790529,-118.169008784081,-118.169066663409,-118.169005663218,-118.168815663209,-118.168845663243,-118.169227796496,-118.169127796816,-118.168944796493,-118.168021796479,-118.167800796517,-118.167830862875,-118.167296796527,-118.167006797051,-118.166694796965,-118.166060662967,-118.165809662966,-118.165267663634,-118.164855596557,-118.164603596651,-118.164634663,-118.165076663506,-118.165046797061,-118.164763796315,-118.163688663098,-118.162765663121],"lat":[43.9480044814819,43.9479354817671,43.9475884818288,43.9476154815781,43.9478634814195,43.9479054813862,43.9474784817731,43.9462644818851,43.9443552278159,43.9460126282819,43.9462832705092,43.9435063295267,43.9413436242526,43.9393315990706,43.9394674817892,43.9400465480004,43.9404515481528,43.9410005482649,43.9416645483243,43.9424465482336,43.9427665481273,43.9432705481757,43.9436595482889,43.9450555480106,43.9452845480861,43.9452765479199,43.9451205485187,43.94443354807,43.9443004813533,43.9443234815119,43.9445974814508,43.9449144815745,43.9453764817722,43.9463795484451,43.9472875479564,43.9475235484504,43.9477065483089,43.9480044814819]}]],[[{"lng":[-118.141618905318,-118.141698263508,-118.141698263691,-118.141858263568,-118.141827196523,-118.142209197038,-118.142209196287,-118.142720196653,-118.143384196236,-118.143796196899,-118.145024196452,-118.146008263045,-118.147405262932,-118.148038263448,-118.148290263375,-118.148229263363,-118.148198196992,-118.148351196281,-118.148793263498,-118.148923263207,-118.148953196949,-118.149236196817,-118.149655263541,-118.149686263551,-118.149175196908,-118.149053196783,-118.149053063065,-118.149434063747,-118.150098196243,-118.151647263417,-118.152089263263,-118.152120263277,-118.151235196607,-118.150884063262,-118.150884063327,-118.151265196881,-118.151868196281,-118.151746196202,-118.150510063456,-118.150700063435,-118.151486063085,-118.151807196324,-118.15228019694,-118.153607263336,-118.155286396675,-118.157437596464,-118.157941597041,-118.157971596223,-118.158635662941,-118.15936079633,-118.159993796765,-118.160787863364,-118.16129886369,-118.161641863018,-118.161801796505,-118.161923796719,-118.162335862866,-118.162465863377,-118.162335863431,-118.162145996347,-118.161641996516,-118.161359996413,-118.161359996341,-118.16161099632,-118.162085063229,-118.1628780635,-118.163572063186,-118.163885196985,-118.164015196618,-118.163694196158,-118.163725196966,-118.164679263118,-118.164801397005,-118.165060396469,-118.165502396211,-118.166258463086,-118.166700596673,-118.166922596321,-118.166861596123,-118.167082596865,-118.167082596829,-118.166761596472,-118.165464463579,-118.165342596258,-118.165716596219,-118.167204663228,-118.16745666305,-118.167395796746,-118.166922796888,-118.166922796766,-118.16673179694,-118.165403663021,-118.165403796799,-118.165686796585,-118.166761863262,-118.167486862814,-118.167555996185,-118.167265996615,-118.16730399619,-118.167524996908,-118.167616996852,-118.167556063043,-118.167426063325,-118.167617062973,-118.167426063146,-118.167508510464,-118.141618905318],"lat":[43.9289441521291,43.9287594814108,43.9277334816013,43.9273284815187,43.9257224818547,43.9252004814176,43.9243684816321,43.9238264814983,43.9233884816951,43.9227704817216,43.9222894816659,43.9217024819567,43.9194814818518,43.9190894816524,43.9186544817369,43.9182234814726,43.9178834819575,43.9175824819851,43.9172614814247,43.9170554818541,43.91657848181,43.9162314815974,43.9160944814846,43.9157964815137,43.9152244818299,43.914931481664,43.9141984815311,43.9137174819869,43.9134854818947,43.9134894819821,43.91315348196,43.9128294819082,43.9122604816791,43.9118674818548,43.911497481372,43.9114594816333,43.9115514815094,43.9110014814709,43.910624481562,43.9103834814848,43.9105634816538,43.9108144816815,43.9109524816033,43.9118674814608,43.9117764814911,43.9113684814574,43.9114824815751,43.9117764817406,43.9126724816611,43.9129704818152,43.9130354819683,43.9127684817393,43.9124474817492,43.9115704816315,43.9106854819007,43.9104754814227,43.9103834819192,43.9107234815836,43.9122564813908,43.912806481451,43.9135424819737,43.9142294813726,43.91463348154,43.9148924815669,43.9150754816984,43.9149614814655,43.9146834816717,43.9146184814651,43.9148394813417,43.9155564814523,43.9158234815446,43.9169684817764,43.9177504816333,43.9180704818151,43.918318481377,43.9185894816858,43.9188634818736,43.9192604816299,43.9198714819029,43.9201494814857,43.9203554813569,43.9204924813741,43.9204434813863,43.9209774817926,43.921343481541,43.9217784813701,43.9219344818332,43.9222974818022,43.9229414818671,43.9236244815707,43.9239874815682,43.9249024813279,43.9252994815288,43.9254134814654,43.925589481713,43.9258184818289,43.9261694815433,43.9266914818967,43.9269894816549,43.9274014818604,43.9279654816659,43.9290684813353,43.9293204817547,43.9299574814814,43.9303274816734,43.9306798647369,43.9289441521291]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":1,"opacity":0.5,"fill":true,"fillColor":["#4C00FF","#FFFF00","#00FF4D"],"fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[43.9338984307166,43.9348929069385,43.9198997225797,43.9385313787248,43.9359826576118,43.9421737298672,43.9212923973461,43.9352563563903,43.9180734037217,43.9404646165831,43.9300902420652,43.9388407532946,43.9234209051715,43.9372606381975,43.9273758921382,43.9280132555619,43.9254734476605,43.9383585455115,43.9390020500234,43.9452796124618,43.9437352963652,43.9476828914026,43.9414492170237,43.9468319021028,43.9443802560296,43.9463836024735,43.942096215885,43.9457640135952,43.9449363163494,43.9455825396596],[-118.154415668072,-118.162728533141,-118.158884122525,-118.156118275625,-118.146209226321,-118.158181849393,-118.154335091576,-118.150349749342,-118.162674521206,-118.138966713495,-118.157995352736,-118.14602835561,-118.1562603592,-118.1389499012,-118.152627161192,-118.162197317116,-118.144406926883,-118.167290630339,-118.160337190513,-118.157162799079,-118.164713596184,-118.163078345381,-118.167085234906,-118.158010655016,-118.164306971637,-118.160105275096,-118.167034236106,-118.156019267736,-118.163914578513,-118.162306558575],6,null,null,{"interactive":true,"className":"","stroke":false,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"black","fillOpacity":1},null,null,null,null,["SU-11","SU-12","SU-13","SU-14","SU-15","SU-16","SU-17","SU-18","SU-19","SU-20","SU-21","SU-22","SU-23","SU-24","SU-25","SU-26","SU-27","SU-28","SU-29","SU-30","SU-36","SU-37","SU-38","SU-39","SU-40","SU-41","SU-42","SU-43","SU-44","SU-45"],{"interactive":false,"permanent":true,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":true,"style":{"color":"white","font-size":"15px","font-family":"serif"},"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["black"],"labels":["OverSamp"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"unknown","title":"Sample sites","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addLegend","args":[{"colors":["#4C00FF","#00FF4D","#FFFF00"],"labels":["north","south","trib"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"factor","title":"sections","extra":null,"layerId":null,"className":"info legend","group":null}]},{"method":"addScaleBar","args":[{"maxWidth":100,"metric":true,"imperial":true,"updateWhenIdle":true,"position":"topright"}]}],"fitBounds":[43.911493219581,-118.167290630339,43.9477728307475,-118.135662595797,[]],"limits":{"lat":[43.9103834814848,43.9480044814819],"lng":[-118.169227796496,-118.131627263775]}},"evals":[],"jsHooks":[]}</script>
 <P style="page-break-before: always">
 </div>
 <div id="site-coordinates" class="section level2">
@@ -5019,318 +5019,318 @@ summary {
 <tbody>
 <tr class="odd">
 <td align="left">mainSites</td>
-<td align="left">SU-02</td>
+<td align="left">SU-01</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.151601383292, 43.9349277986902)</td>
+<td align="left">c(-118.135662595797, 43.9432403795224)</td>
 </tr>
 <tr class="even">
 <td align="left">mainSites</td>
 <td align="left">SU-03</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.154709135174, 43.9311604026262)</td>
+<td align="left">c(-118.159331407155, 43.9405137373671)</td>
 </tr>
 <tr class="odd">
 <td align="left">mainSites</td>
-<td align="left">SU-06</td>
+<td align="left">SU-04</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.145805517816, 43.9279593147966)</td>
+<td align="left">c(-118.146162844181, 43.9422271692202)</td>
 </tr>
 <tr class="even">
 <td align="left">mainSites</td>
 <td align="left">SU-07</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.15126261564, 43.9295194690214)</td>
+<td align="left">c(-118.157415873191, 43.9320237788541)</td>
 </tr>
 <tr class="odd">
 <td align="left">mainSites</td>
 <td align="left">SU-10</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.1494402707, 43.9330605417534)</td>
+<td align="left">c(-118.142559739991, 43.9299897828047)</td>
 </tr>
 <tr class="even">
 <td align="left">mainSites</td>
-<td align="left">SU-01</td>
+<td align="left">SU-02</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.152029846831, 43.9139765637593)</td>
+<td align="left">c(-118.150850412651, 43.9243633198579)</td>
 </tr>
 <tr class="odd">
-<td align="left">mainSites</td>
-<td align="left">SU-04</td>
-<td align="left">open_water</td>
-<td align="left">south</td>
-<td align="left">c(-118.161543553354, 43.9189278433123)</td>
-</tr>
-<tr class="even">
 <td align="left">mainSites</td>
 <td align="left">SU-05</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.152372132363, 43.9170623789689)</td>
+<td align="left">c(-118.155496171538, 43.9157441774375)</td>
+</tr>
+<tr class="even">
+<td align="left">mainSites</td>
+<td align="left">SU-06</td>
+<td align="left">open_water</td>
+<td align="left">south</td>
+<td align="left">c(-118.148722810296, 43.9283828581396)</td>
 </tr>
 <tr class="odd">
 <td align="left">mainSites</td>
 <td align="left">SU-08</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.156017173163, 43.9191626907513)</td>
+<td align="left">c(-118.159503742802, 43.9214310484601)</td>
 </tr>
 <tr class="even">
 <td align="left">mainSites</td>
 <td align="left">SU-09</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.155817191104, 43.9220315933027)</td>
+<td align="left">c(-118.151229415819, 43.911493219581)</td>
 </tr>
 <tr class="odd">
 <td align="left">mainSites</td>
 <td align="left">SU-31</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.164858757551, 43.9323826319933)</td>
+<td align="left">c(-118.166583899252, 43.9407911864328)</td>
 </tr>
 <tr class="even">
 <td align="left">mainSites</td>
 <td align="left">SU-32</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.166191996279, 43.9334183848209)</td>
+<td align="left">c(-118.166916780911, 43.942328591237)</td>
 </tr>
 <tr class="odd">
 <td align="left">mainSites</td>
 <td align="left">SU-33</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.147663617866, 43.9368897940393)</td>
+<td align="left">c(-118.166271468714, 43.9428578405806)</td>
 </tr>
 <tr class="even">
 <td align="left">mainSites</td>
 <td align="left">SU-34</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.154242688235, 43.9397070764193)</td>
+<td align="left">c(-118.161774358964, 43.9477728307475)</td>
 </tr>
 <tr class="odd">
 <td align="left">mainSites</td>
 <td align="left">SU-35</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.161752708504, 43.9380521440143)</td>
+<td align="left">c(-118.158744823751, 43.9468745979892)</td>
 </tr>
 <tr class="even">
+<td align="left">OverSamp</td>
+<td align="left">SU-11</td>
+<td align="left">open_water</td>
+<td align="left">north</td>
+<td align="left">c(-118.154415668072, 43.9338984307166)</td>
+</tr>
+<tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-12</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.162865105075, 43.9299158480302)</td>
+<td align="left">c(-118.162728533141, 43.9348929069385)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-14</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.154691956872, 43.9261814590806)</td>
+<td align="left">c(-118.156118275625, 43.9385313787248)</td>
+</tr>
+<tr class="odd">
+<td align="left">OverSamp</td>
+<td align="left">SU-15</td>
+<td align="left">open_water</td>
+<td align="left">north</td>
+<td align="left">c(-118.146209226321, 43.9359826576118)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-16</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.166603515921, 43.9278308647181)</td>
+<td align="left">c(-118.158181849393, 43.9421737298672)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
-<td align="left">SU-23</td>
+<td align="left">SU-18</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.157906072293, 43.9338500448489)</td>
+<td align="left">c(-118.150349749342, 43.9352563563903)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
-<td align="left">SU-25</td>
+<td align="left">SU-20</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.143775775272, 43.9322412359568)</td>
+<td align="left">c(-118.138966713495, 43.9404646165831)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
-<td align="left">SU-26</td>
+<td align="left">SU-21</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.163367831005, 43.9261605131943)</td>
+<td align="left">c(-118.157995352736, 43.9300902420652)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
-<td align="left">SU-27</td>
+<td align="left">SU-22</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.149213553683, 43.9341825979935)</td>
+<td align="left">c(-118.14602835561, 43.9388407532946)</td>
 </tr>
 <tr class="odd">
+<td align="left">OverSamp</td>
+<td align="left">SU-24</td>
+<td align="left">open_water</td>
+<td align="left">north</td>
+<td align="left">c(-118.1389499012, 43.9372606381975)</td>
+</tr>
+<tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-28</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.161596337681, 43.9249428931885)</td>
+<td align="left">c(-118.167290630339, 43.9383585455115)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-29</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.155481368906, 43.9306516587822)</td>
+<td align="left">c(-118.160337190513, 43.9390020500234)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-30</td>
 <td align="left">open_water</td>
 <td align="left">north</td>
-<td align="left">c(-118.159996586562, 43.9316177208603)</td>
-</tr>
-<tr class="even">
-<td align="left">OverSamp</td>
-<td align="left">SU-11</td>
-<td align="left">open_water</td>
-<td align="left">south</td>
-<td align="left">c(-118.161678312492, 43.9123183872768)</td>
+<td align="left">c(-118.157162799079, 43.9452796124618)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-13</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.155559785435, 43.9253756713941)</td>
+<td align="left">c(-118.158884122525, 43.9198997225797)</td>
 </tr>
 <tr class="even">
-<td align="left">OverSamp</td>
-<td align="left">SU-15</td>
-<td align="left">open_water</td>
-<td align="left">south</td>
-<td align="left">c(-118.165926461338, 43.9192649481417)</td>
-</tr>
-<tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-17</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.147168495332, 43.9250855624494)</td>
-</tr>
-<tr class="even">
-<td align="left">OverSamp</td>
-<td align="left">SU-18</td>
-<td align="left">open_water</td>
-<td align="left">south</td>
-<td align="left">c(-118.156030848309, 43.9146979074777)</td>
+<td align="left">c(-118.154335091576, 43.9212923973461)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-19</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.14835166806, 43.9239285460249)</td>
+<td align="left">c(-118.162674521206, 43.9180734037217)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
-<td align="left">SU-20</td>
+<td align="left">SU-23</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.161559839801, 43.9167490592324)</td>
+<td align="left">c(-118.1562603592, 43.9234209051715)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
-<td align="left">SU-21</td>
+<td align="left">SU-25</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.149043292322, 43.9204658155032)</td>
+<td align="left">c(-118.152627161192, 43.9273758921382)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
-<td align="left">SU-22</td>
+<td align="left">SU-26</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.161642285226, 43.9225977708183)</td>
+<td align="left">c(-118.162197317116, 43.9280132555619)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
-<td align="left">SU-24</td>
+<td align="left">SU-27</td>
 <td align="left">open_water</td>
 <td align="left">south</td>
-<td align="left">c(-118.161052945264, 43.9226976015214)</td>
+<td align="left">c(-118.144406926883, 43.9254734476605)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-36</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.150958008092, 43.9369831376718)</td>
+<td align="left">c(-118.164713596184, 43.9437352963652)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-37</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.151981356667, 43.9357894137257)</td>
+<td align="left">c(-118.163078345381, 43.9476828914026)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-38</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.148125333779, 43.9354340573615)</td>
+<td align="left">c(-118.167085234906, 43.9414492170237)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-39</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.162478366062, 43.933897881223)</td>
+<td align="left">c(-118.158010655016, 43.9468319021028)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-40</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.158079993959, 43.9377025841994)</td>
+<td align="left">c(-118.164306971637, 43.9443802560296)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-41</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.157714516835, 43.9404076286366)</td>
+<td align="left">c(-118.160105275096, 43.9463836024735)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-42</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.146813739077, 43.9358326150266)</td>
+<td align="left">c(-118.167034236106, 43.942096215885)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-43</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.160325890897, 43.9343798488315)</td>
+<td align="left">c(-118.156019267736, 43.9457640135952)</td>
 </tr>
 <tr class="even">
 <td align="left">OverSamp</td>
 <td align="left">SU-44</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.155325112279, 43.9367972287327)</td>
+<td align="left">c(-118.163914578513, 43.9449363163494)</td>
 </tr>
 <tr class="odd">
 <td align="left">OverSamp</td>
 <td align="left">SU-45</td>
 <td align="left">trib</td>
 <td align="left">trib</td>
-<td align="left">c(-118.155332459856, 43.9415460493173)</td>
+<td align="left">c(-118.162306558575, 43.9455825396596)</td>
 </tr>
 </tbody>
 </table>

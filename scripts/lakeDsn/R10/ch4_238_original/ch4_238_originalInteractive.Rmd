@@ -1,5 +1,5 @@
 ---
-title: "Design files for ch4-238, Beulah reservoir, under 'average' water levels"
+title: "Design files for ch4-238, Beulah reservoir, under 'original' water levels"
 author: "J. Beaulieu"
 date: "4/2/2020"
 output: html_document
@@ -26,15 +26,15 @@ library(tidyr)
 
 
 ```{r, echo=FALSE, message=FALSE, results="hide"}
-# see SuRGE/lakeDsn/R10/ch4_238 beulah/ch4_238_average/ch4_238_average.R for origin of these data
+# see SuRGE/lakeDsn/R10/ch4_238 beulah/ch4_238_original/ch4_238_original.R for origin of these data
 
 # survey design points
-averageSitesWGS238 <- st_read(dsn = "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average",
-                              layer = "averageAllSitesWGS238", stringsAsFactors = FALSE)
+originalSitesWGS238 <- st_read(dsn = "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original",
+                              layer = "originalAllSitesWGS238", stringsAsFactors = FALSE)
 
 # lake polygon
-averageWGS238 <- st_read(dsn = "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average",
-                             layer = "averageWGS238") 
+originalWGS238 <- st_read(dsn = "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original",
+                             layer = "originalWGS238") 
 
 
 ```
@@ -45,20 +45,20 @@ Print from Internet Explorer for best quality.
 ```{r, echo=FALSE, out.width= "100%"}
 
 # leaflet colors
-factpal <- colorFactor(topo.colors(3), averageWGS238$section)
-factpal.points <- colorFactor(palette = c("red", "black"), domain = averageSitesWGS238$panel)
+factpal <- colorFactor(topo.colors(3), originalWGS238$section)
+factpal.points <- colorFactor(palette = c("red", "black"), domain = originalSitesWGS238$panel)
 
-# Main points
+# All points
 leaflet() %>%
   addProviderTiles(providers$Esri.WorldImagery) %>%
-  fitBounds(lng1 = min(st_coordinates(averageSitesWGS238)[,1]),
-            lng2 = max(st_coordinates(averageSitesWGS238)[,1]),
-            lat1 = min(st_coordinates(averageSitesWGS238)[,2]),
-            lat2 = max(st_coordinates(averageSitesWGS238)[,2])) %>%
-  addPolygons(data = averageWGS238,
+  fitBounds(lng1 = min(st_coordinates(originalSitesWGS238)[,1]),
+            lng2 = max(st_coordinates(originalSitesWGS238)[,1]),
+            lat1 = min(st_coordinates(originalSitesWGS238)[,2]),
+            lat2 = max(st_coordinates(originalSitesWGS238)[,2])) %>%
+  addPolygons(data = originalWGS238,
               color = "black", weight = 1,
               fillColor = ~factpal(section)) %>%
-  addCircleMarkers(data = dplyr::filter(averageSitesWGS238, panel == "mainSites"),
+  addCircleMarkers(data = dplyr::filter(originalSitesWGS238, panel == "mainSites"),
                    fillColor = ~factpal.points(panel),
                    fillOpacity = 1,
                    stroke = FALSE,
@@ -70,10 +70,10 @@ leaflet() %>%
                                                  "font-size" = "15px",
                                                  "font-family" = "serif"))) %>%
   addLegend(position = "bottomright", pal = factpal.points,
-            values = as.character(averageSitesWGS238$panel),
+            values = as.character(originalSitesWGS238$panel),
             title = "Sample sites") %>%
   addLegend(position = "bottomright", pal = factpal,
-            values = as.character(averageWGS238$section),
+            values = as.character(originalWGS238$section),
             title = "sections") %>%
   addScaleBar()
 
@@ -87,14 +87,14 @@ leaflet() %>%
 
 leaflet() %>%
   addProviderTiles(providers$Esri.WorldImagery) %>%
-  fitBounds(lng1 = min(st_coordinates(averageSitesWGS238)[,1]),
-            lng2 = max(st_coordinates(averageSitesWGS238)[,1]),
-            lat1 = min(st_coordinates(averageSitesWGS238)[,2]),
-            lat2 = max(st_coordinates(averageSitesWGS238)[,2])) %>%
-  addPolygons(data = averageWGS238,
+  fitBounds(lng1 = min(st_coordinates(originalSitesWGS238)[,1]),
+            lng2 = max(st_coordinates(originalSitesWGS238)[,1]),
+            lat1 = min(st_coordinates(originalSitesWGS238)[,2]),
+            lat2 = max(st_coordinates(originalSitesWGS238)[,2])) %>%
+  addPolygons(data = originalWGS238,
               color = "black", weight = 1,
               fillColor = ~factpal(section)) %>%
-  addCircleMarkers(data = dplyr::filter(averageSitesWGS238, panel == "OverSamp"),
+  addCircleMarkers(data = dplyr::filter(originalSitesWGS238, panel == "OverSamp"),
                    fillColor = "black", # manual color specification
                    fillOpacity = 1,
                    stroke = FALSE,
@@ -111,7 +111,7 @@ leaflet() %>%
             labels = "OverSamp", # manual 'labels' specification
             title = "Sample sites") %>%
   addLegend(position = "bottomright", pal = factpal,
-            values = as.character(averageWGS238$section),
+            values = as.character(originalWGS238$section),
             title = "sections") %>%
   addScaleBar()
 ```
@@ -122,11 +122,11 @@ leaflet() %>%
 
 # this is failing.  Can't figure out why
 # Works when cloned to my local system.
- # coords <- read.table(file = "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/ch4_238_averageSites.txt",
+ # coords <- read.table(file = "../../../../../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original/ch4_238_originalSites.txt",
  #                      header = TRUE, sep = "\t")
 
 # Absolute path approach.  Need to fix
-coords <- read.table(file = "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/lakeDsn/R10/ch4_238 beulah/ch4_238_average/ch4_238_averageSites.txt",
+coords <- read.table(file = "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/lakeDsn/R10/ch4_238 beulah/ch4_238_original/ch4_238_originalSites.txt",
                      header = TRUE, sep = "\t")
 
 knitr::kable(coords)
