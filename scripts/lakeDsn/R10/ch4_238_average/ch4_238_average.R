@@ -125,6 +125,24 @@ averageWGS238 <- averageEqArea238 %>% st_transform("+proj=longlat +datum=WGS84")
 averageSitesWGS238 <-  averageSitesEqArea238 %>% st_transform("+proj=longlat +datum=WGS84") # # tried 4269 and 4238, but leaflet asked for this 
 
 
+# BUFFER
+# Create a 15m radius buffer around each sampling point
+averageSitesEqArea238buffer <- st_buffer(averageSitesEqArea238, 15) # radius of 15m, diameter of 30m?
+averageSitesWGS238buffer <- st_transform(averageSitesEqArea238buffer, crs = "+proj=longlat +datum=WGS84")
+
+plot(averageSitesEqArea238buffer$geometry)
+points(averageSitesEqArea238$geometry)
+ggplot() + 
+  geom_sf(data = averageEqArea238) +
+  geom_sf(data = averageSitesEqArea238buffer) +
+  geom_sf(data = averageSitesEqArea238)
+  
+
+ggplot() + 
+  geom_sf(data = averageWGS238) +
+  geom_sf(data = averageSitesWGS238buffer) +
+  geom_sf(data = averageSitesWGS238)
+
 
 # MAPS---------------------
 # Approach 1: generate static maps to paste in .doc or .rmd (see ch4_238_average.html).  html or .doc can be printed for use in field.
@@ -285,6 +303,72 @@ write.table(averageSitesWGS238 %>%
             file = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/ch4_238_averageSites.txt",
             row.names = FALSE, sep="\t")
 
+
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+# geopackage
+# can write all layers to a geopackage, which behaves much like a geodatabase in ArcGIS.
+
+# write out all sites
+st_write(obj = averageSitesWGS238, 
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
+         layer = "averageAllSitesWGS238", # package appends 'main.' to layer name?
+         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         #update = TRUE, actually not sure how this differs from 'OVERWRITE=YES'
+         driver = "GPKG")
+
+# write out all buffers
+st_write(obj = averageSitesWGS238buffer, 
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
+         layer = "averageSitesWGS238buffer", # package appends 'main.' to layer name?
+         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         #update = TRUE, actually not sure how this differs from 'OVERWRITE=YES'
+         driver = "GPKG")
+
+
+
+# write out main sites
+st_write(obj = filter(averageSitesWGS238, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
+         layer = "averageMainSitesWGS238",
+         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         driver = "GPKG")
+
+# write out main site buffers
+st_write(obj = filter(averageSitesWGS238buffer, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
+         layer = "averageMainSitesWGS238buffer",
+         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         driver = "GPKG")
+
+# write out oversample sites
+st_write(obj = filter(averageSitesWGS238, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
+         layer = "averageOverSampSitesWGS238",
+         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         driver = "GPKG")
+
+# write out oversample site buffers
+st_write(obj = filter(averageSitesWGS238buffer, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
+         layer = "averageOverSampSitesWGS238buffer",
+         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         driver = "GPKG")
+
+
+# write out lake polygon
+st_write(obj = averageWGS238,
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
+         layer = "averageWGS238",
+         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         driver = "GPKG")
+
+
+st_layers(file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"))
+
+
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+# to .shp 
+
 # write out main sites
 st_write(obj = filter(averageSitesWGS238, panel == "mainSites"), 
          dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", 
@@ -318,4 +402,4 @@ st_write(obj = averageWGS238,
          delete_layer = TRUE, # True to overwrite existing layer
          driver = "ESRI Shapefile")
 
-
+averageSitesEqArea238buffer
