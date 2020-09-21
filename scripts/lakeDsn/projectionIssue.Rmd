@@ -1,0 +1,46 @@
+---
+title: "Problem writing Web Mercator"
+author: "J. Beaulieu"
+date: "5/6/2020"
+output: html_document
+---
+
+
+
+## Problem preserving coordinate system with st_write
+
+I'm working up some shapefiles in R.  The files will be written to disk, used to make a map in ArcGIS Pro, and the map will be published as a 'Web Layer' to the GeoPlatform.  Within the GeoPlatfrorm, I will use the Web Layer to create a Web Map.  ESRI advised that the shapefiles should use the Web Mercator projection (3857) to be consistent with the projection of the base maps.
+
+Lets read in a .shp.  It comes into R with a 4267 EPSG code.
+
+```{r }
+library(sf)
+
+nc <- st_read(system.file("shape/nc.shp", package="sf"))
+st_crs(nc)
+```
+
+Lets project to 3857:
+
+```{r }
+nc <- nc %>% st_transform(3857)
+st_crs(nc)
+
+```
+
+OK, good, now write to disk.
+```{r}
+st_write(nc, "nc.shp", delete_layer = TRUE)
+
+```
+
+When I read the file back into R, the coordinate system seems to be corrupted.  The EPSG code is gone and the coordinate system is no longer equal to 3857.  I first noticed this when working with the object in ArcGIS Pro which reported a coordinate system of Mercator 2SP.  It seems that st_write is somehow corrupting the coordinate system definition.  Any idea what's going on?
+```{r}
+nc.merc <- st_read("nc.shp")
+st_crs(nc.merc)
+st_crs(nc.merc) == st_crs(3857)
+```
+
+
+
+

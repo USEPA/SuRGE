@@ -1,0 +1,44 @@
+---
+title: "Design files for ch4-249, Emigrant reservoir, under 'mid' water levels"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+## Index Site
+SU-06
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/R10/ch4_249 emigrant/ch4_249_mid/249_midMain.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/R10/ch4_249 emigrant/ch4_249_mid/249_midOver.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+# this is failing.  Can't figure out why.
+# coords <- read.table(file = "../../../../../../../lakeDsn/R10/ch4_249 emigrant/ch4_249_mid/ch4_249_midSites.txt",
+#                       header = TRUE, sep = "\t")
+
+# Absolute path approach.  Need to fix
+coords <- read.table(file = "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/lakeDsn/R10/ch4_249 emigrant/ch4_249_mid/ch4_249_midSites.txt",
+                     header = TRUE, sep = "\t")
+
+knitr::kable(coords, caption = "Site coordinates")
+```

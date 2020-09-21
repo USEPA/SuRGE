@@ -1,0 +1,44 @@
+---
+title: "Design files for ch4-044, Lake Juniper"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+## Summary
+The SW end of lake is a Cypress swamp with unknown accessibility.  This region constitutes the 'cypress' stratum in the survey design and has two main sites and 5 oversample sites.  The open-water stratum has 15 main sites.  Ideally, we will sample the first 13 main sites in the open-water and the two in cypress.  If we are unable to access cypress sites, compensate by sampling additional main sites in open-water.  We should sample a total of 15 sites for the entire lake.
+
+Use SU-08 for Index site.
+
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/RTP/CH4-044/044_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/RTP/CH4-044/044_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/RTP/CH4-044/ch4-044Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

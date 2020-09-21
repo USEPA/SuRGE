@@ -1,66 +1,58 @@
 # STRATIFIED, UNEQUAL PROBABILITY GRTS DESIGN
 
-##Design for Beulah Reservoir based on NHD lake polygon and bathymetry from 
-##Portland State University.  This lake polygon is much larger than in recent
-##satelite imagery.  Will create second design based on recent imagery.
-
-## WHEN MODIFIYING FOR ANOTHER LAKE MAKE THE FOLLOWING CHANGES: 
-##  MODIFY THE GRTS DESIGN LIST FOR THE NUMBER OF MAIN AND OVERSAMPLE SITES WANTED 
-##  FOR EACH STRATA AND EACH SECTION, NOMINALLY:
-##    OPEN WATER MAINSITES = 10
-##            SECTION A (NORTH) = X
-##            SECTION B (SOUTH) = 10-X
-##    OPEN WATER OVER SAMPLE = 20
-##    TRIBUTARY MAIN SITES = 5
-##    TRIBUTARY OVER SAMPLE = 10
-##  CHANGE THE ZOOM FACTOR ON LINE 179
-##  FIND AND REPLACE ALL INSTANCES OF THE LAKE NAME
+# PRELIMINARIES-------------
+# When modifying for another lake: 
+#  Modify design list for number of main/oversample sites wanted 
+#  for each strata and section, nominally:
+#    open water main sites = 10
+#            section A (north) = X
+#            section B (south) = 10-X
+#    open water oversample = 20
+#    trib main sites = 5
+#    trib oversample sites = 10
+#  find and replace all instances of lake name
 
 
-# BEULAH RESERVOIR 
-# LARGE LAKE (7.2 km^2) WITH TWO TRIB ARMS (NW AND NE). NW TRIB IS THE MALHEUR
-# RIVER AND APPEARS TO DRAIN MUCH LARGER AREA THAN NE ARM.
-# ~100FT DEEP AT DAM
-
-# A STRATIFIED-UNEQUAL PROBABILITY GRTS DESIGN
-## UNEQUAL PROBABILITY USED IN AN ATTEMPT TO MAKE SAMPLING EASIER ON THE CREW
-## THIS GRTS DESIGN HAS ALSO BEEN UPDATED TO HAVE THE EXPANDED ATTRIBUTE TABLE IN THE
-## "EQAREA" VERSION OF THE SITE SHAPE FILE
-
-# TRIB STRATA EXTENDS TO A DEPTH 8M (26 FT).  THIS IS THE CUTOFF USED FOR
-# HARSHA LAKE.  BASING BATHYMETRY ON PORTLAND STATUE UNIVERSITY MAP.  APPEARS
-# MORE ACCURATE THAN MODELED CONTOURS.
-
-
-# WORKING DIRECTORY IS THE DIRECTORY CONTAINING THE .rproj FILE.  DATA IS KEPT THREE DIRECTORIES HIGHER IN SuRGE DOCUMENTS
-# LIBRARY.  CAN USE RELATIVE PATHS TO READ IN DATA.---------
+# WORKING DIRECTORY 
+# Working directory contains .rproj file.  Data is kept three directories higher in SuRGE documents
+# librarys.  Use relative paths to read/write data.
 # dir("../../../") # two dots brings you up one level in data hierarchy.  This code brings you up three levels into SuRGE.
 
-# LIBRARIES------
+# LIBRARIES
 # library(tidyverse) # load from masterLibrary.R
 # library(spsurvey) # load from masterLibrary.R
 # library(leaflet) # load from masterLibrary.R
 # library(mapview) # load from masterLibrary.R
 
+# PROJECTIONS
+# grts function requires Albers (5070)
+# leaflet requires WGS84 ()
+# lat/long table requires WGS84
+# ArcGIS Pro/Geoplatform requires Web Mercator (3857)
 
-# READ POLYGON SHAPEFILE-----
-# USED IN grts() CALL
+
+# BEULAH RESERVOIR----- 
+# Design for Beulah Reservoir (ch4-238) per the original NHDPlusV2 polygon.  
+# 7.2 km^2 with two trib arms (NW AND NE). NW trib is Malheur river and drains larger area
+# that NE arm.  100' deep at dam.  Trib strata extends to a depth of 8M (26 FT). Basing
+# bathymetry on Portland State University map.  Appears more accurate than modeled contours.
+
+# Read polygon shapefile
 originalEqArea238 <- st_read(dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original",
-                             layer = "beulahEqAreaOriginal")  # shapefile name
+                             layer = "originalEqArea238")  # shapefile name
 plot(originalEqArea238$geometry) # visualize polygon
 
 # Check CRS, must be equal area for grts function
-# no EPSG code, but arcGIS reports a Geographic Coordinate system of GCS North American 1983 (WKID 4269) and a Projected
+# EPSG code hard to decipher from output, CRS clearly reported as 'NAD_1983_Albers'
 # Coordinate System of NAD 1983 Albers (WKID = 0)
 st_crs(originalEqArea238) 
-originalEqArea238 <- st_transform(originalEqArea238, 5070) # convert to NAD_1983_Contiguous_USA_Albers
-st_crs(originalEqArea238) # 5070
+st_crs(originalEqArea238) == st_crs(5070) # True
+
 # clean up attributes
 originalEqArea238 <- originalEqArea238 %>%
-  mutate(lakeName = "Beulah",
+  mutate(lakeName = "beulah",
          lakeSiteID = "ch4-238") %>%
   select(lakeName, lakeSiteID, Area_km2, strata, section)
-
 
 
 # ATTRIBUTES----------
@@ -77,14 +69,12 @@ temp
 set.seed(4447864)
 
 # Create the design list
-### We decided to set the number of main sites in the tributary area to 5, since it is a relatively small area (0.4 sq km)
-### the unequal probability splits the open water part of the lake into two sections of almost equal area
 original238Dsgn <- list("open_water" = list(panel=c(mainSites=10),
                                             seltype="Unequal",
-                                            caty.n=c("north" = 6, 
-                                                     "south" = 4), 
+                                            caty.n=c("north" = 6, # 
+                                                     "south" = 4), # 
                                             over=20),
-                        "trib"=list(panel=c(mainSites=5), #5.2sites/km2
+                        "trib"=list(panel=c(mainSites=5), # 
                                     seltype="Equal",
                                     over=10))
 # create SpatialDesign object
@@ -106,68 +96,37 @@ summary(originalSites238)
 
 
 # CRS--------------
-# can specify grts to write out .shp.  if so, use this in grts function:
-# out.shape="../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original/originalSitesEqArea238")
-
-# I tested this and shapefile is written out without any coordinate reference system (no .prj file)
-# It might be cleaner to convert SpatialDesign object to sf, define CRS, then write to disk.
-# Waiting for guidance from Marc Weber on how to define CRS of object.
-
 class(originalSites238) # SpatialDesign object
 originalSitesEqArea238 <- st_as_sf(originalSites238) # convert to sf object
 st_crs(originalSitesEqArea238) # no coordinate reference system?
-st_crs(originalSitesEqArea238) = 5070 # I'm pretty sure it should inherit CRS from parent object
+st_crs(originalSitesEqArea238) = 5070 # inherits from parent object, per Weber.
 
 # project to WGS84 for plotting with leaflet, ArcPad, and writing out lat/long table  (5070 works fine for mapview)
-originalWGS238 <- originalEqArea238 %>% st_transform("+proj=longlat +datum=WGS84") # tried 4269 and 4238, but leaflet asked for this
-originalSitesWGS238 <-  originalSitesEqArea238 %>% st_transform("+proj=longlat +datum=WGS84") # # tried 4269 and 4238, but leaflet asked for this 
+originalWGS238 <- originalEqArea238 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83
+originalSitesWGS238 <-  originalSitesEqArea238 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83 
 
+# project to Web Mercator (3857) for use in ArcGIS Pro/geoplatform
+originalMerc238 <- originalEqArea238 %>% st_transform(3857) 
+originalSitesMerc238 <-  originalSitesEqArea238 %>% st_transform(3857) 
 
 # BUFFER
 # Create a 15m radius buffer around each sampling point
-originalSitesEqArea238buffer <- st_buffer(originalSitesEqArea238, 15) # radius of 15m, diameter of 30m?
-originalSitesWGS238buffer <- st_transform(originalSitesEqArea238buffer, crs = "+proj=longlat +datum=WGS84")
-
+# Per ESRI, buffer should be created in Web Mercator, an equidistant projection, not Albers
+originalSitesMerc238buffer <- st_buffer(originalSitesMerc238, 15) # radius of 15m, diameter of 30m. radius = 45ft = 2 boat lengths
+originalSitesWGS238buffer <- originalSitesMerc38buffer %>% st_transform(4326) # for use in ArcPad
 
 
 # MAPS---------------------
-# Approach 1: generate static maps to paste in .doc or .rmd (see ch4_238_original.html).  html or .doc can be printed for use in field.
+# Approach: generate static maps to paste in .rmd.  Knitted html can be printed for use in field.
 # - ggmap requires an API key from google to provide satellite images.  Credit card required.  No thanks.
 # - decided to make interactive map with leaflet, but capture image in .png with mapview::mapshot()
-
-# Approach 2: knit .rmd to html with interactive maps.  These can be printed by field crews or viewed on computer.
-# - getting some weird errors about path being too long in ch4_238_originalInteractive.rmd
-# - keeping maps and mapshot below until problem solved.  Hopefully can come back and delete code below.
+# - per Lil, field crews won't make use of interactive maps
 
 
-# Interactive below, export to .png using mapview::mapshot()
-# # MAPVIEW APPROACH
-# # mapview approach gets close, but I can't quite tweak everything the way I like
-# # mapview can project on fly.  OK to use crs 5070
-# # make map
-# m <- mapview(originalEqArea238, zcol = "section", map.types = "Esri.WorldImagery") +
-#   mapview(originalSitesEqArea238.sf, zcol = "panel", col.regions = c("red", "black")) 
-# 
-# 
-# # define default zoom level # USE THIS APPROACH FOR MAPVIEW
-# cntr_crds <- data.frame(lon = mean(st_coordinates(originalSitesEqArea238.sf)[,1]), # mean long
-#                         lat = mean(st_coordinates(originalSitesEqArea238.sf)[,2])) %>% # mean lat
-#   st_as_sf(., coords = c("lon", "lat"), crs = 5070) %>% # convert df to sf, inherits CRS from parent, 5070
-#   st_transform(., 4269) # project to 5070 (WGS84 lat lon) for 'centering' using leaflet function
-# 
-# 
-# m@map %>% leaflet::setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 14)
-
-
-# LEAFLET APPROACH
-# Leaflet allows much more control, requires WGS84 CRS.
-# define default zoom level, used with setView function
-# setView requires manual fiddling with zoom level.  fitBounds() is cleaner
-# cntr_crds <- data.frame(lon = mean(st_coordinates(originalSitesWGS238.sf)[,1]), # mean long
-#                         lat = mean(st_coordinates(originalSitesWGS238.sf)[,2])) %>% # mean lat
-#   st_as_sf(., coords = c("lon", "lat"), crs = "+proj=longlat +datum=WGS84") # convert df to sf, inherits CRS from parent, WGS84
-
-  
+# LEAFLET
+# Mapview approach gets close, but I can't quite tweak everything the way I like
+# Leaflet aloriginals much more control, requires WGS84 CRS.
+# setView for zoo level requires manual fiddling with zoom level.  fitBounds() is cleaner
 # mapshot() call seems sensitive to length of file name (sometimes?).  Try to keep simple.
 # ch4_238_originalAll.png works, but ch4_238_originalAllSites.png does not.
 
@@ -282,62 +241,115 @@ mapview::mapshot(m, file = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original
 
 
 # WRITE OBJECTS TO DISK-----------------
-# write out table of sample sites for reference in field
+# write out table of sample sites for reference in field.  Must be WGS
 write.table(originalSitesWGS238 %>%
-              select(panel, siteID, stratum, section) %>%
-              arrange(panel, stratum, section, siteID),
+              select(panel, siteID, section) %>%
+              arrange(panel, section, siteID),
             file = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original/ch4_238_originalSites.txt",
             row.names = FALSE, sep="\t")
 
 
-#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
 # geopackage
 # can write all layers to a geopackage, which behaves much like a geodatabase in ArcGIS.
+
+# Web Mercator for Web Map first
+
+# write out all sites
+st_write(obj = originalSitesMerc238, 
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"), 
+         layer = "originalAllSitesMerc238", # package appends 'main.' to layer name?
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out all buffers
+st_write(obj = originalSitesMerc238buffer, 
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"), 
+         layer = "originalAllSitesMerc238buffer", # package appends 'main.' to layer name?
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out main sites
+st_write(obj = filter(originalSitesMerc238, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"), 
+         layer = "originalMainSitesMerc238",
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out main site buffers
+st_write(obj = filter(originalSitesMerc238buffer, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"), 
+         layer = "originalMainSitesMerc238buffer",
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out oversample sites
+st_write(obj = filter(originalSitesMerc238, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"), 
+         layer = "originalOverSampSitesMerc238",
+         append=FALSE, # this overwrites existing layer,
+         driver = "GPKG")
+
+# write out oversample site buffers
+st_write(obj = filter(originalSitesMerc238buffer, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"), 
+         layer = "originalOverSampSitesMerc238buffer",
+         append=FALSE, # this overwrites existing layer,
+         driver = "GPKG")
+
+
+# write out lake polygon
+st_write(obj = originalMerc238,
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"), 
+         layer = "originalMerc238",
+         append=FALSE, # this overwrites existing layer,
+         driver = "GPKG")
+
+
+st_layers(file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalMerc238.gpkg"))
+
+
+# WGS for ArcPad next
 
 # write out all sites
 st_write(obj = originalSitesWGS238, 
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"), 
          layer = "originalAllSitesWGS238", # package appends 'main.' to layer name?
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
-         #update = TRUE, actually not sure how this differs from 'OVERWRITE=YES'
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out all buffers
 st_write(obj = originalSitesWGS238buffer, 
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"), 
          layer = "originalSitesWGS238buffer", # package appends 'main.' to layer name?
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
-         #update = TRUE, actually not sure how this differs from 'OVERWRITE=YES'
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
-
-
 
 # write out main sites
 st_write(obj = filter(originalSitesWGS238, panel == "mainSites"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"), 
          layer = "originalMainSitesWGS238",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out main site buffers
 st_write(obj = filter(originalSitesWGS238buffer, panel == "mainSites"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"), 
          layer = "originalMainSitesWGS238buffer",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out oversample sites
 st_write(obj = filter(originalSitesWGS238, panel == "OverSamp"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"), 
          layer = "originalOverSampSitesWGS238",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 # write out oversample site buffers
 st_write(obj = filter(originalSitesWGS238buffer, panel == "OverSamp"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"), 
          layer = "originalOverSampSitesWGS238buffer",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
@@ -345,47 +357,9 @@ st_write(obj = filter(originalSitesWGS238buffer, panel == "OverSamp"),
 st_write(obj = originalWGS238,
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"), 
          layer = "originalWGS238",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
 st_layers(file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", "originalWGS238.gpkg"))
-
-
-#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
-# to .shp 
-
-# write out main sites
-st_write(obj = filter(originalSitesWGS238, panel == "mainSites"), 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", 
-         layer = "originalMainSitesWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
-
-# write out OverSamp sites
-st_write(obj = filter(originalSitesWGS238, panel == "OverSamp"), 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", 
-         layer = "originalOverSampSitesWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
-# write out all sites
-st_write(obj = originalSitesWGS238, 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", 
-         layer = "originalAllSitesWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
-# write out lake polygon
-st_write(obj = originalWGS238, 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_original", 
-         layer = "originalWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
 

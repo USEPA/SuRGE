@@ -1,0 +1,43 @@
+---
+title: "Design files for CH4-205, Lake Station"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Very small lake located within Rosser Park.  Gravel boat launch will require small boat.  We received permission from Hobart Township Parks department (Fred Williams, 219-588-6075).
+
+## Index Site
+No bathymetry available, but NLA data indicates max depth is greater than 6m.  Please locate deepest site for Index Site.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-205/205_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-205/205_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-205/ch4_205_sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

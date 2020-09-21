@@ -1,0 +1,44 @@
+---
+title: "Design files for ch4-137"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+## Index Site
+We have no bathymetry for this lake.  Use SU-08 unless it becomes obvious that another site is deeper.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/RTP/CH4-137/137_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/RTP/CH4-137/137_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+# this sometimes fails (?).  If so, use absolute path below.
+coords <- read.table(file = "../../../../../../../lakeDsn/RTP/CH4-137/ch4_137_sites.txt",
+                      header = TRUE, sep = "\t")
+
+# Absolute path approach.  Shouldn't need this.
+# coords <- read.table(file = "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/lakeDsn/RTP/CH4-137/ch4_137_sites.txt",
+#                      header = TRUE, sep = "\t")
+
+knitr::kable(coords, caption = "Site coordinates")
+```

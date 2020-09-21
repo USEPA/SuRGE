@@ -1,0 +1,51 @@
+---
+title: "Design files for CH4-209, Otter Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Very small (0.11 km2) reservoir.  Our contact for the lake is:
+
+Otter Lake Property Owners
+C/O Ronald Segebarth
+1185 Otter Lake Loop
+Hanson, KY 42413
+rsegebarth@bellsouth.net
+(270) 836-8891
+
+
+## Index Site
+No bathymetry for lake.  Assume sites nearest dam are deepest.  Maybe U-04.  Small lake, we will have time to locate index site when we are there.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-209/209_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-209/209_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-209/ch4_209_sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

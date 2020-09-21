@@ -1,68 +1,58 @@
 # STRATIFIED, UNEQUAL PROBABILITY GRTS DESIGN
 
-##Design for Beulah Reservoir based on NHD lake polygon modified to reflect
-##"average" conditions based on Google Earth time series averages.  Polygon
-##modifications executed by R10.  Alternative design for larger polygon area
-##in beulahAverage.R.  Bathymetry from Portland State University.  
+# PRELIMINARIES-------------
+# When modifying for another lake: 
+#  Modify design list for number of main/oversample sites wanted 
+#  for each strata and section, nominally:
+#    open water main sites = 10
+#            section A (north) = X
+#            section B (south) = 10-X
+#    open water oversample = 20
+#    trib main sites = 5
+#    trib oversample sites = 10
+#  find and replace all instances of lake name
 
 
-## WHEN MODIFIYING FOR ANOTHER LAKE MAKE THE FOLLOWING CHANGES: 
-##  MODIFY THE GRTS DESIGN LIST FOR THE NUMBER OF MAIN AND OVERSAMPLE SITES WANTED 
-##  FOR EACH STRATA AND EACH SECTION, NOMINALLY:
-##    OPEN WATER MAINSITES = 10
-##            SECTION A (NORTH) = X
-##            SECTION B (SOUTH) = 10-X
-##    OPEN WATER OVER SAMPLE = 20
-##    TRIBUTARY MAIN SITES = 5
-##    TRIBUTARY OVER SAMPLE = 10
-##  CHANGE THE ZOOM FACTOR ON LINE 179
-##  FIND AND REPLACE ALL INSTANCES OF THE LAKE NAME
-
-
-# BEULAH RESERVOIR 
-# LARGE LAKE (4.8 km^2) WITH TWO TRIB ARMS (NW AND NE). NW TRIB IS THE MALHEUR
-# RIVER AND APPEARS TO DRAIN MUCH LARGER AREA THAN NE ARM.
-# ~100FT DEEP AT DAM
-
-# A STRATIFIED-UNEQUAL PROBABILITY GRTS DESIGN
-## UNEQUAL PROBABILITY USED IN AN ATTEMPT TO MAKE SAMPLING EASIER ON THE CREW
-## THIS GRTS DESIGN HAS ALSO BEEN UPDATED TO HAVE THE EXPANDED ATTRIBUTE TABLE IN THE
-## "EQAREA" VERSION OF THE SITE SHAPE FILE
-
-# TRIB STRATA EXTENDS TO A DEPTH 8M (26 FT).  THIS IS THE CUTOFF USED FOR
-# HARSHA LAKE.  BASING BATHYMETRY ON PORTLAND STATUE UNIVERSITY MAP.  APPEARS
-# MORE ACCURATE THAN MODELED CONTOURS.
-
-
-# WORKING DIRECTORY IS THE DIRECTORY CONTAINING THE .rproj FILE.  DATA IS KEPT THREE DIRECTORIES HIGHER IN SuRGE DOCUMENTS
-# LIBRARY.  CAN USE RELATIVE PATHS TO READ IN DATA.---------
+# WORKING DIRECTORY 
+# Working directory contains .rproj file.  Data is kept three directories higher in SuRGE documents
+# librarys.  Use relative paths to read/write data.
 # dir("../../../") # two dots brings you up one level in data hierarchy.  This code brings you up three levels into SuRGE.
 
-# LIBRARIES------
+# LIBRARIES
 # library(tidyverse) # load from masterLibrary.R
 # library(spsurvey) # load from masterLibrary.R
 # library(leaflet) # load from masterLibrary.R
 # library(mapview) # load from masterLibrary.R
 
+# PROJECTIONS
+# grts function requires Albers (5070)
+# leaflet requires WGS84 ()
+# lat/long table requires WGS84
+# ArcGIS Pro/Geoplatform requires Web Mercator (3857)
 
-# READ POLYGON SHAPEFILE-----
-# USED IN grts() CALL
+
+# BEULAH RESERVOIR----- 
+# Design for Beulah Reservoir (ch4-238) per the average NHDPlusV2 polygon.  
+# 7.2 km^2 with two trib arms (NW AND NE). NW trib is Malheur river and drains larger area
+# that NE arm.  100' deep at dam.  Trib strata extends to a depth of 8M (26 FT). Basing
+# bathymetry on Portland State University map.  Appears more accurate than modeled contours.
+
+# Read polygon shapefile
 averageEqArea238 <- st_read(dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average",
-                             layer = "beulahEqAreaAverage")  # shapefile name
+                             layer = "averageEqArea238")  # shapefile name
 plot(averageEqArea238$geometry) # visualize polygon
 
 # Check CRS, must be equal area for grts function
-# no EPSG code, but arcGIS reports a Geographic Coordinate system of GCS North American 1983 (WKID 4269) and a Projected
+# EPSG code hard to decipher from output, CRS clearly reported as 'NAD_1983_Albers'
 # Coordinate System of NAD 1983 Albers (WKID = 0)
 st_crs(averageEqArea238) 
-averageEqArea238 <- st_transform(averageEqArea238, 5070) # convert to NAD_1983_Contiguous_USA_Albers
-st_crs(averageEqArea238) # 5070
+st_crs(averageEqArea238) == st_crs(5070) # True
+
 # clean up attributes
 averageEqArea238 <- averageEqArea238 %>%
-  mutate(lakeName = "Beulah",
+  mutate(lakeName = "beulah",
          lakeSiteID = "ch4-238") %>%
   select(lakeName, lakeSiteID, Area_km2, strata, section)
-
 
 
 # ATTRIBUTES----------
@@ -79,14 +69,12 @@ temp
 set.seed(4447864)
 
 # Create the design list
-### Five main sites in the tributary.
-### the unequal probability splits the open water part of the lake into two sections of almost equal area
 average238Dsgn <- list("open_water" = list(panel=c(mainSites=10),
                                             seltype="Unequal",
-                                            caty.n=c("north" = 5, #2.7 sites/km2
-                                                     "south" = 5), #2.6 sites/km2
+                                            caty.n=c("north" = 5, # 
+                                                     "south" = 5), # 
                                             over=20),
-                        "trib"=list(panel=c(mainSites=5), #5.2sites/km2
+                        "trib"=list(panel=c(mainSites=5), # 
                                     seltype="Equal",
                                     over=10))
 # create SpatialDesign object
@@ -108,80 +96,37 @@ summary(averageSites238)
 
 
 # CRS--------------
-# can specify grts to write out .shp.  if so, use this in grts function:
-# out.shape="../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/averageSitesEqArea238")
-
-# I tested this and shapefile is written out without any coordinate reference system (no .prj file)
-# It might be cleaner to convert SpatialDesign object to sf, define CRS, then write to disk.
-# Waiting for guidance from Marc Weber on how to define CRS of object.
-
 class(averageSites238) # SpatialDesign object
 averageSitesEqArea238 <- st_as_sf(averageSites238) # convert to sf object
 st_crs(averageSitesEqArea238) # no coordinate reference system?
-st_crs(averageSitesEqArea238) = 5070 # I'm pretty sure it should inherit CRS from parent object
+st_crs(averageSitesEqArea238) = 5070 # inherits from parent object, per Weber.
 
 # project to WGS84 for plotting with leaflet, ArcPad, and writing out lat/long table  (5070 works fine for mapview)
-averageWGS238 <- averageEqArea238 %>% st_transform("+proj=longlat +datum=WGS84") # tried 4269 and 4238, but leaflet asked for this
-averageSitesWGS238 <-  averageSitesEqArea238 %>% st_transform("+proj=longlat +datum=WGS84") # # tried 4269 and 4238, but leaflet asked for this 
+averageWGS238 <- averageEqArea238 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83
+averageSitesWGS238 <-  averageSitesEqArea238 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83 
 
+# project to Web Mercator (3857) for use in ArcGIS Pro/geoplatform
+averageMerc238 <- averageEqArea238 %>% st_transform(3857) 
+averageSitesMerc238 <-  averageSitesEqArea238 %>% st_transform(3857) 
 
 # BUFFER
 # Create a 15m radius buffer around each sampling point
-averageSitesEqArea238buffer <- st_buffer(averageSitesEqArea238, 15) # radius of 15m, diameter of 30m?
-averageSitesWGS238buffer <- st_transform(averageSitesEqArea238buffer, crs = "+proj=longlat +datum=WGS84")
-
-plot(averageSitesEqArea238buffer$geometry)
-points(averageSitesEqArea238$geometry)
-ggplot() + 
-  geom_sf(data = averageEqArea238) +
-  geom_sf(data = averageSitesEqArea238buffer) +
-  geom_sf(data = averageSitesEqArea238)
-  
-
-ggplot() + 
-  geom_sf(data = averageWGS238) +
-  geom_sf(data = averageSitesWGS238buffer) +
-  geom_sf(data = averageSitesWGS238)
+# Per ESRI, buffer should be created in Web Mercator, an equidistant projection, not Albers
+averageSitesMerc238buffer <- st_buffer(averageSitesMerc238, 15) # radius of 15m, diameter of 30m. radius = 45ft = 2 boat lengths
+averageSitesWGS238buffer <- averageSitesWGS238buffer %>% st_transform(4326) # for use in ArcPad
 
 
 # MAPS---------------------
-# Approach 1: generate static maps to paste in .doc or .rmd (see ch4_238_average.html).  html or .doc can be printed for use in field.
+# Approach: generate static maps to paste in .rmd.  Knitted html can be printed for use in field.
 # - ggmap requires an API key from google to provide satellite images.  Credit card required.  No thanks.
 # - decided to make interactive map with leaflet, but capture image in .png with mapview::mapshot()
-
-# Approach 2: knit .rmd to html with interactive maps.  These can be printed by field crews or viewed on computer.
-# - getting some weird errors about path being too long in ch4_238_averageInteractive.rmd
-# - keeping maps and mapshot below until problem solved.  Hopefully can come back and delete code below.
+# - per Lil, field crews won't make use of interactive maps
 
 
-# Interactive below, export to .png using mapview::mapshot()
-# # MAPVIEW APPROACH
-# # mapview approach gets close, but I can't quite tweak everything the way I like
-# # mapview can project on fly.  OK to use crs 5070
-# # make map
-# m <- mapview(averageEqArea238, zcol = "section", map.types = "Esri.WorldImagery") +
-#   mapview(averageSitesEqArea238.sf, zcol = "panel", col.regions = c("red", "black")) 
-# 
-# 
-# # define default zoom level # USE THIS APPROACH FOR MAPVIEW
-# cntr_crds <- data.frame(lon = mean(st_coordinates(averageSitesEqArea238.sf)[,1]), # mean long
-#                         lat = mean(st_coordinates(averageSitesEqArea238.sf)[,2])) %>% # mean lat
-#   st_as_sf(., coords = c("lon", "lat"), crs = 5070) %>% # convert df to sf, inherits CRS from parent, 5070
-#   st_transform(., 4269) # project to 5070 (WGS84 lat lon) for 'centering' using leaflet function
-# 
-# 
-# m@map %>% leaflet::setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 14)
-
-
-# LEAFLET APPROACH
+# LEAFLET
+# Mapview approach gets close, but I can't quite tweak everything the way I like
 # Leaflet allows much more control, requires WGS84 CRS.
-# define default zoom level, used with setView function
-# setView requires manual fiddling with zoom level.  fitBounds() is cleaner
-# cntr_crds <- data.frame(lon = mean(st_coordinates(averageSitesWGS238.sf)[,1]), # mean long
-#                         lat = mean(st_coordinates(averageSitesWGS238.sf)[,2])) %>% # mean lat
-#   st_as_sf(., coords = c("lon", "lat"), crs = "+proj=longlat +datum=WGS84") # convert df to sf, inherits CRS from parent, WGS84
-
-  
+# setView for zoo level requires manual fiddling with zoom level.  fitBounds() is cleaner
 # mapshot() call seems sensitive to length of file name (sometimes?).  Try to keep simple.
 # ch4_238_averageAll.png works, but ch4_238_averageAllSites.png does not.
 
@@ -296,62 +241,115 @@ mapview::mapshot(m, file = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/
 
 
 # WRITE OBJECTS TO DISK-----------------
-# write out table of sample sites for reference in field
+# write out table of sample sites for reference in field.  Must be WGS
 write.table(averageSitesWGS238 %>%
-              select(panel, siteID, stratum, section) %>%
-              arrange(panel, stratum, section, siteID),
+              select(panel, siteID, section) %>%
+              arrange(panel, section, siteID),
             file = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average/ch4_238_averageSites.txt",
             row.names = FALSE, sep="\t")
 
 
-#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
 # geopackage
 # can write all layers to a geopackage, which behaves much like a geodatabase in ArcGIS.
+
+# Web Mercator for Web Map first
+
+# write out all sites
+st_write(obj = averageSitesMerc238, 
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"), 
+         layer = "averageAllSitesMerc238", # package appends 'main.' to layer name?
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out all buffers
+st_write(obj = averageSitesMerc238buffer, 
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"), 
+         layer = "averageAllSitesMerc238buffer", # package appends 'main.' to layer name?
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out main sites
+st_write(obj = filter(averageSitesMerc238, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"), 
+         layer = "averageMainSitesMerc238",
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out main site buffers
+st_write(obj = filter(averageSitesMerc238buffer, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"), 
+         layer = "averageMainSitesMerc238buffer",
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# write out oversample sites
+st_write(obj = filter(averageSitesMerc238, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"), 
+         layer = "averageOverSampSitesMerc238",
+         append=FALSE, # this overwrites existing layer,
+         driver = "GPKG")
+
+# write out oversample site buffers
+st_write(obj = filter(averageSitesMerc238buffer, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"), 
+         layer = "averageOverSampSitesMerc238buffer",
+         append=FALSE, # this overwrites existing layer,
+         driver = "GPKG")
+
+
+# write out lake polygon
+st_write(obj = averageMerc238,
+         dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"), 
+         layer = "averageMerc238",
+         append=FALSE, # this overwrites existing layer,
+         driver = "GPKG")
+
+
+st_layers(file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageMerc238.gpkg"))
+
+
+# WGS for ArcPad next
 
 # write out all sites
 st_write(obj = averageSitesWGS238, 
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
          layer = "averageAllSitesWGS238", # package appends 'main.' to layer name?
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
-         #update = TRUE, actually not sure how this differs from 'OVERWRITE=YES'
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out all buffers
 st_write(obj = averageSitesWGS238buffer, 
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
          layer = "averageSitesWGS238buffer", # package appends 'main.' to layer name?
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
-         #update = TRUE, actually not sure how this differs from 'OVERWRITE=YES'
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
-
-
 
 # write out main sites
 st_write(obj = filter(averageSitesWGS238, panel == "mainSites"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
          layer = "averageMainSitesWGS238",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out main site buffers
 st_write(obj = filter(averageSitesWGS238buffer, panel == "mainSites"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
          layer = "averageMainSitesWGS238buffer",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present
+         append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out oversample sites
 st_write(obj = filter(averageSitesWGS238, panel == "OverSamp"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
          layer = "averageOverSampSitesWGS238",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 # write out oversample site buffers
 st_write(obj = filter(averageSitesWGS238buffer, panel == "OverSamp"),
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
          layer = "averageOverSampSitesWGS238buffer",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
@@ -359,47 +357,9 @@ st_write(obj = filter(averageSitesWGS238buffer, panel == "OverSamp"),
 st_write(obj = averageWGS238,
          dsn = file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"), 
          layer = "averageWGS238",
-         layer_options = 'OVERWRITE=YES', # overwrite layer if already present,
+         append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
 st_layers(file.path( "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", "averageWGS238.gpkg"))
 
-
-#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
-# to .shp 
-
-# write out main sites
-st_write(obj = filter(averageSitesWGS238, panel == "mainSites"), 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", 
-         layer = "averageMainSitesWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
-
-# write out OverSamp sites
-st_write(obj = filter(averageSitesWGS238, panel == "OverSamp"), 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", 
-         layer = "averageOverSampSitesWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
-# write out all sites
-st_write(obj = averageSitesWGS238, 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", 
-         layer = "averageAllSitesWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
-# write out lake polygon
-st_write(obj = averageWGS238, 
-         dsn = "../../../lakeDsn/R10/ch4_238 beulah/ch4_238_average", 
-         layer = "averageWGS238", 
-         update = TRUE,
-         delete_layer = TRUE, # True to overwrite existing layer
-         driver = "ESRI Shapefile")
-
-averageSitesEqArea238buffer

@@ -1,7 +1,7 @@
 ---
 title: "Design files for ch4-238, Beulah reservoir, under 'original' water levels"
 author: "J. Beaulieu"
-date: "4/2/2020"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
@@ -11,6 +11,8 @@ output: html_document
 #https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
 ```
 
+## Index Site
+SU-07 is deepest per Peter's bathymetry.  BOR indicated SU-05, located near dam, is deepest.  Use SU-07 unles it becomes obvious that SU-05 is deeper.
 
 ## Main Sites
 ```{r, echo=FALSE, out.width="100%"}

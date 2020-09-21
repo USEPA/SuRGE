@@ -1,0 +1,42 @@
+---
+title: "Design files for ch4-147, Jean Neustadt Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+## Index Site
+No bathymetry for lake.  Will assume deepest water is near dam.  U-12 is close to dam, but also very close to shoreline.  Use U-01 unless it becomes obvious that other sites are much deeper.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/ADA/CH4-147/147_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/ADA/CH4-147/147_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+# this is failing.  Can't figure out why.
+coords <- read.table(file = "../../../../../../../lakeDsn/ADA/CH4-147/ch4_147_sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

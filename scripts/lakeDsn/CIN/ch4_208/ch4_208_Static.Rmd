@@ -1,0 +1,44 @@
+---
+title: "Design files for CH4-208, Lake Lancelot"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Very small private reservoir (0.18 km2) with a max depth of 25 feet.  managed by Camelot Round Table Association (https://www.enjoylakecamelot.com/why-lake-camelot).  The Association maintains a boat ramp, beach, club house, pool, etc.  We have permission to sample from small boat.  Contacts are: Daryl Johnson (General Manager, (309) 697-5339) and Brian Cunningham.  They spoke with Scott Jacobs on 9/11.
+  
+
+## Index Site
+Deepest water is in front of dam (see bathymetry map).  Use the deepest site, probably U-08 or U-01.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-208/208_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-208/208_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-208/ch4_208Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

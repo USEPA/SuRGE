@@ -1,0 +1,47 @@
+---
+title: "Design files for CH4-207, Old Mans Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Strange "comb" shaped lake. Old Man's Lake is an old coal strip mine (as are most of the lakes that area) that was first excavated in 1942.  The deepest part of the lake (15 metres if my memory serves correctly) is the half-way point on the east-west length of the lake. A nice swimming lake despite the cattle grazing near one section of it.
+
+The boat launch isn't much more than a bit of gravel dumped on shore of lake, similar to the Otter Lake launch.  The launch is located behind a locked gate on the northeast corner of the lake near the intersection of West Hickory and North Hyatt Cemetary Roads.  See attached images.  You will need to meet the owner, Charles Lufe (Home number: (309) 671-2886, Mobile number: (309) 338-5153) to let you in.  Check with Jake for details.  Description below is from USGS crew who sampled lake for the 2017 National Lakes Assessment.
+
+The "boat ramp" is just a graded edge of the lake with some gravel dumped on it. If I recall correctly, there was a few plastic barrels supporting some plywood creating a makeshift dock, something you can tie off the boat, but i wouldn't recommend loading heavy equipment into the boat from the "dock". Best to load your equipment and prep your boat while it is still on the trailer.  Best to have a vehicle with a little clearance as the gravel "drive " is narrow and at some point you will  need to turn the vehicle and trailer around (unless you prefer to back your boat in from the paved road). If the ground is wet/saturated you will want a 4x4 pulling the trailer. A 2x4 can get in and out if is stays on the 2-track. A 4x4 is good to have regardless of how wet it is because when you back the trailer to the "boat ramp" it is a sharp turn right before the ramp, so it does not leave a lot of room for error when trying to keep the vehicle on the 2-track and gravel. Also go really slow if you are driving off the gravel. The tall grass obscures deep ruts and holes.
+
+## Index Site
+No bathymetry for this lake, but USGS reports deepest site (~45 feet) is midway along east-west length of the lake.  I'm guessing S-21 or S-23.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-207/207_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-207/207_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-207/ch4_207Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

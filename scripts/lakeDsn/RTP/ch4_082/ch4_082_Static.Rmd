@@ -1,0 +1,40 @@
+---
+title: "Design files for ch4-082, Lake Montclair"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+## Index Site
+No bathymetry, but per Lake Assistant GM, 'The waters near the earthen dam and Dolphin’s Beach are usually 50ft deep'.  U-11 is probably our best bet for the Index Site.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/RTP/CH4-082/082_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/RTP/CH4-082/082_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+# relative path
+coords <- read.table(file = "../../../../../../../lakeDsn/RTP/CH4-082/ch4_082_sites.txt",
+                      header = TRUE, sep = "\t")
+
+knitr::kable(coords, caption = "Site coordinates")
+```
