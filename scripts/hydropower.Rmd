@@ -1,0 +1,34 @@
+---
+title: "Reading Hydrosource for SuRGE"
+author: "J. Beaulieu"
+date: "11/24/2020"
+output: html_document
+---
+
+## Setup R
+```{r}
+library(sf)
+library(tidyverse)
+print(sessionInfo())
+```
+
+## SuRGE hydropower
+
+Henriette Jager executed a spatial join between the SuRGE survey design and HydroSource generation data.  The resulting data were provided as an sf object stored as 'SuRGE.EHA.Rdata'.  Below we confirm file location:
+
+```{r }
+# double check the file location
+# utilizing relative file paths
+list.files("../../../../data/hydropower/")
+```
+
+Something weird happens if I assign the loaded object to a new name.  Just use the name that comes with the object (SuRGE.EHA.sf).
+```{r}
+
+# load data object
+load("../../../../data/hydropower/SuRGE.EHA.Rdata") # data object is SuRGE.EHA.sf
+str(SuRGE.EHA.sf)
+class(SuRGE.EHA.sf)
+SuRGE.EHA.sf
+names(SuRGE.EHA.sf)
+```
