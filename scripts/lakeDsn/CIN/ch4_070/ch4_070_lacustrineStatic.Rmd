@@ -1,0 +1,49 @@
+---
+title: "Design files for lacustrine zone of Francis Case (CH4-070)"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Huge reservoir split into three separate lakes for SuRGE sampling. This design is for the lacustrine zone of Francis Case.   Lacustrine zone extends from river mile 920 to Fort Randall dam, based on longitudinal profiles of water temperature and dissolved oxygen in the USACE final report for 2018.  Total surface area of 19.25 km2.  No bathymetry available, but final report suggests max depths close to 100' throughout this section.
+
+This design is for a randomly chosen subset of the overall lacustrine zone.  The sampling section was chosen by randomly locating a dot in the lacustrine zone, then defining a polygon that extends equal distances up and downstream from the point.  Overall size of the polygon was chosen to allow the sampling to be conducted over two days. 
+
+
+The design includes 15 sampling points, some of which may be in >100 feet of water and will not be used for funnel deployments. 
+
+
+## Index Site
+I think deepest will be near upstream end of section, probably U-12 or U-04 in ~ 100' of water.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-070/070lacustrine_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-070/070lacustrine_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-070/ch4_070lacustrineSites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

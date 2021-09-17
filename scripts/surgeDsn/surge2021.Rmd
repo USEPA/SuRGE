@@ -1,5 +1,5 @@
 ---
-title: "SuRGE"
+title: "SuRGE 2021"
 author: "Survey of Reservoir Greenhouse gas Emissions <br> <br> <br> Dr. Jake Beaulieu"
 date: "`r Sys.Date()`"
 output:
@@ -10,12 +10,11 @@ output:
     fig_caption: yes
     depth: 2
     number_sections: true
-    code_folding: hide
   editor_options: 
   chunk_output_type: console
 ---
 
-```{r results='hide', message=FALSE, warning=FALSE}
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
 # load libraries
 library(sf) # spatial data
 library(tidyverse) # dplyr, ggplot
@@ -26,15 +25,16 @@ library(leaflet)
 
 
 # Background
-The USEPA Office of Air and Radiation has requested that methane (CH4) and carbon dioxide (CO2) emissions from reservoirs be included in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks*.  The Intergovernmental Panel on Climate Change (IPCC) has issued guidance for estimating these emissions, but the model used to derive the IPCC emission factors was trained with a global data set which included very few measurements from the US.  It is therefore uncertain how accurate the IPCC emission factors are for US reservoirs.  Methane emission rates vary by three orders of magnitude across US reservoirs and a small bias in IPCC emission factors could strongly bias the inventory estimate.
-To address this problem, the Office of Research and Development will execute a four-year survey of CH4 and CO2 emission rates from US reservoirs.  This will be a collaborative effort involving several ORD locations, EPA Regional Biologists, and other collaborators.
+The USEPA Office of Air and Radiation has requested that methane (CH~4~) and carbon dioxide (CO~2~) emissions from reservoirs be included in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks*.  The Intergovernmental Panel on Climate Change (IPCC) has issued guidance for estimating these emissions, but the model used to derive the IPCC emission factors was trained with a global data set which included very few measurements from the US.  It is therefore uncertain how accurate the IPCC emission factors are for US reservoirs.  Methane emission rates vary by three orders of magnitude across US reservoirs and a small bias in IPCC emission factors could strongly bias the inventory estimate.
+To address this problem, the Office of Research and Development will execute a four-year survey of CH~4~ and CO~2~ emission rates from US reservoirs.  This will be a collaborative effort involving several ORD locations, EPA Regional Biologists, the USGS and Department of Energy.
 
 
 # Survey Design
 
-The SuRGE project (Survey of Reservoir Greenhouse gas Emissions) is a statistical survey of CH4 and CO2 emission rates from 108 U.S. reservoirs.  The survey design includes stratification by ecoregion, depth, and chlorophyll, thereby ensuring large gradients in environmental drivers (i.e. depth, chla) to inform subsequent modeling efforts.  Each waterbody was previously sampled by the US EPA during the [2017 National Lakes Assessment](https://www.epa.gov/national-aquatic-resource-surveys).
+The SuRGE project (Survey of Reservoir Greenhouse gas Emissions) is a statistical survey of CH~4~ and CO~2~ emission rates from 108 U.S. reservoirs.  The survey design includes stratification by ecoregion, depth, and chlorophyll, thereby ensuring large gradients in environmental drivers (i.e. depth, chla) to inform subsequent modeling efforts.  Each waterbody was previously sampled by the US EPA during the [2017 National Lakes Assessment](https://www.epa.gov/national-aquatic-resource-surveys).  Below is a map of the sites to be sampled in  2021.
 
-```{r message=FALSE, warning=FALSE, results='hide'}
+```{r message=FALSE, warning=FALSE, echo=FALSE, results='hide'}
+
 # READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER
 # Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
 
@@ -58,13 +58,24 @@ epaR <- st_transform(epaR, 4326) # convert to CONUS Albers
 
 
 # READ SURVEY DESIGN FILE
-surge <- st_read(dsn = "../../../../../surgeDsn/modifiedDesign",
-                 layer = "SuRGE_design_20191206",
-                 quiet = TRUE)
+surge2021 <- readxl::read_xlsx("../../../../../surgeDsn/SuRGE_design_20191206_eval_status.xlsx")
 
-# Check CRS
-st_crs(surge) # 9001
-surge <- st_transform(surge, 4326) # convert to CONUS Albers
+# Filter out 2021 sites
+surge2021 <- surge2021 %>% select(-xcoord_1, -ycoord_1) %>% # remove xcoord and ycoord, holdover from Tony's .shp
+  # arcGIS Pro cannot handle "." in geopackage column names. probably can't handle " " either.
+  # just remove.
+  rename_all(~ gsub(" ", "", .)) %>% # replace " " in column names with ""
+  # remove site deemed unsampleable
+  filter(!EvalStatusCode %in% c("LD", "PI", "TR")) %>%
+  # Pull out sites that are yet to be sampled, or don't have a sample year yet assigned
+  # this includes oversample sites that do not have year assigned
+  filter(SampleYear == 2021)  # just 2021 sites
+         
+
+# convert to sf object
+surge2021.sf <- st_as_sf(surge2021, coords = c("LON_DD83", "LAT_DD83"), 
+                        crs = 4269) %>% # NAD83
+  st_transform(., crs = 4326) # CONUS Albers
 
 #  SET UP MAP
 # Call the color function (colorNumeric) to create a new palette function 
@@ -72,7 +83,7 @@ factpal <- colorFactor(palette = c("red", "green", "blue"), domain = ecoR$WSA9_N
 factpal.regions <- colorFactor(palette = c("red", "green", "blue"), domain = epaR$EPAREGION) # ecoregions
 
 
-
+# create map here, but print below.  results=hide above won't allow map to show here
 map <- leaflet() %>%
   addProviderTiles(providers$Esri.WorldTopoMap) %>%
   setView(lng = -98.583, lat = 39.833, zoom = 4) %>%
@@ -92,7 +103,7 @@ map <- leaflet() %>%
                highlightOptions = highlightOptions(color = "white",
                                                   weight = 5,
                                                   bringToFront = TRUE)) %>%
-  addCircleMarkers(data = filter(surge, panel == "Base"),
+  addCircleMarkers(data = surge2021.sf,
                    label = ~siteID,
                    radius = 4, 
                    color = "black", 
@@ -103,11 +114,14 @@ map <- leaflet() %>%
                    options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup("Ecoregions")
 
-map
-
 ```
 
 
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+map
+
+
+```
   
 
 
@@ -121,7 +135,7 @@ knitr::include_graphics("../../scripts/surgeDsn/imagesForRmd/fieldMethods.PNG")
 
 
 # Collaborators
-Dr. Jake Beaulieu (ORD/CEMM/WECD/WMB) is the project lead based out of Cincinnati.  Co-leads include Lil Herger (EPA Region 10 @ Seattle), John Walker (ORD/CEMM/AEMD @ Research Triangle Park, NC), Ken Forshay (ORD/CESER/CGRD @ Ada, OK), Jeff Hollister (ORD/CEMM/ACESD @ Narragansett, RI), and Bridget Deemer (USGS @ Flagstaff, AZ).  Field crews will be deployed from these six locations.  
+Dr. Jake Beaulieu (EPA/ORD/CEMM/WECD/WMB) is the project lead based out of Cincinnati.  Co-leads include Lil Herger (EPA Region 10 @ Seattle), John Walker (EPA/ORD/CEMM/AEMD @ Research Triangle Park, NC), Ken Forshay (EPA/ORD/CESER/CGRD @ Ada, OK), Jeff Hollister (EPA/ORD/CEMM/ACESD @ Narragansett, RI), Bridget Deemer (USGS @ Flagstaff, AZ), and Natalie Griffiths (Department of Energy @ Oak Ridge Tennessee).  Field crews will be deployed from these seven locations.  
 
 # Contact
 Jake Beaulieu  

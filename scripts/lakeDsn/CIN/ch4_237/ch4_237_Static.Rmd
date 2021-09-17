@@ -11,7 +11,7 @@ output: html_document
 #https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
 ```
 ## General Information
-Very small (0.12km2) reservoir with a max depth of ~20 feet located in western Wisconsin.  Electric only lake, Scott is working to get waiver.  Nice boat ramp available.
+Very small (0.12km2) reservoir with a max depth of ~20 feet located in western Wisconsin.  Nice boat ramp available.  Electric only lake, but we have waiver from DNR (Warden Shawna Stringham. Ph 608-638-5715.  Email is shawna.stringham@wisconsin.gov).  The warden indicated that local residents will likely call police when they see our gas motor.  We will plan carefully to ensure sheriff's office is notified ahead of time.  Warden also requested that we place a 'Fact Sheet' on the dash of our vehicle and have copies ready to hand out to interested parties.
 
 ## Index Site
 Use U-12 directly in front of dam.  Bathymetry data for this lake are poor; assume this is deepest location.

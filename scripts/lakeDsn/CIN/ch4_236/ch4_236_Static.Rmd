@@ -1,0 +1,45 @@
+---
+title: "Design files for CH4-236, Lake Meyer"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Very small (area = 0.12 km2, max depth = 26 feet) reservoir in Iowa.  One boat ramp on lake.  Restricted to electric only, but Scott received waiver.  Our local contact is the Director of the Winneshiek County Conservation Board, Barb Schroeder, 563-534-7145.  
+
+Good bathymetry map available.
+
+## Index Site
+Use U-07 or U-11 should be deepest, approximately 20 feet.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-236/236_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-236/236_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-236/ch4_236Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

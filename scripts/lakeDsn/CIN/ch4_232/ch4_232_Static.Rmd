@@ -11,7 +11,9 @@ output: html_document
 #https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
 ```
 ## General Information
-1.0 km2 reservoir in North Dakota.  Maximum depth of 18 feet near dam per bathymetry.  Nice boat ramp at NE side of lake.
+1.0 km2 reservoir in North Dakota.  Maximum depth of 18 feet near dam per bathymetry.  Nice boat ramp at NE side of lake.  Local fisheries biologist says our boat should fit under bridge.  If not, there are roads that end at the waters edge (not ramps exactly) on both sides of the reservoir and it would be relatively easy to trailer around the bridge if necessary and traffic is light.  
+
+Marty Haroldson of ND Dept. of Health, Div. of WQ said no permit needed for sampling (3/19/2021).  Asks that we keep him informed and that he will forward or address concerns or complaints. mhardolds@nd.gov
 
 ## Index Site
 U-01 is nearest the dam, but also close to shoreline.  U-13 might be deeper.  Use whichever is deepest.

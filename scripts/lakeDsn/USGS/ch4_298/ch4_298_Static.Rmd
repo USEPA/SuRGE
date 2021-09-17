@@ -1,0 +1,51 @@
+---
+title: "Design files for CH4-298, Wild Horse Reservoir"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forUSGSg a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+ Design for CH4-298, Wild Horse Reservoir.
+ Polygon based on six historic images from Google Earth reflecting a fairly broad 
+ range of reservoir heights.  We reviewed these with the local reservoir manager.  
+ Based on current water levels, current snow pack in the mountains, and anticipated 
+ irrigation demand, he felt that the ch4_298_Oct2006.jpg image is a good approximation 
+ of the conditions we will encounter this summer.  This is supported by April 17, 2021
+ Landsat imagery.  At that water level we will 
+ be able to navigate our boat under the bridge leading to the middle arm.  
+ The other two arms of the reservoir will remain unaccessible.
+
+## Index Site
+No bathymetry.  Site U-01 is closest to dam.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-298/298_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-298/298_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/USGS/CH4-298/ch4_298Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

@@ -1,0 +1,51 @@
+---
+title: "Design files for lacustrine zone of Lake Oahe (CH4-069)"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Huge reservoir split into three separate lakes for SuRGE sampling.  This design is for the downstream lacustrine zone of the reservoir.  The lacustrine zone extends from the dam to just below Mobridge.  Water depths range from 200' at the dam to 60' at Mobridge.  Data from Duluth's survey showed no thermal stratification above Mobridge.
+
+This design is for a randomly chosen subset of the overall lacustrine zone.  The sampling section was chosen by randomly locating a dot in the lacustrine zone, then defining a polygon that extends equal distances up and downstream from the point.  Overall size of the polygon was chosen to allow the sampling to be conducted over two days. 
+
+The lacustrine sampling section is approximately 32 km long and about 4km wide in most areas.  Total area is 67.9 km^2^.  Assume Joel's big boat can travel 60 km hr^-1^ (40 mph), we could theoretically traverse the entire length of the reservoir in 30 minutes.  For reference, the long tributary section of Cave Run was 20 km one way.  Adam navigated it one way in one long day.
+
+The design includes 25 sampling points, 15 of which are in >100 feet of water and will not be used for funnel deployments.  The remaining 10 sites are in bays or close to shoreline and will have funnel deployments.
+
+Assuming 10 minutes at sites w/out funnels and 15 minutes at sites with funnels, that equates to 5 hours of work.  Lets further assume one hour at index site.  If we were to go out and back in one boat, assume 3 hours of driving time.  Total time on water = 9 hours.
+
+## Index Site
+I think U-09, approximately 100' deep.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-069/069lacustrine_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-069/069lacustrine_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-069/ch4_069lacustrineSites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

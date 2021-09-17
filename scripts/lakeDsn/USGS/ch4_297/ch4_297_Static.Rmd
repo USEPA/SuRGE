@@ -1,0 +1,47 @@
+---
+title: "Design files for CH4-297, New Melones Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forUSGSg a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Local manager indicated lake will be at ~960' during our sampling.  I found a Google Earth image (Dec. 30, 2008) of the lake at this elevation (historic water levels from (https://cdec.water.ca.gov/jspplot/jspPlotServlet.jsp?sensor_no=3288&end=01%2F09%2F2016+13%3A47&geom=huge&interval=400&cookies=cdec01).  This image is roughly consistent with June 2, 2021 Landsat imagery.
+
+At 960', the lake has a surface area of 40km^2^ and the Stanislaus River arm is about 15km long, but also super deep.  Overall, the majority of the sites will be greater than 100' deep and will not have funnels deployed.  To compesate for fewer ebullition measurements, we added 10 sites for additional floating chamber measurements.
+
+We should discuss the 'deep' sond measurements.  Given the extreme depths of this system, it might not make sense to drop a sonde to the bottom at every site.
+
+## Index Site
+I think U10 or U16 will be deepest.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-297/297_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-297/297_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/USGS/CH4-297/ch4_297Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

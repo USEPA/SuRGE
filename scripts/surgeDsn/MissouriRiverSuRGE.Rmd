@@ -1,0 +1,271 @@
+---
+title: "MIssouri River SuRGE Sampling"
+author: "Survey of Reservoir Greenhouse gas Emissions <br> <br> <br> Dr. Jake Beaulieu"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+    fig_caption: yes
+    depth: 2
+    number_sections: true
+  editor_options: 
+  chunk_output_type: console
+---
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+# load libraries
+library(sf) # spatial data
+library(tidyverse) # dplyr, ggplot
+library(leaflet)
+library(kableExtra)
+library(stringr)
+```
+
+
+
+# Background
+The USEPA Office of Air and Radiation has requested that methane (CH~4~) and carbon dioxide (CO~2~) emissions from reservoirs be included in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks*.  The Intergovernmental Panel on Climate Change (IPCC) has issued guidance for estimating these emissions, but the model used to derive the IPCC emission factors was trained with a global data set which included very few measurements from the US.  It is therefore uncertain how accurate the IPCC emission factors are for US reservoirs.  Methane emission rates vary by three orders of magnitude across US reservoirs and a small bias in IPCC emission factors could strongly bias the inventory estimate.
+To address this problem, the Office of Research and Development will execute a four-year survey of CH~4~ and CO~2~ emission rates from US reservoirs.  This will be a collaborative effort involving several ORD locations, EPA Regional Biologists, the USGS and Department of Energy.
+
+
+# Survey Design
+
+The SuRGE project (Survey of Reservoir Greenhouse gas Emissions) is a statistical survey of CH~4~ and CO~2~ emission rates from 108 U.S. reservoirs.  The survey design includes stratification by ecoregion, depth, and chlorophyll, thereby ensuring large gradients in environmental drivers (i.e. depth, chla) to inform subsequent modeling efforts.  Each waterbody was previously sampled by the US EPA during the [2017 National Lakes Assessment](https://www.epa.gov/national-aquatic-resource-surveys).  
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, results='hide'}
+
+# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+
+ecoR <- st_read(dsn = paste0("C:\\Users\\JBEAULIE\\OneDrive - Environmental Protection Agency (EPA)\\",
+                             "GIS_data\\locater_data\\ecoRegions"),
+                layer = "aggr_ecoregions_simple",
+                quiet = TRUE)
+
+# Check CRS
+st_crs(ecoR) # 3857
+ecoR <- st_transform(ecoR, 4326) # convert to CONUS Albers
+
+
+# READ EPA REGIONS SHAPEFILE
+epaR <- st_read(dsn = "../../inputData/epaRegions",
+                layer = "EPA_Regions",
+                quiet = TRUE)
+# Check CRS
+st_crs(epaR) # 4269
+epaR <- st_transform(epaR, 4326) # convert to CONUS Albers
+
+
+# READ SURVEY DESIGN FILE
+surge2021 <- readxl::read_xlsx("../../../../../surgeDsn/SuRGE_design_20191206_eval_status.xlsx")
+
+# Filter out 2021 sites
+surge2021 <- surge2021 %>% select(-xcoord_1, -ycoord_1) %>% # remove xcoord and ycoord, holdover from Tony's .shp
+  # arcGIS Pro cannot handle "." in geopackage column names. probably can't handle " " either.
+  # just remove.
+  rename_all(~ gsub(" ", "", .)) %>% # replace " " in column names with ""
+  # remove site deemed unsampleable
+  filter(!EvalStatusCode %in% c("LD", "PI", "TR")) %>%
+  # Pull out sites that are yet to be sampled, or don't have a sample year yet assigned
+  # this includes oversample sites that do not have year assigned
+  filter(SampleYear == 2021)  # just 2021 sites
+         
+
+# convert to sf object
+surge2021.sf <- st_as_sf(surge2021, coords = c("LON_DD83", "LAT_DD83"), 
+                        crs = 4269) %>% # NAD83
+  st_transform(., crs = 4326) # CONUS Albers
+
+#  SET UP MAP
+# Call the color function (colorNumeric) to create a new palette function 
+factpal <- colorFactor(palette = c("red", "green", "blue"), domain = ecoR$WSA9_NAME) # ecoregions
+factpal.regions <- colorFactor(palette = c("red", "green", "blue"), domain = epaR$EPAREGION) # ecoregions
+
+
+# create map here, but print below.  results=hide above won't allow map to show here
+map <- leaflet() %>%
+  addProviderTiles(providers$Esri.WorldTopoMap) %>%
+  setView(lng = -98.583, lat = 39.833, zoom = 4) %>%
+  addPolygons(data = ecoR, 
+              label = ~WSA9_NAME,
+              color = "black", weight = 1, fillOpacity = 0.5,
+              fillColor = ~factpal(WSA9_NAME),
+              group = "Ecoregions",
+              highlightOptions = highlightOptions(color = "white",
+                                                  weight = 5,
+                                                  bringToFront = TRUE)) %>%
+  addPolygons(data = epaR,
+              label = ~EPAREGION,
+              color = "black", weight = 1, fillOpacity = 0.5,
+              fillColor = ~factpal.regions(EPAREGION),
+              group = "Regions",
+               highlightOptions = highlightOptions(color = "white",
+                                                  weight = 5,
+                                                  bringToFront = TRUE)) %>%
+  addCircleMarkers(data = surge2021.sf,
+                   label = ~siteID,
+                   radius = 4, 
+                   color = "black", 
+                   fillOpacity = 1, 
+                   stroke = FALSE) %>%
+  #addLegend(pal = factpal, values = as.character(ecoR$WSA9_NAME), opacity = 0.5, title = "Ecoregion") %>%
+  addLayersControl(overlayGroups = c("Ecoregions", "Regions"),
+                   options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup("Ecoregions")
+
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+map
+
+
+```
+  
+
+
+# Measurement Details
+Each of the 108 waterbodies in the survey will be sampled one time during the four year program (2020 - 2023). All sampling will be conducted between June 1 and Sept. 15.  Each waterbody will contain 15 - 25 sites where ebullitive (i.e. bubbling) emission rates will be measured via overnight deployments of inverted funnels.  Diffusive emissions will be measured at the sites via ~3 minute floating chamber deployments.  Ancillary measurements include water chemistry, chlorophyll, and dissolved gas concentrations.  
+
+```{r, echo=FALSE, out.width="100%"}
+# This should be image of single waterbody survey design, floating chamber, and inverted funnel.
+knitr::include_graphics("../../scripts/surgeDsn/imagesForRmd/fieldMethods.PNG")
+```
+
+# Missour River Impoundments
+Lakes Oahe and Francis-Case will be sampled in 2021. The level of effort required to conduct a probabilistic survey across the entire 2000 km^2^ surface area of these waterbodies is prohibitive. Rather, we will sample randomly selected sections of the riverine, transitional, and lacustrine zones (Thornton 1990) within each waterbody. Reservoir zones were determined from bathymetry and water quality data collected by the USEPA (Bolgrien et al. 2009) and USACE (USACE Water Quality Team, 2019). See below for sampling locations and schedule.
+
+```{r echo=FALSE}
+schedule <- data.frame(Lake = c("Oahe-riverine", "Oahe-transitional", "Oahe-lacustrine",
+                                "Francis Case-riverine", "Francis-Case-transitional", "Francis Case-lacustrine"),
+                       SampleDates = c("July 25-26", "June 22-23", "June 24-25", 
+                                          "July 11-12", "June 26-27", "June 28-29"))
+schedule %>%
+  kbl(caption = "Missouri River sampling schedule") %>%
+  kable_styling(full_width = FALSE, position = "left")
+```
+```{r echo=FALSE, fig.cap="SuRGE sampling sites in Lakes Oahe and Francis Case"}
+# Read Oahe reservoir zones
+oaheR <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-069",
+                 layer = "eqArea069riverineSF",
+                 quiet = TRUE) %>%
+  group_by(zone) %>% summarise() # merge sections into one
+
+oaheT <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-069",
+                 layer = "eqArea069transitionalSF",
+                 quiet = TRUE) %>%
+    mutate(zone = "transitional") %>% # coded as 'transition' in shapefile
+  group_by(zone) %>% summarise() # merge sections into one
+
+oaheL <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-069",
+                 layer = "eqArea069lacustrineSF",
+                 quiet = TRUE) %>%
+  group_by(zone) %>% summarise() # merge sections into one
+
+# Read Oahe sample points
+oaheRP <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-069\\merc069riverine.gdb",
+                 layer = "main_mainSitesMerc069riverine",
+                 quiet = TRUE) 
+
+oaheTP <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-069\\merc069transitional.gdb",
+                 layer = "main_mainSitesMerc069transitional",
+                 quiet = TRUE) 
+
+oaheLP <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-069\\merc069lacustrine.gdb",
+                 layer = "main_mainSitesMerc069lacustrine",
+                 quiet = TRUE) 
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+# Read Francis Case reservoir zones
+francisR <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-070",
+                 layer = "eqArea070riverineSF",
+                 quiet = TRUE) %>%
+  group_by(zone) %>% summarise() %>% mutate(zone = "riverine")# merge sections into one
+
+francisT <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-070",
+                 layer = "eqArea070transitionalSF",
+                 quiet = TRUE) %>%
+  group_by(zone) %>% summarise() %>% mutate(zone = "transitional")# merge sections into one
+
+francisL <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-070",
+                 layer = "eqArea070lacustrineSF",
+                 quiet = TRUE) %>%
+  group_by(zone) %>% summarise() %>% mutate(zone = "lacustrine")# merge sections into one
+
+# Read francis sample points
+francisRP <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-070\\merc070riverine.gdb",
+                 layer = "main_mainSitesMerc070riverine",
+                 quiet = TRUE) 
+
+francisTP <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-070\\merc070transitional.gdb",
+                 layer = "main_mainSitesMerc070transitional",
+                 quiet = TRUE) 
+
+francisLP <- st_read(dsn = "C:\\Users\\JBEAULIE\\Environmental Protection Agency (EPA)\\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\\lakeDsn\\CIN\\CH4-070\\merc070lacustrine.gdb",
+                 layer = "main_mainSitesMerc070lacustrine",
+                 quiet = TRUE) 
+
+
+# Merge points into one object, project to 4269 (web mercator, same as oaheZ)
+missouriPts <- rbind(oaheLP, oaheTP, oaheRP, francisRP, francisTP, francisLP) %>%
+  mutate(zone = as.character(lakeName) %>% stringr::word(., -1)) %>% # last word in lakeName is the zone
+  st_transform(4326) # CRS required for leaflet
+
+# Merge polygons into one object, project to 4269
+missouriPoly <- rbind(oaheR, oaheT, oaheL, francisR, francisT, francisL) %>%
+  st_transform(4326) # CRS required for leaflet
+
+
+#  SET UP MAP
+# Call the color function to create a new palette function 
+factpal <- colorFactor(palette = c("red", "green", "blue"), domain = missouriPoly$zone) # reservoir zones
+factpal.pt <- colorFactor(palette = c("red", "blue", "green"), domain = missouriPts$zone) # sample points
+
+
+
+map1 <- leaflet() %>%
+  addProviderTiles(providers$Esri.WorldTopoMap) %>%  
+  #setView(lng = -98.583, lat = 39.833, zoom = 4) %>%
+  addPolygons(data = missouriPoly,
+              label = ~zone,
+              color = "black", weight = 1, fillOpacity = 0.5,
+              fillColor = ~factpal(zone),
+              group = "Reservoir Zones",
+              highlightOptions = highlightOptions(color = "white",
+                                                  weight = 5,
+                                                  bringToFront = TRUE)) %>%
+  
+  addCircleMarkers(data = missouriPts,
+                   label = ~zone,
+                   radius = 4,
+                   color = ~factpal.pt(zone),
+                   fillOpacity = 0.5,
+                   stroke = FALSE) %>%
+  addLegend(pal = factpal, values = as.character(missouriPoly$zone), opacity = 0.5, title = "Reservoir zones") 
+
+map1
+```
+# Boat Storage
+We request boat storage at the Fort Randal Dam on June 19 – June 21 and July 2 – July 6.  We have a 21' aluminum boat on a trailer and a 14' jon boat without a trailer.  
+
+
+# Collaborators
+Dr. Jake Beaulieu (EPA/ORD/CEMM/WECD/WMB) is the project lead based out of Cincinnati.  Co-leads include Lil Herger (EPA Region 10 @ Seattle), John Walker (EPA/ORD/CEMM/AEMD @ Research Triangle Park, NC), Ken Forshay (EPA/ORD/CESER/CGRD @ Ada, OK), Jeff Hollister (EPA/ORD/CEMM/ACESD @ Narragansett, RI), Bridget Deemer (USGS @ Flagstaff, AZ), and Natalie Griffiths (Department of Energy @ Oak Ridge Tennessee).  Field crews will be deployed from these seven locations.  
+
+# Contact
+Jake Beaulieu  
+ORD/CEMM/WECD/WMB  
+513-569-7842  
+beaulieu.jake@epa.gov
+
+# Selected References
+
+DelSontro, T., Beaulieu, J. J., & Downing, J. A. (2018). Greenhouse gas emissions from lakes and impoundments: Upscaling in the face of global change. Limnology and Oceanography Letters, 3(3), 64-75. [doi:10.1002/lol2.10073](https://aslopubs.onlinelibrary.wiley.com/doi/pdf/10.1002/lol2.10073)  
+
+Prairie, Y. T., Alm, J., Beaulieu, J., Barros, N., Battin, T., Cole, J., . . . Vachon, D. (2017). Greenhouse Gas Emissions from Freshwater Reservoirs: What Does the Atmosphere See? Ecosystems. [doi:10.1007/s10021-017-0198-9](https://link.springer.com/content/pdf/10.1007%2Fs10021-017-0198-9.pdf)  
+
+Beaulieu, J. J., Smolenski, R. L., Nietch, C. T., Townsend-Small, A., & Elovitz, M. S. (2014). High Methane Emissions from a Midlatitude Reservoir Draining an Agricultural Watershed. Environmental Science & Technology, 48(19), 11100-11108. [doi:10.1021/es501871g](http://pubs.acs.org/doi/pdfplus/10.1021/es501871g)
+
+USACE Water Quality Team.  2019. 2018 Report: Water Quality Conditions in the Missouir River Mainstem System. (https://usace.contentdm.oclc.org/utils/getfile/collection/p266001coll1/id/9399)

@@ -1,4 +1,4 @@
-# UNSTRATIFIED, UNEQUAL PROBABILITY GRTS DESIGN
+# STRATIFIED, UNEQUAL PROBABILITY GRTS DESIGN
 
 # PRELIMINARIES-------------
 # When modifying for another lake: 
@@ -31,32 +31,32 @@
 # ArcGIS Pro/Geoplatform requires Web Mercator (3857)
 
 
-# ATAGAHI LAKE (ch4-102)--------
-# Design for CH4-102, Atagahi Lake, based on NHD lake polygon
+# Nicasio Reservoir (ch4-285)--------
+# Design for CH4-285, Nicasio Reservoir, based on NHD lake polygon
 
 # Read polygon shapefile
-eqArea102 <- st_read(dsn = "../../../lakeDsn/RTP/CH4-102",
-                             layer = "eqArea102")  # shapefile name
-plot(eqArea102$geometry) # visualize polygon
+eqArea285 <- st_read(dsn = "../../../lakeDsn/USGS/CH4-285",
+                             layer = "eqArea285")  # shapefile name
+plot(eqArea285$geometry) # visualize polygon
 
 # Check CRS, must be equal area for grts function
 # EPSG code hard to decipher from output, CRS clearly reported as 'NAD_1983_Albers'
 # Coordinate System of NAD 1983 Albers (WKID = 0)
-st_crs(eqArea102) 
-st_crs(eqArea102) == st_crs(5070) # True
+st_crs(eqArea285) 
+st_crs(eqArea285) == st_crs(5070) # True
 
 # clean up attributes
-eqArea102 <- eqArea102 %>%
-  mutate(lakeName = "Atagahi",
-         lakeSiteID = "ch4-102") %>%
+eqArea285 <- eqArea285 %>%
+  mutate(lakeName = "Nicasio",
+         lakeSiteID = "ch4-285") %>%
   select(lakeName, lakeSiteID, Area_km2, section)
 
 
 # ATTRIBUTES----------
-head(eqArea102) # review attributes
+head(eqArea285) # review attributes
 
 # summarize frame by section
-temp <- with(eqArea102, tapply(Area_km2, section, sum))
+temp <- with(eqArea285, tapply(Area_km2, section, sum))
 temp <- round(addmargins(temp), 2)
 temp
 
@@ -68,48 +68,49 @@ set.seed(4447864)
 # Create the design list
 ### We decided to set the number of main sites in the tributary area to 5, since it is a relatively small area (0.4 sq km)
 ### the unequal probability splits the open water part of the lake into two sections of almost equal area
-dsgn102 <- list(None = list(panel=c(mainSites=15),
+dsgn285 <- list(None = list(panel=c(mainSites=15),
                             seltype="Unequal",
-                            caty.n=c("north" = 13, # grts gives 5, = 5.4 sites/km2
-                                     "south" = 2), # grts gives 7, 5.9 sites/km2
+                            caty.n=c("NE" = 4, # 
+                                     "NW" = 7, # 
+                                     "SE" = 4),
                             over=20))
 # create SpatialDesign object
-sites102 <- grts(design=dsgn102,
-                 DesignID="U", # U for unstratified, unequal
+sites285 <- grts(design=dsgn285,
+                 DesignID="U", # SU for stratified, unequal
                  type.frame="area",
                  src.frame="sf.object",
-                 sf.object=eqArea102,
+                 sf.object=eqArea285,
                  mdcaty="section",
                  shapefile=FALSE) # convert design object to sf, define prj, then write to .shp
 
 # Print the initial six lines of the survey design
-head(sites102)
+head(sites285)
 
 
 # Print the survey design summary
-summary(sites102)
+summary(sites285)
 
 
 # CRS--------------
-class(sites102) # SpatialDesign object
-sites102@data <- sites102@data %>% rename(section = mdcaty) # rename
-sitesEqArea102 <- st_as_sf(sites102) # convert to sf object
-st_crs(sitesEqArea102) # no coordinate reference system?
-st_crs(sitesEqArea102) = 5070 # inherits from parent object, per Weber.
+class(sites285) # SpatialDesign object
+sites285@data <- sites285@data %>% rename(section = mdcaty) # rename
+sitesEqArea285 <- st_as_sf(sites285) # convert to sf object
+st_crs(sitesEqArea285) # no coordinate reference system?
+st_crs(sitesEqArea285) = 5070 # inherits from parent object, per Weber.
 
 # project to WGS84 for plotting with leaflet, ArcPad, and writing out lat/long table  (5070 works fine for mapview)
-WGS102 <- eqArea102 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83
-sitesWGS102 <-  sitesEqArea102 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83 
+WGS285 <- eqArea285 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83
+sitesWGS285 <-  sitesEqArea285 %>% st_transform(4326) # 4326 is WGS84, whereas 4269 is NAD83 
 
 # project to Web Mercator (3857) for use in ArcGIS Pro/geoplatform
-merc102 <- eqArea102 %>% st_transform(3857) 
-sitesMerc102 <-  sitesEqArea102 %>% st_transform(3857) 
+merc285 <- eqArea285 %>% st_transform(3857) 
+sitesMerc285 <-  sitesEqArea285 %>% st_transform(3857) 
 
 # BUFFER
 # Create a 15m radius buffer around each sampling point
 # Per ESRI, buffer should be created in Web Mercator, an equidistant projection, not Albers
-sitesMerc102buffer <- st_buffer(sitesMerc102, 15) # radius of 15m, diameter of 30m. radius = 45ft = 2 boat lengths
-sitesWGS102buffer <- sitesMerc102buffer %>% st_transform(4326) # for use in ArcPad
+sitesMerc285buffer <- st_buffer(sitesMerc285, 15) # radius of 15m, diameter of 30m. radius = 45ft = 2 boat lengths
+sitesWGS285buffer <- sitesMerc285buffer %>% st_transform(4326) # for use in ArcPad
 
 
 # MAPS---------------------
@@ -124,25 +125,25 @@ sitesWGS102buffer <- sitesMerc102buffer %>% st_transform(4326) # for use in ArcP
 # Leaflet allows much more control, requires WGS84 CRS.
 # setView for zoo level requires manual fiddling with zoom level.  fitBounds() is cleaner
 # mapshot() call seems sensitive to length of file name (sometimes?).  Try to keep simple.
-# ch4_102_lowAll.png works, but ch4_102_lowAllSites.png does not.
+# ch4_285_lowAll.png works, but ch4_285_lowAllSites.png does not.
 
 
 # leaflet colors
-factpal <- colorFactor(topo.colors(3), WGS102$section)
-factpal.points <- colorFactor(palette = c("red", "black"), domain = sitesWGS102$panel)
+factpal <- colorFactor(topo.colors(3), WGS285$section)
+factpal.points <- colorFactor(palette = c("red", "black"), domain = sitesWGS285$panel)
 
 # All points
 m <- leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>%
   #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
-  fitBounds(lng1 = min(st_coordinates(sitesWGS102)[,1]),
-            lng2 = max(st_coordinates(sitesWGS102)[,1]),
-            lat1 = min(st_coordinates(sitesWGS102)[,2]),
-            lat2 = max(st_coordinates(sitesWGS102)[,2])) %>%
-  addPolygons(data = st_zm(WGS102), # removes z and m values, if present
+  fitBounds(lng1 = min(st_coordinates(sitesWGS285)[,1]),
+            lng2 = max(st_coordinates(sitesWGS285)[,1]),
+            lat1 = min(st_coordinates(sitesWGS285)[,2]),
+            lat2 = max(st_coordinates(sitesWGS285)[,2])) %>%
+  addPolygons(data = st_zm(WGS285), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1, fillColor = ~factpal(section)) %>%
-  addCircleMarkers(data = sitesWGS102,
+  addCircleMarkers(data = sitesWGS285,
                    fillColor = ~factpal.points(panel),
                    fillOpacity = 1,
                    stroke = FALSE,
@@ -155,29 +156,29 @@ m <- leaflet() %>%
                                                  "font-family" = "serif"))) %>%
   addLegend(position = "bottomright", pal = factpal.points, 
             opacity = 1,
-            values = as.character(sitesWGS102$panel),
+            values = as.character(sitesWGS285$panel),
             title = "Sample sites") %>%
   addLegend(position = "bottomright", pal = factpal, 
             opacity = 1,
-            values = as.character(WGS102$section),
+            values = as.character(WGS285$section),
             title = "sections") %>%
   addScaleBar()
 
-mapview::mapshot(m, file = "../../../lakeDsn/RTP/CH4-102/102_All.png", 
+mapview::mapshot(m, file = "../../../lakeDsn/USGS/CH4-285/285_All.png", 
                  remove_controls = NULL)
 
 
 # Main points
 m <- leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>%
-  fitBounds(lng1 = min(st_coordinates(sitesWGS102)[,1]),
-            lng2 = max(st_coordinates(sitesWGS102)[,1]),
-            lat1 = min(st_coordinates(sitesWGS102)[,2]),
-            lat2 = max(st_coordinates(sitesWGS102)[,2])) %>%
-  addPolygons(data = st_zm(WGS102), # removes z and m values, if present
+  fitBounds(lng1 = min(st_coordinates(sitesWGS285)[,1]),
+            lng2 = max(st_coordinates(sitesWGS285)[,1]),
+            lat1 = min(st_coordinates(sitesWGS285)[,2]),
+            lat2 = max(st_coordinates(sitesWGS285)[,2])) %>%
+  addPolygons(data = st_zm(WGS285), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1, fillColor = ~factpal(section)) %>%
-  addCircleMarkers(data = filter(sitesWGS102, panel == "mainSites"),
+  addCircleMarkers(data = filter(sitesWGS285, panel == "mainSites"),
                    fillColor = "red", # manual color specification
                    fillOpacity = 1,
                    stroke = FALSE,
@@ -196,25 +197,25 @@ m <- leaflet() %>%
             title = "Sample sites") %>%
   addLegend(position = "bottomright", pal = factpal, 
             opacity = 1,
-            values = as.character(WGS102$section),
+            values = as.character(WGS285$section),
             title = "sections") %>%
   addScaleBar()
 
-mapview::mapshot(m, file = "../../../lakeDsn/RTP/CH4-102/102_Main.png", 
+mapview::mapshot(m, file = "../../../lakeDsn/USGS/CH4-285/285_Main.png", 
                  remove_controls = NULL)
 
 
 # OverSample points
 m <- leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>%
-  fitBounds(lng1 = min(st_coordinates(sitesWGS102)[,1]),
-            lng2 = max(st_coordinates(sitesWGS102)[,1]),
-            lat1 = min(st_coordinates(sitesWGS102)[,2]),
-            lat2 = max(st_coordinates(sitesWGS102)[,2])) %>%
-  addPolygons(data = st_zm(WGS102),  # removes z and m values, if present
+  fitBounds(lng1 = min(st_coordinates(sitesWGS285)[,1]),
+            lng2 = max(st_coordinates(sitesWGS285)[,1]),
+            lat1 = min(st_coordinates(sitesWGS285)[,2]),
+            lat2 = max(st_coordinates(sitesWGS285)[,2])) %>%
+  addPolygons(data = st_zm(WGS285),  # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1, fillColor = ~factpal(section)) %>%
-  addCircleMarkers(data = filter(sitesWGS102, panel == "OverSamp"),
+  addCircleMarkers(data = filter(sitesWGS285, panel == "OverSamp"),
                    fillColor = "black", # manual color specification
                    fillOpacity = 1,
                    stroke = FALSE,
@@ -233,21 +234,21 @@ m <- leaflet() %>%
             title = "Sample sites") %>%
   addLegend(position = "bottomright", pal = factpal, 
             opacity = 1,
-            values = as.character(WGS102$section),
+            values = as.character(WGS285$section),
             title = "sections") %>%
   addScaleBar()
 
-mapview::mapshot(m, file = "../../../lakeDsn/RTP/CH4-102/102_Over.png", 
+mapview::mapshot(m, file = "../../../lakeDsn/USGS/CH4-285/285_Over.png", 
                  remove_controls = NULL)
 
 
 
 # WRITE OBJECTS TO DISK-----------------
 # write out table of sample sites for reference in field.  Must be WGS
-write.table(sitesWGS102 %>%
+write.table(sitesWGS285 %>%
               select(panel, siteID, section) %>%
               arrange(panel, section, siteID),
-            file = "../../../lakeDsn/RTP/CH4-102/ch4_102Sites.txt",
+            file = "../../../lakeDsn/USGS/CH4-285/ch4_285Sites.txt",
             row.names = FALSE, sep="\t")
 
 
@@ -257,111 +258,111 @@ write.table(sitesWGS102 %>%
 # Web Mercator for Web Map first
 
 # write out all sites
-st_write(obj = sitesMerc102, 
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"), 
-         layer = "allSitesMerc102", # package appends 'main.' to layer name?
+st_write(obj = sitesMerc285, 
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"), 
+         layer = "allSitesMerc285", # package appends 'main.' to layer name?
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out all buffers
-st_write(obj = sitesMerc102buffer, 
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"), 
-         layer = "allSitesMerc102buffer", # package appends 'main.' to layer name?
+st_write(obj = sitesMerc285buffer, 
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"), 
+         layer = "allSitesMerc285buffer", # package appends 'main.' to layer name?
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out main sites
-st_write(obj = filter(sitesMerc102, panel == "mainSites"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"), 
-         layer = "mainSitesMerc102",
+st_write(obj = filter(sitesMerc285, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"), 
+         layer = "mainSitesMerc285",
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out main site buffers
-st_write(obj = filter(sitesMerc102buffer, panel == "mainSites"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"), 
-         layer = "mainSitesMerc102buffer",
+st_write(obj = filter(sitesMerc285buffer, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"), 
+         layer = "mainSitesMerc285buffer",
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out oversample sites
-st_write(obj = filter(sitesMerc102, panel == "OverSamp"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"), 
-         layer = "overSampSitesMerc102",
+st_write(obj = filter(sitesMerc285, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"), 
+         layer = "overSampSitesMerc285",
          append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 # write out oversample site buffers
-st_write(obj = filter(sitesMerc102buffer, panel == "OverSamp"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"), 
-         layer = "overSampSitesMerc102buffer",
+st_write(obj = filter(sitesMerc285buffer, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"), 
+         layer = "overSampSitesMerc285buffer",
          append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
 # write out lake polygon
-st_write(obj = merc102,
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"), 
-         layer = "merc102",
+st_write(obj = merc285,
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"), 
+         layer = "merc285",
          append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
-st_layers(file.path( "../../../lakeDsn/RTP/CH4-102", "merc102.gpkg"))
+st_layers(file.path( "../../../lakeDsn/USGS/CH4-285", "merc285.gpkg"))
 
 
 # WGS for ArcPad next
 
 # write out all sites
-st_write(obj = sitesWGS102, 
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"), 
-         layer = "allSitesWGS102", # package appends 'main.' to layer name?
+st_write(obj = sitesWGS285, 
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"), 
+         layer = "allSitesWGS285", # package appends 'main.' to layer name?
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out all buffers
-st_write(obj = sitesWGS102buffer, 
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"), 
-         layer = "sitesWGS102buffer", # package appends 'main.' to layer name?
+st_write(obj = sitesWGS285buffer, 
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"), 
+         layer = "sitesWGS285buffer", # package appends 'main.' to layer name?
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out main sites
-st_write(obj = filter(sitesWGS102, panel == "mainSites"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"), 
-         layer = "mainSitesWGS102",
+st_write(obj = filter(sitesWGS285, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"), 
+         layer = "mainSitesWGS285",
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out main site buffers
-st_write(obj = filter(sitesWGS102buffer, panel == "mainSites"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"), 
-         layer = "mainSitesWGS102buffer",
+st_write(obj = filter(sitesWGS285buffer, panel == "mainSites"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"), 
+         layer = "mainSitesWGS285buffer",
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 # write out oversample sites
-st_write(obj = filter(sitesWGS102, panel == "OverSamp"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"), 
-         layer = "overSampSitesWGS102",
+st_write(obj = filter(sitesWGS285, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"), 
+         layer = "overSampSitesWGS285",
          append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 # write out oversample site buffers
-st_write(obj = filter(sitesWGS102buffer, panel == "OverSamp"),
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"), 
-         layer = "overSampSitesWGS102buffer",
+st_write(obj = filter(sitesWGS285buffer, panel == "OverSamp"),
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"), 
+         layer = "overSampSitesWGS285buffer",
          append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
 # write out lake polygon
-st_write(obj = WGS102,
-         dsn = file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"), 
-         layer = "WGS102",
+st_write(obj = WGS285,
+         dsn = file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"), 
+         layer = "WGS285",
          append=FALSE, # this overwrites existing layer,
          driver = "GPKG")
 
 
-st_layers(file.path( "../../../lakeDsn/RTP/CH4-102", "WGS102.gpkg"))
+st_layers(file.path( "../../../lakeDsn/USGS/CH4-285", "WGS285.gpkg"))
 

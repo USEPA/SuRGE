@@ -1,0 +1,43 @@
+---
+title: "Design files for CH4-316, Mittry Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Small reservoir (~1km^2^).  No bathymetry data, but NLA indicates a max depth of 1.5m.  This seems too shallow, however, as the lake has a many docks and a well developed boat launch.  Water levels appear to get pretty dicey in the extreme NE side of lake, however, and we edited out some the NHD lake polygon that covered this area.  Furthermore, I split the remaining NE section into an independent section.  Do the best you can to get two sites in this area.  If too shallow, you can omit them.
+
+## Index Site
+No bathymetry.  Presumably deepest close to dam, so probably site U-06.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-316/316_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-316/316_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/USGS/CH4-316/ch4_316Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

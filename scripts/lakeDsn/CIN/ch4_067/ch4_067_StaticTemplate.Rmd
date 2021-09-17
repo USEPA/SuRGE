@@ -1,0 +1,47 @@
+---
+title: "Design files for CH4-067, Fort Peck Trout Pond"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Region 6 Biologist Jared Krebs, 406-228-3707.  “Fort Peck Trout Pond is the only one of those five reservoirs I directly manage. Current water levels are normal. Even with the hot and dry summer forecasted I don’t foresee water levels dropping more than 1-2 vertical feet throughout the summer. Hope this helps.”
+
+“The pond is located on federal (COE) property and access is managed by FWP. You will be good to access the pond as you please. The easiest access is on the southeast corner of the pond through our Fishing Access Site.”  J. Krebs, 7/14/21.  Would like follow up report.
+
+There is a dirt ramp at the lake; I think you will be able to launch the Oquawka here.  The lake is 1.67 km2 in size.  We have no bathymetry information.
+
+## Index Site
+No bathymetry information for this lake.  Pleas use deepest site.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-067/067_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-067/067_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-067/ch4_067Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

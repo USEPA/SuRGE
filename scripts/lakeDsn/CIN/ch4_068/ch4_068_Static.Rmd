@@ -14,6 +14,8 @@ output: html_document
 13 km2 reservoir broken into four sections to facilitate oversampling and to ensure a high sampling density at the river-reservoir transition zone.  Bathymetry data (2 foot contour intervals) is incorporated into the digital map.
 
 
+Spoke with Marty Haroldson of ND Dept. of Health, Div. of WQ on 3/19/2021.  No permit needed for sampling.  Asks that we keep him informed and that he will forward or address concerns or complaints.  `He is at mhardolds@nd.gov
+
 ## Index Site
 Use SU-04.  Should be approximately 42-44 feet deep.
 

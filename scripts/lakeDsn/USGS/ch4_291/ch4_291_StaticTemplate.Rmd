@@ -1,0 +1,44 @@
+---
+title: "Design files for CH4-291, Upper San Leandro Reservoir"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Worked with local managers to determine expected elevation in August 2021.  Defined perimeter using July 2017 Landsat image.  Lake area is 1.67 km2.  Design split the lake in half to minimize travel time if oversample sites are needed. 
+
+
+## Index Site
+Deepest water is near dam, so sites U-05 or U-01 are probably best choice for Index sites.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-291/291_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/USGS/CH4-291/291_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/USGS/CH4-291/ch4_291Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```
