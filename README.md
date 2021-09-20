@@ -22,3 +22,6 @@ This project uses `conflicted` to manage conflicts between the `dplyr` functions
 
 ## Running Scripts
 Scripts must be run in the sequence documented in scripts/masterScript.R.  Please see status update at the top of script for current status of the scripts.
+
+## Version Control
+This project uses git version control.  git software is independent from the github website and must be installed on each users computer.  Users will be given push/pull rights to the repo and can therefore push directly to the repo without the need to submit a pull request.  To minimize conflicts among separate commits, it is best practice to start each session by pulling from the repo to get the most up to date code.  Similarly, users should commit and push their changes to the repo at the conclusion of each working session.  
