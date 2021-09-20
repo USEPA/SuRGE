@@ -1,37 +1,37 @@
-# THIS CODE WILL BE USED TO READ THE POPULATED SHAPEFILES FROM THE
-# L DRIVE.  MICHELLE PLATZ ENTERED DATA INTO THE SHAPEFILE.  SINCE
-# WE REALLY DON'T NEED THE FULL SHAPEFILE FOR THE ANALYSIS, WE WILL
-# JUST WORK WITH THE .dbf FILE.
+# READ FIELD SHEETS
 
-# LIBRARY----------
-# source("ohio2016/scriptsAndRmd/masterLibrary.R")
-
-# READ IN .dbf FILES-------------------
 
 # 1. Create a list of files to read in.  The completed data files all
-# contain the pattern ...SitesEqAreaData.dbf and are stored in 
-# L:/Priv/Cin/NRMRL/ReservoirEbullitionStudy/multiResSurvey2016/grtsDesign/
-# directory.
+# contain the pattern ...surgeDataXXX.xlsx
 
-rootDir <- "L:/Priv/Cin/NRMRL/ReservoirEbullitionStudy/multiResSurvey2016/grtsDesign/"
+fileNames <- vector() # empty vector to hold results
+labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS")
 
-fileNames <- list.files(path = rootDir, 
-                        pattern = "SitesEqAreaData.dbf", # file names containing this pattern
-                        recursive = TRUE) # look in all subdirectories
+# loop to read in file names from lab specific folders
+for (i in 1:length(labs)) {
+fileNames.i <- list.files(path = paste0(userPath,  "data/", labs[i]),
+                        pattern = "surgeData", # file names containing this pattern
+                        recursive = TRUE) %>% # look in all subdirectories
+  .[!grepl(".pdf", .)] # remove pdf files
 
+if(length(fileNames.i) > 0) { # fi any file names were read...
+  fileNames.i <- paste0(labs[i], "/", fileNames.i) # add lab directory to file path
+}
+
+fileNames <- c(fileNames, fileNames.i) # append new names to existing vector
+}
 
 # 2.  Read in files
 mylist <- list()  # Create an empty list to hold data
 
 for (i in 1:length(fileNames)){  # for each file
-  # read.dbf is in foreign and spsurvey.  The foreign version allows for
-  # use of as.is argument.
-  data.i <- foreign::read.dbf(paste(rootDir, fileNames[i], sep = ""),
-                    as.is=TRUE)
+  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1)
   mylist[[i]] <- data.i
 }
 
 
+#################################################################
+######CODE BELOW NOT YET UPDATED FOR SURGE#######################
 # 3. Strip column names that are not consisent (or necessary) across different .dbf
 # files.  Inconsistency related to source of original GIS shapefile.  Also because
 # data for Acton 2017 came from Sarah's EC study.
