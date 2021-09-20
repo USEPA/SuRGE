@@ -1,1 +1,11 @@
 # Survey of Reservoir Greenhouse gas Emissions (SuRGE)
+
+This project uses the `renv` library to manage library versions.  After creating a local clone, a message will appear in the console directing users to sync the project library  by running `renv::restore()`.  This will download the packages and versions used in this project as specified in the renv.lock file.  If you need to add libraries to the project, be sure to use `renv::snapshot` to update the lock file.  When collaborators sync their local clone with the master, they can then run `renv::restore()` to have the new library installed on their local project directory.  Please see here (https://rstudio.github.io/renv/index.html) for a primer on `renv` and here (https://rstudio.github.io/renv/articles/collaborating.html) for using `renv` in a collaborative workflow.
+
+Please use caution when updating libraries already captured in the lock file.  The code runs succesfully with the suite of packages captured in the current lock file; updating package versions could cause problems with the existing code.  The whole point of `renv` is to  minimize the potential for code breakage due to differences among package versions.
+
+The R project was initiated by J Beaulieu using R.3.6.2 and `renv` will produce a warning message if a different version of R is used.  In theory, `renv` shouldn't be sensitive to the version of R, but in practice I have found that `renv::restore()` can take a very long time or even fail if a different version of R is used.  I suggest using R.3.6.2, but you can try other versions.  
+
+Please note that the .Rprofile file is under version control in the repository.  This file contains an autoloader which automatically downloads and installs the appropriate version of `renv` into the project library.  It is best that users do not use the .Rprofile file to further customize the environment. 
+
+This project uses `conflicted` to manage conflicts between different packages.  For example, the conflict between `MASS::select()` and `dplyr::select()` can cause headaches.  This project uses `conflicted` functions to set the environment such that `select()` will always call `dplry::select()`.  `select()` from the `MASS` package can always be called as `MASS::select()`. 
