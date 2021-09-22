@@ -29,6 +29,11 @@ for (i in 1:length(fileNames)){  # for each file
   mylist[[i]] <- data.i
 }
 
+if(length(mylist) > 1){
+  print("Yay, I think it works")
+} else {
+  print("Tell Jake he screwed up")
+}
 
 #################################################################
 ######CODE BELOW NOT YET UPDATED FOR SURGE#######################

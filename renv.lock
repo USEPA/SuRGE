@@ -144,10 +144,10 @@
     },
     "cachem": {
       "Package": "cachem",
-      "Version": "1.0.6",
+      "Version": "1.0.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "648c5b3d71e6a37e3043617489a0a0e9"
+      "Hash": "2703a46dcabfb902f10060b2bca9f708"
     },
     "callr": {
       "Package": "callr",
@@ -491,6 +491,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "9b2f7cf1899f583a36d367702ecf49a3"
+    },
+    "janitor": {
+      "Package": "janitor",
+      "Version": "2.1.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "6de84a8c67fb247e721166049c84695f"
     },
     "jpeg": {
       "Package": "jpeg",
@@ -932,6 +939,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "a56d058adfc9df30bdd45dbb01cec39f"
+    },
+    "snakecase": {
+      "Package": "snakecase",
+      "Version": "0.11.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "4079070fc210c7901c0832a3aeab894f"
     },
     "sourcetools": {
       "Package": "sourcetools",
