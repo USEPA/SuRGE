@@ -1,0 +1,12 @@
+.Rhistory
+*.Rproj
+.Rproj.user
+
+# too big for github
+inputData/lMorpho
+
+# big files in Tony Olsen's script
+/scripts/surgeDsn/olsenCode
+
+# too big for github
+surgeOverview.html
