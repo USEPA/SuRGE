@@ -2,7 +2,7 @@
 
 ## R Project Directory Structure
 ### SuRGE SharePoint Shared Documents Library
-SuRGE data are maintained in the shared documents library at the private SuRGE SharePoint site (https://usepa.sharepoint.com/sites/SuRGE).  Scripts in this project assume users have synced the documents library to their computer.  Contact Jake Beaulieu if you do not have access the site or need assistance syncing to their computer.
+SuRGE data are maintained in the shared documents library at the private SuRGE SharePoint site (https://usepa.sharepoint.com/sites/SuRGE).  Scripts in this project assume users have synced the documents library to their computer.  Contact Jake Beaulieu if you do not have access the site or need assistance syncing to your computer.
 
 ### Abolute and Relative File Paths
 R scripts in this repository read data from the SuRGE SharePoint site.  Scripts used to create lake specific survey designs are contained in scripts/lakeDsn/... and use relative file paths to read data from SharePoint.  If you wish to reproduce the survey designs, you must create your local clone within the rProjects folder at SharePoint.  The remainining scripts use absolute file paths based on the values returned from `Sys.getenv("USERPROFILE")`.  These scipts can be run regardless of where the R project is cloned on your computer.
@@ -16,6 +16,8 @@ Please use caution when updating libraries already captured in the lock file.  T
 The R project was initiated by J Beaulieu using R.3.6.2 and `renv` will produce a warning message if a different version of R is used.  In theory, `renv` shouldn't be sensitive to the version of R, but in practice I have found that `renv::restore()` can take a very long time or even fail if a different version of R is used.  For example, `renv::restore()` took 1.5 hours when tested with R.4.1.0, then `readxl::read_excel()` threw an error related to the `Rcpp` package.  I suggest using R.3.6.2.  
 
 Please note that the .Rprofile file is under version control in the repository.  This file contains an autoloader which automatically downloads and installs the appropriate version of `renv` into the project library.  It is best that users do not use the .Rprofile file to further customize the environment. 
+
+Finally, `renv::restore()` may require Rtools.  Rtools can be found here (https://cran.r-project.org/bin/windows/Rtools/history.html).  Be sure to install a version that is compatible with your R version.
 
 ## Conflicted
 This project uses `conflicted` to manage conflicts between the `dplyr` functions `select()` and `filter()` and functions with the same names, but in different packages (i.e.`MASS::select()`).  The `conflicted` settings will always give preference to the dplyr library when `select()` or `filter()` are called.
