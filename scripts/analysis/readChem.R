@@ -1,11 +1,11 @@
 
 # METALS----------------------------------
-# Metals samples were submitted to Maily's lab by Pegasus.
+# Metals samples were submitted to TTEB by Pegasus.
 # every submission should be documented with a chain of custody
-# form mapping Maily's sample id to the surge unique identifiers
-# the chain of custody (.pdf) from should be in the metals folder.
+# form mapping TTEB sample id to the surge unique identifiers.
+# The chain of custody (.pdf) from should be in the chemistry folder.
 # mapping between sample id and surge identifiers has been transcribed
-# onto mailySampleIds.xlsx"
+# onto ttebSampleIds.xlsx"
 
 # Samples collected during the 2020 field season were held until the lab
 # opened and submitted in march 2021.  Those data are read in below.
@@ -19,6 +19,7 @@ metals1 <- read_excel(paste0(userPath,
 
 nrow(metals1) #42 records in data
 
+# merge with chain of custody
 metals1 <- left_join(metals1, chemCoc) # keep all analytical records 
 nrow(metals1) #42, good
 metals1 %>% filter(is.na(lake_id)) # good all records matched

@@ -15,3 +15,4 @@ lake.list %>% filter(sample_year == 2021,
 # therefore have a minimum of 70 samples.  Assume 1/3 of lakes have dups and 
 # blanks for another (35*0.3*2 = 21) 21 samples.  Sample totals should be
 # close to 90.
+

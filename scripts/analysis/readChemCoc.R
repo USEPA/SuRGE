@@ -1,5 +1,7 @@
+# Reading in tteb sample IDs
+
 chemCoc <- read_excel(paste0(userPath, 
-                             "data/chemistry/mailySampleIds.xlsx")) %>%
+                             "data/chemistry/ttebSampleIds.xlsx")) %>%
   clean_names(.)
 
 chemCoc

@@ -5,10 +5,10 @@ source("scripts/masterLibrary.R") # Read in renv controlled library
 source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 
 # Analysis
-#source("scripts/analysis/readSurgeLakes.R") # read in survey design file
-#source("scripts/analysis/readFieldSheets.R") # read in data from field sheets
-#source("scripts/analysis/readChemCoc.R") # crosswalk between sample identifiers and lab ids.
-
+source("scripts/readSurgeLakes.R") # read in survey design file
+#source("scripts/analysis/readFieldSheets.R") # read in data from field sheets. under development
+source("scripts/analysis/readChemCoc.R") # crosswalk between sample identifiers and lab ids.
+# source("scripts/analysis/readChem.R") # under development
 
 
 #source("scripts/analysis/readLgr.R")
