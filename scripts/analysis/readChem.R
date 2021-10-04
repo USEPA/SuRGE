@@ -29,6 +29,8 @@ metals1
 # TOC/DOC-------------------
 # During the 2020 field season, TOC samples were sent to MASI contract
 # laboratory for analysis.  No DOC analysis was conducted in 2020.
+
+# remove 01 flag.
 toc.masi <- read_excel(paste0(userPath, 
                            "data/chemistry/TOC.DOC/MASI_TOC/masiTocData.xlsx"), 
                     sheet = "data")

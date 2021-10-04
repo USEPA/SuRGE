@@ -1,5 +1,5 @@
 # source scripts in order
-# 9/20/2021: "scripts/analysis/readFieldSheets" is current through line 31
+
 
 source("scripts/masterLibrary.R") # Read in renv controlled library
 source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
