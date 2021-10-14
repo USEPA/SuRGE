@@ -1,4 +1,3 @@
-# TEST 14 october 
 # METALS----------------------------------
 # Metals samples were submitted to TTEB by Pegasus.
 # every submission should be documented with a chain of custody
