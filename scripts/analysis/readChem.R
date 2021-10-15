@@ -48,7 +48,19 @@ toc.epa <- rbind(toc.1, toc.2, toc.3) %>% janitor::clean_names()
 # Need to clean up toc.epa and restrict lab_id field to numeric values, then
 # join with chemCoc.
 
-  #left_join(., chemCoc, by = c("sample_id" = "lab_id"))
+# Fix sample_id field and ID/average duplicates:
+# str_length + str_squish revealed no leading or trailing spaces in toc.epa
+
+# split sample_id into two columns; numeric ID is first column.
+z <- str_split_fixed(toc.epa$sample_id, pattern = " ", n=2) %>%
+  as.data.frame()
+  
+z <- str_extract(toc.epa$sample_id, pattern = "\\-*\\d+\\.*\\d*") %>%
+  as.numeric() %>%
+  as.data.frame() %>%
+  filter(.>1000)
+  
+  # left_join(toc.epa, chemCoc, by = c("sample_id" = "lab_id"))
 
 # NUTRIENTS-----------------------
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
