@@ -7,8 +7,8 @@
 
 
 # READ DATA -----------------
-# List of .txt files containing data from CIN
-txtFiles <- list.files("../../../data/", 
+# List of .txt files containing data 
+txtFiles <- list.files(paste0(userPath,"data/ADA"), 
                        pattern=c("gga|micro"), recursive = TRUE) # per B.3.5.1, files should contain 'gga' or 'micro'
 
 # Directories contain _s, _l, and _b files that don't contain data of interest.
@@ -43,8 +43,8 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
 # MGGA FORMAT
 if (grepl(pattern = "micro", x = txtFiles[i])) { 
   # slightly different colClasses values.
-  gga.i <- read.table(paste("../../../data/", 
-                            txtFiles[i], sep=""),
+  gga.i <- read.table(paste0(userPath,"data/ADA/", 
+                            txtFiles[i]),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info
                       colClasses = c(rep("character", 2), rep("numeric", 31)), 
@@ -100,15 +100,15 @@ ggsave("output/figures/co2profile.tiff")
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lakeId == "287") %>%
+plotCh4 <- gga %>% filter(lakeId == "167") %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
-  scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
-  ggtitle("287")
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle("167")
 ggplotly(plotCh4)  
   
-plotCo2 <- gga %>% filter(lakeId == "Wapato") %>%
+plotCo2 <- gga %>% filter(lakeId == "167") %>%
   ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
-  ggtitle("Wapato")
+  ggtitle("167")
 ggplotly(plotCo2)  
 

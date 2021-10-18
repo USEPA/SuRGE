@@ -51,16 +51,41 @@ toc.epa <- rbind(toc.1, toc.2, toc.3) %>% janitor::clean_names()
 # Fix sample_id field and ID/average duplicates:
 # str_length + str_squish revealed no leading or trailing spaces in toc.epa
 
-# split sample_id into two columns; numeric ID is first column.
-z <- str_split_fixed(toc.epa$sample_id, pattern = " ", n=2) %>%
-  as.data.frame()
+
+toc.epa.foo <- toc.epa %>% 
+  mutate(
+    # split sample_id into two fields
+    sample_id1 = str_split_fixed(sample_id, pattern = " ", n=2)[,1], # numeric ID first
+    lab_qa = str_split_fixed(sample_id, pattern = " ", n=2)[,2], # character values
+    # 202798d2 is flagged as rerun, but I can't find the original injection.
+    # I think we just ignore this flag.  Here we replace "rerun" with NA.
+    # Also replacing "" with NA to clean up this column
+    lab_qa = replace(lab_qa, 
+                     (sample_id1 == "202798d2" & lab_qa == "rerun") | lab_qa == "", NA)) %>%
   
-z <- str_extract(toc.epa$sample_id, pattern = "\\-*\\d+\\.*\\d*") %>%
+  
+    #203613 was run on 7/24 and noted "will be re-analyzed this week"
+    #it was rerun on 7/31/21 with the sampleID 203613rerun.  I believe it was rerun
+    #because it was below the lowest value in the standard curve.  The two values
+    #are similar, so lets treat as lab DUPS.
+  mutate(
+    notes = replace(notes, sample_id1 == "203613rerun", "rerun because initial results below std curve"),
+    lab_qa = replace(lab_qa, sample_id1 == "203613rerun", "DUP"),
+    sample_id1 = replace(sample_id1, sample_id1 == "203613rerun", 203613)) %>%
+  # remove lab qa.qc not needed
+  filter(nchar(sample_id1) > 5, # values with less than 5 characters are lab qa.qc
+         lab_qa != "SPK" | is.na(lab_qa)) # omit lab spikes, but must specify to keep NA
+
+# left_join(toc.epa.foo, chemCoc, by = c("sample_id1" = "lab_id"))
+
+
+z2 <- str_extract(toc.epa$sample_id, pattern = "\\-*\\d+\\.*\\d*") %>%
   as.numeric() %>%
   as.data.frame() %>%
   filter(.>1000)
   
-  # left_join(toc.epa, chemCoc, by = c("sample_id" = "lab_id"))
+
+
 
 # NUTRIENTS-----------------------
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
