@@ -100,15 +100,15 @@ ggsave("output/figures/co2profile.tiff")
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lakeId == "167") %>%
+plotCh4 <- gga %>% filter(lakeId == "148") %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
-  ggtitle("167")
+  ggtitle("148")
 ggplotly(plotCh4)  
   
-plotCo2 <- gga %>% filter(lakeId == "167") %>%
+plotCo2 <- gga %>% filter(lakeId == "148") %>%
   ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
-  ggtitle("167")
+  ggtitle("148")
 ggplotly(plotCo2)  
 
