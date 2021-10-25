@@ -1,8 +1,24 @@
 ##UPDATE TO READ IN FROM FINAL DBF FILES (BEAULIEU AND SURGE)
-
-
 # Rename flag to qual.  Import values reported in final data file.  Add
 # 'flag` column.  This will be < or blank, indicating censored observations.
+# filter out old observations from the BEAULIEU... file.
+
+
+metals.BEAULIEU <- read_excel(paste0(userPath, 
+                           "data/chemistry/BEAULIEU_10_01_2021_update.xlsx")) 
+
+metals.SURGE <- read_excel(paste0(userPath, 
+                             "data/chemistry/SURGE 2021_10_07_2021_update.xlsx"))
+
+
+metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>% 
+  janitor::clean_names() %>%
+  select(-tn, -toc_comb) %>%
+  rename(sampleid = labid, qual = flag) %>%
+  
+  
+
+
 
 
 # METALS
