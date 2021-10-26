@@ -10,18 +10,31 @@ metals.BEAULIEU <- read_excel(paste0(userPath,
 metals.SURGE <- read_excel(paste0(userPath, 
                              "data/chemistry/SURGE 2021_10_07_2021_update.xlsx"))
 
-
+# options(digits=22) # to see entire value; for coding purposes only.
 metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>% 
   janitor::clean_names() %>%
-  select(-tn, -toc_comb) %>%
-  rename(sampleid = labid, qual = flag) %>%
+  filter(labid>200000) %>% # remove pre-2020 data
+  select(-tn, -toc_comb, -colldate, -studyid) %>% # remove unneeded columns
+  rename(sampleid = labid, qual = flag) %>% 
+  mutate(across(al_aes:zn_aes, # replace lab's placeholder numbers with 'NA'
+                ~ na_if(., 9999999999999990.000))) %>%
+  # create 'flag' columns for every analyte to flag observations < det. limit
+  mutate(across(al_aes:zn_aes, 
+                ~ if_else(. < 0 , "<", ""), 
+                .names = "{col}_flag")) %>%
+  mutate(across(al_aes:zn_aes, # make all values positive
+                ~ abs(.))) %>%
+  select(order(colnames(.))) %>% # alphabetize column names
+  select(sampleid, sampid, qual, comment, everything()) # put these columns first
+
+  
+
   
   
 
 
 
-
-# METALS
+peek# METALS
 # Metals samples were submitted to TTEB by Pegasus.
 # every submission should be documented with a chain of custody
 # form mapping TTEB sample id to the surge unique identifiers.
