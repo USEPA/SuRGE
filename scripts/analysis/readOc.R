@@ -9,12 +9,10 @@
 # remove 01 flag.
 toc.masi <- read_excel(paste0(userPath, 
                               "data/chemistry/TOC.DOC/MASI_TOC/masiTocData.xlsx"), 
-                       sheet = "data")
-
-toc.masi1 <- toc.masi %>% # created new df so I can compare w/ toc.masi 
+                       sheet = "data") %>%
   rename(sampleid = lab_id) %>%
   select(sampleid, everything()) %>% # put sampleid column first
-  select(-lake_id, -site_id) %>% # remove unneeded columns??
+  select(-lake_id, -site_id) %>% # remove unneeded columns (???)
   mutate(qual = str_split_fixed(qual, pattern = ",", n=2)) # remove '01' from qual
   
   

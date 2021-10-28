@@ -10,7 +10,7 @@ metals.BEAULIEU <- read_excel(paste0(userPath,
 metals.SURGE <- read_excel(paste0(userPath, 
                              "data/chemistry/SURGE 2021_10_07_2021_update.xlsx"))
 
-# options(digits=22) # to see entire value; for coding purposes only.
+
 metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>% 
   janitor::clean_names() %>%
   filter(labid>200000) %>% # remove pre-2020 data

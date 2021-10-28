@@ -4,6 +4,48 @@
 # NUTRIENTS-----------------------
 # DO NOT FLAG BQL RESULTS FROM ADA
 
+cin.ada.path <- paste0(userPath, 
+                           "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
+
+cin.ada.Neustadt2021.op <- read_excel(paste0(cin.ada.path, 
+                                   "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls"),
+                                   sheet = "Data", range = "A14:G19") %>%
+  janitor::clean_names() 
+
+cin.ada.Neustadt2021.tntp <- read_excel(paste0(cin.ada.path,
+                                  "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls"),
+                                  sheet = "Data", range = "A14:J19") %>%
+  janitor::clean_names() 
+
+cin.ada.Neustadt2021.no3.n02.nh4 <- read_excel(paste0(cin.ada.path,
+                                  "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx"),
+                                   sheet = "Data", range = "A14:N19") %>%
+  janitor::clean_names()
+  
+get_data <- function(userpath, datasheet) {
+ maintable <- read_excel(paste0(userpath, datasheet), 
+                    sheet = "Data", range = "A14:N19") %>%
+   janitor::clean_names() %>%
+   select(field_sample_id, starts_with("data"))
+ 
+ toptable <- read_excel(paste0(userpath, datasheet), 
+                    sheet = "Data", range = "c8:N19") %>%
+   select(-(starts_with("."))) %>%
+   rownames_to_column() %>%
+   pivot_longer(-rowname, 'variable', 'value') %>%
+   pivot_wider(variable, rowname) %>%
+   row_to_names(1) %>%
+   select(Analytes, MDL)
+ 
+z <<- maintable
+zz <<- toptable
+
+}
+# IN WORK: add column names from toptable to maintable
+# add flags and mutate() data column to include MDL values as needed
+get_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
+
+
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.
 
