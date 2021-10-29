@@ -21,30 +21,38 @@ cin.ada.Neustadt2021.no3.n02.nh4 <- read_excel(paste0(cin.ada.path,
                                   "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx"),
                                    sheet = "Data", range = "A14:N19") %>%
   janitor::clean_names()
-  
-get_data <- function(userpath, datasheet) {
- maintable <- read_excel(paste0(userpath, datasheet), 
-                    sheet = "Data", range = "A14:N19") %>%
-   janitor::clean_names() %>%
-   select(field_sample_id, starts_with("data"))
+
+# Function to extract data from Ada excel files
+get_ada_data <- function(userpath, datasheet) { 
  
- toptable <- read_excel(paste0(userpath, datasheet), 
+ toptable <- read_excel(paste0(userpath, datasheet), # get MDL & analyte names
                     sheet = "Data", range = "c8:N19") %>%
-   select(-(starts_with("."))) %>%
-   rownames_to_column() %>%
+   select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
+   rownames_to_column() %>% # these 4 lines of code transpose the dataframe 
    pivot_longer(-rowname, 'variable', 'value') %>%
    pivot_wider(variable, rowname) %>%
    row_to_names(1) %>%
-   select(Analytes, MDL)
- 
-z <<- maintable
+   select(starts_with("Analytes"), MDL) %>% # select only the columns w/ analyte names and MDL
+   filter(str_detect([1], 'Analyte')) # NEED TO FILTER OUT THE EXTRA "ANALYTE"!!
+   
+#  maintable <- read_excel(paste0(userpath, datasheet), # get the results
+#                          sheet = "Data", range = "A14:N19") %>%
+#    janitor::clean_names() %>%
+#    select(field_sample_id, starts_with("data")) %>% # remove unneeded columns
+#    rename_with(~toptable$Analytes, .cols = starts_with("data")) %>% # rename using analytes
+#    rename(sampleid = field_sample_id) %>%
+#    janitor::clean_names()
+# 
+# z <<- maintable
 zz <<- toptable
 
 }
 # IN WORK: add column names from toptable to maintable
 # add flags and mutate() data column to include MDL values as needed
-get_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
-
+# 29OCT: Figure out how to remove the extra "Analytes..." row
+get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
+get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls")
+get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls")
 
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.
