@@ -4,28 +4,30 @@
 # NUTRIENTS-----------------------
 # DO NOT FLAG BQL RESULTS FROM ADA
 
-cin.ada.path <- paste0(userPath, 
-                           "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
-
-cin.ada.Neustadt2021.op <- read_excel(paste0(cin.ada.path, 
-                                   "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls"),
-                                   sheet = "Data", range = "A14:G19") %>%
-  janitor::clean_names() 
-
-cin.ada.Neustadt2021.tntp <- read_excel(paste0(cin.ada.path,
-                                  "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls"),
-                                  sheet = "Data", range = "A14:J19") %>%
-  janitor::clean_names() 
-
-cin.ada.Neustadt2021.no3.n02.nh4 <- read_excel(paste0(cin.ada.path,
-                                  "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx"),
-                                   sheet = "Data", range = "A14:N19") %>%
-  janitor::clean_names()
+# 1NOV2021: commented out; superseded by new code below. 
+# cin.ada.path <- paste0(userPath, 
+#                            "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
+# 
+# cin.ada.Neustadt2021.op <- read_excel(paste0(cin.ada.path, 
+#                                    "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls"),
+#                                    sheet = "Data", range = "A14:G19") %>%
+#   janitor::clean_names() 
+# 
+# cin.ada.Neustadt2021.tntp <- read_excel(paste0(cin.ada.path,
+#                                   "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls"),
+#                                   sheet = "Data", range = "A14:J19") %>%
+#   janitor::clean_names() 
+# 
+# cin.ada.Neustadt2021.no3.n02.nh4 <- read_excel(paste0(cin.ada.path,
+#                                   "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx"),
+#                                    sheet = "Data", range = "A14:N19") %>%
+#   janitor::clean_names()
 
 # Function to extract data from Ada excel files
-get_ada_data <- function(userpath, datasheet) { 
+get_ada_data <- function(path, datasheet) { 
  
- toptable <- read_excel(paste0(userpath, datasheet), # get MDL & analyte names
+  #'toptable' contains analyte names and MDL values
+ toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
                     sheet = "Data", range = "c8:N19") %>%
    select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
    rownames_to_column() %>% # these 4 lines of code transpose the dataframe 
@@ -33,26 +35,67 @@ get_ada_data <- function(userpath, datasheet) {
    pivot_wider(variable, rowname) %>%
    row_to_names(1) %>%
    select(starts_with("Analytes"), MDL) %>% # select only the columns w/ analyte names and MDL
-   filter(str_detect([1], 'Analyte')) # NEED TO FILTER OUT THE EXTRA "ANALYTE"!!
+   rename(Analytes = starts_with("Analytes")) %>%
+   filter(str_detect(Analytes, "Analyte", negate = TRUE)) # filter out superfluous "Analytes..."
+ 
+ #'maintable' combines 'toptable' with results
+ maintable <- read_excel(paste0(path, datasheet), # get the results
+                         sheet = "Data", range = "A14:N19") %>%
+   janitor::clean_names() %>%
+   select(field_sample_id, starts_with("data")) %>% # remove unneeded columns
+   rename_with(~toptable$Analytes, .cols = starts_with("data")) %>% # rename using analyte names
+   rename(sampleid = field_sample_id) %>%
+   mutate(across(2:last_col(), # create new flag column if analyte not detected
+                 ~ if_else(. == "ND", "<", ""), 
+                 .names = "{col}_flag"))
+   # mutate(across(2:last_col(),
+   #               ~ if_else(. == "ND", -1, 555))) %>%
+
+   #janitor::clean_names() 
    
-#  maintable <- read_excel(paste0(userpath, datasheet), # get the results
-#                          sheet = "Data", range = "A14:N19") %>%
-#    janitor::clean_names() %>%
-#    select(field_sample_id, starts_with("data")) %>% # remove unneeded columns
-#    rename_with(~toptable$Analytes, .cols = starts_with("data")) %>% # rename using analytes
-#    rename(sampleid = field_sample_id) %>%
-#    janitor::clean_names()
-# 
-# z <<- maintable
-zz <<- toptable
+  zz <<- toptable
+  return(maintable)
 
 }
-# IN WORK: add column names from toptable to maintable
-# add flags and mutate() data column to include MDL values as needed
-# 29OCT: Figure out how to remove the extra "Analytes..." row
-get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
-get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls")
-get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls")
+
+# 1NOV21 next steps:
+# join all 3 resulting data objects into a single dataframe (maybe?)
+# add flags if ND: need to add str_detect due to superfluous text
+# add MDL value if ND: figure out (maybe pivot 'toptable' and join?)
+# clean up the sampleid field (remove 'TN or DN')
+# clean up the variable names
+
+# create path for Lake Jean Neustadt
+cin.ada.path <- paste0(userPath, 
+                       "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
+
+# apply get_ada_data function to each spreadsheet for Lake Jean Neustadt
+z1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
+z2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls")
+z3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls")
+
+# join all 3 in a single object (IN WORK)
+
+# create path for Keystone Lake
+cin.ada.path <- paste0(userPath, 
+                       "data/chemistry/nutrients/ADA/CH4_148_Keystone Lake/")
+
+# apply get_ada_data function to each spreadsheet for Lakes Keystone and Bluestem
+get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls")
+get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls")             
+get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx")
+
+# create path for Lake Overholser
+cin.ada.path <- paste0(userPath, 
+                       "data/chemistry/nutrients/ADA/CH4_167_Lake Overholser/")
+
+# apply get_ada_data function to each spreadsheet for for Lake Overholser
+get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls")
+get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls")
+get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3GPMS.xlsx")           
+
+
+
 
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.
