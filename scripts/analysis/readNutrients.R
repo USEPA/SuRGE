@@ -36,23 +36,23 @@ get_ada_data <- function(path, datasheet) {
    row_to_names(1) %>%
    select(starts_with("Analytes"), MDL) %>% # select only the columns w/ analyte names and MDL
    rename(Analytes = starts_with("Analytes")) %>%
-   filter(str_detect(Analytes, "Analyte", negate = TRUE)) # filter out superfluous "Analytes..."
+   filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
+   column_to_rownames(var = "Analytes")
  
  #'maintable' combines 'toptable' with results
  maintable <- read_excel(paste0(path, datasheet), # get the results
                          sheet = "Data", range = "A14:N19") %>%
    janitor::clean_names() %>%
    select(field_sample_id, starts_with("data")) %>% # remove unneeded columns
-   rename_with(~toptable$Analytes, .cols = starts_with("data")) %>% # rename using analyte names
+   rename_with(~row.names(toptable), .cols = starts_with("data")) %>% # rename using analyte names
    rename(sampleid = field_sample_id) %>%
    mutate(across(2:last_col(), # create new flag column if analyte not detected
                  ~ if_else(. == "ND", "<", ""), 
-                 .names = "{col}_flag"))
-   # mutate(across(2:last_col(),
-   #               ~ if_else(. == "ND", -1, 555))) %>%
+                 .names = "{col}_flag")) %>%
+   mutate(across(2:last_col(), # replace ND with the MDL value from toptable
+                 ~ ifelse(. == "ND", toptable[paste(cur_column()),1], .))) # note this is base::ifelse
+   #janitor::clean_names()
 
-   #janitor::clean_names() 
-   
   zz <<- toptable
   return(maintable)
 
@@ -61,7 +61,6 @@ get_ada_data <- function(path, datasheet) {
 # 1NOV21 next steps:
 # join all 3 resulting data objects into a single dataframe (maybe?)
 # add flags if ND: need to add str_detect due to superfluous text
-# add MDL value if ND: figure out (maybe pivot 'toptable' and join?)
 # clean up the sampleid field (remove 'TN or DN')
 # clean up the variable names
 
