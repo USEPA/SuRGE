@@ -30,14 +30,14 @@ get_ada_data <- function(path, datasheet) {
  toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
                     sheet = "Data", range = "c8:N19") %>%
    select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
-   rownames_to_column() %>% # these 4 lines of code transpose the dataframe 
-   pivot_longer(-rowname, 'variable', 'value') %>%
-   pivot_wider(variable, rowname) %>%
-   row_to_names(1) %>%
+   rownames_to_column() %>% # transpose the tibble 
+   pivot_longer(-rowname, 'variable', 'value') %>% # transpose the tibble
+   pivot_wider(variable, rowname) %>% # transpose the tibble
+   row_to_names(1) %>% # transpose the tibble
    select(starts_with("Analytes"), MDL) %>% # select only the columns w/ analyte names and MDL
    rename(Analytes = starts_with("Analytes")) %>%
    filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
-   column_to_rownames(var = "Analytes")
+   column_to_rownames(var = "Analytes") # simpler to work w/ rownames in next chunk of code
  
  #'maintable' combines 'toptable' with results
  maintable <- read_excel(paste0(path, datasheet), # get the results
@@ -47,22 +47,20 @@ get_ada_data <- function(path, datasheet) {
    rename_with(~row.names(toptable), .cols = starts_with("data")) %>% # rename using analyte names
    rename(sampleid = field_sample_id) %>%
    mutate(across(2:last_col(), # create new flag column if analyte not detected
-                 ~ if_else(. == "ND", "<", ""), 
+                 ~ if_else(str_detect(., "ND"), "<", ""), 
                  .names = "{col}_flag")) %>%
    mutate(across(2:last_col(), # replace ND with the MDL value from toptable
-                 ~ ifelse(. == "ND", toptable[paste(cur_column()),1], .))) # note this is base::ifelse
-   #janitor::clean_names()
+                 ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
+   mutate(sampleid = str_replace_all(sampleid, "[(TN or DN)]","")) %>% # clean-up sampleid field
+   janitor::clean_names()
 
-  zz <<- toptable
   return(maintable)
 
 }
 
 # 1NOV21 next steps:
+# Remove BQL and RPD(???) flags from data fields, convert to numeric
 # join all 3 resulting data objects into a single dataframe (maybe?)
-# add flags if ND: need to add str_detect due to superfluous text
-# clean up the sampleid field (remove 'TN or DN')
-# clean up the variable names
 
 # create path for Lake Jean Neustadt
 cin.ada.path <- paste0(userPath, 
@@ -80,9 +78,9 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/nutrients/ADA/CH4_148_Keystone Lake/")
 
 # apply get_ada_data function to each spreadsheet for Lakes Keystone and Bluestem
-get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls")
-get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls")             
-get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx")
+z1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls")
+z2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls")             
+z3 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx")
 
 # create path for Lake Overholser
 cin.ada.path <- paste0(userPath, 
