@@ -52,47 +52,52 @@ get_ada_data <- function(path, datasheet) {
    mutate(across(2:last_col(), # replace ND with the MDL value from toptable
                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
    mutate(sampleid = str_replace_all(sampleid, "[(TN or DN)]","")) %>% # clean-up sampleid field
-   janitor::clean_names()
+   janitor::clean_names() %>%
+   mutate(across(!ends_with(c("flag", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
+                 ~ str_extract(., pattern = "\\D\\d\\d+"))) %>% 
+   mutate(across(!ends_with(c("flag", "sampleid")), # make extracted data numeric
+                 ~ as.numeric(.))) %>%
+   select(order(colnames(.))) %>% # alphabetize column names
+   select(sampleid, everything()) # put 'sampleid' first
 
   return(maintable)
 
 }
 
 # 1NOV21 next steps:
-# Remove BQL and RPD(???) flags from data fields, convert to numeric
-# join all 3 resulting data objects into a single dataframe (maybe?)
+# join resulting data objects into a single tibble
+# fix variable names?
 
 # create path for Lake Jean Neustadt
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
 
 # apply get_ada_data function to each spreadsheet for Lake Jean Neustadt
-z1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
-z2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls")
-z3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls")
+jea1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
+jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls")
+jea3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls")
 
-# join all 3 in a single object (IN WORK)
 
 # create path for Keystone Lake
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_148_Keystone Lake/")
 
-# apply get_ada_data function to each spreadsheet for Lakes Keystone and Bluestem
-z1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls")
-z2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls")             
-z3 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx")
+# apply get_ada_data function to each spreadsheet for Keystone Lake 
+key1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls")
+key2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls")             
+key3 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx")
 
 # create path for Lake Overholser
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_167_Lake Overholser/")
 
 # apply get_ada_data function to each spreadsheet for for Lake Overholser
-get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls")
-get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls")
-get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3GPMS.xlsx")           
+ove1 <- get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls")
+ove2 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls")
+ove3 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3GPMS.xlsx")           
 
-
-
+zzz <- left_join(jea1, jea2, by = "sampleid") # 4NOV21: What do we do with LAB DUPs?
+# this object name is just a placeholder
 
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.
