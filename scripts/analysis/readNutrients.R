@@ -43,26 +43,53 @@ get_ada_data <- function(path, datasheet) {
  maintable <- read_excel(paste0(path, datasheet), # get the results
                          sheet = "Data", range = "A14:N19") %>%
    janitor::clean_names() %>%
-   select(field_sample_id, starts_with("data")) %>% # remove unneeded columns
+   mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), "LAB DUP", "")) %>% # flag the dups
+   select(field_sample_id, labdup, starts_with("data")) %>% # remove unneeded columns
    rename_with(~row.names(toptable), .cols = starts_with("data")) %>% # rename using analyte names
    rename(sampleid = field_sample_id) %>%
-   mutate(across(2:last_col(), # create new flag column if analyte not detected
-                 ~ if_else(str_detect(., "ND"), "<", ""), 
+   select(sampleid, labdup, everything()) %>% # reorder columns for the following mutate() 
+   mutate(across(3:last_col(), # create new flag column if analyte not detected
+                 ~ if_else(str_detect(., "ND"), "<", ""),
                  .names = "{col}_flag")) %>%
-   mutate(across(2:last_col(), # replace ND with the MDL value from toptable
+   mutate(across(3:last_col(), # replace ND with the MDL value from toptable
                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
    mutate(sampleid = str_replace_all(sampleid, "[(TN or DN)]","")) %>% # clean-up sampleid field
    janitor::clean_names() %>%
-   mutate(across(!ends_with(c("flag", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
-                 ~ str_extract(., pattern = "\\D\\d\\d+"))) %>% 
-   mutate(across(!ends_with(c("flag", "sampleid")), # make extracted data numeric
+   mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
+                 ~ str_extract(., pattern = "\\D\\d\\d+"))) %>%
+   mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
                  ~ as.numeric(.))) %>%
    select(order(colnames(.))) %>% # alphabetize column names
-   select(sampleid, everything()) # put 'sampleid' first
-
+   select(sampleid, labdup, everything()) # put 'sampleid' first
   return(maintable)
 
 }
+
+# Function to aggregate the lab dups from the data. 
+# This is a separate function, since we won't always want to aggregate.
+dup_agg <- function(data) {
+   
+   # carve out the _flag columns so they can be re-joined later
+   c <- data %>% select(ends_with(c("sampleid","labdup", "flag")))
+   
+   # group and summarize to obtain means                
+   d <- data %>%
+      dplyr::group_by(sampleid) %>%
+      summarize(across(!ends_with(c("labdup", "sampleid", "flag")), 
+                       ~ mean(., na.rm = TRUE)))
+   
+   e <- left_join(d, c, by = 'sampleid') %>% # rejoin the data
+      mutate(across(3:last_col(), 
+                    ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
+      select(order(colnames(.))) %>% # alphabetize column names
+      select(sampleid, labdup, everything()) %>% # put 'sampleid' first
+      filter(labdup != "LAB DUP") # remove the lab dup; we may want to revisit this.
+      # note that the LAB DUP and the original now have identical values, but the < flags may differ
+   
+return(e)
+
+}
+
 
 # 1NOV21 next steps:
 # join resulting data objects into a single tibble
@@ -73,9 +100,13 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
 
 # apply get_ada_data function to each spreadsheet for Lake Jean Neustadt
-jea1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx")
-jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls")
-jea3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls")
+# also aggregate LAB DUPs with dup_agg
+jea1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
+   dup_agg
+jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
+   dup_agg
+jea3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
+   dup_agg
 
 
 # create path for Keystone Lake
