@@ -1,7 +1,7 @@
 ##UPDATE TO READ IN FROM FINAL DBF FILES (BEAULIEU AND SURGE)
-# Rename flag to qual.  Import values reported in final data file.  Add
-# 'flag` column.  This will be < or blank, indicating censored observations.
-# filter out old observations from the BEAULIEU... file.
+
+# Rename flag to qual. 'flag` column will be < or blank, indicating 
+# censored observations. Filter out old observations from the BEAULIEU... file.
 
 
 metals.BEAULIEU <- read_excel(paste0(userPath, 
@@ -13,49 +13,36 @@ metals.SURGE <- read_excel(paste0(userPath,
 
 metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>% 
   janitor::clean_names() %>%
-  filter(labid>200000) %>% # remove pre-2020 data
+  filter(labid>200000) %>% # pull out pre-2020 data
+  # as if 11/10/2021 the files only contain metals data for SuRGE, but the
+  # Beaulieu file contains TN and TOC from older studies.  Remove other 
+  # analytes for now, but might make sense to expand this code to process other
+  # analytes (TOC and DOC) when the file is updated again.
   select(-tn, -toc_comb, -colldate, -studyid) %>% # remove unneeded columns
-  rename(sampleid = labid, qual = flag) %>% 
+  rename(lab_id = labid, metals.qual = flag) %>% # this should be 'lab_id' to match COC
+  # a value of 9999999999999990.000 indicates no data for that sample/analyte.
+  # this sometimes occurs when the anlyte was outside of the standard curve
+  # and was rerun, but the summary file wasn't updated with re-run value.
+  # This is the case for labid's 203013 and 203014.  Maily indicated these
+  # would be updated in the future (see 10/26/2021 email).  Replace with NA
+  # for now.
   mutate(across(al_aes:zn_aes, # replace lab's placeholder numbers with 'NA'
                 ~ na_if(., 9999999999999990.000))) %>%
   # create 'flag' columns for every analyte to flag observations < det. limit
-  mutate(across(al_aes:zn_aes, 
+  mutate(across(al_aes:zn_aes, # nice code Joe!
                 ~ if_else(. < 0 , "<", ""), 
                 .names = "{col}_flag")) %>%
-  mutate(across(al_aes:zn_aes, # make all values positive
+  mutate(across(al_aes:zn_aes, # make all values positive.  # nice Joe!
                 ~ abs(.))) %>%
   select(order(colnames(.))) %>% # alphabetize column names
-  select(sampleid, sampid, qual, comment, everything()) # put these columns first
+  select(lab_id, sampid, metals.qual, comment, everything()) # put these columns first
 
   
 
-  
-  
-
-
-
-peek# METALS
-# Metals samples were submitted to TTEB by Pegasus.
-# every submission should be documented with a chain of custody
-# form mapping TTEB sample id to the surge unique identifiers.
-# The chain of custody (.pdf) from should be in the chemistry folder.
-# mapping between sample id and surge identifiers has been transcribed
-# onto ttebSampleIds.xlsx"
-
-# Samples collected during the 2020 field season were held until the lab
-# opened and submitted in march 2021.  Those data are read in below.
-metals1 <- read_excel(paste0(userPath, 
-                             "data/chemistry/metals/winter_2021_submision/",
-                             "SURGE_20210316.xlsx")) %>%
-  rename(lab_id = ...1) %>%
-  mutate(file_metals = "SURGE_20210316.xlsx") %>%
-  janitor::clean_names(.)
-
-
-nrow(metals1) #42 records in data
 
 # merge with chain of custody
-metals1 <- left_join(metals1, chemCoc) # keep all analytical records 
-nrow(metals1) #42, good
-metals1 %>% filter(is.na(lake_id)) # good all records matched
-metals1
+
+metals.epa <- left_join(metals.epa, chemCoc %>% select(-analyte)) # keep all analytical records 
+nrow(metals.epa) #68 records
+metals.epa %>% filter(is.na(metals.epa)) # good, all records matched
+metals.epa

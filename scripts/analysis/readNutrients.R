@@ -68,6 +68,28 @@ get_ada_data <- function(path, datasheet) {
 # join resulting data objects into a single tibble
 # fix variable names?
 
+#11NOV21:
+# The Sample ID values in the spreadsheet are a bit confusing.  they are a five
+# digit alphanumeric code where the first three digits correspond to lake_id, the
+# fourth digit indicates sample depth (D=deep, S=shallow, N= no data (used for blanks)),
+# and the fifth digit indicates dissolved or unfiltered (U=unfiltered, D=dissolved,
+# B=blank).  We only want to read in dissolved + blanks from the NO3NO2NH4 and
+# oP spreadsheets.  We only want unfiltered and blanks from the TNTP spreadsheets.
+# After the correct rows have been read in, we need to parse the sampleID into 
+# the fields needed to uniquely identify each sample (lake_id, site_id, sample_depth,
+# and sample_type).  See chemCoc for how these columns should be formatted.  The ADA
+# spreadsheets do not contain data for site_id field.  This information will need
+# to be manually hardcoded from sheet F1 of the field data sheets (...\SuRGE Survey 
+# of Reservoir Greenhouse gas Emissions - Documents\data\ADA\").
+
+# I think data from the Jean Neustadt NO3NO2NH4 file aren't being read in correctly. 
+# The sampleid values in jea1 don't seem to match those in the spreadsheet.  While
+# I generally prefer to read in the data as formatted by the lab, this might be 
+# a case where it makes more sense to add a tab to each excel file and transcribe
+# the data in a more workable format.  We still read data from each excel file, 
+# but we read the formatted data from the new tab.  What do you think?
+
+
 # create path for Lake Jean Neustadt
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
@@ -99,8 +121,12 @@ ove3 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2N
 zzz <- left_join(jea1, jea2, by = "sampleid") # 4NOV21: What do we do with LAB DUPs?
 # this object name is just a placeholder
 
+
+
+
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.
+# 11Nov21: JB not yet reviewed
 
 # 1. Read in chain of custody forms
 cin.ada.coc.path <- paste0(userPath, 
