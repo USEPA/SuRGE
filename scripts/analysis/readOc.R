@@ -6,22 +6,17 @@
 # During the 2020 field season, TOC samples were sent to MASI contract
 # laboratory for analysis.  No DOC analysis was conducted in 2020.
 
-# this dataset doesn't contain flagge observations, so no need for toc.flag
+# this dataset doesn't contain flagged observations, so no need for toc.flag
 # column.  We will retain the qualifier column, however, as it indicates
 # holding time violations.
 
 toc.masi <- read_excel(paste0(userPath, 
                               "data/chemistry/TOC.DOC/MASI_TOC/masiTocData.xlsx"), 
                        sheet = "data") %>%
-  # rename(sampleid = lab_id) %>%
-  # JB. I think we want to retain 'lab_id'.  This is the column name used in
-  # coc file.  Using lab_id consistently will make merging data and COC more
-  # straightforward.
   select(lab_id, everything()) %>% # put sampleid column first
-  #select(-lake_id, -site_id) %>% # remove unneeded columns (???).  #JB, need to keep these
   mutate(qual = str_split_fixed(qual, pattern = ",", n=2)[1]) %>% # remove '01' from qual
   rename(toc.units = units,
-         toc.qual = qual,)
+         toc.qual = qual)
   
   
 

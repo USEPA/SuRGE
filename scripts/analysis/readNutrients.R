@@ -53,7 +53,7 @@ get_ada_data <- function(path, datasheet) {
                  .names = "{col}_flag")) %>%
    mutate(across(3:last_col(), # replace ND with the MDL value from toptable
                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
-   mutate(sampleid = str_replace_all(sampleid, "[(TN or DN)]","")) %>% # clean-up sampleid field
+   mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
    janitor::clean_names() %>%
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
                  ~ str_extract(., pattern = "\\D\\d\\d+"))) %>%
@@ -94,6 +94,12 @@ return(e)
 # 1NOV21 next steps:
 # join resulting data objects into a single tibble
 # fix variable names?
+# Add filter to keep only the following: 
+# oP, NO3NO2NH4: dissolved + blanks
+# TNTP: unfiltered and blanks
+# parse the sampleID (lake_id, site_id, sample_depth, and sample_type); see ChemCoc
+# add site_id; may need to be hardcoded or added to new tab in spreadsheet
+
 
 #11NOV21:
 # The Sample ID values in the spreadsheet are a bit confusing.  they are a five

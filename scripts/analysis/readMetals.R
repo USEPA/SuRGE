@@ -13,15 +13,22 @@ metals.SURGE <- read_excel(paste0(userPath,
 
 metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>% 
   janitor::clean_names() %>%
-  filter(labid>200000) %>% # pull out pre-2020 data
-  # as if 11/10/2021 the files only contain metals data for SuRGE, but the
+  
+  
+  # as of 11/10/2021 the files only contain metals data for SuRGE, but the
   # Beaulieu file contains TN and TOC from older studies.  Remove other 
   # analytes for now, but might make sense to expand this code to process other
   # analytes (TOC and DOC) when the file is updated again.
+  # 12NOV2021: to include TN and TOC, 
+  # remove the following filter() and replace the select() w/ this line of code:  
+  # select(-colldate, -studyid) %>% # remove unneeded columns
+  
+  filter(labid>200000) %>% # filter out pre-2020 data
   select(-tn, -toc_comb, -colldate, -studyid) %>% # remove unneeded columns
+  
   rename(lab_id = labid, metals.qual = flag) %>% # this should be 'lab_id' to match COC
   # a value of 9999999999999990.000 indicates no data for that sample/analyte.
-  # this sometimes occurs when the anlyte was outside of the standard curve
+  # this sometimes occurs when the analyte was outside of the standard curve
   # and was rerun, but the summary file wasn't updated with re-run value.
   # This is the case for labid's 203013 and 203014.  Maily indicated these
   # would be updated in the future (see 10/26/2021 email).  Replace with NA
