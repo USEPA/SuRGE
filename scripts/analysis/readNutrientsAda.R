@@ -54,13 +54,22 @@ get_ada_data <- function(path, datasheet) {
    mutate(across(3:last_col(), # replace ND with the MDL value from toptable
                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
    mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
-   janitor::clean_names() %>%
+   mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
                  ~ str_extract(., pattern = "\\D\\d\\d+"))) %>%
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
                  ~ as.numeric(.))) %>%
+   janitor::clean_names()  %>%
+   mutate(sample_depth = str_sub(sampleid, 4, 4)) %>%
+   mutate(sample_type = str_sub(sampleid, 5, 5)) %>%
+   #mutate(sampleid = str_sub(sampleid, 1, 3)) %>%
+   mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "no data"))) %>%
+   mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unfiltered", "D" =  "dissolved"))) %>%
+   dplyr::rename(lake_id = sampleid) %>%
+   mutate(site_id = "") %>%
    select(order(colnames(.))) %>% # alphabetize column names
-   select(sampleid, labdup, everything()) # put 'sampleid' first
+   select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) # put 'sampleid' first 
+   
   return(maintable)
 
 }
@@ -70,19 +79,19 @@ get_ada_data <- function(path, datasheet) {
 dup_agg <- function(data) {
    
    # carve out the _flag columns so they can be re-joined later
-   c <- data %>% select(ends_with(c("sampleid","labdup", "flag")))
+   c <- data %>% select(ends_with(c("sample_id","labdup", "flag")))
    
    # group and summarize to obtain means                
    d <- data %>%
-      dplyr::group_by(sampleid) %>%
-      summarize(across(!ends_with(c("labdup", "sampleid", "flag")), 
+      dplyr::group_by(sample_id) %>%
+      summarize(across(!ends_with(c("labdup", "sample_id", "flag")), 
                        ~ mean(., na.rm = TRUE)))
    
-   e <- left_join(d, c, by = 'sampleid') %>% # rejoin the data
+   e <- left_join(d, c, by = 'sample_id') %>% # rejoin the data
       mutate(across(3:last_col(), 
                     ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
       select(order(colnames(.))) %>% # alphabetize column names
-      select(sampleid, labdup, everything()) %>% # put 'sampleid' first
+      select(sample_id, labdup, everything()) %>% # put 'sampleid' first
       filter(labdup != "LAB DUP") # remove the lab dup; we may want to revisit this.
       # note that the LAB DUP and the original now have identical values, but the < flags may differ
    
@@ -130,10 +139,14 @@ cin.ada.path <- paste0(userPath,
 # apply get_ada_data function to each spreadsheet for Lake Jean Neustadt
 # also aggregate LAB DUPs with dup_agg
 jea1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   mutate(site_id = "U-01")
    dup_agg
 jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
+   filter(sample_type == "unfiltered"|sample_type == "blank") %>%
    dup_agg
 jea3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>%
    dup_agg
 
 
@@ -155,7 +168,7 @@ ove1 <- get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,G
 ove2 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls")
 ove3 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3GPMS.xlsx")           
 
-zzz <- left_join(jea1, jea2, by = "sampleid") # 4NOV21: What do we do with LAB DUPs?
+zzz <- left_join(jea1, jea2, by = "sampleid") 
 # this object name is just a placeholder
 
 
