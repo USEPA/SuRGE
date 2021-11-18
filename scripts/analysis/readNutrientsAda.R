@@ -46,7 +46,7 @@ get_ada_data <- function(path, datasheet) {
    mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), "LAB DUP", "")) %>% # flag the dups
    select(field_sample_id, labdup, starts_with("data")) %>% # remove unneeded columns
    rename_with(~row.names(toptable), .cols = starts_with("data")) %>% # rename using analyte names
-   rename(sampleid = field_sample_id) %>%
+   rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
    select(sampleid, labdup, everything()) %>% # reorder columns for the following mutate() 
    mutate(across(3:last_col(), # create new flag column if analyte not detected
                  ~ if_else(str_detect(., "ND"), "<", ""),
@@ -55,20 +55,21 @@ get_ada_data <- function(path, datasheet) {
                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
    mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
    mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
+   mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
                  ~ str_extract(., pattern = "\\D\\d\\d+"))) %>%
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
                  ~ as.numeric(.))) %>%
    janitor::clean_names()  %>%
-   mutate(sample_depth = str_sub(sampleid, 4, 4)) %>%
-   mutate(sample_type = str_sub(sampleid, 5, 5)) %>%
-   #mutate(sampleid = str_sub(sampleid, 1, 3)) %>%
+   mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid 
+   mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid 
+   mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
    mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "no data"))) %>%
    mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unfiltered", "D" =  "dissolved"))) %>%
-   dplyr::rename(lake_id = sampleid) %>%
-   mutate(site_id = "") %>%
+   dplyr::rename(lake_id = sampleid) %>% # change name to match chemCoc
+   mutate(site_id = "") %>% # create empty column for site_id (id is populated later)
    select(order(colnames(.))) %>% # alphabetize column names
-   select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) # put 'sampleid' first 
+   select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) # put id fields first 
    
   return(maintable)
 
@@ -79,22 +80,22 @@ get_ada_data <- function(path, datasheet) {
 dup_agg <- function(data) {
    
    # carve out the _flag columns so they can be re-joined later
-   c <- data %>% select(ends_with(c("sample_id","labdup", "flag")))
+   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag")))
    
    # group and summarize to obtain means                
    d <- data %>%
-      dplyr::group_by(sample_id) %>%
-      summarize(across(!ends_with(c("labdup", "sample_id", "flag")), 
+      dplyr::group_by(sample_depth, sample_type) %>%
+      summarize(across(!ends_with(c("id","labdup", "type", "depth", "flag")), 
                        ~ mean(., na.rm = TRUE)))
    
-   e <- left_join(d, c, by = 'sample_id') %>% # rejoin the data
-      mutate(across(3:last_col(), 
+   e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
+      mutate(across(3:last_col(),
                     ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
       select(order(colnames(.))) %>% # alphabetize column names
-      select(sample_id, labdup, everything()) %>% # put 'sampleid' first
+      select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) %>% # put 'sampleid' first
       filter(labdup != "LAB DUP") # remove the lab dup; we may want to revisit this.
-      # note that the LAB DUP and the original now have identical values, but the < flags may differ
-   
+   # note that the LAB DUP and the original now have identical values, but the < flags may differ
+ 
 return(e)
 
 }
@@ -136,17 +137,21 @@ return(e)
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
 
-# apply get_ada_data function to each spreadsheet for Lake Jean Neustadt
-# also aggregate LAB DUPs with dup_agg
+# apply get_ada_data and dup_agg functions to each spreadsheet for Lake Jean Neustadt
+
 jea1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
    filter(sample_type == "dissolved"|sample_type == "blank") %>%
-   mutate(site_id = "U-01")
+   mutate(site_id = "U-01") %>% # add site_id
    dup_agg
+
 jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    filter(sample_type == "unfiltered"|sample_type == "blank") %>%
+   mutate(site_id = "U-01") %>% # add site_id
    dup_agg
+   
 jea3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
    filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   mutate(site_id = "U-01") %>% # add site_id
    dup_agg
 
 
@@ -154,21 +159,47 @@ jea3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,G
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_148_Keystone Lake/")
 
-# apply get_ada_data function to each spreadsheet for Keystone Lake 
-key1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls")
-key2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls")             
-key3 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx")
+# apply get_ada_data and dup_agg functions to each spreadsheet for Keystone Lake 
+key1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   mutate(site_id = "U-07") %>% # add site_id
+   dup_agg
+
+key2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   mutate(site_id = "U-07") %>% # add site_id
+   dup_agg
+
+key3 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   mutate(site_id = "U-07") %>% # add site_id
+   dup_agg
+
 
 # create path for Lake Overholser
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_167_Lake Overholser/")
 
-# apply get_ada_data function to each spreadsheet for for Lake Overholser
-ove1 <- get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls")
-ove2 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls")
-ove3 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3GPMS.xlsx")           
+# apply get_ada_data and dup_agg functions to each spreadsheet for Lake Overholser
+ove1 <- get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   mutate(site_id = "U-06") %>% # add site_id
+   dup_agg 
 
-zzz <- left_join(jea1, jea2, by = "sampleid") 
+ove2 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   mutate(site_id = "U-06") %>% # add site_id
+   dup_agg
+
+ove3 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
+   filter(sample_type == "dissolved"|sample_type == "blank") %>% 
+   mutate(site_id = "U-06") %>% # add site_id
+   dup_agg
+
+
+
+
+zzz <- left_join(jea1, jea2, by = "lake_id") 
 # this object name is just a placeholder
 
 
