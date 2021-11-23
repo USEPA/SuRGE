@@ -166,7 +166,7 @@ key1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,G
    dup_agg
 
 key2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   filter(sample_type == "unfiltered"|sample_type == "blank") %>%
    mutate(site_id = "U-07") %>% # add site_id
    dup_agg
 
@@ -187,7 +187,7 @@ ove1 <- get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,G
    dup_agg 
 
 ove2 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+   filter(sample_type == "unfiltered"|sample_type == "blank") %>%
    mutate(site_id = "U-06") %>% # add site_id
    dup_agg
 

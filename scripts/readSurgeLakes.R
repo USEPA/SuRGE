@@ -16,3 +16,8 @@ lake.list %>% filter(sample_year == 2021,
 # blanks for another (35*0.3*2 = 21) 21 samples.  Sample totals should be
 # close to 90.
 
+lake.list.sampled <- lake.list %>% filter(sample_year <= 2021)
+
+str(lake.list$sample_year)
+
+lake.list.sampled$site_id
