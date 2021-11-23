@@ -26,6 +26,7 @@
 # Function to extract data from Ada excel files
 get_ada_data <- function(path, datasheet) { 
  
+
   #'toptable' contains analyte names and MDL values
  toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
                     sheet = "Data", range = "c8:N19") %>%
@@ -37,7 +38,8 @@ get_ada_data <- function(path, datasheet) {
    select(starts_with("Analytes"), MDL) %>% # select only the columns w/ analyte names and MDL
    rename(Analytes = starts_with("Analytes")) %>%
    filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
-   column_to_rownames(var = "Analytes") # simpler to work w/ rownames in next chunk of code
+   column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
+   mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
  
  #'maintable' combines 'toptable' with results
  maintable <- read_excel(paste0(path, datasheet), # get the results
@@ -57,20 +59,20 @@ get_ada_data <- function(path, datasheet) {
    mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
    mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
-                 ~ str_extract(., pattern = "\\D\\d\\d+"))) %>%
+                 ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
                  ~ as.numeric(.))) %>%
    janitor::clean_names()  %>%
-   mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid 
-   mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid 
+   mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
+   mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
    mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
    mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "no data"))) %>%
    mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unfiltered", "D" =  "dissolved"))) %>%
    dplyr::rename(lake_id = sampleid) %>% # change name to match chemCoc
    mutate(site_id = "") %>% # create empty column for site_id (id is populated later)
    select(order(colnames(.))) %>% # alphabetize column names
-   select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) # put id fields first 
-   
+   select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) # put id fields first
+
   return(maintable)
 
 }
