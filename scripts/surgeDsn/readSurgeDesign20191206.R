@@ -10,42 +10,67 @@
 # abbreviates names) FOR MAPPING IN arcGIS.  GEOPACKAGE MUST BE CONVERTED TO .GDB IN GIS PRIOR
 # TO 'OVERWRITE WEB LAYER' IN WEB MAP.
 
-surgeDsn <- readxl::read_xlsx("../../../surgeDsn/SuRGE_design_20191206_eval_status.xlsx")
-str(surgeDsn) 
+# Read in data
+surgeDsn <- readxl::read_xlsx("../../../surgeDsn/SuRGE_design_20191206_eval_status.xlsx") %>%
+  select(-xcoord_1, -ycoord_1) %>% # remove xcoord and ycoord, holdover from Tony's .shp
+  janitor::clean_names() # GIS is picky about names
 
-# Prep for writing
-surgeDsn <- surgeDsn %>% select(-xcoord_1, -ycoord_1) %>% # remove xcoord and ycoord, holdover from Tony's .shp
-  # arcGIS Pro cannot handle "." in geopackage column names. probably can't handle " " either.
-  # just remove.
-  rename_all(~ gsub(" ", "", .)) %>% # replace " " in column names with ""
-  # remove site deemed unsampleable
-  filter(!EvalStatusCode %in% c("LD", "PI", "TR")) %>%
-  # Pull out sites that are yet to be sampled, or don't have a sample year yet assigned
-  # this includes oversample sites that do not have year assigned
-  filter(SampleYear > 2020 | is.na(SampleYear)) 
-         
+unique(surgeDsn$lab)
 
-# convert to sf object, then write to disk for mapping in GIS
-
-surgeDsn.sf <- st_as_sf(surgeDsn, coords = c("LON_DD83", "LAT_DD83"), 
+# Convert to sf object
+surgeDsn.sf <- st_as_sf(surgeDsn, coords = c("lon_dd83", "lat_dd83"), 
                         crs = 4269) %>% # NAD83
   st_transform(., crs = 3857) # web mercator
 
-st_crs(surgeDsn.sf)
-plot(surgeDsn.sf$geometry)
+st_crs(surgeDsn.sf) # confirm CRS
+plot(surgeDsn.sf$geometry) # preview plot
 
-st_write(obj = surgeDsn.sf, 
+
+# Filter to sites to be sampled in 2022 - 2023, plus all unused oversample sites
+surgeDsn22_23 <- surgeDsn.sf %>%
+  # remove site deemed unsampleable
+  filter(!eval_status_code %in% c("LD", "PI", "TR")) %>%
+  # Pull out sites that are yet to be sampled, or don't have a sample year yet assigned
+  # this includes oversample sites that do not have year assigned
+  filter(sample_year > 2021 | is.na(sample_year)) 
+
+surgeDsn22_23 %>% print(n=Inf)
+         
+
+# Filter to sites sampled in 2020, 2021, and those to be sampled in 2022 - 2023,
+# plus oversample sites
+surgeDsnSampled <- surgeDsn.sf %>%
+  # remove site deemed unsampleable
+  filter(!eval_status_code %in% c("LD", "PI", "TR"))
+
+surgeDsnSampled %>% print(n=Inf)
+
+# write 2022 - 2023 sites to disk
+st_write(obj = surgeDsn22_23, 
          dsn = file.path( "../../../surgeDsn", "SuRGE_design_20191206_eval_status.gpkg"), 
-         layer = "SuRGE_design_20191206", # package appends 'main.' to layer name?
+         layer = "2022_2023_sites", # package appends 'main.' to layer name?
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
 
-unique(surgeDsn.sf$lab)
+# write all sampled sites to disk
+st_write(obj = surgeDsnSampled, 
+         dsn = file.path( "../../../surgeDsn", "SuRGE_design_20191206_eval_status.gpkg"), 
+         layer = "sampled_sites", # package appends 'main.' to layer name?
+         append=FALSE, # this overwrites existing layer
+         driver = "GPKG")
+
+# Quick look at what remains to be sampled
+surgeDsnSampled %>% 
+  filter(sample_year >= 2022 | is.na(sample_year)) %>% # only those remaining
+  {table(.$lab)} # only 16 for CIN
 
 
+# CIN sampled in 2021
+surgeDsnSampled %>% 
+  filter(sample_year == 2021, lab == "CIN")
+
+# should be 108 sites total
+addmargins(table(surgeDsnSampled$lab)) # yes
 
 
-# sampled 14 in 2020
-# total CIN sites for 2021/2022/2023
-# 48-14 = 38 =~ 12/year
