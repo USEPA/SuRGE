@@ -35,16 +35,19 @@ get_ada_data <- function(path, datasheet) {
    pivot_longer(-rowname, 'variable', 'value') %>% # transpose the tibble
    pivot_wider(variable, rowname) %>% # transpose the tibble
    row_to_names(1) %>% # transpose the tibble
-   select(starts_with("Analytes"), MDL) %>% # select only the columns w/ analyte names and MDL
+   select(starts_with("Analytes"), MDL, starts_with("Unit")) %>% # select only columns w/ analyte names, units, & MDL
    rename(Analytes = starts_with("Analytes")) %>%
    filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
+   mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
    column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
    mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
- 
+   
+
  #'maintable' combines 'toptable' with results
  maintable <- read_excel(paste0(path, datasheet), # get the results
                          sheet = "Data", range = "A14:N19") %>%
    janitor::clean_names() %>%
+   mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase since Ada isn't consistent
    mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), "LAB DUP", "")) %>% # flag the dups
    select(field_sample_id, labdup, starts_with("data")) %>% # remove unneeded columns
    rename_with(~row.names(toptable), .cols = starts_with("data")) %>% # rename using analyte names
@@ -66,8 +69,8 @@ get_ada_data <- function(path, datasheet) {
    mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
    mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
    mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
-   mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "no data"))) %>%
-   mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unfiltered", "D" =  "dissolved"))) %>%
+   mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "nutrient blank"))) %>%
+   mutate(sample_type = str_replace_all(sample_type, c("B" = "nutrient blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
    dplyr::rename(lake_id = sampleid) %>% # change name to match chemCoc
    mutate(site_id = "") %>% # create empty column for site_id (id is populated later)
    select(order(colnames(.))) %>% # alphabetize column names
@@ -77,17 +80,17 @@ get_ada_data <- function(path, datasheet) {
 
 }
 
-# Function to aggregate the lab dups from the data. 
+# Function to aggregate the lab dups from the data 
 # This is a separate function, since we won't always want to aggregate.
 dup_agg <- function(data) {
    
    # carve out the _flag columns so they can be re-joined later
-   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag")))
+   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag", "filter")))
    
    # group and summarize to obtain means                
    d <- data %>%
       dplyr::group_by(sample_depth, sample_type) %>%
-      summarize(across(!ends_with(c("id","labdup", "type", "depth", "flag")), 
+      summarize(across(!ends_with(c("id","labdup", "type", "depth", "flag", "filter")), 
                        ~ mean(., na.rm = TRUE)))
    
    e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
@@ -102,6 +105,29 @@ return(e)
 
 }
 
+# Function to convert units
+conv_units <- function(data) {
+   
+   # Step: identify which columns & units are incorrect
+      # 1Dec: passed units to output tibble in analyte names
+         # parse column names into analyte name and units
+         # try using dplyr::cur_column   
+   # Step: convert units
+   # Step: rename columns
+      # nh4, no2_3, no2, no3, tn: ug_n_l
+      # tp, op: ug_p_l
+      # toc, doc: mg_c_l
+   
+   d <- data %>%
+      rename(newname = oldname, etc)
+   
+   # convert values to correct units
+   mutate(d.converted = case_when(
+      analyte == "whatever" ~ . * somecoefficient, # convert to correct units
+      TRUE ~ d.converted
+   ))
+   
+}
 
 # 1NOV21 next steps:
 # join resulting data objects into a single tibble
@@ -121,20 +147,20 @@ cin.ada.path <- paste0(userPath,
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Lake Jean Neustadt
 
-jea1 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>%
+jea1 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
+   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
-   filter(sample_type == "unfiltered"|sample_type == "blank") %>%
    mutate(site_id = "U-01") %>% # add site_id
+   mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
+   dup_agg
+
+jea3 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
+   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
    
-jea3 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>%
-   mutate(site_id = "U-01") %>% # add site_id
-   dup_agg
 
 
 # create path for Keystone Lake
@@ -143,18 +169,18 @@ cin.ada.path <- paste0(userPath,
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Keystone Lake 
 key1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>%
    mutate(site_id = "U-07") %>% # add site_id
+   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 key2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
-   filter(sample_type == "unfiltered"|sample_type == "blank") %>%
    mutate(site_id = "U-07") %>% # add site_id
+   mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 key3 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>%
    mutate(site_id = "U-07") %>% # add site_id
+   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 
@@ -164,21 +190,19 @@ cin.ada.path <- paste0(userPath,
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Lake Overholser
 ove1 <- get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>%
    mutate(site_id = "U-06") %>% # add site_id
+   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg 
 
 ove2 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
-   filter(sample_type == "unfiltered"|sample_type == "blank") %>%
    mutate(site_id = "U-06") %>% # add site_id
+   mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 ove3 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
-   filter(sample_type == "dissolved"|sample_type == "blank") %>% 
    mutate(site_id = "U-06") %>% # add site_id
+   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
-
-
 
 
 zzz <- left_join(jea1, jea2, by = "lake_id") 
