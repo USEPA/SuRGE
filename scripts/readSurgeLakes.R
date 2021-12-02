@@ -2,22 +2,7 @@
 
 lake.list <- readxl::read_excel(paste0(userPath, 
                                        "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
-  janitor::clean_names()
-
-
-# How many chem samples should CIN lab expect for 2021 field season
-lake.list %>% filter(sample_year == 2021,
-                     lab != "ADA") %>% #ADA running their own chemistry
-  summarize(lakes.2021 = n())
-
-# 31 lakes, but Oahe and Francis-Case split into three lakes, therefore
-# should have samples from 35 lakes.  Each lake has a minimum of two samples,
-# therefore have a minimum of 70 samples.  Assume 1/3 of lakes have dups and 
-# blanks for another (35*0.3*2 = 21) 21 samples.  Sample totals should be
-# close to 90.
-
-lake.list.sampled <- lake.list %>% filter(sample_year <= 2021)
-
-str(lake.list$sample_year)
-
-lake.list.sampled$site_id
+  janitor::clean_names() %>%
+  dplyr::rename(lake_id = site_id) %>%
+  mutate(lake_id = substr(lake_id, 5, 8) %>% # extract numeric part of lake_id
+           as.numeric()) #convert lake_id to numeric
