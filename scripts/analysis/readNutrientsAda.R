@@ -42,7 +42,7 @@ get_ada_data <- function(path, datasheet) {
    column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
    mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
    
-
+z <<- (toptable)
  #'maintable' combines 'toptable' with results
  maintable <- read_excel(paste0(path, datasheet), # get the results
                          sheet = "Data", range = "A14:N19") %>%
@@ -65,7 +65,7 @@ get_ada_data <- function(path, datasheet) {
                  ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
                  ~ as.numeric(.))) %>%
-   janitor::clean_names()  %>%
+   #janitor::clean_names()  %>% # this is causing a problem by changing mu symbol to 'm'
    mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
    mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
    mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
@@ -113,31 +113,25 @@ conv_units <- function(data) {
          # parse column names into analyte name and units
          # try using dplyr::cur_column   
    # Step: convert units
-   # Step: rename columns
       # nh4, no2_3, no2, no3, tn: ug_n_l
       # tp, op: ug_p_l
       # toc, doc: mg_c_l
+   # Step: rename columns
+
    
    d <- data %>%
-      rename(newname = oldname, etc)
+      
+      mutate(across(ends_with("/L"), 
+                    ~ case_when(
+                       str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                       TRUE ~ .*1)))
+
+   # May be able to use same format to rename() analytes. 
    
-   # convert values to correct units
-   mutate(d.converted = case_when(
-      analyte == "whatever" ~ . * somecoefficient, # convert to correct units
-      TRUE ~ d.converted
-   ))
+
+  return(d)
    
 }
-
-# 1NOV21 next steps:
-# join resulting data objects into a single tibble
-# fix variable names?
-# Add filter to keep only the following: 
-# oP, NO3NO2NH4: dissolved + blanks
-# TNTP: unfiltered and blanks
-# parse the sampleID (lake_id, site_id, sample_depth, and sample_type); see ChemCoc
-# add site_id; may need to be hardcoded or added to new tab in spreadsheet
-
 
 
 
