@@ -84,20 +84,20 @@ z <<- (toptable)
 # This is a separate function, since we won't always want to aggregate.
 dup_agg <- function(data) {
    
-   # carve out the _flag columns so they can be re-joined later
-   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag", "filter")))
+   # carve out the _flag and _units columns so they can be re-joined later
+   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag", "filter", "units")))
    
    # group and summarize to obtain means                
    d <- data %>%
       dplyr::group_by(sample_depth, sample_type) %>%
-      summarize(across(!ends_with(c("id","labdup", "type", "depth", "flag", "filter")), 
+      summarize(across(!ends_with(c("id","labdup", "type", "depth", "flag", "filter", "units")), 
                        ~ mean(., na.rm = TRUE)))
    
    e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
-      mutate(across(3:last_col(),
+      mutate(across(3:last_col(), # convert NaN to NA
                     ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
       select(order(colnames(.))) %>% # alphabetize column names
-      select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) %>% # put 'sampleid' first
+      select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
       filter(labdup != "LAB DUP") # remove the lab dup; we may want to revisit this.
    # note that the LAB DUP and the original now have identical values, but the < flags may differ
  
@@ -106,30 +106,66 @@ return(e)
 }
 
 # Function to convert units
-conv_units <- function(data) {
+conv_units <- function(data, filename) {
    
-   # Step: identify which columns & units are incorrect
-      # 1Dec: passed units to output tibble in analyte names
-         # parse column names into analyte name and units
-         # try using dplyr::cur_column   
-   # Step: convert units
-      # nh4, no2_3, no2, no3, tn: ug_n_l
-      # tp, op: ug_p_l
-      # toc, doc: mg_c_l
-   # Step: rename columns
+# Flow: Series of non-nested 'if' conditions that evaluate file names;
+   # conditions are mutually exclusive due to Ada lab file name conventions.
+   # If TRUE, proceeds to convert units, rename columns, & add units columns.
+   
+# filename <- toupper(filename) # use if case becomes an issue in file names;
+      # note that 'oP' (in code below) contains a lowercase letter. 
 
    
-   d <- data %>%
-      
-      mutate(across(ends_with("/L"), 
-                    ~ case_when(
-                       str_detect(paste(cur_column()), "mg/") ~ .*1000, 
-                       TRUE ~ .*1)))
-
-   # May be able to use same format to rename() analytes. 
+   # AMMONIUM, NITRATE, NITRITE
+   if (str_detect(paste(filename), "NH4")) 
+      f <- data %>%
+         mutate(across(ends_with("/L"), 
+                       ~ case_when(
+                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                          TRUE ~ .*1))) %>%
+         rename(nh4 = contains("NH4") & !ends_with("flag"), 
+                no2_3 = contains("NO3+NO2") & !ends_with("flag"),
+                no3 = contains("NO3") & !contains("NO2") & !ends_with("flag"),
+                no2 = contains("NO2") & !contains("NO3") & !ends_with("flag"), 
+                nh4_flag = contains("NH4") & ends_with("flag"),
+                no2_3_flag = contains("NO3+NO2") & ends_with("flag"),
+                no3_flag = contains("NO3") & !contains("NO2") & ends_with("flag"),
+                no2_flag = contains("NO2") & !contains("NO3") & ends_with("flag")) %>%
+         mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
+                       ~ "ug_n_l",
+                       .names = "{col}_units"))
    
-
-  return(d)
+   
+    # TOTAL PHOSPHORUS, TOTAL NITROGEN
+   if (str_detect(paste(filename), "TNTP"))
+      f <- data %>%
+         mutate(across(ends_with("/L"), 
+                       ~ case_when(
+                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                          TRUE ~ .*1))) %>%
+         rename(tn = contains("TN") & !ends_with("flag"),
+                tp = contains("TP") & !ends_with("flag"),
+                tn_flag = contains("TN") & ends_with("flag"),
+                tp_flag = contains("TP") & ends_with("flag")) %>%
+         mutate(across(ends_with(c("tn", "tp")), 
+                       ~ "ug_n_l",
+                       .names = "{col}_units"))
+  
+   
+    # ORTHOPHOSPHATE
+   if (str_detect(paste(filename), "oP"))
+      f <- data %>%
+         mutate(across(ends_with("/L"), 
+                       ~ case_when(
+                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                          TRUE ~ .*1))) %>%
+         rename(op = contains("oP") & !ends_with("flag"),
+                op_flag = contains("oP") & ends_with("flag")) %>%
+         mutate(across(ends_with("op"), 
+                       ~ "ug_n_l",
+                       .names = "{col}_units"))
+   
+  return(f)
    
 }
 
@@ -142,16 +178,20 @@ cin.ada.path <- paste0(userPath,
 # apply get_ada_data and dup_agg functions to each spreadsheet for Lake Jean Neustadt
 
 jea1 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
+   conv_units(filename = "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
+   conv_units("EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 jea3 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
+   conv_units("EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
+   mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
    
