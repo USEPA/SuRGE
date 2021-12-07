@@ -122,9 +122,10 @@ conv_units <- function(data) {
    d <- data %>%
       
       mutate(across(ends_with("/L"), 
-                    ~ case_when(
+                    ~ case_when( # similar to if_else
+                       # if "mg/" is in column name, then multiply by 1000 to convert to ug
                        str_detect(paste(cur_column()), "mg/") ~ .*1000, 
-                       TRUE ~ .*1)))
+                       TRUE ~ .*1))) # if "mg/" not in name, multiply by 1 (don't change)
 
    # May be able to use same format to rename() analytes. 
    
