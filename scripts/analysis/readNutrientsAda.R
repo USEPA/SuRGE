@@ -24,9 +24,10 @@
 #   janitor::clean_names()
 
 # Function to extract data from Ada excel files
-get_ada_data <- function(path, datasheet) { 
+get_ada_data21 <- function(path, datasheet) { 
  
-
+   # for 2020 data (and 2022 onward), as field_sample_id is in different format
+   
   #'toptable' contains analyte names and MDL values
    toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
                           sheet = "Data", range = "c8:N500") %>% # up to 492 rows
@@ -43,7 +44,6 @@ get_ada_data <- function(path, datasheet) {
       column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
       mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
    
-   z <<- (toptable)
    #'maintable' combines 'toptable' with results
    maintable <- read_excel(paste0(path, datasheet), # get the results
                            sheet = "Data", range = "A14:N500") %>% # up to 492 rows
@@ -182,19 +182,19 @@ cin.ada.path <- paste0(userPath,
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Lake Jean Neustadt
 
-jea1 <- get_ada_data(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
+jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
    conv_units(filename = "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
-jea2 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
+jea2 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    conv_units("EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
-jea3 <- get_ada_data(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
+jea3 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
    conv_units("EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
@@ -207,17 +207,17 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/nutrients/ADA/CH4_148_Keystone Lake/")
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Keystone Lake 
-key1 <- get_ada_data(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
+key1 <- get_ada_data21(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
-key2 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
+key2 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
-key3 <- get_ada_data(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
+key3 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
@@ -228,18 +228,18 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/nutrients/ADA/CH4_167_Lake Overholser/")
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Lake Overholser
-ove1 <- get_ada_data(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
+ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg 
 
-ove2 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
+ove2 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
    dup_agg
 
 # deleted "GPMS" from end of excel file name.  Full file name couldn't be read on Jake's laptop.
-ove3 <- get_ada_data(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3.xlsx") %>%
+ove3 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3.xlsx") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg
@@ -256,6 +256,66 @@ zzz <- left_join(jea1, jea2, by = "lake_id")
 # 11Nov21: JB not yet reviewed
 # 12Dec21: code below works, but isn't complete.  Should we modify get_ada_data
 # above to accommodate?
+
+# EXAMPLE   2021: (TN or DN)147DU vs. 2020: DN044DU
+
+get_ada_data <- function(path, datasheet) { 
+   
+# for 2020 data and 2022 onward if field_sample_id format is the same
+   
+   #'toptable' contains analyte names and MDL values
+   toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
+                          sheet = "Data", range = "c8:N500") %>% # up to 492 rows
+      janitor::remove_empty("rows") %>% # remove empty rows
+      select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
+      rownames_to_column() %>% # transpose the tibble 
+      pivot_longer(-rowname, 'variable', 'value') %>% # transpose the tibble
+      pivot_wider(variable, rowname) %>% # transpose the tibble
+      row_to_names(1) %>% # transpose the tibble
+      select(starts_with("Analytes"), MDL, starts_with("Unit")) %>% # select only columns w/ analyte names, units, & MDL
+      rename(Analytes = starts_with("Analytes")) %>%
+      filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
+      mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
+      column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
+      mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
+   
+   #'maintable' combines 'toptable' with results
+   maintable <- read_excel(paste0(path, datasheet), # get the results
+                           sheet = "Data", range = "A14:N500") %>% # up to 492 rows
+      janitor::remove_empty("rows") %>% # remove empty rows
+      janitor::clean_names() %>%
+      mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase since Ada isn't consistent
+      mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), "LAB DUP", "")) %>% # flag the dups
+      select(field_sample_id, labdup, starts_with("data")) %>% # remove unneeded columns
+      rename_with(~row.names(toptable), .cols = starts_with("data")) %>% # rename using analyte names
+      rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
+      select(sampleid, labdup, everything()) %>% # reorder columns for the following mutate() 
+      mutate(across(3:last_col(), # create new flag column if analyte not detected
+                    ~ if_else(str_detect(., "ND"), "<", ""),
+                    .names = "{col}_flag")) %>%
+      mutate(across(3:last_col(), # replace ND with the MDL value from toptable
+                    ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
+      mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
+                    ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
+      mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
+                    ~ as.numeric(.))) %>%
+      #janitor::clean_names()  %>% # this is causing a problem by changing mu symbol to 'm'
+      mutate(sample_depth = str_sub(sampleid, 6, 6)) %>% # get sample depth from sampleid
+      mutate(sample_type = str_sub(sampleid, 7, 7)) %>% # get sample type from sampleid
+      mutate(sample_filter = str_sub(sampleid, 1, 1)) %>% # get sample type from sampleid
+      mutate(sampleid = str_sub(sampleid, 3, 5)) %>% # make sampleid 3-digit numeric lake id only
+      mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
+      mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
+      mutate(sample_filter = str_replace_all(sample_filter, c("D" =  "filtered", "N" = "nonfiltered"))) %>%
+      dplyr::rename(lake_id = sampleid) %>% # change name to match chemCoc
+      mutate(site_id = "") %>% # create empty column for site_id (id is populated later)
+      select(order(colnames(.))) %>% # alphabetize column names
+      select(lake_id, site_id, sample_filter, sample_depth, sample_type, labdup, everything()) # put id fields first
+   
+   return(maintable)
+   
+}
+
 
 
 # 1. Read in chain of custody forms
