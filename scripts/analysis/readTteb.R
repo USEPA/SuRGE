@@ -13,6 +13,7 @@ metals.SURGE <- read_excel(paste0(userPath,
 
 metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>% 
   janitor::clean_names() %>%
+  rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
   
   
   # as of 11/10/2021 the files only contain metals data for SuRGE, but the
@@ -33,13 +34,13 @@ metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>%
   # This is the case for labid's 203013 and 203014.  Maily indicated these
   # would be updated in the future (see 10/26/2021 email).  Replace with NA
   # for now.
-  mutate(across(al_aes:zn_aes, # replace lab's placeholder numbers with 'NA'
+  mutate(across(al:zn, # replace lab's placeholder numbers with 'NA'
                 ~ na_if(., 9999999999999990.000))) %>%
   # create 'flag' columns for every analyte to flag observations < det. limit
-  mutate(across(al_aes:zn_aes, # nice code Joe!
-                ~ if_else(. < 0 , "<", ""), 
+  mutate(across(al:zn, # nice code Joe!
+                ~ if_else(. < 0 , "<", ""), #bd reported as -detection limit
                 .names = "{col}_flag")) %>%
-  mutate(across(al_aes:zn_aes, # make all values positive.  # nice Joe!
+  mutate(across(al:zn, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, metals.qual, comment, everything()) # put these columns first
