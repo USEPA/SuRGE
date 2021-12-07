@@ -112,8 +112,10 @@ conv_units <- function(data, filename) {
    # conditions are mutually exclusive due to Ada lab file name conventions.
    # If TRUE, proceeds to convert units, rename columns, & add units columns.
    
+
 # filename <- toupper(filename) # use if case becomes an issue in file names;
       # note that 'oP' (in code below) contains a lowercase letter. 
+
 
    
    # AMMONIUM, NITRATE, NITRITE
