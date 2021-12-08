@@ -37,7 +37,7 @@ surgeDsn22_23 <- surgeDsn.sf %>%
 surgeDsn22_23 %>% print(n=Inf)
          
 
-# Filter to sites sampled in 2020, 2021, and those to be sampled in 2022 - 2023,
+# Filter to sites sampled in 2018, 2020, 2021, and those to be sampled in 2022 - 2023,
 # plus oversample sites
 surgeDsnSampled <- surgeDsn.sf %>%
   # remove site deemed unsampleable

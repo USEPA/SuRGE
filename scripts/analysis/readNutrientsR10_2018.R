@@ -7,3 +7,6 @@
 # All samples were unfiltered, hence all analytes are reported with a "T" in the 
 # name (e.g. TNH4, rather than NH4).  Just ignore this and adopt the analyte names
 # defined in github issue #10.
+
+# Samples were collected at an open-water and tributary site.  We only want the
+# open_water site data.
