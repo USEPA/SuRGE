@@ -60,36 +60,106 @@ analyte_names <- row.names(toptable) # pass analyte names to maintable, below
                     ~ as.numeric(as.Date(., format = "%m/%d/%Y") - as.Date(date_collected, format = "%m/%d/%Y")))) %>%
       rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
       filter(str_starts(sampleid, "\\(")) %>% # retain only rows where sampleid starts with '('
-      select(sampleid, labdup, everything(), -date_collected) #%>% # reorder columns for the following mutate()
-      # mutate(across(4:last_col(), # create new flag column if analyte not detected
-      #               ~ if_else(str_detect(., "ND"), "<", ""),
-      #               .names = "{col}_flag")) %>%
-      # mutate(across(4:last_col(), # replace ND with the MDL value from toptable
-      #               ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
-      # mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
-      # mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
-      # mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
-      # mutate(across(!ends_with(c("flag", labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
-      #               ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
-      # mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
-      #               ~ as.numeric(.))) %>%
-      # #janitor::clean_names()  %>% # this is causing a problem by changing mu symbol to 'm'
-      # mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
-      # mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
-      # mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
-      # mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
-      # mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
-      # rename(lake_id = sampleid) %>% # change name to match chemCoc
-      # mutate(site_id = "") %>% # create empty column for site_id (id is populated later)
-      # select(order(colnames(.))) %>% # alphabetize column names
-      # select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) # put id fields first
+      select(sampleid, labdup, everything(), -date_collected) %>% # reorder columns for the following mutate()
+      mutate(across(ends_with("/L"), # create new flag column if analyte not detected
+                    ~ if_else(str_detect(., "ND"), "<", ""),
+                    .names = "{col}_flag")) %>%
+      mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
+                    ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
+      mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
+      mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
+      mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
+      mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
+                    ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
+      mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
+                    ~ as.numeric(.))) %>%
+      mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
+      mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
+      mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
+      mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
+      mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
+      rename(lake_id = sampleid) %>% # change name to match chemCoc
+      mutate(site_id = "") # create empty column for site_id (id is populated later)
 
   return(maintable)
 
 }
 
-# Function to aggregate the lab dups from the data 
-# This is a separate function, since we won't always want to aggregate.
+
+# Function to convert units, rename columns, and add units columns
+conv_units <- function(data, filename) {
+   
+# Flow: Series of non-nested 'if' conditions that evaluate file names;
+   # conditions are mutually exclusive due to Ada lab file name conventions.
+   # If TRUE, proceeds to convert units, rename columns, & add units columns.
+
+# filename <- toupper(filename) # use if case becomes an issue in file names;
+      # note that 'oP' (in code below) contains a lowercase letter. 
+
+   # AMMONIUM, NITRATE, NITRITE
+   if (str_detect(paste(filename), "NH4")) 
+      f <- data %>%
+         mutate(across(ends_with("/L"), 
+                       ~ case_when(
+                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                          TRUE ~ .*1))) %>%
+         rename(nh4 = contains("NH4") & !ends_with(c("flag", "analyzed")), 
+                no2_3 = contains("NO3+NO2") & !ends_with(c("flag", "analyzed")),
+                no3 = contains("NO3") & !contains("NO2") & !ends_with(c("flag", "analyzed")),
+                no2 = contains("NO2") & !contains("NO3") & !ends_with(c("flag", "analyzed")), 
+                nh4_flag = contains("NH4") & ends_with("flag"),
+                no2_3_flag = contains("NO3+NO2") & ends_with("flag"),
+                no3_flag = contains("NO3") & !contains("NO2") & ends_with("flag"),
+                no2_flag = contains("NO2") & !contains("NO3") & ends_with("flag"), 
+                nh4_qual = contains("NH4") & ends_with("analyzed"), 
+                no2_3_qual = contains("NO3+NO2") & ends_with("analyzed"),
+                no3_qual = contains("NO3") & ends_with("analyzed"), 
+                no2_qual = contains("NO2") & ends_with("analyzed")) %>%
+         mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
+                       ~ "ug_n_l",
+                       .names = "{col}_units"))
+   
+   
+    # TOTAL PHOSPHORUS, TOTAL NITROGEN
+   if (str_detect(paste(filename), "TNTP"))
+      f <- data %>%
+         mutate(across(ends_with("/L"), 
+                       ~ case_when(
+                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                          TRUE ~ .*1))) %>%
+         rename(tn = contains("TN") & !ends_with(c("flag", "analyzed")),
+                tp = contains("TP") & !ends_with(c("flag", "analyzed")),
+                tn_flag = contains("TN") & ends_with("flag"),
+                tp_flag = contains("TP") & ends_with("flag"), 
+                tn_qual = contains("TN") & ends_with("analyzed"), 
+                tp_qual = contains("TP") & ends_with("analyzed")) %>%
+         mutate(across(ends_with(c("tn", "tp")), 
+                       ~ "ug_n_l",
+                       .names = "{col}_units"))
+   
+    # ORTHOPHOSPHATE
+   if (str_detect(paste(filename), "oP"))
+      f <- data %>%
+         mutate(across(ends_with("/L"), 
+                       ~ case_when(
+                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                          TRUE ~ .*1))) %>%
+         rename(op = contains("oP") & !ends_with(c("flag", "analyzed")),
+                op_flag = contains("oP") & ends_with("flag"),
+                op_qual = contains("oP") & ends_with("analyzed")) %>%
+         mutate(across(ends_with("op"), 
+                       ~ "ug_n_l",
+                       .names = "{col}_units"))
+  
+  f <- f %>% select(order(colnames(.))) %>% # alphabetize and reorder columns
+     select(lake_id, site_id, sample_depth, sample_type, labdup, everything())
+    
+  return(f)
+   
+}
+
+
+# Function to aggregate the lab duplicates
 dup_agg <- function(data) {
    
    # carve out the _flag and _units columns so they can be re-joined later
@@ -106,82 +176,14 @@ dup_agg <- function(data) {
       mutate(across(3:last_col(), # convert NaN to NA
                     ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
       select(order(colnames(.))) %>% # alphabetize column names
-      select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, qual, everything()) %>% # put 'sampleid' first
+      select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
       filter(labdup != "LAB DUP") %>% # remove the lab dup; we may want to revisit this.
       select(-labdup) # remove labdup column. JB 12/7/2021
    # note that the LAB DUP and the original now have identical values, but the < flags may differ
- 
-return(e)
-
-}
-
-# Function to convert units
-conv_units <- function(data, filename) {
    
-# Flow: Series of non-nested 'if' conditions that evaluate file names;
-   # conditions are mutually exclusive due to Ada lab file name conventions.
-   # If TRUE, proceeds to convert units, rename columns, & add units columns.
-   
-
-# filename <- toupper(filename) # use if case becomes an issue in file names;
-      # note that 'oP' (in code below) contains a lowercase letter. 
-
-# this is probably a good place to change qual to qual_group1, group2, et al.
-   # add the following code to each if:
-   # rename(qual_group1 = qual)     
-   
-   # AMMONIUM, NITRATE, NITRITE
-   if (str_detect(paste(filename), "NH4")) 
-      f <- data %>%
-         mutate(across(ends_with("/L"), 
-                       ~ case_when(
-                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
-                          TRUE ~ .*1))) %>%
-         rename(nh4 = contains("NH4") & !ends_with("flag"), 
-                no2_3 = contains("NO3+NO2") & !ends_with("flag"),
-                no3 = contains("NO3") & !contains("NO2") & !ends_with("flag"),
-                no2 = contains("NO2") & !contains("NO3") & !ends_with("flag"), 
-                nh4_flag = contains("NH4") & ends_with("flag"),
-                no2_3_flag = contains("NO3+NO2") & ends_with("flag"),
-                no3_flag = contains("NO3") & !contains("NO2") & ends_with("flag"),
-                no2_flag = contains("NO2") & !contains("NO3") & ends_with("flag")) %>%
-         mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
-                       ~ "ug_n_l",
-                       .names = "{col}_units"))
-   
-   
-    # TOTAL PHOSPHORUS, TOTAL NITROGEN
-   if (str_detect(paste(filename), "TNTP"))
-      f <- data %>%
-         mutate(across(ends_with("/L"), 
-                       ~ case_when(
-                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
-                          TRUE ~ .*1))) %>%
-         rename(tn = contains("TN") & !ends_with("flag"),
-                tp = contains("TP") & !ends_with("flag"),
-                tn_flag = contains("TN") & ends_with("flag"),
-                tp_flag = contains("TP") & ends_with("flag")) %>%
-         mutate(across(ends_with(c("tn", "tp")), 
-                       ~ "ug_n_l",
-                       .names = "{col}_units"))
-   
-    # ORTHOPHOSPHATE
-   if (str_detect(paste(filename), "oP"))
-      f <- data %>%
-         mutate(across(ends_with("/L"), 
-                       ~ case_when(
-                          str_detect(paste(cur_column()), "mg/") ~ .*1000, 
-                          TRUE ~ .*1))) %>%
-         rename(op = contains("oP") & !ends_with("flag"),
-                op_flag = contains("oP") & ends_with("flag")) %>%
-         mutate(across(ends_with("op"), 
-                       ~ "ug_n_l",
-                       .names = "{col}_units"))
-   
-  return(f)
+   return(e)
    
 }
-
 
 
 # create path for Lake Jean Neustadt
@@ -194,19 +196,19 @@ jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP
    conv_units(filename = "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
 
 jea2 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    conv_units("EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
 
 jea3 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
    conv_units("EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
    
 
 
@@ -216,19 +218,22 @@ cin.ada.path <- paste0(userPath,
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Keystone Lake 
 key1 <- get_ada_data21(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
+   conv_units("EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
 
 key2 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
+   conv_units("EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
 
 key3 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
+   conv_units("EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
 
 
 # create path for Lake Overholser
@@ -237,25 +242,27 @@ cin.ada.path <- paste0(userPath,
 
 # apply get_ada_data and dup_agg functions to each spreadsheet for Lake Overholser
 ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
+   conv_units("EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg 
+   dup_agg # aggregate lab duplicates (optional)
 
 ove2 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
+   conv_units("EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
 
 # deleted "GPMS" from end of excel file name.  Full file name couldn't be read on Jake's laptop.
 ove3 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3.xlsx") %>%
+   conv_units("EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3.xlsx") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg
+   dup_agg # aggregate lab duplicates (optional)
 
 
 zzz <- left_join(jea1, jea2, by = "lake_id") 
 # this object name is just a placeholder
-
 
 
 
@@ -287,6 +294,8 @@ get_ada_data <- function(path, datasheet) {
       column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
       mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
    
+   analyte_names <- row.names(toptable) # pass analyte names to maintable, below
+   
    #'maintable' combines 'toptable' with results
    maintable <- read_excel(paste0(path, datasheet), # get the results
                            sheet = "Data", range = "A14:N500") %>% # up to 492 rows
@@ -294,24 +303,26 @@ get_ada_data <- function(path, datasheet) {
       janitor::clean_names() %>%
       mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase since Ada isn't consistent
       mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), "LAB DUP", "")) %>% # flag the dups
-      mutate(htime = as.Date(date_analyzed, format = "%m/%d/%Y") - 
-                as.Date(date_collected, format = "%m/%d/%Y")) %>% # compute sample holding time
-      mutate(qual = if_else(htime > 28, "HOLD TIME EXCEEDED!", "GOOD!")) %>% # flag if hold time exceeded
-      select(field_sample_id, labdup, qual, starts_with("data")) %>% # remove unneeded columns
-      rename_with(~row.names(toptable), .cols = starts_with("data")) %>% # rename using analyte names
+      select(field_sample_id, labdup, starts_with("dat")) %>% # remove unneeded columns
+      rename_with(~paste0(analyte_names), .cols = starts_with("data")) %>% # rename using analyte names
+      rename_with(~paste0(analyte_names, "_date_analyzed"), .cols = starts_with("date_a")) %>% # rename using analyte names
+      mutate(across(ends_with("analyzed"), # compute holding time of analytes
+                    ~ as.numeric(as.Date(., format = "%m/%d/%Y") - as.Date(date_collected, format = "%m/%d/%Y")))) %>%
       rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
       filter(str_starts(sampleid, "DN|TN")) %>% # retain only rows where sampleid starts with TN or DN
-      select(sampleid, labdup, everything()) %>% # reorder columns for the following mutate() 
-      mutate(across(4:last_col(), # create new flag column if analyte not detected
+      select(sampleid, labdup, everything(), -date_collected) %>% # reorder columns for the following mutate()
+      mutate(across(ends_with("/L"), # create new flag column if analyte not detected
                     ~ if_else(str_detect(., "ND"), "<", ""),
                     .names = "{col}_flag")) %>%
-      mutate(across(4:last_col(), # replace ND with the MDL value from toptable
+      mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
                     ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
-      mutate(across(!ends_with(c("flag", "qual", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
+      mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
+      mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
+      mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
+      mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
                     ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
-      mutate(across(!ends_with(c("flag", "qual", "labdup", "sampleid")), # make extracted data numeric
+      mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
                     ~ as.numeric(.))) %>%
-      #janitor::clean_names()  %>% # this is causing a problem by changing mu symbol to 'm'
       mutate(sample_depth = str_sub(sampleid, 6, 6)) %>% # get sample depth from sampleid
       mutate(sample_type = str_sub(sampleid, 7, 7)) %>% # get sample type from sampleid
       mutate(sample_filter = str_sub(sampleid, 1, 1)) %>% # get sample type from sampleid
@@ -319,15 +330,12 @@ get_ada_data <- function(path, datasheet) {
       mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
       mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
       mutate(sample_filter = str_replace_all(sample_filter, c("D" =  "filtered", "N" = "nonfiltered"))) %>%
-      dplyr::rename(lake_id = sampleid) %>% # change name to match chemCoc
-      mutate(site_id = "") %>% # create empty column for site_id (id is populated later)
-      select(order(colnames(.))) %>% # alphabetize column names
-      select(lake_id, site_id, sample_filter, sample_depth, sample_type, labdup, qual, everything()) # put id fields first
+      rename(lake_id = sampleid) %>% # change name to match chemCoc
+      mutate(site_id = "") # create empty column for site_id (id is populated later) 
    
    return(maintable)
    
 }
-
 
 
 # 1. Read in chain of custody forms
