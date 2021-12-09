@@ -63,6 +63,7 @@ qa.qc.samples <- expand.grid(lake_id = lake.list.chem %>% # lake_id for all samp
                                          metals, algae.nar), # no qa.qc for algae.gb analytes
                              sample_depth = "shallow", # qa.qc only collected from shallow depth
                              stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
+  mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank")) %>% # blank depth = blank
   arrange(lake_id)
 
 # 6. create df of samples collected from all lakes
@@ -100,22 +101,26 @@ chem.samples <- chem.samples %>%
 unique(chem.samples$analyte_group) # no 'oops', good
 
 # 8. Filter out samples that were not collected in some years.
-# R10 in 2018 did not include doc, anions, taxonomy, physiology, or metals. 
-# 2020 samples (CIN, RTP, R10) did not include doc, anions, taxonomy, or physiology.
-# chla and phycocyanin blanks not collected at lake_id == 67
 chem.samples.foo <- chem.samples %>%
   # use ! to exclude any samples that meet these criteria
+  # R10 in 2018 did not include doc, anions, taxonomy, physiology, or metals. 
   filter(!((lab == "R10" & sample_year == 2018) & # for R10 sampling in 2018
-           (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
-                             analyte_group %in% c("algae.gb", "anions", "metals")))) %>% 
+             (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
+                analyte_group %in% c("algae.gb", "anions", "metals")))) %>% 
+  # 2020 samples (CIN, RTP, R10) did not include doc, anions, taxonomy, or physiology.
   filter(!((sample_year == 2020) & # for R10, RTP, and CIN samples in 2020
              (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
                 analyte_group %in% c("algae.gb", "anions")))) %>% # or these
-  filter(!(lake_id == "67" & analyte %in% c("chla", "phyco") & sample_type == "blank")) %>%
+  # chla and phycocyanin blanks not collected at lake_id == 67
+  filter(!(lake_id == "67" & analyte %in% c("chla", "phycocyanin") & sample_type == "blank")) %>%
+  # no deep chemistry at 69_lacustrine (forgot van dorn)
+  filter(!(lake_id == "69_lacustrine" & sample_depth == "deep")) %>% 
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          
-
+# 9.  chem sampling for R10 2018 was done at trib and open_water site.  Not certain
+# which lakes had dups and blanks.  Need to dig into the CoC forms and populate 
+# sample list.
          
          
          

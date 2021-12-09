@@ -15,13 +15,13 @@ toc.masi <- read_excel(paste0(userPath,
                        sheet = "data") %>%
   select(lab_id, everything()) %>% # put sampleid column first
   mutate(qual = str_split_fixed(qual, pattern = ",", n=2)[1]) %>% # remove '01' from qual
-  rename(toc.units = units,
-         toc.qual = qual) %>%
-  mutate(toc.units = tolower(toc.units),  # L ->l
-         toc.units =  sub("/", "_", toc.units), # / -> _
-         toc.units =  paste0(substr(toc.units, start = 1, stop = 3), # mg_
+  rename(toc_units = units,
+         toc_qual = qual) %>%
+  mutate(toc_units = tolower(toc_units),  # L ->l
+         toc_units =  sub("/", "_", toc_units), # / -> _
+         toc_units =  paste0(substr(toc_units, start = 1, stop = 3), # mg_
                              "c_", # squeeze this in between mg_ and l
-                             substr(toc.units, start = 4, stop = 4) # l
+                             substr(toc_units, start = 4, stop = 4) # l
          ))
                 
   

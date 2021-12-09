@@ -54,3 +54,52 @@ metals.epa <- left_join(metals.epa, chemCoc %>% select(-analyte)) # keep all ana
 nrow(metals.epa) #68 records
 metals.epa %>% filter(is.na(metals.epa)) # good, all records matched
 metals.epa
+
+
+# Compare list of submitted samples to comprehensive sample list
+tteb.samples <- read_excel(paste0(userPath, 
+                                  "data/chemistry/ttebSampleIds.xlsx"))
+
+# print rows in d.anions not in chem.samples.
+# only 247 and unk in ttebSampleIds, but not in comprehensive list.  247 was
+# not sampled.
+setdiff(tteb.samples[c("lake_id", "sample_depth", "sample_type", "analyte")],
+        chem.samples.foo %>% 
+          filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
+                 sample_year >= 2020, # no 2018 samples sent to TTEB
+                 !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
+                 !(sample_year == 2020 & analyte_group == "organics"))  %>% # 2020 doc/toc sent to MASI
+          mutate(analyte = replace(analyte, analyte_group == "metals", "metals")) %>%
+          distinct() %>%
+          select(lake_id, sample_depth, sample_type, analyte)) %>%
+  arrange(lake_id)
+
+# 6. Have all tteb sampled in comprehensive sample list been analyzed?
+# Print rows from comprehensive sample list not in tteb list.
+# Missing a bunch, but I see nar sample receipt list doesn't contain any 2020
+# samples.  Have NAR update file, then revisit.  I inspected the 2021 samples
+# not in NAR inventory and communicated to Stephen Shivers.  Stephen confirmed
+# that he analyzed the samples and will update the Excel file.
+setdiff(chem.samples.foo %>% 
+          filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
+                 sample_year >= 2020, # no 2018 samples sent to TTEB
+                 !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
+                 !(sample_year == 2020 & analyte_group == "organics"))  %>% # 2020 doc/toc sent to MASI
+          mutate(analyte = replace(analyte, analyte_group == "metals", "metals")) %>%
+          distinct() %>%
+          select(lake_id, sample_depth, sample_type, analyte) ,
+        tteb.samples[c("lake_id", "sample_depth", "sample_type", "analyte")]) %>%
+  arrange(lake_id) 
+
+# 147
+# ttebMetals19July2021.pdf contains three shallow metals samples for lake 147.  
+# None of three lines report whether they are unknowns, duplicates, or blanks.  
+# All three are entered as unknown in ttebSampleIds, but we will need to change 
+# this when we get the data.
+
+# 155
+
+
+%>%
+  write.table(file = "clipboard")
+
