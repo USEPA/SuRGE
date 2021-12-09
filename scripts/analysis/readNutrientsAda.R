@@ -160,7 +160,7 @@ conv_units <- function(data, filename) {
 
 
 # Function to aggregate the lab duplicates
-dup_agg <- function(data) {
+dup_agg21 <- function(data) {
    
    # carve out the _flag and _units columns so they can be re-joined later
    c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag", "filter", "units", "qual")))
@@ -196,19 +196,19 @@ jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP
    conv_units(filename = "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 jea2 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    conv_units("EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 jea3 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
    conv_units("EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx") %>%
    mutate(site_id = "U-01") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
    
 
 
@@ -221,19 +221,19 @@ key1 <- get_ada_data21(cin.ada.path, "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP
    conv_units("EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 key2 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
    conv_units("EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 key3 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
    conv_units("EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
    mutate(site_id = "U-07") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 
 # create path for Lake Overholser
@@ -245,20 +245,20 @@ ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP
    conv_units("EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 ove2 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
    conv_units("EPAGPA059SS#7777,AE2.6,Forshay,7-27-21,TN,TP,GPKR.xls") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 # deleted "GPMS" from end of excel file name.  Full file name couldn't be read on Jake's laptop.
 ove3 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3.xlsx") %>%
    conv_units("EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO2NH4NO2NO3.xlsx") %>%
    mutate(site_id = "U-06") %>% # add site_id
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
-   dup_agg # aggregate lab duplicates (optional)
+   dup_agg21 # aggregate lab duplicates (optional)
 
 
 zzz <- left_join(jea1, jea2, by = "lake_id") 
@@ -272,7 +272,6 @@ zzz <- left_join(jea1, jea2, by = "lake_id")
 # 12Dec21: code below works, but isn't complete.  Should we modify get_ada_data
 # above to accommodate?
 
-# EXAMPLE   2021: (TN or DN)147DU vs. 2020: DN044DU
 
 get_ada_data <- function(path, datasheet) { 
    
@@ -280,7 +279,7 @@ get_ada_data <- function(path, datasheet) {
    
    #'toptable' contains analyte names and MDL values
    toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
-                          sheet = "Data", range = "c8:N500") %>% # up to 492 rows
+                          sheet = "Data", range = "c8:N500", na = "-") %>% # up to 492 rows
       janitor::remove_empty("rows") %>% # remove empty rows
       select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
       rownames_to_column() %>% # transpose the tibble 
@@ -292,13 +291,14 @@ get_ada_data <- function(path, datasheet) {
       filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
       mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
       column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
+      mutate(MDL = str_replace_all(MDL, pattern = "\\*", "")) %>%
       mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
    
    analyte_names <- row.names(toptable) # pass analyte names to maintable, below
    
    #'maintable' combines 'toptable' with results
    maintable <- read_excel(paste0(path, datasheet), # get the results
-                           sheet = "Data", range = "A14:N500") %>% # up to 492 rows
+                           sheet = "Data", range = "A14:N500", na = "-") %>% # up to 492 rows
       janitor::remove_empty("rows") %>% # remove empty rows
       janitor::clean_names() %>%
       mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase since Ada isn't consistent
@@ -331,9 +331,36 @@ get_ada_data <- function(path, datasheet) {
       mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
       mutate(sample_filter = str_replace_all(sample_filter, c("D" =  "filtered", "N" = "nonfiltered"))) %>%
       rename(lake_id = sampleid) %>% # change name to match chemCoc
-      mutate(site_id = "") # create empty column for site_id (id is populated later) 
-   
+      mutate(site_id = "") # create empty column for site_id (id is populated later)
+
    return(maintable)
+   
+}
+
+
+# Function to aggregate the lab duplicates (2020)
+dup_agg <- function(data) {
+   
+   # carve out the _flag and _units columns so they can be re-joined later
+   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag", "filter", "units", "qual")))
+   
+   # group and summarize to obtain means                
+   d <- data %>%
+      dplyr::group_by(lake_id, sample_depth, sample_type) %>%
+      # '!' to exclude columns we don't want to aggregate
+      summarize(across(!ends_with(c("site_id","labdup", "type", "depth", "flag", "filter", "units", "qual")), 
+                       ~ mean(., na.rm = TRUE)))
+   
+   e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% # rejoin the data
+      mutate(across(4:last_col(), # convert NaN to NA
+                    ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
+      select(order(colnames(.))) %>% # alphabetize column names
+      select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
+      filter(labdup != "LAB DUP") %>% # remove the lab dup; we may want to revisit this.
+      select(-labdup) # remove labdup column. JB 12/7/2021
+   # note that the LAB DUP and the original now have identical values, but the < flags may differ
+   
+   return(e)
    
 }
 
@@ -342,10 +369,22 @@ get_ada_data <- function(path, datasheet) {
 cin.ada.path <- paste0(userPath, 
                            "data/chemistry/nutrients/2020cinSentToAda/")
 
-lmp1 <- get_ada_data(cin.ada.path, "EPAGPA053,SS#7759,AE2.6,Forshay,LakeMethaneProject7-6-20,oP,GPKR.xls") %>%
-   conv_units(filename = "EPAGPA053,SS#7759,AE2.6,Forshay,LakeMethaneProject7-6-20,oP,GPKR.xls") %>%
+lmp1 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProject7-6-20oPRev1GPKR.xls") %>%
+   conv_units(filename = "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProject7-6-20oPRev1GPKR.xls") %>%
       mutate(site_id = "I don't know yet") %>% # add site_id
       dup_agg # aggregate the lab duplicates (optional)
+
+lmp2 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls") %>%
+   conv_units(filename = "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls") %>%
+   mutate(site_id = "I don't know yet") %>% # add site_id
+   dup_agg # aggregate the lab duplicates (optional)
+
+lmp3 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls") %>%
+   conv_units(filename = "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls") %>%
+   mutate(site_id = "I don't know yet") %>% # add site_id
+   dup_agg # aggregate the lab duplicates (optional)
+
+
 
 
 cin.ada.coc <- rbind(read_excel(paste0(cin.ada.path,
