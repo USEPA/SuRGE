@@ -267,10 +267,10 @@ zzz <- left_join(jea1, jea2, by = "lake_id")
 
 
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
-# then shipped to ADA in May 2021 for analysis.
-# 11Nov21: JB not yet reviewed
-# 12Dec21: code below works, but isn't complete.  Should we modify get_ada_data
-# above to accommodate?
+# then shipped to ADA in May 2021 for analysis.  The reports are formatted
+# differently than the 2021 data reports.  We anticipate that the 2020 format
+# will be used in 2022 and 2023.  Here we modify the functions defined above
+# to accomodate format for 2020, 2022, and 2023.
 
 
 get_ada_data <- function(path, datasheet) { 
@@ -365,91 +365,39 @@ dup_agg <- function(data) {
 }
 
 
-# 1. Read in chain of custody forms
+# 1. Read in root path for 2020 chemistry data analyzed in ADA.
 cin.ada.path <- paste0(userPath, 
                            "data/chemistry/nutrients/2020cinSentToAda/")
+# 2. Read in files containing unique sample IDs.
+tot.id <- read_excel(paste0(cin.ada.path, "totalNutrientSampleIds.xlsx"))
+diss.id <- read_excel(paste0(cin.ada.path, "dissolvedNutrientSampleIds.xlsx"))
+id <- rbind(tot.id, diss.id) %>% select(lake_id, site_id) %>% distinct()
 
+# 3. Read data
+# op
 lmp1 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProject7-6-20oPRev1GPKR.xls") %>%
    conv_units(filename = "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProject7-6-20oPRev1GPKR.xls") %>%
-      mutate(site_id = "I don't know yet") %>% # add site_id
-      dup_agg # aggregate the lab duplicates (optional)
+   select(-site_id) %>%
+   left_join(., id) %>% # add site_id
+   dup_agg # aggregate the lab duplicates (optional)
 
+# TN TP
 lmp2 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls") %>%
    conv_units(filename = "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls") %>%
-   mutate(site_id = "I don't know yet") %>% # add site_id
+   select(-site_id) %>%
+   left_join(., id) %>% # add site_id
    dup_agg # aggregate the lab duplicates (optional)
 
+# NO2, NO3, NO2+NO3, NH4
 lmp3 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls") %>%
    conv_units(filename = "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls") %>%
-   mutate(site_id = "I don't know yet") %>% # add site_id
+   select(-site_id) %>%
+   left_join(., id) %>% # add site_id
    dup_agg # aggregate the lab duplicates (optional)
 
+lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id))) # all records have site_id
 
 
-
-cin.ada.coc <- rbind(read_excel(paste0(cin.ada.path,
-                                       "dissolvedNutrientSampleIds.xlsx"),
-                                sheet = "data"),
-                     read_excel(paste0(cin.ada.coc.path,
-                                       "totalNutrientSampleIds.xlsx"),
-                                sheet = "data")) %>%
-   janitor::clean_names() %>%
-   # as.numeric to remove leading '0'
-   # as.character to facilitate merging with objects that
-   # contain 069-lacustrine.... as lake_id values
-   mutate(lake_id = as.numeric(lake_id) %>% as.character(.),
-          sample_depth = case_when(sample_type == "BLK" ~ "blank",
-                                   TRUE ~ sample_depth) %>%
-             tolower(.),
-          sample_type = case_when(sample_type == "BLK" ~ "blank",
-                                  sample_type == "UNK" ~ "unknown",
-                                  sample_type == "DUP" ~ "duplicate",
-                                  TRUE ~ sample_type))
-
-
-# 2. Read in ORP data
-cin.ada.orp <- read_excel(paste0(cin.ada.path,
-                                 "EPAGPA053,SS#7759,AE2.6,Forshay,LakeMethaneProject7-6-20,oP,GPKR.xls"),
-                          sheet = "Data", range = "A14:G81") %>%
-  janitor::clean_names() %>%
-  rename(op = data)
-
-
-# 3. Add coc info to ORP data
-nrow(cin.ada.orp) #67 records
-cin.ada.orp <- left_join(cin.ada.orp, cin.ada.coc, by = c("field_sample_id" = "lab_id"))
-nrow(cin.ada.orp) #67 records
-cin.ada.orp %>% filter(is.na(lake_id)) # good, all were matched.
-
-# 4. Read in TN and TP data 
-cin.ada.total <- read_excel(paste0(cin.ada.coc.path,
-                                   "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TN,TP,GPKR.xls"),
-                            sheet = "Data", range = "A14:J154") %>% # records above A85 are for dissolved samples!
-  janitor::clean_names() %>%
-  filter(!grepl("DN", field_sample_id)) %>% # remove dissolved nutrients.  somehow they were run for totals.
-  rename_with(~gsub(c("_5|_6|_7"), replacement = "_tn", x = .x)) %>%
-  rename_with(~gsub(c("_8|_9|_10"), replacement = "_tp", x = .x)) %>%
-  rename_with(~gsub("data_", "", .x)) %>%
-  janitor::clean_names() 
-
-#5.  Add coc info to TN and TP data
-nrow(cin.ada.total) #70 records
-cin.ada.total <- left_join(cin.ada.total, cin.ada.coc, by = c("field_sample_id" = "lab_id"))
-nrow(cin.ada.total) #70 records
-cin.ada.total %>% filter(is.na(lake_id)) # good, all were matched.
-
-#6.  Read in no3.no2
-cin.ada.no3.nh4 <- read_excel(paste0(cin.ada.coc.path,
-                                   "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls"),
-                            sheet = "Data", range = "A14:I88") %>% 
-  janitor::clean_names() %>%
-  rename_with(~gsub(c("_5|_6"), replacement = "_no2_3", x = .x)) %>%
-  rename_with(~gsub(c("_8|_9"), replacement = "_nh4", x = .x)) %>%
-  rename_with(~gsub("data_", "", .x))
-
-#7.  Add coc info to no3.no2 data
-cin.ada.no3.nh4 <- left_join(cin.ada.no3.nh4, cin.ada.coc, by = c("field_sample_id" = "lab_id")) 
-cin.ada.no3.nh4 %>% filter(is.na(lake_id)) # good, all were matched.
 
 
 
