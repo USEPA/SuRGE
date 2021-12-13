@@ -400,18 +400,11 @@ lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id))) # all records 
 
 
 # Join all of the data objects
-jea <- left_join(jea1, jea2, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) %>%
-   left_join(jea3, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) 
 
-key <- left_join(key1, key2, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) %>%
-   left_join(key3, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) 
-
-ada.nutrients <- full_join(jea, key)
-
-ada.nutrients <- list(list(jea1, jea2, jea3), list(key1, key2, key3), 
-                      list(ove1, ove2, ove3), list(lmp1, lmp2, lmp3)) %>% 
-   pmap(~select(., -sample_filter)) %>% # remove sample_filter column
-   pmap(reduce(left_join)) # left_join each sublist of 3 objects
-   # then perform a full_join
+ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
+                      ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3)) %>% 
+   lmap(~pmap(~select(., -sample_filter))) %>% # remove sample_filter column
+   map2(~reduce(left_join)) # ??? left_join each sublist of 3 objects
+   # then perform a full_join???
 
 
