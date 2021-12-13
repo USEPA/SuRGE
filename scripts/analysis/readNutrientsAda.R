@@ -79,6 +79,9 @@ analyte_names <- row.names(toptable) # pass analyte names to maintable, below
       mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
       mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
       rename(lake_id = sampleid) %>% # change name to match chemCoc
+      mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
+      mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
+                    ~ ifelse(.>28, "HOLD", NA))) %>% # note this is base::ifelse
       mutate(site_id = "") # create empty column for site_id (id is populated later)
 
   return(maintable)
@@ -121,7 +124,7 @@ conv_units <- function(data, filename) {
    
    
     # TOTAL PHOSPHORUS, TOTAL NITROGEN
-   if (str_detect(paste(filename), "TNTP"))
+   if (str_detect(paste(filename), "TNTP|TN,TP"))
       f <- data %>%
          mutate(across(ends_with("/L"), 
                        ~ case_when(
@@ -261,11 +264,6 @@ ove3 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO
    dup_agg21 # aggregate lab duplicates (optional)
 
 
-zzz <- left_join(jea1, jea2, by = "lake_id") 
-# this object name is just a placeholder
-
-
-
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.  The reports are formatted
 # differently than the 2021 data reports.  We anticipate that the 2020 format
@@ -309,7 +307,7 @@ get_ada_data <- function(path, datasheet) {
       mutate(across(ends_with("analyzed"), # compute holding time of analytes
                     ~ as.numeric(as.Date(., format = "%m/%d/%Y") - as.Date(date_collected, format = "%m/%d/%Y")))) %>%
       rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
-      filter(str_starts(sampleid, "DN|TN")) %>% # retain only rows where sampleid starts with TN or DN
+      filter(str_starts(sampleid, "TN\\d|DN\\d")) %>% # retain only rows where sampleid starts with TN or DN
       select(sampleid, labdup, everything(), -date_collected) %>% # reorder columns for the following mutate()
       mutate(across(ends_with("/L"), # create new flag column if analyte not detected
                     ~ if_else(str_detect(., "ND"), "<", ""),
@@ -331,6 +329,9 @@ get_ada_data <- function(path, datasheet) {
       mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
       mutate(sample_filter = str_replace_all(sample_filter, c("D" =  "filtered", "N" = "nonfiltered"))) %>%
       rename(lake_id = sampleid) %>% # change name to match chemCoc
+      mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
+      mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
+                    ~ ifelse(.>28, "HOLD", NA))) %>% # note this is base::ifelse
       mutate(site_id = "") # create empty column for site_id (id is populated later)
 
    return(maintable)
@@ -398,6 +399,19 @@ lmp3 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759ForshayLakeMethaneProject7-6
 lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id))) # all records have site_id
 
 
+# Join all of the data objects
+jea <- left_join(jea1, jea2, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) %>%
+   left_join(jea3, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) 
 
+key <- left_join(key1, key2, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) %>%
+   left_join(key3, by = c("lake_id", "site_id", "sample_depth", "sample_type", "sample_filter")) 
+
+ada.nutrients <- full_join(jea, key)
+
+ada.nutrients <- list(list(jea1, jea2, jea3), list(key1, key2, key3), 
+                      list(ove1, ove2, ove3), list(lmp1, lmp2, lmp3)) %>% 
+   pmap(~select(., -sample_filter)) %>% # remove sample_filter column
+   pmap(reduce(left_join)) # left_join each sublist of 3 objects
+   # then perform a full_join
 
 
