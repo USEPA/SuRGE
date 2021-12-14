@@ -98,8 +98,22 @@ setdiff(chem.samples.foo %>%
 # this when we get the data.
 
 # 155
+# 23june has 6 toc doc samples for 155. No blanks though.  could not find sample 
+# tracking form to check if blank was collected
+
+# 275
+# 01July2021 sample tracking form has a shallow duplicate and two shallow unknowns 
+# for metals.  I suspect one of the unknowns is the blank.  Will have to sort out 
+# after  we get data from TTEB.
+# I don't see anything that could have been the doc blank.
+
+# 298
+# One of the shallow unknown metals that was submitted (203558, 203580) is likely
+# the missing blank.  Will sort out after we get tteb data.
+
+# 68
+# Two DOC blanks submitted (204165, 204166).  One of them is likely the TOC blank.
+# will sort out after we get tteb data.
 
 
-%>%
-  write.table(file = "clipboard")
 

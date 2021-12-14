@@ -115,6 +115,14 @@ chem.samples.foo <- chem.samples %>%
   filter(!(lake_id == "67" & analyte %in% c("chla", "phycocyanin") & sample_type == "blank")) %>%
   # no deep chemistry at 69_lacustrine (forgot van dorn)
   filter(!(lake_id == "69_lacustrine" & sample_depth == "deep")) %>% 
+  # blanks collected at 238, but no duplicates
+  filter(!(lake_id == "238" & sample_type == "duplicate")) %>%
+  # duplicates collected at 238, but no blanks
+  filter(!(lake_id == "265" & sample_type == "blank")) %>% 
+  # toc and doc blanks not collected at 155 (as best we can tell)
+  filter(!(lake_id == "155" & sample_type == "blank" & analyte %in% (c("doc", "toc")))) %>%
+  # toc and doc blanks not collected from 67.  No DI brought to field
+  filter(!(lake_id == "67" & sample_type == "blank" & analyte %in% c("doc", "toc"))) %>%
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          
