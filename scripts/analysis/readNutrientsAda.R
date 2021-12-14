@@ -81,7 +81,7 @@ analyte_names <- row.names(toptable) # pass analyte names to maintable, below
       rename(lake_id = sampleid) %>% # change name to match chemCoc
       mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
       mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
-                    ~ ifelse(.>28, "HOLD", NA))) %>% # note this is base::ifelse
+                    ~ if_else(.>28, TRUE, FALSE))) %>% 
       mutate(site_id = "") # create empty column for site_id (id is populated later)
 
   return(maintable)
@@ -117,7 +117,7 @@ conv_units <- function(data, filename) {
                 nh4_qual = contains("NH4") & ends_with("analyzed"), 
                 no2_3_qual = contains("NO3+NO2") & ends_with("analyzed"),
                 no3_qual = contains("NO3") & ends_with("analyzed"), 
-                no2_qual = contains("NO2") & ends_with("analyzed")) %>%
+                no2_qual = contains("NO2") & !contains("NO3") & ends_with("analyzed")) %>%
          mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
                        ~ "ug_n_l",
                        .names = "{col}_units"))
@@ -331,7 +331,7 @@ get_ada_data <- function(path, datasheet) {
       rename(lake_id = sampleid) %>% # change name to match chemCoc
       mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
       mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
-                    ~ ifelse(.>28, "HOLD", NA))) %>% # note this is base::ifelse
+                    ~ if_else(.>28, TRUE, FALSE))) %>% 
       mutate(site_id = "") # create empty column for site_id (id is populated later)
 
    return(maintable)
@@ -401,10 +401,17 @@ lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id))) # all records 
 
 # Join all of the data objects
 
+
+# I think this will work: 
 ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
                       ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3)) %>% 
-   lmap(~pmap(~select(., -sample_filter))) %>% # remove sample_filter column
-   map2(~reduce(left_join)) # ??? left_join each sublist of 3 objects
-   # then perform a full_join???
+   map_depth(2, ~select(., -sample_filter)) %>%
+   map_depth(1, function(x) reduce(x, left_join)) %>%
+   reduce(full_join)
+   
 
-
+   
+# Doesn't work?
+# ada.nutrients <- list(jea1, jea2, jea3, key1, key2, key3, ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
+#    map(~select(.,-sample_filter)) %>%
+#    reduce(full_join)
