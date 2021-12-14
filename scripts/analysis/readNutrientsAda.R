@@ -1,27 +1,8 @@
+# NUTRIENTS ANALYZED IN ADA GENERAL PARAMETERS LABORATORY
 
-
-
-# NUTRIENTS-----------------------
-# DO NOT FLAG BQL RESULTS FROM ADA
-
-# 1NOV2021: commented out; superseded by new code below. 
-# cin.ada.path <- paste0(userPath, 
-#                            "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
-# 
-# cin.ada.Neustadt2021.op <- read_excel(paste0(cin.ada.path, 
-#                                    "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls"),
-#                                    sheet = "Data", range = "A14:G19") %>%
-#   janitor::clean_names() 
-# 
-# cin.ada.Neustadt2021.tntp <- read_excel(paste0(cin.ada.path,
-#                                   "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls"),
-#                                   sheet = "Data", range = "A14:J19") %>%
-#   janitor::clean_names() 
-# 
-# cin.ada.Neustadt2021.no3.n02.nh4 <- read_excel(paste0(cin.ada.path,
-#                                   "EPAGPA054SS#7773AE2.6Forshay,7-14-21,NO3NO2NH4.xlsx"),
-#                                    sheet = "Data", range = "A14:N19") %>%
-#   janitor::clean_names()
+# FIRST SECTION READS IN NUTRIENT DATA FROM SAMPLES COLLECTED BY ADA IN 2021-------
+# AND ANALYZED IN ADA LABORATORY.  FORMAT OF 2021 DATA REPORTS ARE UNIQUE TO
+# 2021
 
 # Function to extract data from Ada excel files
 get_ada_data21 <- function(path, datasheet) { 
@@ -263,7 +244,7 @@ ove3 <- get_ada_data21(cin.ada.path, "EPAGPA059SS#7777AE2.6Forshay,7-27-21NO3+NO
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg21 # aggregate lab duplicates (optional)
 
-
+# 2020 NUTRIENT SAMPLES-----------------------------------------------------------
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.  The reports are formatted
 # differently than the 2021 data reports.  We anticipate that the 2020 format
@@ -372,11 +353,13 @@ cin.ada.path <- paste0(userPath,
 # 2. Read in files containing unique sample IDs.
 tot.id <- read_excel(paste0(cin.ada.path, "totalNutrientSampleIds.xlsx"))
 diss.id <- read_excel(paste0(cin.ada.path, "dissolvedNutrientSampleIds.xlsx"))
-id <- rbind(tot.id, diss.id) %>% select(lake_id, site_id) %>% distinct()
+id <- rbind(tot.id, diss.id) %>% select(lake_id, site_id) %>% distinct() %>%
+   mutate(lake_id = as.numeric(lake_id) %>% as.character())
 
 # 3. Read data
 # op
 lmp1 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProject7-6-20oPRev1GPKR.xls") %>%
+   filter(sample_filter == "filtered") %>% # op should only be filtered samples
    conv_units(filename = "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProject7-6-20oPRev1GPKR.xls") %>%
    select(-site_id) %>%
    left_join(., id) %>% # add site_id
@@ -384,6 +367,7 @@ lmp1 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProje
 
 # TN TP
 lmp2 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls") %>%
+   filter(sample_filter == "T") %>% # T for total, that is what we want for TN and TP
    conv_units(filename = "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls") %>%
    select(-site_id) %>%
    left_join(., id) %>% # add site_id
@@ -391,6 +375,7 @@ lmp2 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethanePr
 
 # NO2, NO3, NO2+NO3, NH4
 lmp3 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls") %>%
+   filter(sample_filter == "filtered") %>% # inorganic N should only be filtered samples
    conv_units(filename = "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls") %>%
    select(-site_id) %>%
    left_join(., id) %>% # add site_id
@@ -400,18 +385,48 @@ lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id))) # all records 
 
 
 # Join all of the data objects
-
-
-# I think this will work: 
 ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
                       ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3)) %>% 
    map_depth(2, ~select(., -sample_filter)) %>%
    map_depth(1, function(x) reduce(x, left_join)) %>%
-   reduce(full_join)
-   
+   reduce(full_join) %>%
+   arrange(lake_id)
 
-   
-# Doesn't work?
-# ada.nutrients <- list(jea1, jea2, jea3, key1, key2, key3, ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
-#    map(~select(.,-sample_filter)) %>%
-#    reduce(full_join)
+
+# INSPECT FINAL MERGED DATA OBJECT-------------------------------------------
+# Inspect final object for merge errors
+# any duplicate rows for a given set of unique identifiers?  No, good!
+ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
+   janitor::get_dupes()
+
+# Did we preserve all combinations of unique identifiers in original data?
+# 75 unique combinations of lake_id, site_id, sample_depth, and sample_type
+# in original data.
+list(jea1, jea2, jea3, key1, key2, key3, 
+     ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
+   map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
+   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
+   distinct() %>% # condense to unique observations
+   nrow(.) # 75 unique combinations
+
+# 74 unique combinations in merged df.  What are we missing?
+ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
+   distinct() %>% {nrow(.)}
+
+# concatenate unique identifiers in merged data into one column
+merged.obs <- ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
+   distinct() %>%
+   unite("unique", everything()) # concatenate unique identifiers into string
+
+# concatenate unique identifiers in original data into one column
+original.obs <- list(jea1, jea2, jea3, key1, key2, key3, 
+                     ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
+   map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
+   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
+   distinct() %>% # pull our unique observations
+   unite("unique", everything()) # concatenate unique identifiers into string
+
+# Which original data observation is missing from the merged data
+original.obs %>% filter(!(original.obs$unique %in% merged.obs$unique)) #167_U-06_shallow_unknown
+
+# I'm not sure why that observation is dropped?
