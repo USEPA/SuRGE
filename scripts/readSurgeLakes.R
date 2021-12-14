@@ -6,3 +6,4 @@ lake.list <- readxl::read_excel(paste0(userPath,
   dplyr::rename(lake_id = site_id) %>%
   mutate(lake_id = substr(lake_id, 5, 8) %>% # extract numeric part of lake_id
            as.numeric()) #convert lake_id to numeric
+

@@ -70,7 +70,7 @@ surgeDsnSampled %>%
 surgeDsnSampled %>% 
   filter(sample_year == 2021, lab == "CIN")
 
-# should be 108 sites total
+# should be 114 sites total (108 for SuRGE plus 6 extra from R10 2018)
 addmargins(table(surgeDsnSampled$lab)) # yes
 
 
