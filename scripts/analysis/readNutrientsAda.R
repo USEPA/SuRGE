@@ -393,6 +393,7 @@ ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3)
    arrange(lake_id)
 
 
+
 # INSPECT FINAL MERGED DATA OBJECT-------------------------------------------
 # Inspect final object for merge errors
 # any duplicate rows for a given set of unique identifiers?  No, good!
@@ -400,33 +401,36 @@ ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
    janitor::get_dupes()
 
 # Did we preserve all combinations of unique identifiers in original data?
-# 75 unique combinations of lake_id, site_id, sample_depth, and sample_type
+# 74 unique combinations of lake_id, site_id, sample_depth, and sample_type
 # in original data.
 list(jea1, jea2, jea3, key1, key2, key3, 
      ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
    map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
    map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
    distinct() %>% # condense to unique observations
-   nrow(.) # 75 unique combinations
+   nrow(.) # 74 unique combinations
 
-# 74 unique combinations in merged df.  What are we missing?
+# 74 unique combinations in merged df.  Everything looks good
 ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
    distinct() %>% {nrow(.)}
 
-# concatenate unique identifiers in merged data into one column
-merged.obs <- ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
-   distinct() %>%
-   unite("unique", everything()) # concatenate unique identifiers into string
+# # Some unneeded code below to help resolved discrepancy between original and
+# # merged data.
+# 
+# # concatenate unique identifiers in merged data into one column
+# merged.obs <- ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
+#    distinct() %>%
+#    unite("unique", everything()) # concatenate unique identifiers into string
+# 
+# # concatenate unique identifiers in original data into one column
+# original.obs <- list(jea1, jea2, jea3, key1, key2, key3, 
+#                      ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
+#    map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
+#    map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
+#    distinct() %>% # pull our unique observations
+#    unite("unique", everything()) # concatenate unique identifiers into string
+# 
+# # Which original data observation is missing from the merged data
+# original.obs %>% filter(!(original.obs$unique %in% merged.obs$unique))
 
-# concatenate unique identifiers in original data into one column
-original.obs <- list(jea1, jea2, jea3, key1, key2, key3, 
-                     ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
-   map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
-   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
-   distinct() %>% # pull our unique observations
-   unite("unique", everything()) # concatenate unique identifiers into string
 
-# Which original data observation is missing from the merged data
-original.obs %>% filter(!(original.obs$unique %in% merged.obs$unique)) #167_U-06_shallow_unknown
-
-# I'm not sure why that observation is dropped?
