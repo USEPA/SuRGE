@@ -88,16 +88,16 @@ conv_units <- function(data, filename) {
                           str_detect(paste(cur_column()), "mg/") ~ .*1000, 
                           TRUE ~ .*1))) %>%
          rename(nh4 = contains("NH4") & !ends_with(c("flag", "analyzed")), 
-                no2_3 = contains("NO3+NO2") & !ends_with(c("flag", "analyzed")),
+                no2_3 = contains("NO3") & contains("NO2") & !ends_with(c("flag", "analyzed")),
                 no3 = contains("NO3") & !contains("NO2") & !ends_with(c("flag", "analyzed")),
                 no2 = contains("NO2") & !contains("NO3") & !ends_with(c("flag", "analyzed")), 
                 nh4_flag = contains("NH4") & ends_with("flag"),
-                no2_3_flag = contains("NO3+NO2") & ends_with("flag"),
+                no2_3_flag = contains("NO3") & contains("NO2") & ends_with("flag"),
                 no3_flag = contains("NO3") & !contains("NO2") & ends_with("flag"),
                 no2_flag = contains("NO2") & !contains("NO3") & ends_with("flag"), 
                 nh4_qual = contains("NH4") & ends_with("analyzed"), 
-                no2_3_qual = contains("NO3+NO2") & ends_with("analyzed"),
-                no3_qual = contains("NO3") & ends_with("analyzed"), 
+                no2_3_qual = contains("NO3") & contains("NO2") & ends_with("analyzed"),
+                no3_qual = contains("NO3") & !contains("NO2") & ends_with("analyzed"), 
                 no2_qual = contains("NO2") & !contains("NO3") & ends_with("analyzed")) %>%
          mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
                        ~ "ug_n_l",
@@ -146,24 +146,31 @@ conv_units <- function(data, filename) {
 # Function to aggregate the lab duplicates
 dup_agg21 <- function(data) {
    
-   # carve out the _flag and _units columns so they can be re-joined later
-   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag", "filter", "units", "qual")))
+   # first, convert all _flag columns to a numeric for summarize operations;
+   # Must be performed in the event that a lab dup has a different flag than the sample.
    
-   # group and summarize to obtain means                
+   data <- data %>% 
+      mutate(across(ends_with("flag"), 
+                    ~ ifelse(str_detect(., "<"), 1, 0))) 
+   
+   # carve out the _flag and _units columns so they can be re-joined later
+   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")))
+           
    d <- data %>%
       dplyr::group_by(sample_depth, sample_type) %>%
       # '!' to exclude columns we don't want to aggregate
-      summarize(across(!ends_with(c("id","labdup", "type", "depth", "flag", "filter", "units", "qual")), 
-                       ~ mean(., na.rm = TRUE)))
+      summarize(across(!ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")), 
+                       ~ mean(., na.rm = TRUE))) 
    
    e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
       mutate(across(3:last_col(), # convert NaN to NA
                     ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
       select(order(colnames(.))) %>% # alphabetize column names
       select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
-      filter(labdup != "LAB DUP") %>% # remove the lab dup; we may want to revisit this.
+      mutate(across(ends_with("flag"), # convert all _flag values back to text
+                    ~ if_else(.<1, "", "<"))) %>% 
+      filter(labdup != "LAB DUP") %>% # remove the lab dup
       select(-labdup) # remove labdup column. JB 12/7/2021
-   # note that the LAB DUP and the original now have identical values, but the < flags may differ
    
    return(e)
    
@@ -323,14 +330,21 @@ get_ada_data <- function(path, datasheet) {
 # Function to aggregate the lab duplicates (2020)
 dup_agg <- function(data) {
    
+   # first, convert all _flag columns to a numeric for summarize operations;
+   # Must be performed in the event that a lab dup has a different flag than the sample.
+   
+   data <- data %>% 
+      mutate(across(ends_with("flag"), 
+                    ~ ifelse(str_detect(., "<"), 1, 0))) 
+   
    # carve out the _flag and _units columns so they can be re-joined later
-   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "flag", "filter", "units", "qual")))
+   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")))
    
    # group and summarize to obtain means                
    d <- data %>%
       dplyr::group_by(lake_id, sample_depth, sample_type) %>%
       # '!' to exclude columns we don't want to aggregate
-      summarize(across(!ends_with(c("site_id","labdup", "type", "depth", "flag", "filter", "units", "qual")), 
+      summarize(across(!ends_with(c("site_id","labdup", "type", "depth", "filter", "units", "qual")), 
                        ~ mean(., na.rm = TRUE)))
    
    e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% # rejoin the data
@@ -338,10 +352,11 @@ dup_agg <- function(data) {
                     ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
       select(order(colnames(.))) %>% # alphabetize column names
       select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
-      filter(labdup != "LAB DUP") %>% # remove the lab dup; we may want to revisit this.
+      mutate(across(ends_with("flag"), # convert all _flag values back to text
+                    ~ if_else(.<1, "", "<"))) %>% 
+      filter(labdup != "LAB DUP") %>% # remove the lab dup
       select(-labdup) # remove labdup column. JB 12/7/2021
-   # note that the LAB DUP and the original now have identical values, but the < flags may differ
-   
+
    return(e)
    
 }
