@@ -97,12 +97,12 @@ conv_units <- function(data, filename) {
                 no2_flag = contains("NO2") & !contains("NO3") & ends_with("flag"), 
                 nh4_qual = contains("NH4") & ends_with("analyzed"), 
                 no2_3_qual = contains("NO3") & contains("NO2") & ends_with("analyzed"),
-                no3_qual = contains("NO3") & !contains("NO2") & ends_with("analyzed"), 
                 no2_qual = contains("NO2") & !contains("NO3") & ends_with("analyzed")) %>%
          mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
                        ~ "ug_n_l",
-                       .names = "{col}_units"))
-   
+                       .names = "{col}_units")) 
+         # For no3, add qual flag if either no2+no3 or no2 has a qual flag
+
    
     # TOTAL PHOSPHORUS, TOTAL NITROGEN
    if (str_detect(paste(filename), "TNTP|TN,TP"))
@@ -133,9 +133,17 @@ conv_units <- function(data, filename) {
                 op_qual = contains("oP") & ends_with("analyzed")) %>%
          mutate(across(ends_with("op"), 
                        ~ "ug_n_l",
-                       .names = "{col}_units"))
-  
-  f <- f %>% select(order(colnames(.))) %>% # alphabetize and reorder columns
+                       .names = "{col}_units")) 
+   
+   # if 
+   #   mutate(no3_qual = case_when(
+   #    no2_qual == TRUE ~ TRUE,
+   #    no2_3_qual == TRUE ~ TRUE, 
+   #    TRUE ~ FALSE)) 
+   # 
+   
+  f <- f %>% 
+     select(order(colnames(.))) %>% # alphabetize and reorder columns
      select(lake_id, site_id, sample_depth, sample_type, labdup, everything())
     
   return(f)
