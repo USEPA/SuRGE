@@ -76,6 +76,7 @@ conv_units <- function(data, filename) {
 # Flow: Series of non-nested 'if' conditions that evaluate file names;
    # conditions are mutually exclusive due to Ada lab file name conventions.
    # If TRUE, proceeds to convert units, rename columns, & add units columns.
+   # Then, if the object includes no3 data, create new column for no3 qual. 
 
 # filename <- toupper(filename) # use if case becomes an issue in file names;
       # note that 'oP' (in code below) contains a lowercase letter. 
@@ -101,9 +102,7 @@ conv_units <- function(data, filename) {
          mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
                        ~ "ug_n_l",
                        .names = "{col}_units")) 
-         # For no3, add qual flag if either no2+no3 or no2 has a qual flag
-
-   
+         
     # TOTAL PHOSPHORUS, TOTAL NITROGEN
    if (str_detect(paste(filename), "TNTP|TN,TP"))
       f <- data %>%
@@ -134,14 +133,16 @@ conv_units <- function(data, filename) {
          mutate(across(ends_with("op"), 
                        ~ "ug_n_l",
                        .names = "{col}_units")) 
-   
-   # if 
-   #   mutate(no3_qual = case_when(
-   #    no2_qual == TRUE ~ TRUE,
-   #    no2_3_qual == TRUE ~ TRUE, 
-   #    TRUE ~ FALSE)) 
-   # 
-   
+  
+    # Check for an no3 column, then create no3_qual flag column
+   if ("no3" %in% colnames(f))
+     f <- f %>% 
+        mutate(no3_qual = case_when( # check if either no2 or no2_3 has qual flag
+           no2_qual == TRUE ~ TRUE,
+           no2_3_qual == TRUE ~ TRUE, 
+           TRUE ~ FALSE))
+
+   # select and order columns
   f <- f %>% 
      select(order(colnames(.))) %>% # alphabetize and reorder columns
      select(lake_id, site_id, sample_depth, sample_type, labdup, everything())
