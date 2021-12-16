@@ -1,31 +1,58 @@
-# Rename flag to qual.  Import values reported in final data file.  Add
-# 'flag` column.  This will be < or blank, indicating censored observations.
-
-
 # TOC/DOC-------------------
-# During the 2020 field season, TOC samples were sent to MASI contract
-# laboratory for analysis.  No DOC analysis was conducted in 2020.
+# During the 2020 field season, several batches of TOC samples were sent to MASI 
+# contract laboratory for analysis.  The first handful of batches contained a 
+# TOC vial per sample.  At the request of MASI, subsequent batches contained 
+# two vials per sample.  No DOC analysis was conducted in 2020.
 
-# this dataset doesn't contain flagged observations, so no need for toc.flag
-# column.  We will retain the qualifier column, however, as it indicates
-# holding time violations.
+# See the repo Wiki page for information on toc_qual and toc_flag.
 
+# read data
 toc.masi <- read_excel(paste0(userPath, 
                               "data/chemistry/TOC.DOC/MASI_TOC/masiTocData.xlsx"), 
                        sheet = "data") %>%
-  select(lab_id, everything()) %>% # put sampleid column first
-  mutate(qual = str_split_fixed(qual, pattern = ",", n=2)[1]) %>% # remove '01' from qual
   rename(toc_units = units,
-         toc_qual = qual) %>%
+         toc_qual = qual,
+         toc_flag = flag) %>%
   mutate(toc_units = tolower(toc_units),  # L ->l
          toc_units =  sub("/", "_", toc_units), # / -> _
          toc_units =  paste0(substr(toc_units, start = 1, stop = 3), # mg_
                              "c_", # squeeze this in between mg_ and l
-                             substr(toc_units, start = 4, stop = 4) # l
-         ))
+                             substr(toc_units, start = 4, stop = 4)), # l
+         #toc_qual should be TRUE or FALSE
+         toc_qual = case_when(is.na(toc_qual) ~ FALSE, # if NA, then FALSE (no holding time violation)
+                          TRUE ~ TRUE), # if not NA, then TRUE (holding time violation)
+         # sample depth for blanks entered as N/A.  Change to 'blank'
+         sample_depth = case_when(sample_depth == "N/A" ~ "blank",
+                                  TRUE ~ sample_depth),
+         lake_id = as.numeric(lake_id) %>% as.character(),
+         # extract number from site_id, convert to numeric
+         site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
+  select(-lab_id)
                 
   
-  
+# check data object
+# any duplicated observations for unique combination of sample IDs?
+# no dups, good!
+toc.masi %>% select(matches("id|sample")) %>% 
+  janitor::get_dupes()
+
+
+# sample inventory.  All 2020 TOC samples were sent to MASI.
+# print rows in toc.masi not in chem.samples
+# only samples showing up are duplicate TOC samples that were requested by MASI,
+# but collected at non qa.qc lakes.  No problem.
+setdiff(toc.masi[,c("lake_id", "sample_depth", "sample_type")],
+        chem.samples.foo[c("lake_id", "sample_depth", "sample_type")]) %>% print(n=Inf)
+
+
+# Have all 2020 toc samples comprehensive sample list been analyzed by MASI?
+# Print rows from comprehensive sample list not in MASI data.
+# Good, all samples accounted for.
+setdiff(chem.samples.foo %>% filter(analyte == "toc", # only toc sent to MASI
+                                    sample_year == 2020) %>% # only 2020 sent to MASI
+          select(lake_id, sample_depth, sample_type),
+        toc.masi[c("lake_id", "sample_depth", "sample_type")]) %>%
+  arrange(lake_id) %>% print(n=Inf)
 
 
 # ###DEPRECATED
