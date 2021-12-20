@@ -3,9 +3,8 @@
 # See issue 8 for key to sample id values.
 # See issue 10 for analyte names.
 
+# Function to read-in and collate data from excel files 
 get_ada_data21 <- function(path, datasheet) { 
-  
-  # for 2020 data (and 2022 onward), as field_sample_id is in different format
   
   #'toptable' contains analyte names and MDL values
   toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
@@ -71,75 +70,28 @@ get_ada_data21 <- function(path, datasheet) {
 # Function to convert units, rename columns, and add units columns
 conv_units <- function(data, filename) {
   
-  # Flow: Series of non-nested 'if' conditions that evaluate file names;
-  # conditions are mutually exclusive due to Ada lab file name conventions.
-  # If TRUE, proceeds to convert units, rename columns, & add units columns.
-  # Then, if the object includes no3 data, create new column for no3 qual. 
   
-  # filename <- toupper(filename) # use if case becomes an issue in file names;
-  # note that 'oP' (in code below) contains a lowercase letter. 
-  
-  # AMMONIUM, NITRATE, NITRITE
-  if (str_detect(paste(filename), "NH4")) 
+  # filename <- toupper(filename) # use if case becomes an issue in file names.
+
+  # TOC/DOC
+
+  # note that no unit conversions were required for TOC/DOC data
     f <- data %>%
       mutate(across(ends_with("/L"), 
-                    ~ case_when(
-                      str_detect(paste(cur_column()), "mg/") ~ .*1000, 
+                    ~ case_when( # results are identical; no conversion needed. 
+                      str_detect(paste(cur_column()), "mg/") ~ .*1, 
                       TRUE ~ .*1))) %>%
-      rename(nh4 = contains("NH4") & !ends_with(c("flag", "analyzed")), 
-             no2_3 = contains("NO3") & contains("NO2") & !ends_with(c("flag", "analyzed")),
-             no3 = contains("NO3") & !contains("NO2") & !ends_with(c("flag", "analyzed")),
-             no2 = contains("NO2") & !contains("NO3") & !ends_with(c("flag", "analyzed")), 
-             nh4_flag = contains("NH4") & ends_with("flag"),
-             no2_3_flag = contains("NO3") & contains("NO2") & ends_with("flag"),
-             no3_flag = contains("NO3") & !contains("NO2") & ends_with("flag"),
-             no2_flag = contains("NO2") & !contains("NO3") & ends_with("flag"), 
-             nh4_qual = contains("NH4") & ends_with("analyzed"), 
-             no2_3_qual = contains("NO3") & contains("NO2") & ends_with("analyzed"),
-             no2_qual = contains("NO2") & !contains("NO3") & ends_with("analyzed")) %>%
-      mutate(across(ends_with(c("nh4", "no2_3", "no3", "no2")), 
-                    ~ "ug_n_l",
+      rename(toc = contains("NPOC") & !ends_with(c("flag", "analyzed")),
+             doc = contains("NPDOC") & !ends_with(c("flag", "analyzed")),
+             toc_flag = contains("NPOC") & ends_with("flag"),
+             doc_flag = contains("NPDOC") & ends_with("flag"),
+             toc_qual = contains("NPOC") & ends_with("analyzed"),
+             doc_qual = contains("NPDOC") & ends_with("analyzed")) %>%
+      mutate(across(ends_with("oc"), 
+                    ~ "mg_c_l",
                     .names = "{col}_units")) 
   
-  # TOTAL PHOSPHORUS, TOTAL NITROGEN
-  if (str_detect(paste(filename), "TNTP|TN,TP"))
-    f <- data %>%
-      mutate(across(ends_with("/L"), 
-                    ~ case_when(
-                      str_detect(paste(cur_column()), "mg/") ~ .*1000, 
-                      TRUE ~ .*1))) %>%
-      rename(tn = contains("TN") & !ends_with(c("flag", "analyzed")),
-             tp = contains("TP") & !ends_with(c("flag", "analyzed")),
-             tn_flag = contains("TN") & ends_with("flag"),
-             tp_flag = contains("TP") & ends_with("flag"), 
-             tn_qual = contains("TN") & ends_with("analyzed"), 
-             tp_qual = contains("TP") & ends_with("analyzed")) %>%
-      mutate(across(ends_with(c("tn", "tp")), 
-                    ~ "ug_n_l",
-                    .names = "{col}_units"))
-  
-  # ORTHOPHOSPHATE
-  if (str_detect(paste(filename), "oP"))
-    f <- data %>%
-      mutate(across(ends_with("/L"), 
-                    ~ case_when(
-                      str_detect(paste(cur_column()), "mg/") ~ .*1000, 
-                      TRUE ~ .*1))) %>%
-      rename(op = contains("oP") & !ends_with(c("flag", "analyzed")),
-             op_flag = contains("oP") & ends_with("flag"),
-             op_qual = contains("oP") & ends_with("analyzed")) %>%
-      mutate(across(ends_with("op"), 
-                    ~ "ug_n_l",
-                    .names = "{col}_units")) 
-  
-  # Check for an no3 column, then create no3_qual flag column
-  if ("no3" %in% colnames(f))
-    f <- f %>% 
-      mutate(no3_qual = case_when( # check if either no2 or no2_3 has qual flag
-        no2_qual == TRUE ~ TRUE,
-        no2_3_qual == TRUE ~ TRUE, 
-        TRUE ~ FALSE))
-  
+
   # select and order columns
   f <- f %>% 
     select(order(colnames(.))) %>% # alphabetize and reorder columns
@@ -161,19 +113,19 @@ dup_agg21 <- function(data) {
                   ~ ifelse(str_detect(., "<"), 1, 0))) 
   
   # carve out the _flag and _units columns so they can be re-joined later
-  c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")))
+  c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "units", "qual")))
   
   d <- data %>%
     dplyr::group_by(sample_depth, sample_type) %>%
     # '!' to exclude columns we don't want to aggregate
-    summarize(across(!ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")), 
+    summarize(across(!ends_with(c("id","labdup", "type", "depth", "units", "qual")), 
                      ~ mean(., na.rm = TRUE))) 
   
   e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
     mutate(across(3:last_col(), # convert NaN to NA
                   ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
     select(order(colnames(.))) %>% # alphabetize column names
-    select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
+    select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) %>% # put 'sampleid' first
     mutate(across(ends_with("flag"), # convert all _flag values back to text
                   ~ if_else(.<1, "", "<"))) %>% 
     filter(labdup != "LAB DUP") %>% # remove the lab dup
@@ -185,13 +137,40 @@ dup_agg21 <- function(data) {
 
 # create path for Lake Jean Neustadt
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/TOC.DOC/ADA/CH4_147_Lake Jean Neustadt")
+                       "data/chemistry/TOC.DOC/ADA/CH4_147_Lake Jean Neustadt/")
 
-# apply get_ada_data and dup_agg functions to each spreadsheet for Lake Jean Neustadt
-
-# file names are too long. will need to rename
-jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773AE2.6ForshayLakeMethaneProject7-14-21NPOCNPDOCGPMS.xlsx") %>%
-  conv_units(filename = "EPAGPA054SS#7773AE2.6ForshayLakeMethaneProject7-14-21NPOCNPDOCGPMS.xlsx") %>%
-  # mutate(site_id = 1) %>% # add site_id 
-  # mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
+# apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
+jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-21NPOCNPDOCGPMS.xlsx") %>%
+  conv_units(filename = "EPAGPA054SS7773AE2.6Neustadt7-14-21NPOCNPDOCGPMS.xlsx") %>%
+  # mutate(site_id = ???) %>% # add site_id 
   dup_agg21 # aggregate lab duplicates (optional)
+
+
+# create path for Keystone Lake
+cin.ada.path <- paste0(userPath, 
+                       "data/chemistry/TOC.DOC/ADA/CH4_148_Keystone Lake/")
+
+# apply get_ada_data21, conv_units, & dup_agg21 to Keystone Lake excel file
+key1 <- get_ada_data21(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-21NPOCNPDOCGPMS.xlsx") %>%
+  conv_units(filename = "EPAGPA061SS7784AE2.6Keystone8-17-21NPOCNPDOCGPMS.xlsx") %>%
+  # mutate(site_id = ???) %>% # add site_id 
+  dup_agg21 # aggregate lab duplicates (optional)
+
+
+# create path for Lake Overholser
+cin.ada.path <- paste0(userPath, 
+                       "data/chemistry/TOC.DOC/ADA/CH4_167_Lake Overholser/")
+
+# apply get_ada_data21, conv_units, & dup_agg21 to Lake Overholser excel file
+ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059SS7777AE2.6Overholser7-27-21NPOCNPDOCGPMS.xlsx") %>%
+  conv_units(filename = "EPAGPA059SS7777AE2.6Overholser7-27-21NPOCNPDOCGPMS.xlsx") %>%
+  # mutate(site_id = ???) %>% # add site_id 
+  dup_agg21 # aggregate lab duplicates (optional)
+
+
+# Join all of the data objects
+ada.oc <- list(jea = list(jea1), key = list(key1), 
+                      ove = list(ove1)) %>% 
+  map_depth(1, function(x) reduce(x, left_join)) %>%
+  reduce(full_join) %>%
+  arrange(lake_id)
