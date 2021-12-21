@@ -58,8 +58,8 @@ get_ada_data21 <- function(path, datasheet) {
     mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
     rename(lake_id = sampleid) %>% # change name to match chemCoc
     mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
-    mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
-                  ~ if_else(.>28, TRUE, FALSE))) %>% 
+    mutate(across(ends_with("analyzed"), # determine if holding time exceeded
+                  ~ if_else(.>28, TRUE, FALSE))) %>% # TRUE = hold time violation
     mutate(site_id = "") # create empty column for site_id (id is populated later)
   
   return(maintable)
