@@ -1,2 +1,2 @@
 # ADA analyzing their own anions.  See ...data/chemistry/anions/ADA/...
-# See issue 10 for analyte names and issue 8 for key to sample id values.
+# See Wiki for analtye name and unique identifier conventions.
