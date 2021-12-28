@@ -195,8 +195,9 @@ ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrF
 
 # Join all of the data objects
 ada.anions <- list(jea = list(jea1), key = list(key1), 
-               ove = list(ove1)) %>% 
-  map_depth(1, function(x) reduce(x, left_join)) %>%
-  reduce(full_join) %>%
+                   ove = list(ove1)) %>% 
+  map_depth(1, function(x) reduce(x, left_join)) %>% 
+  reduce(full_join) %>% 
+  select(-starts_with("no"), -starts_with("op")) %>% # remove no2, no3, and op
   arrange(lake_id)
 

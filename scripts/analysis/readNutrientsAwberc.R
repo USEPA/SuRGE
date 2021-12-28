@@ -27,26 +27,37 @@
 
 get_awberc_data <- function(path, data, sheet) { 
   
-d <- read_excel(paste0(path, data), # get MDL & analyte names
+d <- read_excel(paste0(path, data), # 
                        sheet = sheet, range = "A2:AZ12000") %>%
-  janitor::clean_names() %>%
-  janitor::remove_empty(which = c("rows", "cols"))  # remove empty rows
+  janitor::clean_names() %>% # clean up names for rename and select, below
+  janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
+  rename(rdate = collection_date_cdate, #rename fields
+         finalConc = peak_concentration_corrected_for_dilution_factor,
+         analyte = analyte_name_analy,
+         tp = tp_tn_adjusted_concentration_full_series_ug_p_l,
+         site = site_id_id,
+         longid = long_id_subid) %>%
+  select(rdate, finalConc, analyte, tp, site, longid) %>% # keep only needed fields
+  mutate(analyte = str_to_lower(analyte)) %>% #make analyte names lowercase
+  mutate(analyte = case_when( # change analyte names where necessary
+    analyte == "trp" ~ "op",
+    analyte == "tnh4" ~ "nh4",
+    analyte == "tno2" ~ "no2",
+    analyte == "tno2-3" ~ "no2_3",
+    TRUE   ~ analyte)
+  )
 
   return(d)
 
 }
 
 
-
-
 cin.awberc.path <- paste0(userPath, 
                        "data/chemistry/nutrients/")
-
+  
 chem21 <- get_awberc_data(cin.awberc.path, 
                           "2021_ESF-EFWS_NutrientData_Updated11082021_AKB.xlsx", 
                           "2021 Data")
-
-
 
 # Replace spaces and unusual characters in column names with ".".
 # Note that "(" is a special character in R.  Must precdede with \\ for
@@ -59,7 +70,8 @@ chem <- rename(chem, rdate = cdate.yymmdd10.,
                site = site.id..ID.,
                longid = long.id..SUBID.) %>%
   select(rdate, site, REP., TYPE, analyte, finalConc,
-         UNIT, tp)
+         UNIT, tp) 
+
 
 # Check units
 distinct(chem, UNIT) # all ug, except mg C/L for TOC
@@ -72,31 +84,7 @@ distinct(chem, UNIT) # all ug, except mg C/L for TOC
 # Acton Lake (ACN, 2016-05-31), site ids U04 and U18 in chem file for this
 # Brookeville SU-35 is coded as SU35_2.
 # Cave Run SU4 should be SU46
-chem <- mutate(chem, site = 
-                 # fix Hocking
-                 ifelse(grepl(pattern = "HOC", x = site),
-                        gsub(pattern = "HOC", 
-                             replacement = "HOK", 
-                             site),
-                        
-                        # Fix Senacaville
-                        ifelse(grepl(pattern = "SEN", x = site),
-                               gsub(pattern = "SEN", 
-                                    replacement = "SNC", 
-                                    site),
-                               
-                               # Fix Acton
-                               ifelse(site %in% c("U04", "U18"),
-                                      paste("ACN", site, sep = ""),
-                                      
-                                      # Fix Brookeville
-                                      ifelse(site == "SU35_2",
-                                             "BVRSU35",
-                                             
-                                             # Fix Cave Run
-                                             ifelse(site == "CRRSU4",
-                                                    "CRRSU46",
-                                                    site))))))
+
 
 
 # Pull out site values that contain the 3 letter code for each reservoir.
@@ -208,33 +196,6 @@ ggplot(fChem, aes(Lake_Name, finalConc)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
 
 
-fChem <- mutate(fChem,      # blank and unknown switched at CMLSU01  
-                finalConc = ifelse(analyte == "TOC" & site == "CMLUS01",
-                                   3.34,
-                                   ifelse(analyte == "TOC" & site == "CMLUS01BLK",
-                                          0.28,
-                                          
-                                          # Looks like sample contained blank water       
-                                          ifelse(analyte == "TOC" & site == "MILSU01D",
-                                                 NA,
-                                                 
-                                                 # blank and unknown switched at MJKS23        
-                                                 ifelse(analyte == "TOC" & site == "MJKS23",
-                                                        5.06,
-                                                        ifelse(analyte == "TOC" & site == "MJKS23BLK",
-                                                               0.29,
-                                                               
-                                                               # Looks like sample contained blank water         
-                                                               ifelse(analyte == "TOC" & site == "TPNSU07D",
-                                                                      NA,
-                                                                      
-                                                                      # Tappan Lake SU-28 UNK-TOC is too high 17.7
-                                                                      ifelse(analyte == "TOC" & site == "TPNSU28D",
-                                                                             NA,
-                                                                             finalConc)
-                                                               )))))))
-
-
 # Strip Blanks
 fChem <-  filter(fChem, TYPE != "BLANK") %>%
   # Exclude unnecessary columns
@@ -251,11 +212,6 @@ fChemAgBySite <- ddply(.data = fChem, .(Lake_Name, siteID, analyte), summarize,
 # Cast to wide for merge with eqAreaData
 fChemAgBySiteW <- dcast(fChemAgBySite, Lake_Name + siteID ~ analyte, 
                         value.var = "finalConc")
-
-# Strip ugly characters from analyte names
-names(fChemAgBySiteW) = gsub(pattern = c("\\(| |#|)|/|-"), 
-                             replacement = ".", 
-                             x = names(fChemAgBySiteW))
 
 
 # Missing TP from BVR SU-35 (tube cracked).  Estimate from TRP
