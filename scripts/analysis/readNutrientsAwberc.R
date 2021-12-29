@@ -32,20 +32,35 @@ d <- read_excel(paste0(path, data), #
   janitor::clean_names() %>% # clean up names for rename and select, below
   janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
   rename(rdate = collection_date_cdate, #rename fields
+         ddate = analyte_detection_date_ddate,
          finalConc = peak_concentration_corrected_for_dilution_factor,
          analyte = analyte_name_analy,
          tp = tp_tn_adjusted_concentration_full_series_ug_p_l,
          site = site_id_id,
+         crossid = c_ross_id_pos, 
          longid = long_id_subid) %>%
-  select(rdate, finalConc, analyte, tp, site, longid) %>% # keep only needed fields
+  mutate(nutrients_qual = if_else( # determine if holding time exceeded
+    (as.Date(ddate) - as.Date(rdate)) > 28, TRUE, FALSE)) %>%  # TRUE = hold time violation
+  select(site, longid, crossid, analyte, finalConc, tp, nutrients_qual) %>% # keep only needed fields
   mutate(analyte = str_to_lower(analyte)) %>% #make analyte names lowercase
   mutate(analyte = case_when( # change analyte names where necessary
     analyte == "trp" ~ "op",
     analyte == "tnh4" ~ "nh4",
     analyte == "tno2" ~ "no2",
     analyte == "tno2-3" ~ "no2_3",
-    TRUE   ~ analyte)
-  )
+    TRUE   ~ analyte)) %>%
+  mutate(longid = case_when(
+    longid == "BLK" ~ "blank",
+    longid == "STD" ~ "standard",
+    longid == " " ~ " ",
+    longid == " " ~ " ",
+    TRUE ~ longid)) %>%
+  mutate(crossid = case_when(
+    crossid == " " ~ " ",
+    crossid == " " ~ " ",
+    crossid == " " ~ " ",
+    crossid == " " ~ " ",
+    TRUE ~ crossid)) %>%
 
   return(d)
 
