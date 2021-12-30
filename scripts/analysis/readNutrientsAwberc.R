@@ -27,43 +27,81 @@
 
 get_awberc_data <- function(path, data, sheet) { 
   
-d <- read_excel(paste0(path, data), # 
-                       sheet = sheet, range = "A2:AZ12000") %>%
-  janitor::clean_names() %>% # clean up names for rename and select, below
-  janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
-  rename(rdate = collection_date_cdate, #rename fields
-         ddate = analyte_detection_date_ddate,
-         finalConc = peak_concentration_corrected_for_dilution_factor,
-         analyte = analyte_name_analy,
-         tp = tp_tn_adjusted_concentration_full_series_ug_p_l,
-         site = site_id_id,
-         crossid = c_ross_id_pos, 
-         longid = long_id_subid) %>%
-  mutate(nutrients_qual = if_else( # determine if holding time exceeded
-    (as.Date(ddate) - as.Date(rdate)) > 28, TRUE, FALSE)) %>%  # TRUE = hold time violation
-  select(site, longid, crossid, analyte, finalConc, tp, nutrients_qual) %>% # keep only needed fields
-  mutate(analyte = str_to_lower(analyte)) %>% #make analyte names lowercase
-  mutate(analyte = case_when( # change analyte names where necessary
-    analyte == "trp" ~ "op",
-    analyte == "tnh4" ~ "nh4",
-    analyte == "tno2" ~ "no2",
-    analyte == "tno2-3" ~ "no2_3",
-    TRUE   ~ analyte)) %>%
-  mutate(longid = case_when(
-    longid == "BLK" ~ "blank",
-    longid == "STD" ~ "standard",
-    longid == " " ~ " ",
-    longid == " " ~ " ",
-    TRUE ~ longid)) %>%
-  mutate(crossid = case_when(
-    crossid == " " ~ " ",
-    crossid == " " ~ " ",
-    crossid == " " ~ " ",
-    crossid == " " ~ " ",
-    TRUE ~ crossid)) %>%
+  d <- read_excel(paste0(path, data), #
+                  sheet = sheet, range = "A2:AZ12000") %>%
+  # d <- read_excel(paste0(cin.awberc.path,
+  #                        "2021_ESF-EFWS_NutrientData_Updated11082021_AKB.xlsx"), #
+  #                 sheet = "2021 Data", range = "A2:AZ12000") %>%
+    janitor::clean_names() %>% # clean up names for rename and select, below
+    janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
+    rename(rdate = collection_date_cdate, #rename fields
+           ddate = analyte_detection_date_ddate,
+           finalConc = peak_concentration_corrected_for_dilution_factor,
+           analyte = analyte_name_analy,
+           tp_tn = tp_tn_adjusted_concentration_full_series_ug_p_l,
+           lake_id = site_id_id,
+           crossid = c_ross_id_pos, 
+           site_id = long_id_subid,
+           sample_type = type) %>%
+    mutate(nutrients_qual = if_else( # determine if holding time exceeded
+      (as.Date(ddate) - as.Date(rdate)) > 28, TRUE, FALSE)) %>% # TRUE = hold time violation
+    mutate(finalConc = ifelse( # correct TP and TN are in tp_tn
+      analyte %in% c("TP", "TN"),
+      tp_tn,
+      finalConc)) %>%  
+    filter(sample_type != "SPK") %>% # exclude matrix spike
+    select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual) %>% # keep only needed fields
+    mutate(analyte = str_to_lower(analyte)) %>% #make analyte names lowercase
+    mutate(analyte = case_when( # change analyte names where necessary
+      analyte == "trp" ~ "op",
+      analyte == "tnh4" ~ "nh4",
+      analyte == "tno2" ~ "no2",
+      analyte == "tno2-3" ~ "no2_3",
+      TRUE   ~ analyte)) %>%
+    # the commented code below addresses samples not included in SuRGE
+    # inventory.  It doesn't hurt anything, but isn't needed
+    # mutate(site_id = case_when(
+    #   site_id == "BLK" ~ "blank",
+    #   site_id == "STD" ~ "standard",
+    #   site_id == " " ~ " ",
+    #   site_id == " " ~ " ",
+    #   TRUE ~ site_id)) %>%
+    mutate(crossid = case_when( # I'm not sure this is needed for SuRGE data...
+      crossid == " " ~ " ",
+      crossid == " " ~ " ",
+      crossid == " " ~ " ",
+      crossid == " " ~ " ",
+      TRUE ~ crossid)) %>%
+    # strip character values from site_id, convert to numeric
+    mutate(site_id =  as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
+    mutate(sample_type = case_when( # recode sample type identifiers
+      sample_type == "UKN" ~ "unknown",
+      sample_type == "DUP" ~ "duplicate",
+      sample_type == "BLK" ~ "blank",
+      TRUE ~ sample_type)) %>%
+    # sample filtered or unfiltered
+    mutate(filter = str_sub(crossid, 1, 1) %>% tolower(.),
+           filter = case_when(
+             filter == "d" ~ "filtered",
+             filter == "t" ~ "unfiltered",
+             TRUE ~ filter)) %>%
+    # define sample depth
+      mutate(sample_depth = str_sub(crossid, 3, nchar(crossid)),
+             sample_depth = case_when(
+               grepl("d", sample_depth, ignore.case = TRUE) ~ "deep",
+               grepl("s", sample_depth, ignore.case = TRUE) ~ "shallow",
+               TRUE ~ sample_depth)) %>%
+    # strip out unneeded analyses
+    # exclude filtered samples run for totals
+    filter(!(analyte %in% c("tp", "tn") & filter == "filtered")) %>%
+    # exclude unfiltered samples run for inorganics
+    filter(!(analyte %in% c("nh4", "op", "no2_3", "no2") & filter == "unfiltered")) %>%
+    filter(!(analyte == "turea")) # exclude urea
+      
 
+  
   return(d)
-
+  
 }
 
 
@@ -73,6 +111,22 @@ cin.awberc.path <- paste0(userPath,
 chem21 <- get_awberc_data(cin.awberc.path, 
                           "2021_ESF-EFWS_NutrientData_Updated11082021_AKB.xlsx", 
                           "2021 Data")
+
+# Filter SuRGE data
+# Most samples are coded as CH4-###, except the samples from the lacustrine,
+# riverine, and transitional zones of Francis Case and Oahe (069 and 070).
+chem21 <- chem21 %>%
+  filter(grepl(pattern = c("CH4|069|070"), lake_id))
+
+# This data object contains laboratory dups that must be aggregated.  These
+# data can be identified as having identical values for all fields except
+# finalConc.  They have different values for the 'REP" field in the original data.
+# This aggregation can be accomplished by grouping and summarizing.  I suspect
+# you will want to write another function to do this.
+
+# we also need to format lake_id values (see Wiki page 'lake_id and site_id formats')
+
+
 
 # Replace spaces and unusual characters in column names with ".".
 # Note that "(" is a special character in R.  Must precdede with \\ for
