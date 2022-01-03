@@ -116,8 +116,11 @@ conv_units <- function(data, filename) {
                 tp_flag = contains("TP") & ends_with("flag"), 
                 tn_qual = contains("TN") & ends_with("analyzed"), 
                 tp_qual = contains("TP") & ends_with("analyzed")) %>%
-         mutate(across(ends_with(c("tn", "tp")), 
+         mutate(across(ends_with(c("tn")), 
                        ~ "ug_n_l",
+                       .names = "{col}_units")) %>%
+         mutate(across(ends_with(c("tp")), 
+                       ~ "ug_p_l",
                        .names = "{col}_units"))
    
     # ORTHOPHOSPHATE
@@ -131,7 +134,7 @@ conv_units <- function(data, filename) {
                 op_flag = contains("oP") & ends_with("flag"),
                 op_qual = contains("oP") & ends_with("analyzed")) %>%
          mutate(across(ends_with("op"), 
-                       ~ "ug_n_l",
+                       ~ "ug_p_l",
                        .names = "{col}_units")) 
   
     # Check for an no3 column, then create no3_qual flag column

@@ -166,7 +166,7 @@ cin.ada.path <- paste0(userPath,
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
 jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4BrFNO3NO2oPGPKR.xls") %>%
   conv_units(filename = "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4BrFNO3NO2oPGPKR.xls") %>%
-  # mutate(site_id = ???) %>% # add site_id 
+  mutate(site_id = 1) %>% # add site_id
   dup_agg21 # aggregate lab duplicates (optional)
 
 
@@ -178,7 +178,7 @@ cin.ada.path <- paste0(userPath,
 # apply get_ada_data21, conv_units, & dup_agg21 to Keystone Lake excel file
 key1 <- get_ada_data21(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4BrFNO3NO2GPKR.xls") %>%
   conv_units(filename = "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4BrFNO3NO2GPKR.xls") %>%
-  # mutate(site_id = ???) %>% # add site_id 
+  mutate(site_id = 7) %>% # add site_id
   dup_agg21 # aggregate lab duplicates (optional)
 
 
@@ -189,7 +189,7 @@ cin.ada.path <- paste0(userPath,
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Overholser excel file
 ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrFNO3NO2.xls") %>%
   conv_units(filename = "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrFNO3NO2.xls") %>%
-  # mutate(site_id = ???) %>% # add site_id 
+  mutate(site_id = 6) %>% # add site_id
   dup_agg21 # aggregate lab duplicates (optional)
 
 
