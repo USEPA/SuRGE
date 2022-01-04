@@ -51,7 +51,7 @@ get_awberc_data <- function(path, data, sheet) {
       finalConc)) %>%  
     filter(sample_type != "SPK") %>% # exclude matrix spike
     select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual) %>% # keep only needed fields
-    mutate(analyte = str_to_lower(analyte)) %>% #make analyte names lowercase
+    mutate(analyte = str_to_lower(analyte)) %>% # make analyte names lowercase
     mutate(analyte = case_when( # change analyte names where necessary
       analyte == "trp" ~ "op",
       analyte == "tnh4" ~ "nh4",
@@ -86,37 +86,48 @@ get_awberc_data <- function(path, data, sheet) {
     filter(grepl(pattern = c("CH4|069|070"), lake_id)) %>% # Filter SuRGE data
     mutate(lake_id = str_remove(lake_id, "CH4-")) %>% # standardize lake IDs
     mutate(lake_id = case_when( # # standardize lake ID sub-component names
-      str_detect(lake_id, "LAC") ~ str_replace(lake_id, "LAC", "_lacustrine"),
-      str_detect(lake_id, "River") ~ str_replace(lake_id, "River", "_riverine"),
-      str_detect(lake_id, "Trans") ~ str_replace(lake_id, "Trans", "_transitional"),
+      str_detect(lake_id, "LAC") ~ str_replace(lake_id, " LAC", "_lacustrine"),
+      str_detect(lake_id, "River") ~ str_replace(lake_id, " River", "_riverine"),
+      str_detect(lake_id, "Trans") ~ str_replace(lake_id, " Trans", "_transitional"),
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
-    
-    # 1) pivot wider, then adapt following code to create analyte_flag columns
-    # mutate(across(ends_with("/L"), # create new flag column if analyte not detected
-    #             ~ if_else(str_detect(., "ND"), "<", ""), 
-    #             .names = "{col}_flag"))
-    # 2) adapt following code to create units columns:
-    # mutate(across(ends_with(c("tn", "tp")), 
-    #               ~ "ug_n_l",
-    #               .names = "{col}_units"))
-  
-
+    mutate(analyte_flag = case_when( # create the analyte_flag column
+      analyte == "nh4" & finalConc < 7 ~ "<", # 1000 is a placeholder value
+      analyte == "no2" & finalConc < 8 ~ "<",
+      analyte == "no2_3" & finalConc < 8 ~ "<",
+      analyte == "op" & finalConc < 0.7 ~ "<",
+      analyte == "tn" & finalConc < 8 ~ "<",
+      analyte == "tp" & finalConc < 8 ~ "<",
+      TRUE ~ "")) %>%
+    mutate(units = case_when(
+      analyte == "nh4"  ~ "ug_n_l",
+      analyte == "no2"  ~ "ug_n_l",
+      analyte == "no2_3"  ~ "ug_n_l",
+      analyte == "op"  ~ "ug_p_l",
+      analyte == "tn"  ~ "ug_n_l",
+      analyte == "tp"  ~ "ug_p_l",
+      TRUE ~ "")) %>%
+  select(-crossid) # no longer need crossid
     
   return(d)
+  
   
 }
 
 
-# aggregate lakes (lacustrine, transitional, & riverine components)
-# --- can probably aggregate duplicates in same function
 lake_agg <- function(data) { 
-  
+  # 1/4/2022 problem with pivot_wider--there appear to be multiple values for some analytes? 
+  # 1/4/2022 also need to implement duplicate aggregation
 e <- data %>%
-  group_by(site_id, crossid, analyte, sample_type, sample_depth, nutrients_qual) %>% 
-  summarize(value = mean(finalConc, na.rm = TRUE))
-
+  mutate(lake_id = str_extract(lake_id, "\\d+")) %>% # strip suffixes from lake_ids
+  group_by(lake_id, site_id, analyte, sample_type, sample_depth, nutrients_qual, analyte_flag, units) %>% 
+  summarize(value = mean(finalConc, na.rm = TRUE)) %>% # group lakes together and calculate means
+  pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units)) # %>% # cast to wide
+  # mutate(across(starts_with(c("value", "analyte", "units")), # convert NULL values to NA
+  #               ~ ifelse(is.null(.), NA, .))) # 1/4/2022 this isn't working--revisit
+  #                                             # 1/4/2022 maybe because some values are lists?
 return(e)
+
 
 }
 
@@ -128,7 +139,7 @@ chem21 <- get_awberc_data(cin.awberc.path,
                           "2021_ESF-EFWS_NutrientData_Updated11082021_AKB.xlsx", 
                           "2021 Data") 
 
-
+zz <- lake_agg(chem21) # temporary object so I can compare results
 
 # This data object contains laboratory dups that must be aggregated.  These
 # data can be identified as having identical values for all fields except
