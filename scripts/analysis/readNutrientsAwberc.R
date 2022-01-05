@@ -22,7 +22,40 @@
 # 'pos $char4.' column (e.g., T-Sh).
 
 # All analyte names begin with a "T" to indicate "total" (e.g. TNH4).  Ignore this
-# and use the analyte names defined in github issue #10.
+# and use the analyte names defined in github Wiki page ("Chemistry units,
+# names, and data sources).
+
+# SCRIPT TO READ IN COC FORMS
+# 1. Read in chain of custody file names
+# sheet name is "water (original)", but sometimes there is a space before 
+# "water".  str_detect looks for "water" in sheet name.
+# https://stackoverflow.com/questions/61308709/r-use-regex-to-import-specific-sheets-from-multiple-excel-files
+coc.list <- fs::dir_ls(path = paste0(userPath,  "data/chemistry/nutrients"), # get file names
+                       regexp = "COC", # file names containing this pattern
+                       recurse = FALSE) %>% # do not look in subdirectories
+  .[!grepl("initials", .)] %>% # exclude template
+  # map will read each file and select columns of interest
+  purrr::map(~read_excel(.x, skip = 5, 
+                         sheet = which(str_detect(excel_sheets(.x), "water"))) %>%
+               select(contains("Lake"), contains("Site"))) 
+
+
+# 2. in some COC the lake_id value is in the LakeID column, whereas in others it
+# is in the SiteID... column.  specify correct columns
+coc.vector <- coc.list %>%
+  map_dfr(., # map_dfr will rbind list objects into df
+          function(x) if(length(names(x)) > 1) { # if >1 column..
+    select(x, LakeID) # grab LakeID
+  } else {
+    x # else, return the original df with one column
+  }
+  ) %>%
+  pivot_longer(everything()) %>% # collapse into one column of values
+  filter(!is.na(value)) %>% # remove NA
+  pull(value) # pull column into a vector
+
+
+
 # SCRIPT TO READ IN WATER CHEM
 
 get_awberc_data <- function(path, data, sheet) { 
@@ -83,7 +116,8 @@ get_awberc_data <- function(path, data, sheet) {
     # exclude unfiltered samples run for inorganics
     filter(!(analyte %in% c("nh4", "op", "no2_3", "no2") & filter == "unfiltered")) %>%
     filter(!(analyte == "turea")) %>% # exclude urea
-    filter(grepl(pattern = c("CH4|069|070"), lake_id)) %>% # Filter SuRGE data
+    #filter(grepl(pattern = c("CH4|069|070"), lake_id)) %>% # Filter SuRGE data
+    filter(lake_id %in% coc.vector) %>% # Filter SuRGE data, see above
     mutate(lake_id = str_remove(lake_id, "CH4-")) %>% # standardize lake IDs
     mutate(lake_id = case_when( # # standardize lake ID sub-component names
       str_detect(lake_id, "LAC") ~ str_replace(lake_id, " LAC", "_lacustrine"),
@@ -136,8 +170,10 @@ cin.awberc.path <- paste0(userPath,
                        "data/chemistry/nutrients/")
   
 chem21 <- get_awberc_data(cin.awberc.path, 
-                          "2021_ESF-EFWS_NutrientData_Updated11082021_AKB.xlsx", 
+                          "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx", 
                           "2021 Data") 
+chem21 %>% distinct(lake_id)
+
 
 zz <- lake_agg(chem21) # temporary object so I can compare results
 
