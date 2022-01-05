@@ -58,6 +58,7 @@ coc.vector <- coc.list %>%
 
 # SCRIPT TO READ IN WATER CHEM
 
+# function reads in data, filters data, and creates all new columns
 get_awberc_data <- function(path, data, sheet) { 
   
   d <- read_excel(paste0(path, data), #
@@ -126,13 +127,21 @@ get_awberc_data <- function(path, data, sheet) {
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
     mutate(analyte_flag = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 7 ~ "<", # 1000 is a placeholder value
+      analyte == "nh4" & finalConc < 7 ~ "<", 
       analyte == "no2" & finalConc < 8 ~ "<",
       analyte == "no2_3" & finalConc < 8 ~ "<",
       analyte == "op" & finalConc < 0.7 ~ "<",
       analyte == "tn" & finalConc < 8 ~ "<",
       analyte == "tp" & finalConc < 8 ~ "<",
       TRUE ~ "")) %>%
+    mutate(finalConc = case_when( # create the analyte_flag column
+      analyte == "nh4" & finalConc < 7 ~ 7, 
+      analyte == "no2" & finalConc < 8 ~ 8,
+      analyte == "no2_3" & finalConc < 8 ~ 8,
+      analyte == "op" & finalConc < 0.7 ~ 0.7,
+      analyte == "tn" & finalConc < 8 ~ 8,
+      analyte == "tp" & finalConc < 8 ~ 8,
+      TRUE ~ finalConc)) %>%
     mutate(units = case_when(
       analyte == "nh4"  ~ "ug_n_l",
       analyte == "no2"  ~ "ug_n_l",
@@ -149,20 +158,40 @@ get_awberc_data <- function(path, data, sheet) {
 }
 
 
-lake_agg <- function(data) { 
-  # 1/4/2022 problem with pivot_wider--there appear to be multiple values for some analytes? 
-  # 1/4/2022 also need to implement duplicate aggregation
-e <- data %>%
-  mutate(lake_id = str_extract(lake_id, "\\d+")) %>% # strip suffixes from lake_ids
-  group_by(lake_id, site_id, analyte, sample_type, sample_depth, nutrients_qual, analyte_flag, units) %>% 
-  summarize(value = mean(finalConc, na.rm = TRUE)) %>% # group lakes together and calculate means
-  pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units)) # %>% # cast to wide
-  # mutate(across(starts_with(c("value", "analyte", "units")), # convert NULL values to NA
-  #               ~ ifelse(is.null(.), NA, .))) # 1/4/2022 this isn't working--revisit
-  #                                             # 1/4/2022 maybe because some values are lists?
-return(e)
+# function aggregates dups, renames/sorts columns, and casts to wide
+dup_agg <- function(data) { 
 
+# aggregate dups and convert analyte_flags to numeric (for summarize operations)
+  e <- data %>%
+    mutate(analyte_flag = if_else(str_detect(analyte_flag, "<"), 1, 0)) %>% # convert to numeric
+    group_by(lake_id, site_id, analyte, sample_type, sample_depth, nutrients_qual, units) %>% 
+    summarize(value = mean(finalConc, na.rm = TRUE), # group and calculate means
+              analyte_flag = mean(analyte_flag, na.rm = TRUE)) 
+    
+  # cast to wide, convert analyte flags to text, and convert any NaN to NA
+  f <- e %>%
+    pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units)) %>% # cast to wide
+    mutate(across(contains("flag"), # convert all _flag values back to text (< or blank)
+                  ~ if_else(.<1, "", "<"))) %>%
+    mutate(across(starts_with(c("value", "analyte", "units")), # convert NaN values to NA
+                  ~ ifelse(is.nan(.), NA, .))) 
 
+  # rename functions to rename flag, units, and value columns
+  flagnamer <- function(data) {str_c(str_remove(data, "analyte_flag_"), "_flag")}
+  unitnamer <- function(data) {str_c(str_remove(data, "units_"), "_units")}
+  valunamer <- function(data) {str_remove(data, "value_")}
+
+  # apply rename functions to column names, then reorder columns
+  g <- f %>%
+    rename_with(flagnamer, .cols = contains("flag")) %>%
+    rename_with(unitnamer, .cols = contains("units")) %>%
+    rename_with(valunamer, .cols = contains("value")) %>%
+    select(order(colnames(.))) %>% # alphabetize column names
+    select(lake_id, site_id, sample_depth, sample_type, nutrients_qual, everything()) 
+    
+  return(g)
+
+  
 }
 
 
@@ -172,10 +201,12 @@ cin.awberc.path <- paste0(userPath,
 chem21 <- get_awberc_data(cin.awberc.path, 
                           "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx", 
                           "2021 Data") 
+
 chem21 %>% distinct(lake_id)
 
 
-zz <- lake_agg(chem21) # temporary object so I can compare results
+chem21 <- dup_agg(chem21) # final object, cast to wide with dups aggregated
+
 
 # This data object contains laboratory dups that must be aggregated.  These
 # data can be identified as having identical values for all fields except
