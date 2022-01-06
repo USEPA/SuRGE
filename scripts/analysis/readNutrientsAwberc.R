@@ -52,6 +52,8 @@ coc.vector <- coc.list %>%
   ) %>%
   pivot_longer(everything()) %>% # collapse into one column of values
   filter(!is.na(value)) %>% # remove NA
+  select(value) %>% # pull out lake id values
+  distinct(value) %>% # get rid of duplicates
   pull(value) # pull column into a vector
 
 
@@ -62,10 +64,10 @@ coc.vector <- coc.list %>%
 get_awberc_data <- function(path, data, sheet) { 
   
   d <- read_excel(paste0(path, data), #
-                  sheet = sheet, range = "A2:AZ12000") %>%
+                  sheet = sheet, skip = 1) %>%
   # d <- read_excel(paste0(cin.awberc.path,
-  #                        "2021_ESF-EFWS_NutrientData_Updated11082021_AKB.xlsx"), #
-  #                 sheet = "2021 Data", range = "A2:AZ12000") %>%
+  #                        "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx"), #
+  #                 sheet = "2021 Data", skip = 1) %>%
     janitor::clean_names() %>% # clean up names for rename and select, below
     janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
     rename(rdate = collection_date_cdate, #rename fields
@@ -77,6 +79,14 @@ get_awberc_data <- function(path, data, sheet) {
            crossid = c_ross_id_pos, 
            site_id = long_id_subid,
            sample_type = type) %>%
+    # No deep samples collected at 069 LAC.  The deep sample in the file is
+    # actually shallow.
+    mutate(crossid = case_when(lake_id == "069 LAC" & crossid == "T-Dp" ~ "T-Sh",
+                               TRUE ~ crossid)) %>%
+    # Data shows dissolved duplicate collected from deep and total duplicate collected
+    # from shallow at 070 LAC.  This is an error.  All dups collected from shallow.
+    mutate(crossid = case_when(lake_id == "070 LAC" & crossid == "D-Dp" & sample_type == "DUP" ~ "D-Sh",
+                               TRUE ~ crossid)) %>%
     mutate(nutrients_qual = if_else( # determine if holding time exceeded
       (as.Date(ddate) - as.Date(rdate)) > 28, TRUE, FALSE)) %>% # TRUE = hold time violation
     mutate(finalConc = ifelse( # correct TP and TN are in tp_tn
@@ -124,6 +134,8 @@ get_awberc_data <- function(path, data, sheet) {
       str_detect(lake_id, "LAC") ~ str_replace(lake_id, " LAC", "_lacustrine"),
       str_detect(lake_id, "River") ~ str_replace(lake_id, " River", "_riverine"),
       str_detect(lake_id, "Trans") ~ str_replace(lake_id, " Trans", "_transitional"),
+      lake_id == "70" ~ "70_transitional",
+      lake_id == "69" ~ "69_riverine",
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
     mutate(analyte_flag = case_when( # create the analyte_flag column
