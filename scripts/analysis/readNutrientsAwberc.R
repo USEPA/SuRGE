@@ -83,10 +83,6 @@ get_awberc_data <- function(path, data, sheet) {
     # actually shallow.
     mutate(crossid = case_when(lake_id == "069 LAC" & crossid == "T-Dp" ~ "T-Sh",
                                TRUE ~ crossid)) %>%
-    # Data shows dissolved duplicate collected from deep and total duplicate collected
-    # from shallow at 070 LAC.  This is an error.  All dups collected from shallow.
-    mutate(crossid = case_when(lake_id == "070 LAC" & crossid == "D-Dp" & sample_type == "DUP" ~ "D-Sh",
-                               TRUE ~ crossid)) %>%
     mutate(nutrients_qual = if_else( # determine if holding time exceeded
       (as.Date(ddate) - as.Date(rdate)) > 28, TRUE, FALSE)) %>% # TRUE = hold time violation
     mutate(finalConc = ifelse( # correct TP and TN are in tp_tn
@@ -121,6 +117,13 @@ get_awberc_data <- function(path, data, sheet) {
                grepl("d", sample_depth, ignore.case = TRUE) ~ "deep",
                grepl("s", sample_depth, ignore.case = TRUE) ~ "shallow",
                TRUE ~ sample_depth)) %>%
+    # filtered sample has really high NH4 (59.3), but unfiltered from same depth
+    # has much lower (3.94).  Replacing suspicious value with lower value
+    mutate(finalConc = replace(finalConc,
+                               lake_id == "070 River" & sample_depth == "shallow" & 
+                                 analyte == "nh4" & filter == "filtered", 
+                               3.94)) %>%
+    mutate()
     # strip out unneeded analyses
     # exclude filtered samples run for totals
     filter(!(analyte %in% c("tp", "tn") & filter == "filtered")) %>%
