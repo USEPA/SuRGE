@@ -45,10 +45,10 @@ coc.list <- fs::dir_ls(path = paste0(userPath,  "data/chemistry/nutrients"), # g
 coc.vector <- coc.list %>%
   map_dfr(., # map_dfr will rbind list objects into df
           function(x) if(length(names(x)) > 1) { # if >1 column..
-            select(x, LakeID) # grab LakeID
-          } else {
-            x # else, return the original df with one column
-          }
+    select(x, LakeID) # grab LakeID
+  } else {
+    x # else, return the original df with one column
+  }
   ) %>%
   pivot_longer(everything()) %>% # collapse into one column of values
   filter(!is.na(value)) %>% # remove NA
@@ -60,14 +60,24 @@ coc.vector <- coc.list %>%
 
 # SCRIPT TO READ IN WATER CHEM
 
+# The correction to 069 LAC will be addressed in update to nutrient data.  Will
+# delete the relevant code below.
+# problems with 288, 298, 231, and 233 are being addressed by Andrea and Bill.  Check
+# on these after new update has been issued.
+# data from the following lakes has been reviewed as of 1/7/2022:
+# 233, 237, 236, 144, 155, 275, 240, 069_lacustrine, 069_transitional, 070_lacustrine,
+# 070_riverine, 288, 316, 79, 298, 75, 326, 327, 70_transitional, 231, 78, 232,
+# 68, 69_riverine
+
+
 # function reads in data, filters data, and creates all new columns
 get_awberc_data <- function(path, data, sheet) { 
   
   d <- read_excel(paste0(path, data), #
                   sheet = sheet, skip = 1) %>%
-    # d <- read_excel(paste0(cin.awberc.path,
-    #                        "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx"), #
-    #                 sheet = "2021 Data", skip = 1) %>%
+  # d <- read_excel(paste0(cin.awberc.path,
+  #                        "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx"), #
+  #                 sheet = "2021 Data", skip = 1) %>%
     janitor::clean_names() %>% # clean up names for rename and select, below
     janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
     rename(rdate = collection_date_cdate, #rename fields
@@ -102,9 +112,9 @@ get_awberc_data <- function(path, data, sheet) {
     # strip character values from site_id, convert to numeric
     mutate(site_id =  as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
     mutate(sample_type = case_when( # recode sample type identifiers
-      sample_type == "UKN" ~ "unknown",
-      sample_type == "DUP" ~ "duplicate",
-      sample_type == "BLK" ~ "blank",
+      grepl("dup", sample_type, ignore.case = TRUE) ~ "duplicate",
+      grepl("ukn", sample_type, ignore.case = TRUE) ~ "unknown",
+      grepl("blk", sample_type, ignore.case = TRUE) ~ "blank",
       TRUE ~ sample_type)) %>%
     # sample filtered or unfiltered
     mutate(filter = str_sub(crossid, 1, 1) %>% tolower(.),
@@ -113,11 +123,11 @@ get_awberc_data <- function(path, data, sheet) {
              filter == "t" ~ "unfiltered",
              TRUE ~ filter)) %>%
     # define sample depth
-    mutate(sample_depth = str_sub(crossid, 3, nchar(crossid)),
-           sample_depth = case_when(
-             grepl("d", sample_depth, ignore.case = TRUE) ~ "deep",
-             grepl("s", sample_depth, ignore.case = TRUE) ~ "shallow",
-             TRUE ~ sample_depth)) %>%
+      mutate(sample_depth = str_sub(crossid, 3, nchar(crossid)),
+             sample_depth = case_when(
+               grepl("d", sample_depth, ignore.case = TRUE) ~ "deep",
+               grepl("s", sample_depth, ignore.case = TRUE) ~ "shallow",
+               TRUE ~ sample_depth)) %>%
     # filtered sample has really high NH4 (59.3), but unfiltered from same depth
     # has much lower (3.94).  Replacing suspicious value with lower value
     mutate(finalConc = replace(finalConc,
@@ -170,7 +180,7 @@ get_awberc_data <- function(path, data, sheet) {
       sample_type == "duplicate" ~ "unknown",
       TRUE ~ sample_type)) %>%
     select(-crossid) # no longer need crossid
-  
+    
   return(d)
   
   
@@ -179,7 +189,7 @@ get_awberc_data <- function(path, data, sheet) {
 
 # function aggregates dups, renames/sorts columns, and casts to wide
 dup_agg <- function(data) { 
-  
+
   # aggregate dups and convert analyte_flags to numeric (for summarize operations)
   e <- data %>%
     mutate(analyte_flag = if_else(str_detect(analyte_flag, "<"), 1, 0)) %>% # convert to numeric
@@ -190,7 +200,7 @@ dup_agg <- function(data) {
     mutate(sample_type = case_when(
       rep %in% c("B", 2) ~ "duplicate", TRUE ~ sample_type)) %>%
     select(-rep)
-  
+
   # cast to wide, convert analyte flags to text, and convert any NaN to NA
   f <- e %>%
     pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units, nutrients_qual)) %>% # cast to wide
@@ -198,13 +208,13 @@ dup_agg <- function(data) {
                   ~ if_else(.<1, "", "<"))) %>%
     mutate(across(starts_with(c("value", "analyte", "units", "nutrients")), # convert NaN values to NA
                   ~ ifelse(is.nan(.), NA, .))) 
-  
+
   # rename functions to rename flag, units, and value columns
   flagnamer <- function(data) {str_c(str_remove(data, "analyte_flag_"), "_flag")}
   unitnamer <- function(data) {str_c(str_remove(data, "units_"), "_units")}
   qualnamer <- function(data) {str_c(str_remove(data, "nutrients_qual_"), "_qual")}
   valunamer <- function(data) {str_remove(data, "value_")}
-  
+
   # apply rename functions to column names, then reorder columns
   g <- f %>%
     rename_with(flagnamer, .cols = contains("flag")) %>%
@@ -219,16 +229,16 @@ dup_agg <- function(data) {
     select(lake_id, site_id, sample_depth, sample_type, everything()) %>%
     ungroup() %>%
     select(-rep)
-  
+    
   return(g)
-  
+
   
 }
 
 
 cin.awberc.path <- paste0(userPath, 
-                          "data/chemistry/nutrients/")
-
+                       "data/chemistry/nutrients/")
+  
 chem21 <- get_awberc_data(cin.awberc.path, 
                           "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx", 
                           "2021 Data") 
@@ -244,5 +254,6 @@ chem21 <- dup_agg(chem21) # final object, cast to wide with dups aggregated
 # finalConc.  They have different values for the 'REP" field in the original data.
 # This aggregation can be accomplished by grouping and summarizing.  I suspect
 # you will want to write another function to do this.
+
 
 
