@@ -191,32 +191,32 @@ dup_agg <- function(data) {
       rep %in% c("B", 2) ~ "duplicate", TRUE ~ sample_type)) %>%
     select(-rep)
 
-
-
   # cast to wide, convert analyte flags to text, and convert any NaN to NA
   f <- e %>%
-    pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units)) %>% # cast to wide
+    pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units, nutrients_qual)) %>% # cast to wide
     mutate(across(contains("flag"), # convert all _flag values back to text (< or blank)
                   ~ if_else(.<1, "", "<"))) %>%
-    mutate(across(starts_with(c("value", "analyte", "units")), # convert NaN values to NA
+    mutate(across(starts_with(c("value", "analyte", "units", "nutrients")), # convert NaN values to NA
                   ~ ifelse(is.nan(.), NA, .))) 
 
   # rename functions to rename flag, units, and value columns
   flagnamer <- function(data) {str_c(str_remove(data, "analyte_flag_"), "_flag")}
   unitnamer <- function(data) {str_c(str_remove(data, "units_"), "_units")}
+  qualnamer <- function(data) {str_c(str_remove(data, "nutrients_qual_"), "_qual")}
   valunamer <- function(data) {str_remove(data, "value_")}
 
   # apply rename functions to column names, then reorder columns
   g <- f %>%
     rename_with(flagnamer, .cols = contains("flag")) %>%
     rename_with(unitnamer, .cols = contains("units")) %>%
+    rename_with(qualnamer, .cols = contains("qual")) %>% 
     rename_with(valunamer, .cols = contains("value")) %>%
     # mutate(duplicate = case_when(
     #   duplicate == 2 ~ "duplicate",
     #   duplicate == 1 ~ "not a duplicate",
     #   TRUE ~ "neither")) %>%
     select(order(colnames(.))) %>% # alphabetize column names
-    select(lake_id, site_id, sample_depth, sample_type, nutrients_qual, everything()) %>%
+    select(lake_id, site_id, sample_depth, sample_type, everything()) %>%
     ungroup() %>%
     select(-rep)
     
