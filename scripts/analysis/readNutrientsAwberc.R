@@ -88,7 +88,8 @@ get_awberc_data <- function(path, data, sheet) {
            lake_id = site_id_id,
            crossid = c_ross_id_pos, 
            site_id = long_id_subid,
-           sample_type = type) %>%
+           sample_type = type, 
+           rep = rep_number) %>%
     # No deep samples collected at 069 LAC.  The deep sample in the file is
     # actually shallow.
     mutate(crossid = case_when(lake_id == "069 LAC" & crossid == "T-Dp" ~ "T-Sh",
@@ -100,7 +101,7 @@ get_awberc_data <- function(path, data, sheet) {
       tp_tn,
       finalConc)) %>%  
     filter(sample_type != "SPK") %>% # exclude matrix spike
-    select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual) %>% # keep only needed fields
+    select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual, rep) %>% # keep only needed fields
     mutate(analyte = str_to_lower(analyte)) %>% # make analyte names lowercase
     mutate(analyte = case_when( # change analyte names where necessary
       analyte == "trp" ~ "op",
@@ -133,7 +134,7 @@ get_awberc_data <- function(path, data, sheet) {
                                lake_id == "070 River" & sample_depth == "shallow" & 
                                  analyte == "nh4" & filter == "filtered", 
                                3.94)) %>%
-    mutate()
+    mutate() %>%
     # strip out unneeded analyses
     # exclude filtered samples run for totals
     filter(!(analyte %in% c("tp", "tn") & filter == "filtered")) %>%
@@ -175,7 +176,10 @@ get_awberc_data <- function(path, data, sheet) {
       analyte == "tn"  ~ "ug_n_l",
       analyte == "tp"  ~ "ug_p_l",
       TRUE ~ "")) %>%
-  select(-crossid) # no longer need crossid
+    mutate(sample_type = case_when(
+      sample_type == "duplicate" ~ "unknown",
+      TRUE ~ sample_type)) %>%
+    select(-crossid) # no longer need crossid
     
   return(d)
   
@@ -186,13 +190,19 @@ get_awberc_data <- function(path, data, sheet) {
 # function aggregates dups, renames/sorts columns, and casts to wide
 dup_agg <- function(data) { 
 
-# aggregate dups and convert analyte_flags to numeric (for summarize operations)
+  # aggregate dups and convert analyte_flags to numeric (for summarize operations)
   e <- data %>%
     mutate(analyte_flag = if_else(str_detect(analyte_flag, "<"), 1, 0)) %>% # convert to numeric
-    group_by(lake_id, site_id, analyte, sample_type, sample_depth, nutrients_qual, units) %>% 
+    group_by(lake_id, site_id, analyte, sample_depth, 
+             sample_type, rep, nutrients_qual, units) %>%
     summarize(value = mean(finalConc, na.rm = TRUE), # group and calculate means
-              analyte_flag = mean(analyte_flag, na.rm = TRUE)) 
-    
+              analyte_flag = mean(analyte_flag, na.rm = TRUE)) %>%
+    mutate(sample_type = case_when(
+      rep %in% c("B", 2) ~ "duplicate", TRUE ~ sample_type)) %>%
+    select(-rep)
+
+
+
   # cast to wide, convert analyte flags to text, and convert any NaN to NA
   f <- e %>%
     pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units)) %>% # cast to wide
@@ -211,8 +221,14 @@ dup_agg <- function(data) {
     rename_with(flagnamer, .cols = contains("flag")) %>%
     rename_with(unitnamer, .cols = contains("units")) %>%
     rename_with(valunamer, .cols = contains("value")) %>%
+    # mutate(duplicate = case_when(
+    #   duplicate == 2 ~ "duplicate",
+    #   duplicate == 1 ~ "not a duplicate",
+    #   TRUE ~ "neither")) %>%
     select(order(colnames(.))) %>% # alphabetize column names
-    select(lake_id, site_id, sample_depth, sample_type, nutrients_qual, everything()) 
+    select(lake_id, site_id, sample_depth, sample_type, nutrients_qual, everything()) %>%
+    ungroup() %>%
+    select(-rep)
     
   return(g)
 
