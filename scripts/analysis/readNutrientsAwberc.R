@@ -60,6 +60,16 @@ coc.vector <- coc.list %>%
 
 # SCRIPT TO READ IN WATER CHEM
 
+# The correction to 069 LAC will be addressed in update to nutrient data.  Will
+# delete the relevant code below.
+# problems with 288, 298, 231, and 233 are being addressed by Andrea and Bill.  Check
+# on these after new update has been issued.
+# data from the following lakes has been reviewed as of 1/7/2022:
+# 233, 237, 236, 144, 155, 275, 240, 069_lacustrine, 069_transitional, 070_lacustrine,
+# 070_riverine, 288, 316, 79, 298, 75, 326, 327, 70_transitional, 231, 78, 232,
+# 68, 69_riverine
+
+
 # function reads in data, filters data, and creates all new columns
 get_awberc_data <- function(path, data, sheet) { 
   
@@ -102,9 +112,9 @@ get_awberc_data <- function(path, data, sheet) {
     # strip character values from site_id, convert to numeric
     mutate(site_id =  as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
     mutate(sample_type = case_when( # recode sample type identifiers
-      sample_type == "UKN" ~ "unknown",
-      sample_type == "DUP" ~ "duplicate",
-      sample_type == "BLK" ~ "blank",
+      grepl("dup", sample_type, ignore.case = TRUE) ~ "duplicate",
+      grepl("ukn", sample_type, ignore.case = TRUE) ~ "unknown",
+      grepl("blk", sample_type, ignore.case = TRUE) ~ "blank",
       TRUE ~ sample_type)) %>%
     # sample filtered or unfiltered
     mutate(filter = str_sub(crossid, 1, 1) %>% tolower(.),
