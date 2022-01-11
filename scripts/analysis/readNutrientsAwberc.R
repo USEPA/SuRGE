@@ -62,8 +62,9 @@ coc.vector <- coc.list %>%
 
 # The correction to 069 LAC will be addressed in update to nutrient data.  Will
 # delete the relevant code below.
-# problems with 288, 298, 231, and 233 are being addressed by Andrea and Bill.  Check
-# on these after new update has been issued.
+# problems with 288, 298, 231, and 233 are being addressed by Andrea and Bill.  
+# lake id 144 is actually 149.  Asked Andrea to fix.
+# Check on these after new update has been issued.
 # data from the following lakes has been reviewed as of 1/7/2022:
 # 233, 237, 236, 144, 155, 275, 240, 069_lacustrine, 069_transitional, 070_lacustrine,
 # 070_riverine, 288, 316, 79, 298, 75, 326, 327, 70_transitional, 231, 78, 232,
@@ -148,10 +149,12 @@ get_awberc_data <- function(path, data, sheet) {
       str_detect(lake_id, "LAC") ~ str_replace(lake_id, " LAC", "_lacustrine"),
       str_detect(lake_id, "River") ~ str_replace(lake_id, " River", "_riverine"),
       str_detect(lake_id, "Trans") ~ str_replace(lake_id, " Trans", "_transitional"),
-      str_detect(lake_id, "070") ~ str_replace(lake_id, "070", "70"), # need to replace 070 with 70
-      str_detect(lake_id, "069") ~ str_replace(lake_id, "069", "69"), # need to replace 069 with 69
       lake_id == "70" ~ "70_transitional",
       lake_id == "69" ~ "69_riverine",
+      TRUE ~ lake_id)) %>%
+    mutate(lake_id = case_when(
+      str_detect(lake_id, "070") ~ str_replace(lake_id, "070", "70"), # need to replace 070 with 70
+      str_detect(lake_id, "069") ~ str_replace(lake_id, "069", "69"), # need to replace 069 with 69
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
     mutate(analyte_flag = case_when( # create the analyte_flag column
@@ -181,6 +184,9 @@ get_awberc_data <- function(path, data, sheet) {
     mutate(sample_type = case_when(
       sample_type == "duplicate" ~ "unknown",
       TRUE ~ sample_type)) %>%
+    mutate(sample_depth = case_when(
+      sample_type == "blank" ~ "blank", # see Wiki lake_id, site_id, and sample_depth formats
+      TRUE ~ sample_depth)) %>%
     select(-crossid) # no longer need crossid
     
   return(d)
@@ -269,9 +275,14 @@ chem21.inventory.analyzed <- chem21 %>% select(-site_id, -matches(c("flag|qual|u
   select(-value)
 
 # all analyzed samples in collected list?
-anti_join(chem21.inventory.analyzed, chem21.inventory.expected)
 setdiff(chem21.inventory.analyzed, chem21.inventory.expected) %>% print(n=Inf)
 
+#144 is actually 149.  Asked Andrea to fix
+#288 issues are problem with excel file.  I asked andrea to fix.
+#298 issues are problem with excel file.  I asked andrea to fix.
 
-
-
+# all collected samples in analyzed list?
+setdiff(chem21.inventory.expected, chem21.inventory.analyzed) %>% 
+  print(n=Inf)
+# several lakes not in data set yet.
+# NO3 not run on some samples.  Can I calculate it?
