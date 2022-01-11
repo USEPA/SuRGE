@@ -25,7 +25,7 @@
 # and use the analyte names defined in github Wiki page ("Chemistry units,
 # names, and data sources).
 
-# SCRIPT TO READ IN COC FORMS
+# SCRIPT TO READ IN COC FORMS--------------------
 # 1. Read in chain of custody file names
 # sheet name is "water (original)", but sometimes there is a space before 
 # "water".  str_detect looks for "water" in sheet name.
@@ -58,7 +58,7 @@ coc.vector <- coc.list %>%
 
 
 
-# SCRIPT TO READ IN WATER CHEM
+# SCRIPT TO READ IN WATER CHEM------------------
 
 # The correction to 069 LAC will be addressed in update to nutrient data.  Will
 # delete the relevant code below.
@@ -148,6 +148,8 @@ get_awberc_data <- function(path, data, sheet) {
       str_detect(lake_id, "LAC") ~ str_replace(lake_id, " LAC", "_lacustrine"),
       str_detect(lake_id, "River") ~ str_replace(lake_id, " River", "_riverine"),
       str_detect(lake_id, "Trans") ~ str_replace(lake_id, " Trans", "_transitional"),
+      str_detect(lake_id, "070") ~ str_replace(lake_id, "070", "70"), # need to replace 070 with 70
+      str_detect(lake_id, "069") ~ str_replace(lake_id, "069", "69"), # need to replace 069 with 69
       lake_id == "70" ~ "70_transitional",
       lake_id == "69" ~ "69_riverine",
       TRUE ~ lake_id)) %>%
@@ -248,12 +250,28 @@ chem21 %>% distinct(lake_id)
 
 chem21 <- dup_agg(chem21) # final object, cast to wide with dups aggregated
 
+# Sample inventory----------------------
+# Are all collected samples included?
 
-# This data object contains laboratory dups that must be aggregated.  These
-# data can be identified as having identical values for all fields except
-# finalConc.  They have different values for the 'REP" field in the original data.
-# This aggregation can be accomplished by grouping and summarizing.  I suspect
-# you will want to write another function to do this.
+# Samples collected
+chem21.inventory.expected <- chem.samples.foo %>% 
+  filter(lab != "R10", # see readNutrientsR10_2018.R for 2018 R10 samples
+         # See readNutrientsAda.R for R10 2020 nutrient data
+         lab != "ADA", # Ada analyzed their own. readNutrientsAda.R  
+         analyte_group == "nutrients", 
+         sample_year >= 2021) %>% # earlier samples handled in other scripts
+  select(-sample_year, -lab, -analyte_group)
+  
+  
+# Samples analyzed  
+chem21.inventory.analyzed <- chem21 %>% select(-site_id, -matches(c("flag|qual|units"))) %>%
+  pivot_longer(!c(lake_id, sample_depth, sample_type), names_to = "analyte") %>%
+  select(-value)
+
+# all analyzed samples in collected list?
+anti_join(chem21.inventory.analyzed, chem21.inventory.expected)
+setdiff(chem21.inventory.analyzed, chem21.inventory.expected) %>% print(n=Inf)
+
 
 
 
