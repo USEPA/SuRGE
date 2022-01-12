@@ -8,13 +8,15 @@ fileNames <- vector() # empty vector to hold results
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS")
 
 # loop to read in file names from lab specific folders
+# this gets everything except 2018 R10 data.  Those data files are '...EqAreaData.xlsx'
+# and need to be inspected for consistency with SuRGE data files.
 for (i in 1:length(labs)) {
 fileNames.i <- list.files(path = paste0(userPath,  "data/", labs[i]),
                         pattern = "surgeData", # file names containing this pattern
                         recursive = TRUE) %>% # look in all subdirectories
-  .[!grepl(".pdf", .)] # remove pdf files
+  .[!grepl(c(".pdf|.docx"), .)] # remove pdf and .docx review files
 
-if(length(fileNames.i) > 0) { # fi any file names were read...
+if(length(fileNames.i) > 0) { # if any file names were read...
   fileNames.i <- paste0(labs[i], "/", fileNames.i) # add lab directory to file path
 }
 
@@ -22,18 +24,50 @@ fileNames <- c(fileNames, fileNames.i) # append new names to existing vector
 }
 
 # 2.  Read in files
-mylist <- list()  # Create an empty list to hold data
+mylist.data <- list()  # Create an empty list to hold data
 
 for (i in 1:length(fileNames)){  # for each file
-  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1)
-  mylist[[i]] <- data.i
+  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "data")
+  mylist.data[[i]] <- data.i
 }
 
-if(length(mylist) > 1){
-  print("Yay, I think it works")
-} else {
-  print("Tell Jake he screwed up")
+mylist.dg <- list() # Create an empty list to hold data
+
+for (i in 1:length(fileNames)){  # for each file
+  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "dissolved.gas")
+  mylist.dg[[i]] <- data.i
 }
+
+# right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
+
+trap.air.extList <- map(mylist.data, function(x) select(x, lake.id, site.id, contains("extn")) %>%
+                 select(!contains("notes"))) %>%
+  #map(., function(x) any(x == 1389)) # works
+  #map(., function(x) any(x %in% c("SG210639", "SG210650"))) # doesn't work
+  map(., function(x) pivot_longer(x, !c(lake.id, site.id), names_to = "extn")) %>% # pivot to longer
+  map(., function(x) mutate(x, extn = case_when(grepl("trap", extn) ~ "trap",
+                                                grepl("air", extn) ~ "air",
+                                                TRUE ~ extn)) %>%
+        filter(!is.na(value))) %>%
+  do.call("rbind", .)
+
+dg.extList <- map(mylist.dg, function(x) select(x, lake.id, site.id, dg.extn)) %>%
+  map(., function(x) mutate(x, extn = "dg") %>%
+        rename(value = dg.extn) %>%
+        filter(!is.na(value))) %>%
+  do.call("rbind", .)
+
+extn.list <- rbind(trap.air.extList, dg.extList)
+
+extn.list %>% janitor::get_dupes() # no dups
+extn.list %>% filter(is.na(value)) # no missing values
+extn.list %>% filter(nchar(value) != 8) # no strangely formatted values.
+
+# code to help identify random samples that showed up on my desk
+unknown.extn <- read_excel(paste0(userPath, "data/gases/unknown_exetainers_from_JakeBs_desk_20220106.xlsx"), sheet = "data")
+
+extn.list %>% filter(value %in% unknown.extn$value) # o yes, some of these are samples
+inner_join(extn.list, unknown.extn)
 
 #################################################################
 ######CODE BELOW NOT YET UPDATED FOR SURGE#######################
