@@ -1,5 +1,5 @@
 # File for reading doc and toc from ADA.
-# See ...data/chemistry/TOC.DOC/ADA/.... for data.
+# See ...data/chemistry/oc_ada_masi/ADA/.... for data.
 
 # See Wiki for analtye name and unique identifier conventions.
 
@@ -138,7 +138,7 @@ dup_agg21 <- function(data) {
 
 # create path for Lake Jean Neustadt
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/TOC.DOC/ADA/CH4_147_Lake Jean Neustadt/")
+                       "data/chemistry/oc_ada_masi/ADA/CH4_147_Lake Jean Neustadt/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
 jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-21NPOCNPDOCGPMS.xlsx") %>%
@@ -149,7 +149,7 @@ jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-21NPOCNPD
 
 # create path for Keystone Lake
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/TOC.DOC/ADA/CH4_148_Keystone Lake/")
+                       "data/chemistry/oc_ada_masi/ADA/CH4_148_Keystone Lake/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Keystone Lake excel file
 key1 <- get_ada_data21(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-21NPOCNPDOCGPMS.xlsx") %>%
@@ -160,7 +160,7 @@ key1 <- get_ada_data21(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-21NPOCNPD
 
 # create path for Lake Overholser
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/TOC.DOC/ADA/CH4_167_Lake Overholser/")
+                       "data/chemistry/oc_ada_masi/ADA/CH4_167_Lake Overholser/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Overholser excel file
 ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059SS7777AE2.6Overholser7-27-21NPOCNPDOCGPMS.xlsx") %>%

@@ -1,12 +1,12 @@
 # Script for reading anions analyzed at AWBERC by Kit Daniels for CIN, RTP, and
 # USGS samples collected in 2021.
 
-# see ...data/chemistry/anions/Daniels_Anions_2021.xlsx for data
+# see ...data/chemistry/anions_ada_daniels/Daniels_Anions_2021.xlsx for data
 # see issue 10 for analyte naming conventions
 
 # 1. Read data
 d.anions <- read_excel(paste0(userPath,
-                              "data/chemistry/anions/",
+                              "data/chemistry/anions_ada_daniels/",
                               "Daniels_Anions_2021.xlsx"),
                        sheet = "2021_SURGE_anions",
                        na = "n.a.") %>%

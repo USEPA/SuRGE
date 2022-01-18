@@ -107,6 +107,9 @@ chem.samples.foo <- chem.samples %>%
   filter(!((lab == "R10" & sample_year == 2018) & # for R10 sampling in 2018
              (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
                 analyte_group %in% c("algae.gb", "anions", "metals")))) %>% 
+  # R10 only collected at shallow depth in 2018
+  filter(!((lab == "R10" & sample_year == 2018) & # for R10 sampling in 2018
+             sample_depth == "deep")) %>%
   # 2020 samples (CIN, RTP, R10) did not include doc, anions, taxonomy, or physiology.
   filter(!((sample_year == 2020) & # for R10, RTP, and CIN samples in 2020
              (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
@@ -126,9 +129,18 @@ chem.samples.foo <- chem.samples %>%
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          
-# 9.  chem sampling for R10 2018 was done at trib and open_water site.  Not certain
-# which lakes had dups and blanks.  Need to dig into the CoC forms and populate 
-# sample list.
+# 9.  chem sampling for R10 2018 was done at trib and open_water site.  Blanks 
+# and dups mostly at trib site, but we will only read in open_water site data
+# to be consistent with SuRGE 2020-2023.  R10 collected one blank and one dup
+# at open_water site:
+# LGR, 302, site 10, has field duplicate of shallow sample: TOC, nutrients, chla
+# WPL (308) has blank at site 1. TOC, nutrients, chla
+# create small dataframes containing the qa.qc samples for these lakes.
+lgr <- chem.samples.foo %>% filter(lake_id == "302") %>%
+  mutate(sample_type = "duplicate" )
+wpl <- chem.samples.foo %>% filter(lake_id == "308") %>%
+  mutate(sample_type = "blank", sample_depth = "blank")  
 
-         
+# Bind these dfs to main df
+chem.samples.foo <- rbind(chem.samples.foo, lgr, wpl)
                                      

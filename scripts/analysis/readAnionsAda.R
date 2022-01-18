@@ -1,4 +1,4 @@
-# ADA analyzing their own anions.  See ...data/chemistry/anions/ADA/...
+# ADA analyzing their own anions.  See ...data/chemistry/anions_ada_daniels/ADA/...
 
 # See Wiki for analtye name and unique identifier conventions.
 
@@ -62,7 +62,7 @@ get_ada_data21 <- function(path, datasheet) {
     mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
     mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
     mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
-    rename(lake_id = sampleid) %>% # change name to match chemCoc
+    rename(lake_id = sampleid) %>% # enforce project formatting.  See Wiki
     mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
     mutate(across(ends_with("analyzed"), # determine if holding time exceeded
                   ~ if_else(.>28, TRUE, FALSE))) %>%  # TRUE = hold time violation
@@ -161,7 +161,7 @@ dup_agg21 <- function(data) {
 
 # create path for Lake Jean Neustadt
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/anions/ADA/CH4_147_Lake Jean Neustadt/")
+                       "data/chemistry/anions_ada_daniels/ADA/CH4_147_Lake Jean Neustadt/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
 jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4BrFNO3NO2oPGPKR.xls") %>%
@@ -173,7 +173,7 @@ jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4
 # create path for Keystone Lake
 # This generates some warnings, but the output is correct 
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/anions/ADA/CH4_148_Keystone Lake/")
+                       "data/chemistry/anions_ada_daniels/ADA/CH4_148_Keystone Lake/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Keystone Lake excel file
 key1 <- get_ada_data21(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4BrFNO3NO2GPKR.xls") %>%
@@ -184,7 +184,7 @@ key1 <- get_ada_data21(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4
 
 # create path for Lake Overholser
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/anions/ADA/CH4_167_Lake Overholser/")
+                       "data/chemistry/anions_ada_daniels/ADA/CH4_167_Lake Overholser/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Overholser excel file
 ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrFNO3NO2.xls") %>%

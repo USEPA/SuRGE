@@ -1,72 +1,76 @@
-##UPDATE TO READ IN FROM FINAL DBF FILES (BEAULIEU AND SURGE)
+# READ ANALYTICAL DATA FROM TTEB LABORATORY
 
-# Rename flag to qual. 'flag` column will be < or blank, indicating 
-# censored observations. Filter out old observations from the BEAULIEU... file.
+# In 2018, TTEB ran TOC and TN, but not metals, on R10 samples.  These data are in 
+# BEAULIEU_10_01_2021_update.xlsx.  We will use TN from AWBERC nutrient chemistry,
+# not TTEB analysis.
+
+# In March 2021, TTEB ran metals (TOC ran by MASI contract lab) on R10 and CIN 
+# SuRGE samples collected in 2020.  Data are in `SURGE 2021_10_07_2021_update.xlsx`.
+
+# During the summer of 2021, TTEB ran metals, TOC, and DOC on SuRGE samples
+# multiple locations.  Data are in `SURGE 2021_10_07_2021_update.xlsx`.
+
+# As of 1/13/2022, the `SURGE 2021_10_07_2021_update.xlsx` file contains a small
+# subset of the data.  We are waiting for an update from TTEB.
+
+# 1. READ CHEMISTRY DATA--------------
+# Files contain samples from SuRGE + other studies.  Filter below.
+tteb.BEAULIEU <- read_excel(paste0(userPath, 
+                           "data/chemistry/tteb/BEAULIEU_10_01_2021_update.xlsx")) 
+
+tteb.SURGE <- read_excel(paste0(userPath, 
+                             "data/chemistry/tteb/SURGE 2021_10_07_2021_update.xlsx"))
 
 
-metals.BEAULIEU <- read_excel(paste0(userPath, 
-                           "data/chemistry/BEAULIEU_10_01_2021_update.xlsx")) 
-
-metals.SURGE <- read_excel(paste0(userPath, 
-                             "data/chemistry/SURGE 2021_10_07_2021_update.xlsx"))
-
-
-metals.epa <- bind_rows(metals.BEAULIEU, metals.SURGE) %>% 
+tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
+   select(-colldate, -studyid, -tn, -flag) %>% # remove unneeded columns
+  rename(lab_id = labid,
+         toc = toc_comb) %>%
   
-  
-  # as of 11/10/2021 the files only contain metals data for SuRGE, but the
-  # Beaulieu file contains TN and TOC from older studies.  Remove other 
-  # analytes for now, but might make sense to expand this code to process other
-  # analytes (TOC and DOC) when the file is updated again.
-  # 12NOV2021: to include TN and TOC, 
-  # remove the following filter() and replace the select() w/ this line of code:  
-  # select(-colldate, -studyid) %>% # remove unneeded columns
-  
-  filter(labid>200000) %>% # filter out pre-2020 data
-  select(-tn, -toc_comb, -colldate, -studyid) %>% # remove unneeded columns
-  
-  rename(lab_id = labid, metals.qual = flag) %>% # this should be 'lab_id' to match COC
   # a value of 9999999999999990.000 indicates no data for that sample/analyte.
-  # this sometimes occurs when the analyte was outside of the standard curve
-  # and was rerun, but the summary file wasn't updated with re-run value.
-  # This is the case for labid's 203013 and 203014.  Maily indicated these
-  # would be updated in the future (see 10/26/2021 email).  Replace with NA
-  # for now.
-  mutate(across(al:zn, # replace lab's placeholder numbers with 'NA'
+  # This often occurs if a summary file contains samples with different
+  # requested analytes.  For example, the Beaulieu file contains samples that did
+  # not request metals (e.g. Falls Lake (FL), 2018 SuRGE samples (LVR, PLR))
+  # and samples that did (e.g. 2020 SuRGE samples).  Samples that did not request
+  # metals have values of 9999999999999990.000 for all metals analytes.
+  # However, a value of 9999999999999990.000 may also indicate that the analyte
+  # was outside of the standard curve and was rerun, but the summary file wasn't
+  # updated with re-run value.  This is the case for labid's 203013 and 203014.  
+  # Maily indicated these would be updated in the future (see 10/26/2021 email).
+  # Replace with NA for now.
+  mutate(across(everything(), # replace lab's placeholder numbers with 'NA'
                 ~ na_if(., 9999999999999990.000))) %>%
   # create 'flag' columns for every analyte to flag observations < det. limit
   mutate(across(al:zn, # nice code Joe!
-                ~ if_else(. < 0 , "<", ""), #bd reported as -detection limit
+                ~ if_else(. < 0 , "<", ""), # bd reported as -detection limit
                 .names = "{col}_flag")) %>%
   mutate(across(al:zn, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
   select(order(colnames(.))) %>% # alphabetize column names
-  select(lab_id, sampid, metals.qual, comment, everything()) # put these columns first
+  select(lab_id, sampid, everything()) # put these columns first
 
   
 
+# 2. READ CHAIN OF CUSTODY----------------
+# Read in chain on custody data for SuRGE samples submitted to TTEB
+# Need to add R10 2018 samples to ttebSampleIds.xlsx
+ttebCoc <- read_excel(paste0(userPath, 
+                             "data/chemistry/tteb/ttebSampleIds.xlsx")) %>%
+  clean_names(.)
 
-# merge with chain of custody
+janitor::get_dupes(ttebCoc, lab_id) # no duplicates
 
-metals.epa <- left_join(metals.epa, chemCoc %>% select(-analyte)) # keep all analytical records 
-nrow(metals.epa) #68 records
-metals.epa %>% filter(is.na(metals.epa)) # good, all records matched
-metals.epa
 
+# 3. REVIEW CHAIN OF CUSTODY-------------
 
 # Compare list of submitted samples to comprehensive sample list
-tteb.samples <- read_excel(paste0(userPath, 
-                                  "data/chemistry/ttebSampleIds.xlsx"))
-
-# print rows in d.anions not in chem.samples.
-# only 247 and unk in ttebSampleIds, but not in comprehensive list.  247 was
-# not sampled.
-setdiff(tteb.samples[c("lake_id", "sample_depth", "sample_type", "analyte")],
+# print rows in ttebSampleIds not in chem.samples.
+# [Feb. 13, 2022] No extra samples, all good 
+setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
-                 sample_year >= 2020, # no 2018 samples sent to TTEB
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
                  !(sample_year == 2020 & analyte_group == "organics"))  %>% # 2020 doc/toc sent to MASI
           mutate(analyte = replace(analyte, analyte_group == "metals", "metals")) %>%
@@ -74,7 +78,7 @@ setdiff(tteb.samples[c("lake_id", "sample_depth", "sample_type", "analyte")],
           select(lake_id, sample_depth, sample_type, analyte)) %>%
   arrange(lake_id)
 
-# 6. Have all tteb sampled in comprehensive sample list been analyzed?
+# Have all tteb sampled in comprehensive sample list been analyzed?
 # Print rows from comprehensive sample list not in tteb list.
 # Missing a bunch, but I see nar sample receipt list doesn't contain any 2020
 # samples.  Have NAR update file, then revisit.  I inspected the 2021 samples
@@ -82,13 +86,15 @@ setdiff(tteb.samples[c("lake_id", "sample_depth", "sample_type", "analyte")],
 # that he analyzed the samples and will update the Excel file.
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
-                 sample_year >= 2020, # no 2018 samples sent to TTEB
+                 #sample_year >= 2020, # no 2018 samples sent to TTEB
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
                  !(sample_year == 2020 & analyte_group == "organics"))  %>% # 2020 doc/toc sent to MASI
-          mutate(analyte = replace(analyte, analyte_group == "metals", "metals")) %>%
-          distinct() %>%
-          select(lake_id, sample_depth, sample_type, analyte) ,
-        tteb.samples[c("lake_id", "sample_depth", "sample_type", "analyte")]) %>%
+          mutate(analyte = replace(analyte, # convert long list of metals into "metals"
+                                   analyte_group == "metals", 
+                                   "metals")) %>%
+          distinct() %>% # remove duplicate "metals"
+          select(lake_id, sample_depth, sample_type, analyte),
+        ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")]) %>%
   arrange(lake_id) 
 
 # 147
@@ -96,10 +102,6 @@ setdiff(chem.samples.foo %>%
 # None of three lines report whether they are unknowns, duplicates, or blanks.  
 # All three are entered as unknown in ttebSampleIds, but we will need to change 
 # this when we get the data.
-
-# 155
-# 23june has 6 toc doc samples for 155. No blanks though.  could not find sample 
-# tracking form to check if blank was collected
 
 # 275
 # 01July2021 sample tracking form has a shallow duplicate and two shallow unknowns 
@@ -116,4 +118,16 @@ setdiff(chem.samples.foo %>%
 # will sort out after we get tteb data.
 
 
+# 4. JOIN TTEB DATA WITH CoC--------------
+# inner_join will keep all matched samples.  Since
+# we are matching with SuRGE CoC, only SuRGE samples will be retained.
+tteb.all <- inner_join(ttebCoc %>% select(-analyte), tteb)
+nrow(tteb.all) # 78 records
 
+# Are all records in CoC in chemistry data?
+# no, missing a ton.  Waiting for update from Maily.
+ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id))
+
+# clean up final object
+tteb.all <- tteb.all %>% select(-lab_id, -coc, -notes, -sampid) %>%
+  rename(cin_shipping_notes = shipping_notes)
