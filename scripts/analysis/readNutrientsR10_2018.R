@@ -103,19 +103,20 @@ dup_agg <- function(data) {
   # aggregate dups and convert analyte_flags to numeric (for summarize operations)
   e <- data %>%
     mutate(analyte_flag = if_else(str_detect(analyte_flag, "<"), 1, 0)) %>% # convert to numeric
+    mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown",
+                                   TRUE ~ sample_type)) %>%
     group_by(lake_id, site_id, analyte, sample_depth, 
              sample_type, rep, nutrients_qual, units) %>%
     summarize(value = mean(finalConc, na.rm = TRUE), # group and calculate means
               analyte_flag = mean(analyte_flag, na.rm = TRUE)) %>%
     mutate(sample_type = case_when(
-      rep %in% c("B", 2) ~ "duplicate", TRUE ~ sample_type)) %>%
-    select(-rep)
+      rep == "2" ~ "duplicate", TRUE ~ sample_type)) 
   
   # cast to wide, convert analyte flags to text, and convert any NaN to NA
   f <- e %>%
     pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units, nutrients_qual)) %>% # cast to wide
     mutate(across(contains("flag"), # convert all _flag values back to text (< or blank)
-                  ~ if_else(.<1, "", "<"))) %>%
+                  ~ if_else(. < 1, "", "<"))) %>%
     mutate(across(starts_with(c("value", "analyte", "units", "nutrients")), # convert NaN values to NA
                   ~ ifelse(is.nan(.), NA, .))) 
   
@@ -150,7 +151,7 @@ cin.awberc.path <- paste0(userPath,
                           "data/chemistry/nutrients/")
 
 chem18 <- get_awberc_data(cin.awberc.path, 
-                          "nutrients\2018_ESF-EFWS_NutrientData_Updated03012019_SS_CTNUpdate04012019_JB.xlsx", 
+                          "2018_ESF-EFWS_NutrientData_Updated03012019_SS_CTNUpdate04012019_JB.xlsx", 
                           "2018DATA") 
 
 chem18 %>% distinct(lake_id)
