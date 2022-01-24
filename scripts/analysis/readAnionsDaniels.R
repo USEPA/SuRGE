@@ -50,10 +50,7 @@ setdiff(d.anions[c("lake_id", "sample_depth", "sample_type")],
 
 # 6. # Have all Daniels anion samples in comprehensive sample list been analyzed?
 # Print rows from comprehensive sample list not in Daniels anion data.
-# Missing a bunch, but I see nar sample receipt list doesn't contain any 2020
-# samples.  Have NAR update file, then revisit.  I inspected the 2021 samples
-# not in NAR inventory and communicated to Stephen Shivers.  Stephen confirmed
-# that he analyzed the samples and will update the Excel file.
+# Missing a bunch
 setdiff(chem.samples.foo %>% filter(analyte_group == "anions", 
                                     sample_year == 2021, # only 2021 samples to daniels
                                     lab != "ADA") %>% # ADA ran their own anions 

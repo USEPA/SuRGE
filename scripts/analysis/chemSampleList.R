@@ -112,7 +112,7 @@ chem.samples.foo <- chem.samples %>%
              sample_depth == "deep")) %>%
   # 2020 samples (CIN, RTP, R10) did not include doc, anions, taxonomy, or physiology.
   filter(!((sample_year == 2020) & # for R10, RTP, and CIN samples in 2020
-             (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
+             (analyte == "doc" | # that contain these
                 analyte_group %in% c("algae.gb", "anions")))) %>% # or these
   # chla and phycocyanin blanks not collected at lake_id == 67
   filter(!(lake_id == "67" & analyte %in% c("chla", "phycocyanin") & sample_type == "blank")) %>%
@@ -126,6 +126,8 @@ chem.samples.foo <- chem.samples %>%
   filter(!(lake_id == "155" & sample_type == "blank" & analyte %in% (c("doc", "toc")))) %>%
   # toc and doc blanks not collected from 67.  No DI brought to field
   filter(!(lake_id == "67" & sample_type == "blank" & analyte %in% c("doc", "toc"))) %>%
+  # chl unknown filter tore during sample prep at 148.  no replacement available
+  filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla")) %>%
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          

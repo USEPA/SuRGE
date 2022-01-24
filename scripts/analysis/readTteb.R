@@ -1,14 +1,14 @@
 # READ ANALYTICAL DATA FROM TTEB LABORATORY
 
 # In 2018, TTEB ran TOC and TN, but not metals, on R10 samples.  These data are in 
-# BEAULIEU_10_01_2021_update.xlsx.  We will use TN from AWBERC nutrient chemistry,
+# BEAULIEU_01_20_2022_update.xlsx.  We will use TN from AWBERC nutrient chemistry,
 # not TTEB analysis.
 
 # In March 2021, TTEB ran metals (TOC ran by MASI contract lab) on R10 and CIN 
-# SuRGE samples collected in 2020.  Data are in `SURGE 2021_10_07_2021_update.xlsx`.
+# SuRGE samples collected in 2020.  Data are in `SURGE_2021_01_20_2022_update.xlsx`.
 
 # During the summer of 2021, TTEB ran metals, TOC, and DOC on SuRGE samples
-# multiple locations.  Data are in `SURGE 2021_10_07_2021_update.xlsx`.
+# multiple locations.  Data are in `SURGE_2022_01_20_2022_update.xlsx`.
 
 # As of 1/13/2022, the `SURGE 2021_10_07_2021_update.xlsx` file contains a small
 # subset of the data.  We are waiting for an update from TTEB.
@@ -16,10 +16,10 @@
 # 1. READ CHEMISTRY DATA--------------
 # Files contain samples from SuRGE + other studies.  Filter below.
 tteb.BEAULIEU <- read_excel(paste0(userPath, 
-                           "data/chemistry/tteb/BEAULIEU_10_01_2021_update.xlsx")) 
+                           "data/chemistry/tteb/BEAULIEU_01_20_2022_update.xlsx")) 
 
 tteb.SURGE <- read_excel(paste0(userPath, 
-                             "data/chemistry/tteb/SURGE 2021_10_07_2021_update.xlsx"))
+                             "data/chemistry/tteb/SURGE_2021_01_20_2022_update.xlsx"))
 
 
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>% 
@@ -37,9 +37,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>%
   # metals have values of 9999999999999990.000 for all metals analytes.
   # However, a value of 9999999999999990.000 may also indicate that the analyte
   # was outside of the standard curve and was rerun, but the summary file wasn't
-  # updated with re-run value.  This is the case for labid's 203013 and 203014.  
-  # Maily indicated these would be updated in the future (see 10/26/2021 email).
-  # Replace with NA for now.
+  # updated with re-run value.  This is the case for labid 203173.
   mutate(across(everything(), # replace lab's placeholder numbers with 'NA'
                 ~ na_if(., 9999999999999990.000))) %>%
   # create 'flag' columns for every analyte to flag observations < det. limit
@@ -67,7 +65,7 @@ janitor::get_dupes(ttebCoc, lab_id) # no duplicates
 
 # Compare list of submitted samples to comprehensive sample list
 # print rows in ttebSampleIds not in chem.samples.
-# [Feb. 13, 2022] No extra samples, all good 
+# [Jan. 21, 2022] No extra samples, all good 
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
@@ -80,10 +78,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb sampled in comprehensive sample list been analyzed?
 # Print rows from comprehensive sample list not in tteb list.
-# Missing a bunch, but I see nar sample receipt list doesn't contain any 2020
-# samples.  Have NAR update file, then revisit.  I inspected the 2021 samples
-# not in NAR inventory and communicated to Stephen Shivers.  Stephen confirmed
-# that he analyzed the samples and will update the Excel file.
+# Missing some from 147, 275, 298, and 68
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
                  #sample_year >= 2020, # no 2018 samples sent to TTEB
@@ -121,8 +116,9 @@ setdiff(chem.samples.foo %>%
 # 4. JOIN TTEB DATA WITH CoC--------------
 # inner_join will keep all matched samples.  Since
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
+# tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc %>% select(-analyte), tteb)
-nrow(tteb.all) # 78 records
+nrow(tteb.all) # 95 records
 
 # Are all records in CoC in chemistry data?
 # no, missing a ton.  Waiting for update from Maily.
