@@ -152,20 +152,20 @@ get_awberc_data <- function(path, data, sheet) {
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
     mutate(analyte_flag = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 7 ~ "<", 
-      analyte == "no2" & finalConc < 8 ~ "<",
-      analyte == "no2_3" & finalConc < 8 ~ "<",
-      analyte == "op" & finalConc < 0.7 ~ "<",
-      analyte == "tn" & finalConc < 8 ~ "<",
-      analyte == "tp" & finalConc < 8 ~ "<",
+      analyte == "nh4" & finalConc < 6 ~ "<", 
+      analyte == "no2" & finalConc < 6 ~ "<",
+      analyte == "no2_3" & finalConc < 6 ~ "<",
+      analyte == "op" & finalConc < 3 ~ "<",
+      analyte == "tn" & finalConc < 25 ~ "<",
+      analyte == "tp" & finalConc < 5 ~ "<",
       TRUE ~ "")) %>%
     mutate(finalConc = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 7 ~ 7, 
-      analyte == "no2" & finalConc < 8 ~ 8,
-      analyte == "no2_3" & finalConc < 8 ~ 8,
-      analyte == "op" & finalConc < 0.7 ~ 0.7,
-      analyte == "tn" & finalConc < 8 ~ 8,
-      analyte == "tp" & finalConc < 8 ~ 8,
+      analyte == "nh4" & finalConc < 6 ~ 6, 
+      analyte == "no2" & finalConc < 6 ~ 6,
+      analyte == "no2_3" & finalConc < 6 ~ 6,
+      analyte == "op" & finalConc < 3 ~ 3,
+      analyte == "tn" & finalConc < 25 ~ 25,
+      analyte == "tp" & finalConc < 5 ~ 5,
       TRUE ~ finalConc)) %>%
     mutate(units = case_when(
       analyte == "nh4"  ~ "ug_n_l",
