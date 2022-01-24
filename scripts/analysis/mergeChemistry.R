@@ -1,5 +1,5 @@
-# merge chem21, chem18, and ada.nutrients
 
+# merge chem21, chem18, and ada.nutrients
 all.nutrients <- full_join(chem18, chem21) %>%
   full_join(ada.nutrients)
 
