@@ -1,0 +1,110 @@
+---
+title: "SuRGE Field Duplicates and Field Blanks"
+author: "J. Beaulieu and J. Corra"
+date: "1/24/2022"
+output: pdf_document
+---
+
+```{r setup, results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+
+# Identify local path for each user
+userPath <- paste0(Sys.getenv("USERPROFILE"), 
+                   "/Environmental Protection Agency (EPA)/",
+                   "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+localName <- "Jake/" # R proj folder at SP.
+# localName <- "Joe/" # R proj folder at SP.
+
+# load project libraries
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/masterLibrary.R"))
+
+# load data
+# Analysis
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readSurgeLakes.R")) # read in survey design file
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/chemSampleList.R")) # creates chem.samples.foo, an inventory of all collected chem sample
+
+
+# Read chemistry
+# uncomment rows to bring in more data
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results 
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsR10_2018.R")) # read AWBERC nutrients for 2018 R10
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcAda.R")) # read ADA TOC/DOC data
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcMasi.R")) # read 2020 TOC run at MASI lab
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # NAR chl, phyco, and microcystin
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTaxonomy.R")) # GB taxonomy
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
+```
+
+## Background
+
+SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey of methane (CH4) and carbon dioxide (CO2) emissions from US reservoirs.  Gas emissions are measured at >= 15 locations within each reservoir.  Water chemistry samples are collected from two depths (near the air-water interface and the sediment-water interface) at one location within each reservoir.  At a subset of the reservoirs, field blanks and field duplicates are also collected.  This report details results from the field blanks and duplicates.
+
+
+## Field Blanks
+
+### Anions
+Fluoride and bromide were below the detection limit for all field blanks from ADA.  Chloride and sulfate were about 3-fold greater than the detection limit in field blanks from lake 148, but were still 4-5 orders of magnitude lower than the unknowns from that lake. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# table
+# formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
+ada.anions %>% 
+  ungroup() %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
+  pivot_longer(!c(lake_id, sample_type)) %>% 
+  group_by(lake_id, name, sample_type) %>% 
+  summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  select(-max_blank) %>%
+  rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  kableExtra::kbl(booktabs = TRUE, # nice formatting
+                  caption = "Minimum and Maximum Anion Concentrations in Unknowns") %>% # table title
+  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
+  kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
+  kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
+  kableExtra::pack_rows("", 9, 12) # space between second and third lake
+
+
+# It would be cool to add horizontal red line at MDL for each analyte
+ada.anions %>% ungroup() %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  ggtitle("Anion field blanks") +
+  facet_wrap(~name, scales = "free")
+
+```
+
+### Nutrients
+Same kind of deal as above, but for nutrients
+
+### Metals
+
+### Organic Carbon
+
+### Algal pigments
+
+
+## Field duplicates
+
+### Anions
+
+### Nutrients
+Same kind of deal as above, but for nutrients
+
+### Metals
+
+### Organic Carbon
+
+### Algal pigments
+
