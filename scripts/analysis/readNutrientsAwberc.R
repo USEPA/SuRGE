@@ -1,10 +1,6 @@
 # NUTRIENT ANALYSIS ON LACHAT CONDUCTED IN AWBERC
 
 # Original data can be found at: L:\Priv\Cin\ORD\Pegasus-ESF\Lachat Data\Nutrients
-# Copy of original 2021 data file at SP: 
-# ....data\chemistry\nutrients\2021_ESF-EFWS_NutrientData_Updated11082021_AKB.xlsx"
-
-# see readChem.R in mulitResSurvey repo for an example of how to read data.
 
 # Need to create a "nutrients_qual" column to indicate holding time violations.
 # Value of "HOLD" if holding time violated, else blank.  Holding time should be
@@ -26,6 +22,10 @@
 # names, and data sources).
 
 # SCRIPT TO READ IN COC FORMS--------------------
+# TTEB data file contains data from many different project.  Here we read in
+# the SuRGE CoC forms; we use these CoCs to filter out SuRGE data from TTEB
+# data file.
+
 # 1. Read in chain of custody file names
 # sheet name is "water (original)", but sometimes there is a space before 
 # "water".  str_detect looks for "water" in sheet name.
@@ -61,7 +61,8 @@ coc.vector <- coc.list %>%
 # SCRIPT TO READ IN WATER CHEM------------------
 
 
-# 1/19/2022 see below for database fixes to 76 (actually 71), 72, and 137. 
+# 1/24/2022 see line 280 for pending database fixes to 16 and 82. 
+
 # data from the following lakes has been reviewed as of 1/7/2022:
 # 233, 237, 236, 144, 155, 275, 240, 069_lacustrine, 069_transitional, 070_lacustrine,
 # 070_riverine, 288, 316, 79, 298, 75, 326, 327, 70_transitional, 231, 78, 232,
@@ -241,7 +242,7 @@ cin.awberc.path <- paste0(userPath,
                        "data/chemistry/nutrients/")
   
 chem21 <- get_awberc_data(cin.awberc.path, 
-                          "2021_ESF-EFWS_NutrientData_Updated01182022_AKB.xlsx", 
+                          "2021_ESF-EFWS_NutrientData_Updated01202022_AKB.xlsx", 
                           "2021 Data") 
 
 chem21 %>% distinct(lake_id) %>% print(n=Inf)
@@ -268,15 +269,13 @@ chem21.inventory.analyzed <- chem21 %>% select(-site_id, -matches(c("flag|qual|u
   select(-value)
 
 # all analyzed samples in collected list?
+# yes
 setdiff(chem21.inventory.analyzed, chem21.inventory.expected) %>% print(n=Inf)
 
-# 137 is problem with Excel.  Asked Andrea to fix.
-# 76 is actually 71.  Asked Andrea to fix.
 
 # all collected samples in analyzed list?
 setdiff(chem21.inventory.expected, chem21.inventory.analyzed) %>% 
-  arrange(lake_id) %>% print(n=Inf)
-# several lakes not in data set yet.
+  arrange(analyte, lake_id) %>% print(n=Inf)
 # NO3 not run on some samples.  Can I calculate it?
-# COC had all lake 72 samples as shallow, but two were deep.  Asked Andrea to fix
+# COC and data had several issues with 16 and 82.  Asked Andrea to fix on 1/24/22
 
