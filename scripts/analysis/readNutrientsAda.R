@@ -419,7 +419,8 @@ ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3)
    map_depth(2, ~select(., -sample_filter)) %>%
    map_depth(1, function(x) reduce(x, left_join)) %>%
    reduce(full_join) %>%
-   arrange(lake_id)
+   arrange(lake_id) %>%
+   mutate(site_id = as.character(site_id)) # convert to char to match other data 
 
 
 
