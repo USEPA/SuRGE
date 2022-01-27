@@ -44,8 +44,14 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>%
   mutate(across(al:zn, # nice code Joe!
                 ~ if_else(. < 0 , "<", ""), # bd reported as -detection limit
                 .names = "{col}_flag")) %>%
+  # create 'units' columns. All units will be converted to ug/L below; see Wiki page 
+  mutate(across(al:zn, # 
+                ~ "ug/l", 
+                .names = "{col}_units")) %>%
   mutate(across(al:zn, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
+  mutate(across(al:zn, # convert values from mg/l to ug/l; see Wiki page
+                ~ .*1000)) %>%
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, everything()) # put these columns first
 

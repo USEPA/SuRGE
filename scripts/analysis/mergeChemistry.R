@@ -1,6 +1,6 @@
 
 # merge chem21, chem18, and ada.nutrients
-all.nutrients <- full_join(chem18, chem21) %>%
+all.nutrients <- full_join(nutrientsAwberc18, nutrientsAwberc21) %>%
   full_join(ada.nutrients)
 
 # do we want a column(s) that indicates the year and/or lab?

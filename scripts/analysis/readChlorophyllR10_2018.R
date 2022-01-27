@@ -60,6 +60,42 @@
 # "Analyzed_Date" (column E) - ["Sample Date" (column D) + 60 days]
 # All of these samples will be flagged for holding time violation.
 
+# Function to read-in volume filtered data
+get_volume_data <- function(path, data, sheet) { 
+  
+  d <- read_excel(paste0(path, data), #
+                       sheet = sheet) %>%
+    janitor::clean_names() %>% # clean up names 
+    mutate(collection_date = as.Date(collection_date, format = "%m.%d.%Y")) %>%
+    filter(collection_date < "2019-01-01") # get 2018 only
+  
+  return(d)
+}
+
+# Function to read-in chlorophyll results data
+get_results_data <- function(path, data, sheet) { 
+  
+  e <- read_csv(paste0(path, data)) %>% #
+    janitor::clean_names() %>% # clean up names 
+    mutate(collection_date = as.Date(collection_date, format = "%m/%d/%Y")) %>%
+    filter(collection_date >= as.Date("2018-01-01") & collection_date <= as.Date("2018-12-31")) # get 2018 only
+  
+  
+}
 
 
+# chlorophyll filter volumes data
+cin.chl.volume.path <- paste0(userPath, 
+                          "data/algalIndicators/pigments/")
+
+chloro18.volume <- get_volume_data(cin.chl.volume.path, 
+                          "surgeFilteredVolumes.xlsx", 
+                          "data") 
+
+# chlorophyll results
+cin.chl.results.path <- paste0(userPath, 
+                          "data/algalIndicators/pigments/R10_2018_chl/")
+
+chloro18.results <- get_results_data(cin.chl.results.path, 
+                          "chl_sample_log.csv")
 
