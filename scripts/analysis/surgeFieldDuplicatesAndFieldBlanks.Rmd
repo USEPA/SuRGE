@@ -80,6 +80,7 @@ ada.anions %>% ungroup() %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
+  # geom_hline(aes(yintercept=mdl), color = "red") + # need to figure out join w/ mdl data
   ggtitle("Anion field blanks") +
   facet_wrap(~name, scales = "free")
 

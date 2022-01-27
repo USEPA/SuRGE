@@ -71,19 +71,19 @@ get_awberc_data <- function(path, data, sheet) {
       analyte == "tp"  ~ "ug_p_l",
       TRUE ~ ""))  %>%
     mutate(analyte_flag = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 7 ~ "<",
+      analyte == "nh4" & finalConc < 6 ~ "<",
       analyte == "no2" & finalConc < 8 ~ "<",
-      analyte == "no2_3" & finalConc < 8 ~ "<",
-      analyte == "op" & finalConc < 0.7 ~ "<",
-      analyte == "tn" & finalConc < 8 ~ "<",
+      analyte == "no2_3" & finalConc < 6 ~ "<",
+      analyte == "op" & finalConc < 3 ~ "<",
+      analyte == "tn" & finalConc < 20.9 ~ "<",
       analyte == "tp" & finalConc < 8 ~ "<",
       TRUE ~ "")) %>%
     mutate(finalConc = case_when( #
-      analyte == "nh4" & finalConc < 7 ~ 7,
+      analyte == "nh4" & finalConc < 6 ~ 6,
       analyte == "no2" & finalConc < 8 ~ 8,
-      analyte == "no2_3" & finalConc < 8 ~ 8,
-      analyte == "op" & finalConc < 0.7 ~ 0.7,
-      analyte == "tn" & finalConc < 8 ~ 8,
+      analyte == "no2_3" & finalConc < 6 ~ 6,
+      analyte == "op" & finalConc < 3 ~ 3,
+      analyte == "tn" & finalConc < 20.9 ~ 8,
       analyte == "tp" & finalConc < 8 ~ 8,
       TRUE ~ finalConc))
 
