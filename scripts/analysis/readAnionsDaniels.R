@@ -7,12 +7,27 @@
 # 1. Read data
 d.anions <- read_excel(paste0(userPath,
                               "data/chemistry/anions_ada_daniels/",
-                              "Daniels_Anions_2021.xlsx"),
+                              "Daniels_Anions_2021.xls"),
                        sheet = "2021_SURGE_anions",
                        na = "n.a.") %>%
   janitor::clean_names() %>%
   select(-matches(("no2|no3|po4"))) %>% # these analytes are taken from Lachat
-  rename(fluoride_mg_l = f_mg_l) # rename to be consistent with github issue #10
+  rename(fluoride_mg_l = f_mg_l) %>% # rename to be consistent with github Wiki
+  mutate(sample_depth = case_when(grepl("blank", sample_id, ignore.case = TRUE) ~ "blank",
+                                  grepl("shallow", sample_id, ignore.case = TRUE) ~ "shallow",
+                                  grepl("deep", sample_id, ignore.case = TRUE) ~ "deep",
+                                  TRUE ~ "oops"),
+         sample_type = case_when(grepl("dup", sample_id, ignore.case = TRUE) ~ "duplicate",
+                                 grepl("blank", sample_id, ignore.case = TRUE) ~ "blank",
+                                 TRUE ~ "unknown"),
+         #https://stackoverflow.com/questions/35403491/r-regex-extracting-a-string-between-a-dash-and-a-period
+         lake_id = gsub("^[^-]*-([^-]+).*", "\\1", sample_id) %>% 
+           as.numeric() %>% as.character()) %>%
+  mutate(lake_id = case_when(str_detect(sample_id, "LAC") ~ paste0(lake_id, "_lacustrine"),
+                             str_detect(sample_id, "TRAN") ~ paste0(lake_id, "_transitional"),
+                             str_detect(sample_id, "RIV") ~ paste0(lake_id, "_riverine"),
+                             lake_id == "69" ~ "69_riverine",
+                             TRUE ~ lake_id))
 
 # 2. Extract units and analyte names
 analytes.units <- d.anions %>% 
@@ -38,7 +53,7 @@ d.anions <- d.anions %>%
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
 # 5. Compare samples analyzed to those in comprehensive sample list.
-# All analyzed samples are in comprehensive sample list, good.
+# [1/25/2022] all samples in comprehensive list. Good
 
 # print rows in d.anions not in chem.samples.
 setdiff(d.anions[c("lake_id", "sample_depth", "sample_type")],
@@ -57,7 +72,7 @@ setdiff(chem.samples.foo %>% filter(analyte_group == "anions",
           select(lake_id, sample_depth, sample_type),
         d.anions[,c("lake_id", "sample_depth", "sample_type")]) %>%
   arrange(lake_id) %>%
-  write.table(file = "clipboard")
+  write.table(file = paste0(userPath, "data/chemistry/anions_ada_daniels/danielsMissingAnions.txt"), row.names = FALSE)
 
 
 

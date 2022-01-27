@@ -10,7 +10,7 @@
 # During the summer of 2021, TTEB ran metals, TOC, and DOC on SuRGE samples
 # multiple locations.  Data are in `SURGE_2022_01_20_2022_update.xlsx`.
 
-# As of 1/13/2022, the `SURGE 2021_10_07_2021_update.xlsx` file contains a small
+# As of 1/25/2022, the `SURGE_2022_01_20_2022_update.xlsx` file contains a
 # subset of the data.  We are waiting for an update from TTEB.
 
 # 1. READ CHEMISTRY DATA--------------
@@ -76,8 +76,8 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
           select(lake_id, sample_depth, sample_type, analyte)) %>%
   arrange(lake_id)
 
-# Have all tteb sampled in comprehensive sample list been analyzed?
-# Print rows from comprehensive sample list not in tteb list.
+# Have all tteb samples in comprehensive sample list been submitted?
+# Print rows from comprehensive sample list not in tteb coc.
 # Missing some from 147, 275, 298, and 68
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
@@ -120,9 +120,14 @@ setdiff(chem.samples.foo %>%
 tteb.all <- inner_join(ttebCoc %>% select(-analyte), tteb)
 nrow(tteb.all) # 95 records
 
-# Are all records in CoC in chemistry data?
+# Are all submitted samples in chemistry data?
 # no, missing a ton.  Waiting for update from Maily.
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id))
+# list of missing metals samples to send to Maily [1/25/2022]
+ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
+  filter(analyte == "metals") %>%
+  write.table(paste0(userPath, "data/chemistry/tteb/missingMetals01252022.txt"), row.names = FALSE)
+
 
 # clean up final object
 tteb.all <- tteb.all %>% select(-lab_id, -coc, -notes, -sampid) %>%

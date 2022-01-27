@@ -1,6 +1,5 @@
 # source scripts in order
 
-
 source("scripts/masterLibrary.R") # Read in renv controlled library
 source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 
