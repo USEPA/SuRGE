@@ -67,9 +67,11 @@ get_volume_data <- function(path, data, sheet) {
                        sheet = sheet) %>%
     janitor::clean_names() %>% # clean up names 
     mutate(collection_date = as.Date(collection_date, format = "%m.%d.%Y")) %>%
-    filter(collection_date < "2019-01-01") # get 2018 only
+    filter(collection_date >= as.Date("2018-01-01") & 
+             collection_date <= as.Date("2018-12-31")) # get 2018 only
   
   return(d)
+  
 }
 
 # Function to read-in chlorophyll results data
@@ -78,8 +80,33 @@ get_results_data <- function(path, data, sheet) {
   e <- read_csv(paste0(path, data)) %>% #
     janitor::clean_names() %>% # clean up names 
     mutate(collection_date = as.Date(collection_date, format = "%m/%d/%Y")) %>%
-    filter(collection_date >= as.Date("2018-01-01") & collection_date <= as.Date("2018-12-31")) # get 2018 only
+    mutate(analysis_date = as.Date(analysis_date, format = "%m/%d/%Y")) %>%
+    mutate(extraction_date = as.Date(extraction_date, format = "%m/%d/%Y")) %>%
+    filter(collection_date >= as.Date("2018-01-01") & 
+             collection_date <= as.Date("2018-12-31")) %>% # get 2018 only
+    rename(sample_type = type) %>%
+    mutate(sample_type = case_when( # We'll probably want different names(???)
+      sample_type == "Blank" ~ "blank",
+      sample_type == "Control" ~ "control",
+      sample_type == "Sample" ~ "sample",
+      TRUE   ~ sample_type)) %>%
+    select(lake_id, site_id, sample_type,
+           collection_date, analysis_date, chl_a_jh)
   
+  
+  # TO DO: convert lake_id and site_id values (see Wiki page)
+  # column R: chl_a_jh    column L: extract_volume_l
+  # calculate hold time violations and chla_qual column:
+    # create chla_qual column. There are 2 holding times:
+    # holdtime 1: collection to extraction (filter_hold_time) >60 = violation
+    # holdtime 2: extraction to analysis (extract_hold_time) >330 = violation.
+    # the chla_qual = 1 if either hold times are violated, otherwise = "".
+  # calculate mdl values and chla_flag column:
+    # chla_flag = "<" for chla levels < 9ug/L (from extract)
+    # Extract concentration = (column R * 5)/column K
+  # create chla_units column?
+  
+  return(e)
   
 }
 
@@ -99,3 +126,6 @@ cin.chl.results.path <- paste0(userPath,
 chloro18.results <- get_results_data(cin.chl.results.path, 
                           "chl_sample_log.csv")
 
+# join data and calculate chlorophyll a
+chloro18 <- left_join(chloro18.results, chloro18.volume, by = "????") %>%
+  mutate(chlorophyll_a = chl_a_jh / volume_filtered) # calculate ug_l

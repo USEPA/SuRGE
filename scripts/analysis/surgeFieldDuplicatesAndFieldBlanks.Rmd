@@ -45,12 +45,34 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAni
 SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey of methane (CH4) and carbon dioxide (CO2) emissions from US reservoirs.  Gas emissions are measured at >= 15 locations within each reservoir.  Water chemistry samples are collected from two depths (near the air-water interface and the sediment-water interface) at one location within each reservoir.  At a subset of the reservoirs, field blanks and field duplicates are also collected.  This report details results from the field blanks and duplicates.
 
 
+## Detection Limits
+
+### Create dataframe of detection limits for use with all following plots
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+name = c("tno2_3", "tnh4", "trp", "tp",	"tn",	"tno2_3",	"tnh4",	"trp", "tp",
+         "tn",	"toc", "chlorophyll_a",	"chlorophyll_b", "al", "as", "ba", "be",
+         "ca", "cd", "cr",	"cu",	"fe",	"k", "li",	"mg",	"mn",	"na",	"ni",	"pb",
+         "p", "sb", "si", "sn", "sr", "s", "v", "zn",	"no2_3", "no2",	"no3", "nh4",
+         "nh4_low_range", "op", "tp",	"tn",	"toc", "doc", "br",	"cl", "so4", "f")
+mdl = c(6, 6,	3, 8,	20.9,	6, 6,	3, 5,	25, 100, 9, 9999999, 4,	4, 1,	5, 10, 0.3,	1,
+        1, 1,	300, 5,	5, 1, 30, 1, 2, 5, 3, 20, 1, 1, 3, 1, 0.5, 0.03, 0.013,
+        0.03,0.016, 3.22, 0.005, 0.01, 0.021, 0.043, 0.043, 0.041, 0.026, 0.151, 
+        0.014) # 9999999 is a placeholder; value not determined yet
+# need to differentiate between years for nutrients(?)
+# chlorophyll a is listed twice in the wiki. I changed 2nd one to chlorophyll_b
+detlimits <- data.frame(name, mdl) 
+
+```
+
 ## Field Blanks
 
 ### Anions
 Fluoride and bromide were below the detection limit for all field blanks from ADA.  Chloride and sulfate were about 3-fold greater than the detection limit in field blanks from lake 148, but were still 4-5 orders of magnitude lower than the unknowns from that lake. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+
 
 # table
 # formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
@@ -72,22 +94,25 @@ ada.anions %>%
   kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
-# It would be cool to add horizontal red line at MDL for each analyte
 ada.anions %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = detlimits, by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
-  # geom_hline(aes(yintercept=mdl), color = "red") + # need to figure out join w/ mdl data
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Anion field blanks") +
   facet_wrap(~name, scales = "free")
 
 ```
 
 ### Nutrients
-Same kind of deal as above, but for nutrients
+
+
 
 ### Metals
 
@@ -108,4 +133,7 @@ Same kind of deal as above, but for nutrients
 ### Organic Carbon
 
 ### Algal pigments
+
+
+
 
