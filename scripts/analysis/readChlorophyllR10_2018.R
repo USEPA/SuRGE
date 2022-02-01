@@ -60,6 +60,8 @@
 # "Analyzed_Date" (column E) - ["Sample Date" (column D) + 60 days]
 # All of these samples will be flagged for holding time violation.
 
+# Read in AWBERC data----
+
 # Function to read-in volume filtered data
 get_volume_data <- function(path, data, sheet) { 
   
@@ -68,7 +70,15 @@ get_volume_data <- function(path, data, sheet) {
     janitor::clean_names() %>% # clean up names 
     mutate(collection_date = as.Date(collection_date, format = "%m.%d.%Y")) %>%
     filter(collection_date >= as.Date("2018-01-01") & 
-             collection_date <= as.Date("2018-12-31")) # get 2018 only
+             collection_date <= as.Date("2018-12-31")) %>% # get 2018 only
+    mutate(site_id = str_replace_all(site_id, "[[:punct:]]", "")) %>% # remove special chars
+    mutate(sample_type = case_when( # convert sample_type to SuRGE format
+      sample_type == "BLK" ~ "blank",
+      sample_type == "DUP" ~ "duplicate",
+      sample_type == "UKN" ~ "unknown",
+      sample_type == "UNK" ~ "unknown",
+      TRUE   ~ sample_type)) %>%
+    select(site_id, sample_type, volume_filtered)
   
   return(d)
   
@@ -79,33 +89,51 @@ get_results_data <- function(path, data, sheet) {
   
   e <- read_csv(paste0(path, data)) %>% #
     janitor::clean_names() %>% # clean up names 
+    # convert all dates to proper format and data type
     mutate(collection_date = as.Date(collection_date, format = "%m/%d/%Y")) %>%
     mutate(analysis_date = as.Date(analysis_date, format = "%m/%d/%Y")) %>%
     mutate(extraction_date = as.Date(extraction_date, format = "%m/%d/%Y")) %>%
     filter(collection_date >= as.Date("2018-01-01") & 
              collection_date <= as.Date("2018-12-31")) %>% # get 2018 only
-    rename(sample_type = type) %>%
-    mutate(sample_type = case_when( # We'll probably want different names(???)
-      sample_type == "Blank" ~ "blank",
-      sample_type == "Control" ~ "control",
-      sample_type == "Sample" ~ "sample",
+    filter(project == "AEBRR") %>% # samples analyzed at AWBERC only
+    mutate(lake_id = str_extract(sample_id, "SFR|MMR|LGR|PLR|LVR")) %>% # get lake_id
+    mutate(lake_id = case_when( # convert lake_id to SuRGE format
+      lake_id == "SFR" ~ "331",
+      lake_id == "MMR" ~ "323",
+      lake_id == "LGR" ~ "302",
+      lake_id == "PLR" ~ "239",
+      lake_id == "LVR" ~ "253",
+      TRUE   ~ lake_id)) %>%
+    filter(is.na(lake_id) == FALSE) %>% # keep only SuRGE lakes
+    mutate(site_id = case_when( # get corresponding open water site_id (see wiki)
+      lake_id == "331" ~ "U22",
+      lake_id == "323" ~ "U04",
+      lake_id == "302" ~ "U10",
+      lake_id == "239" ~ "SU03",
+      lake_id == "253" ~ "SU05",
+      TRUE   ~ "")) %>%
+    mutate(sample_type = str_sub(sample_id, -3)) %>% # get sample_type
+    mutate(sample_type = case_when( # convert sample_type to SuRGE format
+      sample_type == "BLK" ~ "blank",
+      sample_type == "DUP" ~ "duplicate",
+      sample_type == "UKN" ~ "unknown",
+      sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
-    select(lake_id, site_id, sample_type,
-           collection_date, analysis_date, chl_a_jh)
-  
-  
-  # TO DO: convert lake_id and site_id values (see Wiki page)
-  # column R: chl_a_jh    column L: extract_volume_l
-  # calculate hold time violations and chla_qual column:
-    # create chla_qual column. There are 2 holding times:
-    # holdtime 1: collection to extraction (filter_hold_time) >60 = violation
-    # holdtime 2: extraction to analysis (extract_hold_time) >330 = violation.
-    # the chla_qual = 1 if either hold times are violated, otherwise = "".
-  # calculate mdl values and chla_flag column:
-    # chla_flag = "<" for chla levels < 9ug/L (from extract)
-    # Extract concentration = (column R * 5)/column K
-  # create chla_units column?
-  
+    mutate(sample_depth = "shallow") %>% # all samples collected near a/w interface
+    mutate(extract_conc = (5 * chl_a_jh) / extract_volume_l) %>%
+    mutate(filter_hold_time = collection_date - extraction_date) %>%
+    mutate(extract_hold_time = analysis_date - extraction_date) %>%
+    mutate(chla_qual = case_when( # qual flag if either hold time exceeded
+      filter_hold_time > 60 ~ "1",
+      extract_hold_time > 300 ~ "1",
+      TRUE   ~ "")) %>%
+    mutate(chla_flag = case_when( # flag if conc is below detection limit 
+      extract_conc < 9 ~ "<",
+      TRUE   ~ "")) %>%
+    rename(chl = chl_a_jh) %>%
+    select(lake_id, site_id, sample_type, sample_depth, chl, extract_conc, 
+           chla_flag, chla_qual)
+
   return(e)
   
 }
@@ -115,7 +143,7 @@ get_results_data <- function(path, data, sheet) {
 cin.chl.volume.path <- paste0(userPath, 
                           "data/algalIndicators/pigments/")
 
-chloro18.volume <- get_volume_data(cin.chl.volume.path, 
+chl18.volume <- get_volume_data(cin.chl.volume.path, 
                           "surgeFilteredVolumes.xlsx", 
                           "data") 
 
@@ -123,9 +151,12 @@ chloro18.volume <- get_volume_data(cin.chl.volume.path,
 cin.chl.results.path <- paste0(userPath, 
                           "data/algalIndicators/pigments/R10_2018_chl/")
 
-chloro18.results <- get_results_data(cin.chl.results.path, 
+chl18.results <- get_results_data(cin.chl.results.path, 
                           "chl_sample_log.csv")
 
-# join data and calculate chlorophyll a
-chloro18 <- left_join(chloro18.results, chloro18.volume, by = "????") %>%
-  mutate(chlorophyll_a = chl_a_jh / volume_filtered) # calculate ug_l
+# join data and calculate chlorophyll-a in ug/l
+chl18 <- left_join(chl18.results, chl18.volume, by = c("site_id", "sample_type")) %>%
+  mutate(chla = chl / volume_filtered) %>% # calculate chl-a in ug_l
+  mutate(chla_units = "ug/l") # add units column for chl-a
+  
+
