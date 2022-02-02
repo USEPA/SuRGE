@@ -149,6 +149,8 @@ get_awberc_data <- function(path, data, sheet) {
     mutate(lake_id = case_when(
       str_detect(lake_id, "070") ~ str_replace(lake_id, "070", "70"), # need to replace 070 with 70
       str_detect(lake_id, "069") ~ str_replace(lake_id, "069", "69"), # need to replace 069 with 69
+      str_detect(lake_id, "016") ~ str_replace(lake_id, "016", "16"), # need to replace 016 with 16
+      str_detect(lake_id, "082") ~ str_replace(lake_id, "082", "82"), # need to replace 082 with 82
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
     mutate(analyte_flag = case_when( # create the analyte_flag column
@@ -244,7 +246,7 @@ cin.awberc.path <- paste0(userPath,
                        "data/chemistry/nutrients/")
   
 chem21 <- get_awberc_data(cin.awberc.path, 
-                          "2021_ESF-EFWS_NutrientData_Updated01202022_AKB.xlsx", 
+                          "2021_ESF-EFWS_NutrientData_Updated01272022_AKB.xlsx", 
                           "2021 Data") 
 
 chem21 %>% distinct(lake_id) %>% print(n=Inf)
@@ -278,6 +280,6 @@ setdiff(chem21.inventory.analyzed, chem21.inventory.expected) %>% print(n=Inf)
 # all collected samples in analyzed list?
 setdiff(chem21.inventory.expected, chem21.inventory.analyzed) %>% 
   arrange(analyte, lake_id) %>% print(n=Inf)
-# NO3 not run on some samples.  Can I calculate it?
-# COC and data had several issues with 16 and 82.  Asked Andrea to fix on 1/24/22
+# all accounted for!
+
 

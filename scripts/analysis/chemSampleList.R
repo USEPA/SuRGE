@@ -40,7 +40,7 @@ lake.list.chem <- left_join(lake.list.chem, qa.qc) # keep all
 nrow(lake.list.chem) # 68
 
 # 4. create vectors of analyte groups.
-nutrients <- c("nh4", "no2_3", "no3", "no2", "tn", "tp", "op")
+nutrients <- c("nh4", "no2_3", "no2", "tn", "tp", "op")
 anions <- c("fluoride", "cl", "br", "so4")
 organics <- c("doc", "toc")
 metals <- c("al", "as", "ba", "be", "ca",  

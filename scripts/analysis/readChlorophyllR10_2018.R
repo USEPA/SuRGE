@@ -71,19 +71,16 @@ get_volume_data <- function(path, data, sheet) {
     mutate(collection_date = as.Date(collection_date, format = "%m.%d.%Y")) %>%
     filter(collection_date >= as.Date("2018-01-01") & 
              collection_date <= as.Date("2018-12-31")) %>% # get 2018 only
-    # the next 4 mutates add a "0" to site_id #'s, if needed
-    mutate(site_id2 = str_split_fixed(site_id, n=2, pattern = "-")[,2]) %>%
-    mutate(site_id = str_split_fixed(site_id, n=2, pattern = "-")[,1]) %>%
-    mutate(site_id2 = str_pad(site_id2, width = 2, pad = "0")) %>%
-    mutate(site_id = str_c(site_id, site_id2)) %>%
-    # mutate(site_id = str_replace_all(site_id, "[[:punct:]]", "")) %>% # remove special chars
+    # pull out numeric component of site_id
+    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
     mutate(sample_type = case_when( # convert sample_type to SuRGE format
       sample_type == "BLK" ~ "blank",
       sample_type == "DUP" ~ "duplicate",
       sample_type == "UKN" ~ "unknown",
       sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
-    select(site_id, sample_type, volume_filtered)
+    mutate(volume_filtered_l = volume_filtered / 1000) %>% # convert from ml to L
+    select(lake_id, site_id, sample_type, volume_filtered_l)
   
   return(d)
   
@@ -110,13 +107,9 @@ get_results_data <- function(path, data, sheet) {
       lake_id == "LVR" ~ "253",
       TRUE   ~ lake_id)) %>%
     filter(is.na(lake_id) == FALSE) %>% # keep only SuRGE lakes
-    mutate(site_id = case_when( # get corresponding open water site_id (see wiki)
-      lake_id == "331" ~ "U22",
-      lake_id == "323" ~ "U04",
-      lake_id == "302" ~ "U10",
-      lake_id == "239" ~ "SU03",
-      lake_id == "253" ~ "SU05",
-      TRUE   ~ "")) %>%
+    mutate(site_id = str_extract(sample_id, # create site_id
+                                 "U02|U22|U35|U10|U31|U05|U08|U33|U04|U10|U09|SU05|SU03|SU31|SU34"), # R10 2018 site_id values
+           site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # convert to numeric
     mutate(sample_type = str_sub(sample_id, -3)) %>% # get sample_type
     mutate(sample_type = case_when( # convert sample_type to SuRGE format
       sample_type == "BLK" ~ "blank",
@@ -124,9 +117,9 @@ get_results_data <- function(path, data, sheet) {
       sample_type == "UKN" ~ "unknown",
       sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
-    rename(chl = chl_a_jh) %>% # simplify field name 
+    rename(chla = chl_a_jh) %>% # see Wiki for naming conventions
     mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
-    mutate(extract_conc = (5 * chl) / extract_volume_l) %>% # extracted concentration
+    mutate(extract_conc = (5 * chla) / extract_volume_l) %>% # extracted concentration
     mutate(filter_hold_time = collection_date - extraction_date) %>% # get hold time
     mutate(extract_hold_time = analysis_date - extraction_date) %>% # get hold time
     mutate(chla_qual = case_when( # qual flag if either hold time exceeded
@@ -136,7 +129,7 @@ get_results_data <- function(path, data, sheet) {
     mutate(chla_flag = case_when( # flag if conc is below detection limit 
       extract_conc < 9 ~ "<",
       TRUE   ~ "")) %>%
-    select(lake_id, site_id, sample_type, sample_depth, chl, extract_conc, 
+    select(lake_id, site_id, sample_type, sample_depth, chla, extract_conc, 
            chla_flag, chla_qual)
 
   return(e)
@@ -160,9 +153,11 @@ chl18.results <- get_results_data(cin.chl.results.path,
                           "chl_sample_log.csv")
 
 # join data to calculate volume of chlorophyll-a in ug/l
-chl18 <- left_join(chl18.results, chl18.volume, by = c("site_id", "sample_type")) %>%
-  mutate(chla = chl / volume_filtered) %>% # calculate chl-a in ug_l
+dim(chl18.results) # 18 observations (subset of 2018 samples run at AWBERC)
+dim(chl18.volume) # 30 observations (all 2018 R10 samples)
+chl18 <- left_join(chl18.results, chl18.volume, by = c("lake_id", "site_id", "sample_type")) %>%
+  mutate(chla = chla / volume_filtered_l) %>% # calculate chl-a in ug_l
   mutate(chla_units = "ug/l") #%>% # add units column for chl-a
   # select(-extract_conc, -volume_filtered) # no longer needed
   # 
-
+dim(chl18) #18, all chla data retained
