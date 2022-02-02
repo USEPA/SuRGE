@@ -71,7 +71,12 @@ get_volume_data <- function(path, data, sheet) {
     mutate(collection_date = as.Date(collection_date, format = "%m.%d.%Y")) %>%
     filter(collection_date >= as.Date("2018-01-01") & 
              collection_date <= as.Date("2018-12-31")) %>% # get 2018 only
-    mutate(site_id = str_replace_all(site_id, "[[:punct:]]", "")) %>% # remove special chars
+    # the next 4 mutates add a "0" to site_id #'s, if needed
+    mutate(site_id2 = str_split_fixed(site_id, n=2, pattern = "-")[,2]) %>%
+    mutate(site_id = str_split_fixed(site_id, n=2, pattern = "-")[,1]) %>%
+    mutate(site_id2 = str_pad(site_id2, width = 2, pad = "0")) %>%
+    mutate(site_id = str_c(site_id, site_id2)) %>%
+    # mutate(site_id = str_replace_all(site_id, "[[:punct:]]", "")) %>% # remove special chars
     mutate(sample_type = case_when( # convert sample_type to SuRGE format
       sample_type == "BLK" ~ "blank",
       sample_type == "DUP" ~ "duplicate",
@@ -89,7 +94,7 @@ get_results_data <- function(path, data, sheet) {
   
   e <- read_csv(paste0(path, data)) %>% #
     janitor::clean_names() %>% # clean up names 
-    # convert all dates to proper format and data type
+    # convert all dates to same format and data type
     mutate(collection_date = as.Date(collection_date, format = "%m/%d/%Y")) %>%
     mutate(analysis_date = as.Date(analysis_date, format = "%m/%d/%Y")) %>%
     mutate(extraction_date = as.Date(extraction_date, format = "%m/%d/%Y")) %>%
@@ -119,10 +124,11 @@ get_results_data <- function(path, data, sheet) {
       sample_type == "UKN" ~ "unknown",
       sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
-    mutate(sample_depth = "shallow") %>% # all samples collected near a/w interface
-    mutate(extract_conc = (5 * chl_a_jh) / extract_volume_l) %>%
-    mutate(filter_hold_time = collection_date - extraction_date) %>%
-    mutate(extract_hold_time = analysis_date - extraction_date) %>%
+    rename(chl = chl_a_jh) %>% # simplify field name 
+    mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
+    mutate(extract_conc = (5 * chl) / extract_volume_l) %>% # extracted concentration
+    mutate(filter_hold_time = collection_date - extraction_date) %>% # get hold time
+    mutate(extract_hold_time = analysis_date - extraction_date) %>% # get hold time
     mutate(chla_qual = case_when( # qual flag if either hold time exceeded
       filter_hold_time > 60 ~ "1",
       extract_hold_time > 300 ~ "1",
@@ -130,7 +136,6 @@ get_results_data <- function(path, data, sheet) {
     mutate(chla_flag = case_when( # flag if conc is below detection limit 
       extract_conc < 9 ~ "<",
       TRUE   ~ "")) %>%
-    rename(chl = chl_a_jh) %>%
     select(lake_id, site_id, sample_type, sample_depth, chl, extract_conc, 
            chla_flag, chla_qual)
 
@@ -154,9 +159,10 @@ cin.chl.results.path <- paste0(userPath,
 chl18.results <- get_results_data(cin.chl.results.path, 
                           "chl_sample_log.csv")
 
-# join data and calculate chlorophyll-a in ug/l
+# join data to calculate volume of chlorophyll-a in ug/l
 chl18 <- left_join(chl18.results, chl18.volume, by = c("site_id", "sample_type")) %>%
   mutate(chla = chl / volume_filtered) %>% # calculate chl-a in ug_l
-  mutate(chla_units = "ug/l") # add units column for chl-a
-  
+  mutate(chla_units = "ug/l") #%>% # add units column for chl-a
+  # select(-extract_conc, -volume_filtered) # no longer needed
+  # 
 
