@@ -41,32 +41,11 @@
 
 
 
-
-
-# SAMPLES ANALYZED AT BSA LABORATORIES-----------------------
-# Samples collected from SFP, WPL, and BKL were extracted, but not run.  They were 
-# driven to BSA laboratory by Dana Macke in September 2020.  I 
-# provided filtered volumes for these samples and BSA reported the results in
-# units of mg chla/m3.  Data are at:
-#"...\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\
-# data\algalIndicators\pigments\R10_2018_chl\20201109 USEPA Chlorophyll Report 779.xlsx"
-# OUTPUT-VOLUMETRIC worksheet
-
-# We do not have the data to assess detection limit violations for these samples.
-# Assume all values > MDL.  
-
-# Filter hold time is not reported; assume a value of 60.  Extract hold time
-# can be calculated as:
-# "Analyzed_Date" (column E) - ["Sample Date" (column D) + 60 days]
-# All of these samples will be flagged for holding time violation.
-
-# Read in AWBERC data----
-
 # Function to read-in volume filtered data
 get_volume_data <- function(path, data, sheet) { 
   
   d <- read_excel(paste0(path, data), #
-                       sheet = sheet) %>%
+                  sheet = sheet) %>%
     janitor::clean_names() %>% # clean up names 
     mutate(collection_date = as.Date(collection_date, format = "%m.%d.%Y")) %>%
     filter(collection_date >= as.Date("2018-01-01") & 
@@ -107,7 +86,7 @@ get_results_data <- function(path, data, sheet) {
       lake_id == "LVR" ~ "253",
       TRUE   ~ lake_id)) %>%
     filter(is.na(lake_id) == FALSE) %>% # keep only SuRGE lakes
-    mutate(site_id = str_extract(sample_id, # create site_id
+    mutate(site_id = str_extract(sample_id, # create site_id   
                                  "U02|U22|U35|U10|U31|U05|U08|U33|U04|U10|U09|SU05|SU03|SU31|SU34"), # R10 2018 site_id values
            site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # convert to numeric
     mutate(sample_type = str_sub(sample_id, -3)) %>% # get sample_type
@@ -131,7 +110,7 @@ get_results_data <- function(path, data, sheet) {
       TRUE   ~ "")) %>%
     select(lake_id, site_id, sample_type, sample_depth, chla, extract_conc, 
            chla_flag, chla_qual)
-
+  
   return(e)
   
 }
@@ -139,31 +118,49 @@ get_results_data <- function(path, data, sheet) {
 
 # chlorophyll filter volumes data
 cin.chl.volume.path <- paste0(userPath, 
-                          "data/algalIndicators/pigments/")
+                              "data/algalIndicators/pigments/")
 
 chl18.volume <- get_volume_data(cin.chl.volume.path, 
-                          "surgeFilteredVolumes.xlsx", 
-                          "data") 
+                                "surgeFilteredVolumes.xlsx", 
+                                "data") 
 
 # chlorophyll results
 cin.chl.results.path <- paste0(userPath, 
-                          "data/algalIndicators/pigments/R10_2018_chl/")
+                               "data/algalIndicators/pigments/R10_2018_chl/")
 
 chl18.results <- get_results_data(cin.chl.results.path, 
-                          "chl_sample_log.csv")
+                                  "chl_sample_log.csv")
 
 # join data to calculate volume of chlorophyll-a in ug/l
 dim(chl18.results) # 18 observations (subset of 2018 samples run at AWBERC)
 dim(chl18.volume) # 30 observations (all 2018 R10 samples)
-chl18 <- left_join(chl18.results, chl18.volume, by = c("lake_id", "site_id", "sample_type")) %>%
+chl18.awberc <- left_join(chl18.results, chl18.volume, by = c("lake_id", "site_id", "sample_type")) %>%
   mutate(chla = chla / volume_filtered_l) %>% # calculate chl-a in ug_l
-  mutate(chla_units = "ug/l") %>% # add units column for chl-a
+  mutate(chla_units = "ug_l") %>% # add units column for chl-a
   select(-extract_conc, -volume_filtered_l) # no longer needed
-  # 
-dim(chl18) #18, all chla data retained
+
+dim(chl18.awberc) #18, all chla data retained
 
 
-# Read in BSA data----
+
+# SAMPLES ANALYZED AT BSA LABORATORIES-----------------------
+# Samples collected from SFP, WPL, and BKL were extracted, but not run.  They were 
+# driven to BSA laboratory by Dana Macke in September 2020.  I 
+# provided filtered volumes for these samples and BSA reported the results in
+# units of mg chla/m3.  Data are at:
+#"...\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\
+# data\algalIndicators\pigments\R10_2018_chl\20201109 USEPA Chlorophyll Report 779.xlsx"
+# OUTPUT-VOLUMETRIC worksheet
+
+# We do not have the data to assess detection limit violations for these samples.
+# Assume all values > MDL.  
+
+# Filter hold time is not reported; assume a value of 60.  Extract hold time
+# can be calculated as:
+# "Analyzed_Date" (column E) - ["Sample Date" (column D) + 60 days]
+# All of these samples will be flagged for holding time violation.
+
+
 
 get_bsa_data <- function(path, data, sheet) { 
   
@@ -174,7 +171,7 @@ get_bsa_data <- function(path, data, sheet) {
     rename(chla = chlorophyll_a_mg_m3) %>%
     mutate(sample_date = as.Date(sample_date, format = "%Y-%m-%d")) %>%
     mutate(analyzed_date = as.Date(analyzed_date, format = "%Y-%m-%d")) %>%
-    mutate(extract_hold_time = analyzed_date - sample_date) %>%
+    mutate(extract_hold_time = analyzed_date - (sample_date + 60)) %>% # assume extraction occurred 60 days after collection
     mutate(lake_id = str_extract(location, "SFP|WPL|BKL")) %>% # get lake_id
     mutate(lake_id = case_when( # convert lake_id to SuRGE format
       lake_id == "SFP" ~ "263",
@@ -194,11 +191,12 @@ get_bsa_data <- function(path, data, sheet) {
       sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
     mutate(chla_qual = case_when( # qual flag if either hold time exceeded
-      extract_hold_time > 300 ~ "1",
+      extract_hold_time > 330 ~ "1",
       TRUE   ~ "")) %>%
     mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
     mutate(chla_flag = "") %>% # assume all are above mdl (data unavailable)
-    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag, chla_qual)
+    mutate(chla_units = "ug_l") %>%
+    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag, chla_qual, chla_units)
 
   return(f)
 
@@ -212,3 +210,9 @@ chl.bsa.path <- paste0(userPath,
 chl18.bsa <- get_bsa_data(chl.bsa.path,
                           "20201109 USEPA Chlorophyll Report 779.xlsx",
                                   "OUTPUT - VOLUMETRIC")
+
+# COMBINE AWBERC AND BSA DATA---------
+# both have 8 identically formatted columns, good
+dim(chl18.awberc)
+dim(chl18.bsa)
+chl18 <- rbind(chl18.awberc, chl18.bsa)
