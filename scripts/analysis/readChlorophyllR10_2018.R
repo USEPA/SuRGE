@@ -157,7 +157,58 @@ dim(chl18.results) # 18 observations (subset of 2018 samples run at AWBERC)
 dim(chl18.volume) # 30 observations (all 2018 R10 samples)
 chl18 <- left_join(chl18.results, chl18.volume, by = c("lake_id", "site_id", "sample_type")) %>%
   mutate(chla = chla / volume_filtered_l) %>% # calculate chl-a in ug_l
-  mutate(chla_units = "ug/l") #%>% # add units column for chl-a
-  # select(-extract_conc, -volume_filtered) # no longer needed
+  mutate(chla_units = "ug/l") %>% # add units column for chl-a
+  select(-extract_conc, -volume_filtered_l) # no longer needed
   # 
 dim(chl18) #18, all chla data retained
+
+
+# Read in BSA data----
+
+get_bsa_data <- function(path, data, sheet) { 
+  
+  f <- read_excel(paste0(path, data), #
+                  sheet = sheet) %>%
+    janitor::clean_names() %>% # clean up names 
+    filter(study == "AEBRR") %>% # 
+    rename(chla = chlorophyll_a_mg_m3) %>%
+    mutate(sample_date = as.Date(sample_date, format = "%Y-%m-%d")) %>%
+    mutate(analyzed_date = as.Date(analyzed_date, format = "%Y-%m-%d")) %>%
+    mutate(extract_hold_time = analyzed_date - sample_date) %>%
+    mutate(lake_id = str_extract(location, "SFP|WPL|BKL")) %>% # get lake_id
+    mutate(lake_id = case_when( # convert lake_id to SuRGE format
+      lake_id == "SFP" ~ "263",
+      lake_id == "WPL" ~ "308",
+      lake_id == "BKL" ~ "999",
+      TRUE   ~ lake_id)) %>%
+    filter(is.na(lake_id) == FALSE) %>% # keep only SuRGE lakes
+    mutate(site_id = str_extract(location, # create site_id
+                                 "U01|U22|U35|U10|U31|U05|U06|U07|U08|U09|U12|U33|U04|U10|U09|SU05|SU03|SU31|SU34"), # R10 2018 site_id values
+           site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
+    mutate(sample_type = str_extract(location, # get sample_type
+                                     "BLK|DUP|UKN|UNK")) %>% 
+    mutate(sample_type = case_when( # convert sample_type to SuRGE format
+      sample_type == "BLK" ~ "blank",
+      sample_type == "DUP" ~ "duplicate",
+      sample_type == "UKN" ~ "unknown",
+      sample_type == "UNK" ~ "unknown",
+      TRUE   ~ sample_type)) %>%
+    mutate(chla_qual = case_when( # qual flag if either hold time exceeded
+      extract_hold_time > 300 ~ "1",
+      TRUE   ~ "")) %>%
+    mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
+    mutate(chla_flag = "") %>% # assume all are above mdl (data unavailable)
+    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag, chla_qual)
+
+  return(f)
+
+}
+
+
+# read in chlorophyll results from BSA
+chl.bsa.path <- paste0(userPath,
+                       "data/algalIndicators/pigments/R10_2018_chl/")
+
+chl18.bsa <- get_bsa_data(chl.bsa.path,
+                          "20201109 USEPA Chlorophyll Report 779.xlsx",
+                                  "OUTPUT - VOLUMETRIC")
