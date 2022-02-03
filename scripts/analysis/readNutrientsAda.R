@@ -63,8 +63,7 @@ analyte_names <- row.names(toptable) # pass analyte names to maintable, below
       mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
       mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
                     ~ if_else(.>28, TRUE, FALSE))) %>% 
-      mutate(site_id = "") # create empty column for site_id (id is populated later)
-
+      mutate(site_id = "") # create empty column for site_id (id is populated later
 
   return(maintable)
 
@@ -420,6 +419,7 @@ ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3)
    map_depth(2, ~select(., -sample_filter)) %>%
    map_depth(1, function(x) reduce(x, left_join)) %>%
    reduce(full_join) %>%
+   mutate(site_id = as.numeric(site_id)) %>% 
    arrange(lake_id)
    
 

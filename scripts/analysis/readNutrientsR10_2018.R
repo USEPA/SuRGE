@@ -85,7 +85,8 @@ get_awberc_data <- function(path, data, sheet) {
       analyte == "op" & finalConc < 3 ~ 3,
       analyte == "tn" & finalConc < 20.9 ~ 8,
       analyte == "tp" & finalConc < 8 ~ 8,
-      TRUE ~ finalConc))
+      TRUE ~ finalConc)) %>%
+    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))  # remove non-numeric chars
 
     # mutate(sample_type = case_when(
     #   sample_type == "duplicate" ~ "unknown",

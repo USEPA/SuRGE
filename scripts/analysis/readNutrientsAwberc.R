@@ -184,7 +184,7 @@ get_awberc_data <- function(path, data, sheet) {
       sample_type == "blank" ~ "blank", # see Wiki lake_id, site_id, and sample_depth formats
       TRUE ~ sample_depth)) %>%
     select(-crossid)  %>% # no longer need crossid
-    mutate(site_id = as.character(site_id)) # convert to char to match other chem data 
+    mutate(site_id = as.numeric(site_id)) # convert to char to match other chem data 
   
     
   return(d)

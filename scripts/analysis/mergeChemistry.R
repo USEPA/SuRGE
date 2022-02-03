@@ -1,12 +1,34 @@
 
+
+# Bring in chemistry data objects----
+
+localName <- "Joe/" # R proj folder at SP
+
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
+# data object name: ada.anions
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
+# data object name: d.anions
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
+# data object name: ada.nutrients
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results
+# data object name: chem21
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsR10_2018.R")) # read AWBERC nutrients for 2018 R10
+# data object name: chem18
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcAda.R")) # read ADA TOC/DOC data
+# data object name: ada.oc
+# Need to add site_id to script
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcMasi.R")) # read 2020 TOC run at MASI lab
+# data object name: toc.masi
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
+# data object name: tteb.all
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
+# data object name: chl18
+
+
 # merge chem21, chem18, and ada.nutrients
-all.nutrients <- full_join(nutrientsAwberc18, nutrientsAwberc21) %>%
-  full_join(ada.nutrients)
-
-# do we want a column(s) that indicates the year and/or lab?
-
-colnames(ada.nutrients)
-colnames(chem18)
-colnames(chem21)
-# chem21 and chem18 are identical; ada.nutrients has 4 add. columns for no3
+chemistry <- list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
+                      ada.oc, toc.masi, tteb.all, chl18) %>% 
+  # map_depth(2, ~select(., -sample_filter)) %>%
+  # map_depth(1, function(x) reduce(x, left_join)) %>%
+  reduce(full_join) 
 

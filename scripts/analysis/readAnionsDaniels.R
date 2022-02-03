@@ -48,7 +48,8 @@ d.anions <- d.anions %>%
               .cols = contains("_l"), # rename columns with this pattern
               ~sub("_.*", "", .x) # extract before first occurrence of _
               ) %>% 
-  cbind(., analytes.units) # add units to data.
+  cbind(., analytes.units) %>% # add units to data.
+  mutate(site_id = as.numeric(site_id)) # make site id numeric
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 

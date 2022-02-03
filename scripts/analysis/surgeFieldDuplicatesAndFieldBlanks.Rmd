@@ -51,17 +51,14 @@ SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-name = c("tno2_3", "tnh4", "trp", "tp",	"tn",	"tno2_3",	"tnh4",	"trp", "tp",
-         "tn",	"toc", "chlorophyll_a",	"chlorophyll_b", "al", "as", "ba", "be",
-         "ca", "cd", "cr",	"cu",	"fe",	"k", "li",	"mg",	"mn",	"na",	"ni",	"pb",
-         "p", "sb", "si", "sn", "sr", "s", "v", "zn",	"no2_3", "no2",	"no3", "nh4",
-         "nh4_low_range", "op", "tp",	"tn",	"toc", "doc", "br",	"cl", "so4", "f")
-mdl = c(6, 6,	3, 8,	20.9,	6, 6,	3, 5,	25, 100, 9, 9999999, 4,	4, 1,	5, 10, 0.3,	1,
-        1, 1,	300, 5,	5, 1, 30, 1, 2, 5, 3, 20, 1, 1, 3, 1, 0.5, 0.03, 0.013,
-        0.03,0.016, 3.22, 0.005, 0.01, 0.021, 0.043, 0.043, 0.041, 0.026, 0.151, 
-        0.014) # 9999999 is a placeholder; value not determined yet
-# need to differentiate between years for nutrients(?)
-# chlorophyll a is listed twice in the wiki. I changed 2nd one to chlorophyll_b
+name = c("tno2_3", "tnh4", "trp", "tp", "tn", "toc", "chla", "al", "as", "ba", "be", 
+         "ca", "cd", "cr", "cu", "fe", "k", "li", "mg", "mn", "na", "ni", "pb", "p", 
+         "sb", "si", "sn", "sr", "s", "v", "zn", "no2_3", "no2", "no3", "nh4", "op", 
+         "tp", "tn", "toc", "doc", "br", "cl", "so4", "f")
+mdl = c(6, 6, 3, 5, 25, 100, 9999999, 4, 4, 1, 5, 10, 0.3, 1, 1, 1, 300, 5, 5, 1, 30, 1,
+        2, 5, 3, 20, 1, 1, 3, 1, 0.5, 0.01, 0.012, 0.01, 0.00171, 0.002, 0.002, 0.002, 
+        0.102, 0.102, 0.041, 0.026, 0.151, 0.014)
+# 9999999 is a placeholder; value not determined yet
 detlimits <- data.frame(name, mdl) 
 
 ```
@@ -111,8 +108,6 @@ ada.anions %>% ungroup() %>%
 ```
 
 ### Nutrients
-
-
 
 ### Metals
 

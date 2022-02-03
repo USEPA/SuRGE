@@ -137,4 +137,6 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
 
 # clean up final object
 tteb.all <- tteb.all %>% select(-lab_id, -coc, -notes, -sampid) %>%
-  rename(cin_shipping_notes = shipping_notes)
+  rename(cin_shipping_notes = shipping_notes) %>%
+  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))  # remove non numeric chars
+
