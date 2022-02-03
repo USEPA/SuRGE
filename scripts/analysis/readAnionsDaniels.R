@@ -22,7 +22,8 @@ d.anions <- read_excel(paste0(userPath,
                                  TRUE ~ "unknown"),
          #https://stackoverflow.com/questions/35403491/r-regex-extracting-a-string-between-a-dash-and-a-period
          lake_id = gsub("^[^-]*-([^-]+).*", "\\1", sample_id) %>% 
-           as.numeric() %>% as.character()) %>%
+           as.numeric() %>% as.character(),
+         d_anion_analysis_date = as.Date(gsub( " .*$", "", analysis_date), format = "%m/%d/%Y")) %>%
   mutate(lake_id = case_when(str_detect(sample_id, "LAC") ~ paste0(lake_id, "_lacustrine"),
                              str_detect(sample_id, "TRAN") ~ paste0(lake_id, "_transitional"),
                              str_detect(sample_id, "RIV") ~ paste0(lake_id, "_riverine"),
@@ -49,7 +50,8 @@ d.anions <- d.anions %>%
               ~sub("_.*", "", .x) # extract before first occurrence of _
               ) %>% 
   cbind(., analytes.units) %>% # add units to data.
-  mutate(site_id = as.numeric(site_id)) # make site id numeric
+  mutate(site_id = as.numeric(site_id)) %>% # make site id numeric
+  select(-no, -sample_id, -analysis_date, -comments)
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
@@ -67,13 +69,13 @@ setdiff(d.anions[c("lake_id", "sample_depth", "sample_type")],
 # 6. # Have all Daniels anion samples in comprehensive sample list been analyzed?
 # Print rows from comprehensive sample list not in Daniels anion data.
 # Missing a bunch
-setdiff(chem.samples.foo %>% filter(analyte_group == "anions", 
-                                    sample_year == 2021, # only 2021 samples to daniels
-                                    lab != "ADA") %>% # ADA ran their own anions 
-          select(lake_id, sample_depth, sample_type),
-        d.anions[,c("lake_id", "sample_depth", "sample_type")]) %>%
-  arrange(lake_id) %>%
-  write.table(file = paste0(userPath, "data/chemistry/anions_ada_daniels/danielsMissingAnions.txt"), row.names = FALSE)
+# setdiff(chem.samples.foo %>% filter(analyte_group == "anions", 
+#                                     sample_year == 2021, # only 2021 samples to daniels
+#                                     lab != "ADA") %>% # ADA ran their own anions 
+#           select(lake_id, sample_depth, sample_type),
+#         d.anions[,c("lake_id", "sample_depth", "sample_type")]) %>%
+#   arrange(lake_id) %>%
+#   write.table(file = paste0(userPath, "data/chemistry/anions_ada_daniels/danielsMissingAnions.txt"), row.names = FALSE)
 
 
 

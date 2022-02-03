@@ -17,12 +17,12 @@ source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2
 source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data
 source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab
 source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC
-source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin
-source("scripts/analysis/readTaxonomy.R") # GB taxonomy
+#source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin
+#source("scripts/analysis/readTaxonomy.R") # GB taxonomy
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll
 
 # Aggregate and review chemistry
-# need a script merging chemistry objects and field sheets
+source("scripts/analysis/mergeChemistry.R")
 # need a script to document blanks and percent agreement among dups
 # need a script to strip out blanks and dups
 

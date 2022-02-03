@@ -2,7 +2,8 @@
 
 # Bring in chemistry data objects----
 
-localName <- "Joe/" # R proj folder at SP
+#localName <- "Joe/" # R proj folder at SP
+localName <- "Jake/" # R proj folder at SP
 
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
 # data object name: ada.anions
@@ -25,10 +26,28 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChl
 # data object name: chl18
 
 
+# inspect object to merge
+# each df contains 10 - 95 observations
+list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
+     ada.oc, toc.masi, tteb.all, chl18) %>% 
+  map_dfc(., nrow)
+
+# merged object should have at most 462 rows
+list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
+     ada.oc, toc.masi, tteb.all, chl18) %>% 
+  map_int(., nrow) %>% sum(.) # 462 observations
+
 # merge chem21, chem18, and ada.nutrients
 chemistry <- list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
                       ada.oc, toc.masi, tteb.all, chl18) %>% 
   # map_depth(2, ~select(., -sample_filter)) %>%
   # map_depth(1, function(x) reduce(x, left_join)) %>%
   reduce(full_join) 
+dim(chemistry) #430 rows?
+
+# Any duplicates among unique identifiers?
+# 338 duplicates, this is a problem
+janitor::get_dupes(chemistry %>% select(lake_id, site_id, sample_depth, sample_type))
+
+
 

@@ -3,8 +3,8 @@
 # CREATE LIST OF CHEM SAMPLES
 # 1.  filter comprehensive lake list to 2022 lakes
 lake.list.2022 <- lake.list %>% 
-  filter(sample_year == 2022, # lakes sampled in or before 2021
-         !grepl(c("PI|LD|TR"), sample_year)) %>% # exclude inacessible lakes (may not be necessary)
+  filter(sample_year == 2022, # 2022 lakes
+         !grepl(c("PI|LD|TR"), sample_year)) %>% # exclude inaccessible lakes (may not be necessary)
   select(lake_id, sample_year, lab)
 
 
@@ -22,10 +22,10 @@ foo <- lake.list.2022 %>% group_by(lab) %>%
 # so assigning randomly
 lake.list.2022 <- lake.list.2022 %>%
   mutate(qa_qc = c(1, NA, # RTP, 2 lakes, one qa.qc
-                   1,1, NA, NA, # NAR, 4 lakes, two qa.qc
-                   1, NA, NA, # DOE, 3 lakes, 1 qa.qc
+                   1,1, 1, NA, NA, NA, # NAR, 6 lakes, three qa.qc
+                   1, 1, NA, NA, # DOE, 4 lakes, 2 qa.qc
          rep(1,7), rep(NA, 8), #CIN, 15 lakes, 7 qa.qc
-                   rep(1,3), rep(NA, 4))) #ADA 7 lakes, 3 qa.qc
+                   rep(1,3), rep(NA, 4))) # ADA 7 lakes, 3 qa.qc
 
 
 # 4. create vectors of analyte groups.
@@ -39,6 +39,7 @@ metals <- c("al", "as", "ba", "be", "ca",
             "sn", "sr", "s", "v", "zn")
 algae.nar <- c("microcystin", "phycocyanin", "chla")
 algae.gb <- c("taxonomy", "physiology")
+suva <- "suva"
 
 # 5. create df of chem samples collected from qa.qc lakes.
 qa.qc.samples <- expand.grid(lake_id = lake.list.2022 %>% # lake_id for all sampled lakes
@@ -47,7 +48,7 @@ qa.qc.samples <- expand.grid(lake_id = lake.list.2022 %>% # lake_id for all samp
                                pull(), # extract lake_id to vector
                              sample_type = c("duplicate", "blank"),
                              analyte = c(nutrients, anions, organics, 
-                                         metals, algae.nar), # no qa.qc for algae.gb analytes
+                                         metals, algae.nar, suva), # no qa.qc for algae.gb analytes
                              sample_depth = "shallow", # qa.qc only collected from shallow depth
                              stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
   as_tibble() %>%
@@ -58,12 +59,12 @@ qa.qc.samples <- expand.grid(lake_id = lake.list.2022 %>% # lake_id for all samp
 unknown.samples <- expand.grid(lake_id = lake.list.2022$lake_id, # lake_id for all sampled lakes
                                sample_type = "unknown", # unknowns collected at all lakes
                                analyte = c(nutrients, anions, organics, 
-                                           metals, algae.nar, algae.gb),
+                                           metals, algae.nar, algae.gb, suva),
                                sample_depth = c("shallow", "deep"),
                                stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
   as_tibble() %>%
-  # algal indicator samples not collected at depth.  Filter out
-  filter(!(sample_depth == "deep" & analyte %in% c(algae.nar, algae.gb))) %>%
+  # algal indicator and suva samples not collected at depth.  Filter out
+  filter(!(sample_depth == "deep" & analyte %in% c(algae.nar, algae.gb, suva))) %>%
   arrange(lake_id)
 
 # 7. Combine df of qa.qc and df of unknowns.  Merge 'lab' and 'sample_year' fields
@@ -80,7 +81,8 @@ chem.samples.2022 <- chem.samples.2022 %>%
                                    analyte %in% organics ~ "organics",
                                    analyte %in% metals ~ "metals",
                                    analyte %in% algae.nar ~ "algae.nar",
-                                   analyte %in% algae.gb ~"algae.gb",
+                                   analyte %in% algae.gb ~ "algae.gb",
+                                   analyte %in% suva ~ "suva",
                                    TRUE ~ "oops"))
 
 unique(chem.samples$analyte_group) # no 'oops', good
