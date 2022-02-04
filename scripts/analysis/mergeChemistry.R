@@ -34,10 +34,52 @@ list(ada.anions, d.anions, ada.nutrients, chem21, chem18,
      ada.oc, toc.masi, tteb.all, chl18) %>% 
   map_dfc(., nrow)
 
-# merged object should have at most 462 rows
+# are the unique IDs formatted identically across the dfs? yes
 list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
      ada.oc, toc.masi, tteb.all, chl18) %>% 
-  map_int(., nrow) %>% sum(.) # 462 observations
+  map(., function(x) select(x, lake_id, site_id, sample_depth, sample_type) %>% str(.))
+
+# merge a few and check results
+foo <- 
+ada.anions %>%
+  ungroup() %>%
+  full_join(ungroup(d.anions)) %>% # 76 observations, correct, no dups
+  full_join(ungroup(ada.nutrients)) # 138 observations, no dups
+janitor::get_dupes(foo %>% select(lake_id, site_id, sample_depth, sample_type)) # 0 dups!
+
+# add chem21
+poo <- foo %>% 
+  full_join(ungroup(chem21)) # 230 observations
+janitor::get_dupes(poo %>% select(lake_id, site_id, sample_depth, sample_type)) # 129 dups!
+# Dups in chem21
+janitor::get_dupes(chem21 %>% select(lake_id, site_id, sample_depth, sample_type)) # 2 dups, doesn't explain problem
+
+
+# lake 119 is duplicated in poo.  take a close look at that lake.
+# all look fine?
+zoo <- poo %>% 
+  filter(lake_id == "119")
+str(zoo) # looks fine
+unique(zoo$lake_id) # only 119
+unique(zoo$site_id) # only 4
+unique(zoo$sample_depth) # only deep and shallow
+unique(zoo$sample_type) # only unknown
+
+# are there other duplicated names between foo and chem21?
+# OK, chem21 and ada.nutrients share analyte names!  I think we need to first
+# merge objects that share analyte names!
+names(foo)[names(foo) %in% names(chem21)]
+
+nutrients1 <- chem21 %>%
+  full_join(ada.nutrients)  # 116 observations, just the two known dups in chem21
+janitor::get_dupes(select(nutrients1, lake_id, site_id, sample_depth, sample_type)) 
+
+nutrients2 <- nutrients1 %>% # 176 observations, just the two known dups in chem21!
+  full_join(chem18)
+janitor::get_dupes(select(nutrients2, lake_id, site_id, sample_depth, sample_type)) 
+
+
+
 
 # merge chem21, chem18, and ada.nutrients
 chemistry <- list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
@@ -61,6 +103,6 @@ dim(chemistry) #430 rows?
 
 # Any duplicates among unique identifiers?
 # 338 duplicates, this is a problem
-janitor::get_dupes(chemistry %>% select(lake_id, site_id, sample_depth, sample_type))
+janitor::get_dupes(foo %>% select(lake_id, site_id, sample_depth, sample_type))
 
 
