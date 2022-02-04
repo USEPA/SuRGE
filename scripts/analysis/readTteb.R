@@ -48,9 +48,10 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>%
   mutate(across(al:zn, # 
                 ~ "ug/l", 
                 .names = "{col}_units")) %>%
+  mutate(toc_units = "mg_c_l") %>% # TOC is the exception
   mutate(across(al:zn, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
-  mutate(across(al:zn, # convert values from mg/l to ug/l; see Wiki page
+  mutate(across(c(al:zn, -toc), # convert values from mg/l to ug/l; see Wiki page
                 ~ .*1000)) %>%
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, everything()) # put these columns first
@@ -96,7 +97,7 @@ setdiff(chem.samples.foo %>%
           distinct() %>% # remove duplicate "metals"
           select(lake_id, sample_depth, sample_type, analyte),
         ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")]) %>%
-  arrange(lake_id) 
+  arrange(lake_id)
 
 # 147
 # ttebMetals19July2021.pdf contains three shallow metals samples for lake 147.  
@@ -138,5 +139,8 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
 # clean up final object
 tteb.all <- tteb.all %>% select(-lab_id, -coc, -notes, -sampid) %>%
   rename(cin_shipping_notes = shipping_notes) %>%
-  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))  # remove non numeric chars
+  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # remove non numeric chars
+  rename(tteb.toc = toc, # rename these fields for the full_join in the merge script
+         tteb.toc_units = toc_units, 
+         tteb.toc_flag = toc_flag) 
 
