@@ -39,42 +39,16 @@ list(ada.anions, d.anions, ada.nutrients, chem21, chem18,
      ada.oc, toc.masi, tteb.all, chl18) %>% 
   map(., function(x) select(x, lake_id, site_id, sample_depth, sample_type) %>% str(.))
 
-# merge a few and check results
-foo <- 
-ada.anions %>%
-  ungroup() %>%
-  full_join(ungroup(d.anions)) %>% # 76 observations, correct, no dups
-  full_join(ungroup(ada.nutrients)) # 138 observations, no dups
-janitor::get_dupes(foo %>% select(lake_id, site_id, sample_depth, sample_type)) # 0 dups!
-
-# add chem21
-poo <- foo %>% 
-  full_join(ungroup(chem21)) # 230 observations
-janitor::get_dupes(poo %>% select(lake_id, site_id, sample_depth, sample_type)) # 129 dups!
-# Dups in chem21
-janitor::get_dupes(chem21 %>% select(lake_id, site_id, sample_depth, sample_type)) # 2 dups, doesn't explain problem
-
-
-# lake 119 is duplicated in poo.  take a close look at that lake.
-# all look fine?
-zoo <- poo %>% 
-  filter(lake_id == "119")
-str(zoo) # looks fine
-unique(zoo$lake_id) # only 119
-unique(zoo$site_id) # only 4
-unique(zoo$sample_depth) # only deep and shallow
-unique(zoo$sample_type) # only unknown
-
-# are there other duplicated names between foo and chem21?
-# OK, chem21 and ada.nutrients share analyte names!  I think we need to first
-# merge objects that share analyte names!
-names(foo)[names(foo) %in% names(chem21)]
-
 
 # Merge objects----
+# All observations are uniquely identified by a combination of lake_id, site_id,
+# sample_depth, and sample_type.  Objects must be joined in proper order to avoid
+# unexpected duplicates.  Best to merge objects that share names other than
+# the unique identifiers.  For example, all nutrient objects should be joined, all
+# anion object should be joined, all chlorophyll should be joined, etc.  After 
+# that, we can join together the nutrient, anion, chlorophyll....objects.
 
 # merge objects one at a time to check duplicates
-
 nutrients1 <- chem21 %>%
   full_join(chem18) 
 janitor::get_dupes(select(nutrients1, lake_id, site_id, sample_depth, sample_type)) 
@@ -82,7 +56,7 @@ janitor::get_dupes(select(nutrients1, lake_id, site_id, sample_depth, sample_typ
 nutrients2 <- nutrients1 %>%
   full_join(ada.nutrients)
 janitor::get_dupes(select(nutrients2, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 233)
+# no dupes
 
 anions <- ada.anions %>%
   full_join(d.anions)
@@ -97,26 +71,34 @@ janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type))
 metal.chl <- tteb.all %>%
   full_join(chl18)
 janitor::get_dupes(select(metal.chl, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 275)
+# 2 dupe (lake 275).  lake 275 dupe is known (see readTteb.R)
 
 metal.chl.oc <- metal.chl %>%
   full_join(oc)
 janitor::get_dupes(select(metal.chl.oc, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 275)
+# 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
 
 metal.chl.oc.anions <- metal.chl.oc %>%
   full_join(anions)
 janitor::get_dupes(select(metal.chl.oc.anions, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 275)
+# 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
 
 chemistry <- nutrients2 %>%
   full_join(metal.chl.oc.anions)
 janitor::get_dupes(select(chemistry, lake_id, site_id, sample_depth, sample_type)) 
-# 4 dupe (lake 275, lake 233)
-# lake 233 dupe is ; lake 275 dupe is known (see readTteb.R)
+# 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
 
 
 
+# The tteb.all object contains metals and TOC data.  To prevent erroneous duplicates
+# when joining tteb.all with other objects containing TOC data, we appended "tteb."
+# to TOC column names in tteb.all (see readTteb.R).  Any samples where TOC was run
+# at TTEB will have TOC numbers in the tteb.toc columns AND NAs in the TOC columns
+# that came from toc.masi and ada.oc.  For any observations that meet these criteria,
+# move the tteb OC data into the OC columns, then remove the tteb.toc columns.
+# TTEB will also run anions from the 2022 field season.  When we get those data,
+# we will need to take a similar approach to deal with anion analytes in tteb,
+# ada.anions, and d.anions.
 chemistry <- chemistry %>%
   mutate(toc = case_when(
     is.na(toc) & !is.na(tteb.toc) ~ tteb.toc,

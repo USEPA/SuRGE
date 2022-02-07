@@ -140,6 +140,8 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
 tteb.all <- tteb.all %>% select(-lab_id, -coc, -notes, -sampid) %>%
   rename(cin_shipping_notes = shipping_notes) %>%
   mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # remove non numeric chars
+  # rename the toc fields to enable a clean join with other objects containing
+  # TOC data (i.e. oc.ada, masi.toc).  See mergeChemistry.R
   rename(tteb.toc = toc, # rename these fields for the full_join in the merge script
          tteb.toc_units = toc_units, 
          tteb.toc_flag = toc_flag) 
