@@ -73,7 +73,7 @@ coc.vector <- coc.list %>%
 get_awberc_data <- function(path, data, sheet) { 
   
   d <- read_excel(paste0(path, data), #
-                  sheet = sheet, skip = 1) %>%
+                  sheet = sheet, skip = 1, guess_max = 10000) %>%
   # d <- read_excel(paste0(cin.awberc.path,
   #                        "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx"), #
   #                 sheet = "2021 Data", skip = 1) %>%
@@ -183,6 +183,10 @@ get_awberc_data <- function(path, data, sheet) {
     mutate(sample_depth = case_when(
       sample_type == "blank" ~ "blank", # see Wiki lake_id, site_id, and sample_depth formats
       TRUE ~ sample_depth)) %>%
+    mutate(rep = case_when(
+      rep == "A" ~ "1", # convert to number for dup_agg function
+      rep == "B" ~ "2",
+      TRUE ~ rep)) %>%
     select(-crossid)  %>% # no longer need crossid
     mutate(site_id = as.numeric(site_id)) # convert to char to match other chem data 
   
@@ -253,6 +257,7 @@ chem21 %>% distinct(lake_id) %>% print(n=Inf)
 
 
 chem21 <- dup_agg(chem21) # final object, cast to wide with dups aggregated
+
 
 # Sample inventory----------------------
 # Are all collected samples included?

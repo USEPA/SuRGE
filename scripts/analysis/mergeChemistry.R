@@ -26,7 +26,7 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChl
 
 
 
-
+# Inspect objects----
 
 # inspect object to merge
 # each df contains 10 - 95 observations
@@ -70,39 +70,64 @@ unique(zoo$sample_type) # only unknown
 # merge objects that share analyte names!
 names(foo)[names(foo) %in% names(chem21)]
 
+
+# Merge objects----
+
+# merge objects one at a time to check duplicates
+
 nutrients1 <- chem21 %>%
-  full_join(ada.nutrients)  # 116 observations, just the two known dups in chem21
+  full_join(chem18) 
 janitor::get_dupes(select(nutrients1, lake_id, site_id, sample_depth, sample_type)) 
 
-nutrients2 <- nutrients1 %>% # 176 observations, just the two known dups in chem21!
-  full_join(chem18)
+nutrients2 <- nutrients1 %>%
+  full_join(ada.nutrients)
 janitor::get_dupes(select(nutrients2, lake_id, site_id, sample_depth, sample_type)) 
+# 2 dupe (lake 233)
+
+anions <- ada.anions %>%
+  full_join(d.anions)
+janitor::get_dupes(select(anions, lake_id, site_id, sample_depth, sample_type)) 
+# no dupes
+
+oc <- ada.oc %>%
+  full_join(toc.masi)
+janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type)) 
+# no dupes
+
+metal.chl <- tteb.all %>%
+  full_join(chl18)
+janitor::get_dupes(select(metal.chl, lake_id, site_id, sample_depth, sample_type)) 
+# 2 dupe (lake 275)
+
+metal.chl.oc <- metal.chl %>%
+  full_join(oc)
+janitor::get_dupes(select(metal.chl.oc, lake_id, site_id, sample_depth, sample_type)) 
+# 2 dupe (lake 275)
+
+metal.chl.oc.anions <- metal.chl.oc %>%
+  full_join(anions)
+janitor::get_dupes(select(metal.chl.oc.anions, lake_id, site_id, sample_depth, sample_type)) 
+# 2 dupe (lake 275)
+
+chemistry <- nutrients2 %>%
+  full_join(metal.chl.oc.anions)
+janitor::get_dupes(select(chemistry, lake_id, site_id, sample_depth, sample_type)) 
+# 4 dupe (lake 275, lake 233)
+# lake 233 dupe is ; lake 275 dupe is known (see readTteb.R)
 
 
 
+chemistry <- chemistry %>%
+  mutate(toc = case_when(
+    is.na(toc) & !is.na(tteb.toc) ~ tteb.toc,
+    TRUE ~ toc)) %>%
+  mutate(toc_flag = case_when(
+    is.na(toc_flag) & !is.na(tteb.toc_flag) ~ tteb.toc_flag,
+    TRUE ~ toc_flag)) %>%
+  mutate(toc_units = case_when(
+    is.na(toc_units) & !is.na(tteb.toc_units) ~ "mg_c_l",
+    TRUE ~ toc_units)) %>%
+  select(-contains("tteb"))
 
-# merge chem21, chem18, and ada.nutrients
-chemistry <- list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
-                      ada.oc, toc.masi, tteb.all, chl18) %>% 
-  # map_depth(2, ~select(., -sample_filter)) %>%
-  # map_depth(1, function(x) reduce(x, left_join)) %>%
-  reduce(full_join) 
-#%>%
-  # mutate(toc = case_when(
-  #   is.na(toc) & !is.na(tteb.toc) ~ tteb.toc, 
-  #   TRUE ~ toc)) %>% 
-  # mutate(toc_flag = case_when(
-  #   is.na(toc_flag) & !is.na(tteb.toc_flag) ~ tteb.toc_flag, 
-  #   TRUE ~ toc_flag)) %>% 
-  # mutate(toc_units = case_when(
-  #   is.na(toc_units) & !is.na(tteb.toc_units) ~ "mg_c_l", 
-  #   TRUE ~ toc_units)) %>%
-  # select(-contains("tteb")) 
-
-dim(chemistry) #430 rows?
-
-# Any duplicates among unique identifiers?
-# 338 duplicates, this is a problem
-janitor::get_dupes(foo %>% select(lake_id, site_id, sample_depth, sample_type))
 
 
