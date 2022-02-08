@@ -12,8 +12,8 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
-localName <- "Jake/" # R proj folder at SP.
-# localName <- "Joe/" # R proj folder at SP.
+# localName <- "Jake/" # R proj folder at SP.
+localName <- "Joe/" # R proj folder at SP.
 
 # load project libraries
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/masterLibrary.R"))
@@ -27,7 +27,6 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/chemSam
 # Read chemistry
 # uncomment rows to bring in more data
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results 
@@ -37,7 +36,7 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAni
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # NAR chl, phyco, and microcystin
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTaxonomy.R")) # GB taxonomy
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
 ```
 
 ## Background
@@ -55,10 +54,10 @@ name = c("tno2_3", "tnh4", "trp", "tp", "tn", "toc", "chla", "al", "as", "ba", "
          "ca", "cd", "cr", "cu", "fe", "k", "li", "mg", "mn", "na", "ni", "pb", "p", 
          "sb", "si", "sn", "sr", "s", "v", "zn", "no2_3", "no2", "no3", "nh4", "op", 
          "tp", "tn", "toc", "doc", "br", "cl", "so4", "f")
-mdl = c(6, 6, 3, 5, 25, 100, 9999999, 4, 4, 1, 5, 10, 0.3, 1, 1, 1, 300, 5, 5, 1, 30, 1,
+mdl = c(6, 6, 3, 5, 25, 100, 9, 4, 4, 1, 5, 10, 0.3, 1, 1, 1, 300, 5, 5, 1, 30, 1,
         2, 5, 3, 20, 1, 1, 3, 1, 0.5, 0.01, 0.012, 0.01, 0.00171, 0.002, 0.002, 0.002, 
         0.102, 0.102, 0.041, 0.026, 0.151, 0.014)
-# 9999999 is a placeholder; value not determined yet
+# need to add chl-a detection limit when available
 detlimits <- data.frame(name, mdl) 
 
 ```
@@ -115,6 +114,44 @@ ada.anions %>% ungroup() %>%
 
 ### Algal pigments
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+# table
+# formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
+chl18 %>% 
+  ungroup() %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
+  pivot_longer(!c(lake_id, sample_type)) %>% 
+  group_by(lake_id, name, sample_type) %>% 
+  summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  select(-max_blank) %>%
+  rename(chla = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown)  %>%
+  kableExtra::kbl(booktabs = TRUE, # nice formatting
+                  caption = "Minimum and Maximum Chlorophyll-A Concentrations in Unknowns") %>% # table title
+  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2))# %>% # header above the unknowns
+  # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
+  # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
+  # kableExtra::pack_rows("", 9, 12) # space between second and third lake
+
+
+chl18 %>% ungroup() %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = detlimits, by = "name") %>%
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank()) + # remove legend titles
+  ggtitle("Chlorophyll-A field blanks") +
+  facet_wrap(~name, scales = "free")
+
+```
 
 ## Field duplicates
 
