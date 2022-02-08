@@ -1,42 +1,126 @@
 # READ FIELD SHEETS
 
 
-# 1. Create a list of files to read in.  The completed data files all
-# contain the pattern ...surgeDataXXX.xlsx
-
-fileNames <- vector() # empty vector to hold results
+# 1. Create a list of file paths where the data are stored.  
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS")
+paths <- paste0(userPath,  "data/", labs)
 
-# loop to read in file names from lab specific folders
-# this gets everything except 2018 R10 data.  Those data files are '...EqAreaData.xlsx'
-# and need to be inspected for consistency with SuRGE data files.
-for (i in 1:length(labs)) {
-fileNames.i <- list.files(path = paste0(userPath,  "data/", labs[i]),
-                        pattern = "surgeData", # file names containing this pattern
-                        recursive = TRUE) %>% # look in all subdirectories
-  .[!grepl(c(".pdf|.docx"), .)] # remove pdf and .docx review files
+# code below creates a list of paths for each file.  This can then be fed into
+# a loop for reading each file.  This has been deprecated in favor of fs::dir_ls
+# and purr map (see below).  
+# Create a list of files to read in.  The completed data files all
+# contain the pattern ...surgeDataXXX.xlsx.  This gets everything except 2018 
+# R10 data.  Those data files are '...EqAreaData.xlsx' and need to be inspected 
+# for consistency with SuRGE data files.
 
-if(length(fileNames.i) > 0) { # if any file names were read...
-  fileNames.i <- paste0(labs[i], "/", fileNames.i) # add lab directory to file path
-}
+# labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS")
+# paths <- paste0(userPath,  "data/", labs)
 
-fileNames <- c(fileNames, fileNames.i) # append new names to existing vector
-}
+#  for (i in 1:length(labs)) {
+#  fileNames.i <- list.files(path = paste0(userPath,  "data/", labs[i]),
+#                          pattern = "surgeData", # file names containing this pattern
+#                          recursive = TRUE) %>% # look in all subdirectories
+#    .[!grepl(c(".pdf|.docx"), .)] # remove pdf and .docx review files
+# 
+#  if(length(fileNames.i) > 0) { # if any file names were read...
+#    fileNames.i <- paste0(labs[i], "/", fileNames.i) # add lab directory to file path
+#  }
+# 
+#  fileNames <- c(fileNames, fileNames.i) # append new names to existing vector
+#  }
 
 # 2.  Read in files
-mylist.data <- list()  # Create an empty list to hold data
+# # deprecated in favor of function below
+#  mylist.data <- list()  # Create an empty list to hold data
+# 
+#  for (i in 1:length(fileNames)){  # for each file
+#    data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "data") %>%
+#      janitor::clean_names()
+#    mylist.data[[i]] <- data.i
+#  }
 
-for (i in 1:length(fileNames)){  # for each file
-  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "data")
-  mylist.data[[i]] <- data.i
-}
 
+# still need to deal with dissolved gas data
 mylist.dg <- list() # Create an empty list to hold data
 
 for (i in 1:length(fileNames)){  # for each file
-  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "dissolved.gas")
+  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "dissolved.gas")  %>%
+    janitor::clean_names()
   mylist.dg[[i]] <- data.i
 }
+
+# 2. Function for reading 'data' tab of surgeData files.
+
+get_data_sheet <- function(paths){
+  #d <-  
+  fs::dir_ls(path = paths, # see above
+             regexp = 'surgeData', # file names containing this pattern
+             recurse = TRUE) %>% # look in all subdirectories
+    .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
+    
+    # map will read each file in fs_path list generated above
+    purrr::map(~read_excel(., skip = 1, sheet = "data", 
+                           na = c("NA", "", "N/A", "n/a"))) %>%
+    # format data
+    map(., function(x){
+      janitor::clean_names(x) %>%
+        # format lake_id and site_id.  See Wiki
+        mutate(lake_id = as.character(lake_id) %>%
+                 tolower(.) %>% # i.e. Lacustrine -> lacustrine
+                 str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
+                 str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
+               site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
+        # Format date and time objects
+        mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+               across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
+               trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                                 format = "%Y-%m-%d%H:%M:%S",
+                                                 tz = "UTC"),
+               chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
+                                                  format = "%Y-%m-%d%H:%M:%S",
+                                                  tz = "UTC"))
+    }) %>%
+    map_dfr(., identity) # rbinds into one df
+}
+
+# 3. Read 'data' tab of surgeData files.
+fld_sheet <- get_data_sheet(paths = paths)
+
+
+# 4. Function to read 'dissolved.gas' tab of surgeData file.
+get_dg_sheet <- function(paths){
+  #d <-  
+  fs::dir_ls(path = paths, # see above
+             regexp = 'surgeData', # file names containing this pattern
+             recurse = TRUE) %>% # look in all subdirectories
+    .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
+    
+    # map will read each file in fs_path list generated above
+    purrr::map(~read_excel(., skip = 1, sheet = "dissolved.gas", 
+                           na = c("NA", "", "N/A", "n/a"))) %>%
+    # format data
+    map(., function(x){
+      janitor::clean_names(x) %>%
+        # format lake_id and site_id.  See Wiki
+        mutate(lake_id = as.character(lake_id) %>%
+                 tolower(.) %>% # i.e. Lacustrine -> lacustrine
+                 str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
+                 str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
+               site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))
+    }) %>%
+    map_dfr(., identity) # rbinds into one df
+}
+
+# 5.  Read dissolved gas sheet
+dg_sheet <- get_dg_sheet(paths = paths)
+
+dg_sheet %>% print(n=Inf)
+
+dg_sheet %>% filter(is.na(atm_pressure) | is.na(air_temperature) | is.na(water_vol) | is.na(air_vol)) %>%
+  distinct(lake_id) %>% print(n=Inf)
+
+
+
 
 # right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
 
