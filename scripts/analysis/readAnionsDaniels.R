@@ -12,7 +12,7 @@ d.anions <- read_excel(paste0(userPath,
                        na = "n.a.") %>%
   janitor::clean_names() %>%
   select(-matches(("no2|no3|po4"))) %>% # these analytes are taken from Lachat
-  rename(fluoride_mg_l = f_mg_l) %>% # rename to be consistent with github Wiki
+  # rename(fluoride_mg_l = f_mg_l) %>% # rename to be consistent with github Wiki
   mutate(sample_depth = case_when(grepl("blank", sample_id, ignore.case = TRUE) ~ "blank",
                                   grepl("shallow", sample_id, ignore.case = TRUE) ~ "shallow",
                                   grepl("deep", sample_id, ignore.case = TRUE) ~ "deep",
@@ -51,7 +51,7 @@ d.anions <- d.anions %>%
               ) %>% 
   cbind(., analytes.units) %>% # add units to data.
   mutate(site_id = as.numeric(site_id)) %>% # make site id numeric
-  select(-no, -sample_id, -analysis_date, -comments)
+  select(-no, -sample_id, -analysis_date, -d_anion_analysis_date, -comments)
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
