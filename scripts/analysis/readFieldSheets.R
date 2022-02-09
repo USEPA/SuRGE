@@ -40,15 +40,6 @@ paths <- paste0(userPath,  "data/", labs)
 #  }
 
 
-# still need to deal with dissolved gas data
-mylist.dg <- list() # Create an empty list to hold data
-
-for (i in 1:length(fileNames)){  # for each file
-  data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "dissolved.gas")  %>%
-    janitor::clean_names()
-  mylist.dg[[i]] <- data.i
-}
-
 # 2. Function for reading 'data' tab of surgeData files.
 
 get_data_sheet <- function(paths){
@@ -57,7 +48,7 @@ get_data_sheet <- function(paths){
              regexp = 'surgeData', # file names containing this pattern
              recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
-    
+   # .[12] %>%
     # map will read each file in fs_path list generated above
     purrr::map(~read_excel(., skip = 1, sheet = "data", 
                            na = c("NA", "", "N/A", "n/a"))) %>%

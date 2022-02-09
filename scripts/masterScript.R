@@ -8,7 +8,7 @@ source("scripts/analysis/readSurgeLakes.R") # read in survey design file
 source("scripts/analysis/chemSampleList.R") # creates chem.samples.foo, an inventory of all collected chem sample
 #source("scripts/analysis/readFieldSheets.R") # read in data from field sheets. under development
 
-# Read chemistry
+# Read chemistry and field sheets
 source("scripts/analysis/readAnionsAda.R") # read ADA lab anions
 source("scripts/analysis/readAnionsDaniels.R") # read Kit Daniels anions
 source("scripts/analysis/readNutrientsAda.R") # read nutrients ran in ADA lab
@@ -22,9 +22,17 @@ source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll
 
 # Aggregate and review chemistry
-source("scripts/analysis/mergeChemistry.R")
-# need a script to document blanks and percent agreement among dups
-# need a script to strip out blanks and dups
+source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
+source("scripts/analysis/mergeChemistry.R") # merge all chem objects
+source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates
+
+# Read and merge field sheets
+source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx
+source("scripts/analysis/mergeChemistryFieldSheets.R")
+# need to do something with dg_sheet
+
+# Prep 2020 and 2021 data sets for RAPID reporting
+source("scripts/analysis/rapidReport.R")
 
 
 # Diffusive emission rates

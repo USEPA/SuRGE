@@ -83,7 +83,7 @@ metal.chl.oc.anions <- metal.chl.oc %>%
 janitor::get_dupes(select(metal.chl.oc.anions, lake_id, site_id, sample_depth, sample_type)) 
 # 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
 
-chemistry <- nutrients2 %>%
+chemistry_all <- nutrients2 %>%
   full_join(metal.chl.oc.anions)
 janitor::get_dupes(select(chemistry, lake_id, site_id, sample_depth, sample_type)) 
 # 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
@@ -99,7 +99,7 @@ janitor::get_dupes(select(chemistry, lake_id, site_id, sample_depth, sample_type
 # TTEB will also run anions from the 2022 field season.  When we get those data,
 # we will need to take a similar approach to deal with anion analytes in tteb,
 # ada.anions, and d.anions.
-chemistry <- chemistry %>%
+chemistry_all <- chemistry_all %>%
   mutate(toc = case_when(
     is.na(toc) & !is.na(tteb.toc) ~ tteb.toc,
     TRUE ~ toc)) %>%
