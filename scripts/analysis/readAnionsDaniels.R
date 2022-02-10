@@ -28,7 +28,18 @@ d.anions <- read_excel(paste0(userPath,
                              str_detect(sample_id, "TRAN") ~ paste0(lake_id, "_transitional"),
                              str_detect(sample_id, "RIV") ~ paste0(lake_id, "_riverine"),
                              lake_id == "69" ~ "69_riverine",
-                             TRUE ~ lake_id))
+                             TRUE ~ lake_id)) %>%
+  # create the analyte_flag column
+  mutate(f_flag = case_when(is.na(f_mg_l) ~ "<", TRUE ~ "")) %>% # TRUE ~ NA throws error
+  mutate(cl_flag = case_when(is.na(cl_mg_l) ~ "<", TRUE ~ "")) %>% # TRUE ~ NA throws error
+  mutate(br_flag = case_when(is.na(br_mg_l) ~ "<", TRUE ~ "")) %>% # TRUE ~ NA throws error
+  mutate(so4_flag = case_when(is.na(so4_mg_l) ~ "<", TRUE ~ "")) %>% # TRUE ~ NA throws error
+  mutate(across(contains("flag"), ~ replace(., . == "", NA))) %>% # sub NA for ""
+  # sub mdl for NA
+  mutate(f_mg_l = case_when(is.na(f_mg_l) ~ 0.005, TRUE ~ f_mg_l),
+         cl_mg_l = case_when(is.na(cl_mg_l) ~ 0.03, TRUE ~ cl_mg_l),
+         br_mg_l = case_when(is.na(br_mg_l) ~ 0.02, TRUE ~ br_mg_l),
+         so4_mg_l = case_when(is.na(br_mg_l) ~ 0.025, TRUE ~ br_mg_l))
 
 # 2. Extract units and analyte names
 analytes.units <- d.anions %>% 
@@ -51,7 +62,40 @@ d.anions <- d.anions %>%
               ) %>% 
   cbind(., analytes.units) %>% # add units to data.
   mutate(site_id = as.numeric(site_id)) %>% # make site id numeric
-  select(-no, -sample_id, -analysis_date, -d_anion_analysis_date, -comments)
+  select(-no, -sample_id, -analysis_date, -comments) %>%
+  as_tibble()
+
+#4. Merge with sample collection date and calculate qual_flag
+
+# Get sample collection date from fld_sheet.  This date not entered anywhere, but
+# it was either day 1 or 2 at lake.  Conservatively assume day 1.
+sample_date <- fld_sheet %>%
+  select(lake_id, trap_deply_date) %>% # day 1
+  filter(!is.na(trap_deply_date)) %>%
+  # 2 deply dates at 70_riverine.  Omit later day
+  filter(!(lake_id == "70_riverine" & trap_deply_date == as.Date("2021-06-27"))) %>%
+  rename(sample_col_date = trap_deply_date) %>%
+  distinct()
+
+# join date with d.anions
+dim(d.anions) # 64 rows
+d.anions <- left_join(d.anions, sample_date) 
+dim(d.anions) # 64 rows
+janitor::get_dupes(d.anions %>% # no dups
+                     select(lake_id, site_id, sample_depth, sample_type))
+
+# calculate holding time violation (-qual)
+d.anions <- d.anions %>%
+  add_column(f_qual = NA,
+         cl_qual = NA,
+         br_qual = NA,
+         so4_qual = NA) %>%
+  mutate(across(contains("qual"), 
+                ~ if_else((d_anion_analysis_date - sample_col_date) > 28, TRUE, FALSE))) %>%  # TRUE = hold time violation)
+  select(-contains("date"))
+    
+   
+
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
