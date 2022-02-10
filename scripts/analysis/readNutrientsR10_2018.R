@@ -117,7 +117,7 @@ dup_agg <- function(data) {
   f <- e %>%
     pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units, nutrients_qual)) %>% # cast to wide
     mutate(across(contains("flag"), # convert all _flag values back to text (< or blank)
-                  ~ if_else(. < 1, "", "<"))) %>%
+                  ~ if_else(. < 1, NA_character_, "<"))) %>%
     mutate(across(starts_with(c("value", "analyte", "units", "nutrients")), # convert NaN values to NA
                   ~ ifelse(is.nan(.), NA, .))) 
   

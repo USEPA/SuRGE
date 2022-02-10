@@ -46,7 +46,7 @@ get_ada_data21 <- function(path, datasheet) {
     select(sampleid, labdup, everything(),
            -date_collected, -date_analyzed) %>% # reorder columns for the following mutate()
     mutate(across(ends_with("/L"), # create new flag column if analyte not detected
-                  ~ if_else(str_detect(., "ND"), "<", ""),
+                  ~ if_else(str_detect(., "ND"), "<", NA_character_),
                   .names = "{col}_flag")) %>%
     mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
                   ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
@@ -151,7 +151,7 @@ dup_agg21 <- function(data) {
     select(order(colnames(.))) %>% # alphabetize column names
     select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) %>% # put 'sampleid' first
     mutate(across(ends_with("flag"), # convert all _flag values back to text
-                  ~ if_else(.<1, "", "<"))) %>% 
+                  ~ if_else(.<1, NA_character_, "<"))) %>% 
     filter(labdup != "LAB DUP") %>% # remove the lab dup
     select(-labdup) # remove labdup column. 
   
@@ -199,5 +199,6 @@ ada.anions <- list(jea = list(jea1), key = list(key1),
   map_depth(1, function(x) reduce(x, left_join)) %>% 
   reduce(full_join) %>% 
   select(-starts_with("no"), -starts_with("op")) %>% # remove no2, no3, and op
-  arrange(lake_id)
+  arrange(lake_id) %>%
+  ungroup()
 

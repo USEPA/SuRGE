@@ -42,7 +42,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>%
                 ~ na_if(., 9999999999999990.000))) %>%
   # create 'flag' columns for every analyte to flag observations < det. limit
   mutate(across(al:zn, # nice code Joe!
-                ~ if_else(. < 0 , "<", ""), # bd reported as -detection limit
+                ~ if_else(. < 0 , "<", NA_character_), # bd reported as -detection limit
                 .names = "{col}_flag")) %>%
   # create 'units' columns. All units will be converted to ug/L below; see Wiki page 
   mutate(across(al:zn, # 
