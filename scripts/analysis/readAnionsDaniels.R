@@ -39,7 +39,7 @@ d.anions <- read_excel(paste0(userPath,
   mutate(f_mg_l = case_when(is.na(f_mg_l) ~ 0.005, TRUE ~ f_mg_l),
          cl_mg_l = case_when(is.na(cl_mg_l) ~ 0.03, TRUE ~ cl_mg_l),
          br_mg_l = case_when(is.na(br_mg_l) ~ 0.02, TRUE ~ br_mg_l),
-         so4_mg_l = case_when(is.na(br_mg_l) ~ 0.025, TRUE ~ br_mg_l))
+         so4_mg_l = case_when(is.na(so4_mg_l) ~ 0.025, TRUE ~ so4_mg_l))
 
 # 2. Extract units and analyte names
 analytes.units <- d.anions %>% 
