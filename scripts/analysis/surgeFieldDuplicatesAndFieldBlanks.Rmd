@@ -12,8 +12,8 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
-# localName <- "Jake/" # R proj folder at SP.
-localName <- "Joe/" # R proj folder at SP.
+ localName <- "Jake/" # R proj folder at SP.
+# localName <- "Joe/" # R proj folder at SP.
 
 # load project libraries
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/masterLibrary.R"))
@@ -26,6 +26,7 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/chemSam
 
 # Read chemistry
 # uncomment rows to bring in more data
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readFieldSheets.R")) # read surgeData...xlsx.  fld_sheet, dg_sheet
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
@@ -64,7 +65,7 @@ detlimits <- data.frame(name, mdl)
 
 ## Field Blanks
 
-### Anions
+### ADA Anions
 Fluoride and bromide were below the detection limit for all field blanks from ADA.  Chloride and sulfate were about 3-fold greater than the detection limit in field blanks from lake 148, but were still 4-5 orders of magnitude lower than the unknowns from that lake. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -83,11 +84,10 @@ ada.anions %>%
   select(-max_blank) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
-                  caption = "Minimum and Maximum Anion Concentrations in Unknowns") %>% # table title
+                  caption = "Minimum and Maximum Anion Concentrations Measured at ADA") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
-  kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
-  kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
-  kableExtra::pack_rows("", 9, 12) # space between second and third lake
+  kableExtra::column_spec(1, bold = TRUE) %>%
+  kableExtra::collapse_rows(columns = 1, valign = "top")
 
 
 ada.anions %>% ungroup() %>%
@@ -101,15 +101,16 @@ ada.anions %>% ungroup() %>%
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("Anion field blanks") +
-  facet_wrap(~name, scales = "free")
+  ggtitle("ADA Anion Samples") +
+  facet_wrap(~name, scales = "free")  +
+  theme(legend.position = "bottom")
 
 ```
 
-### Anions II
-Text about kit daniels' anions here. 
+### CIN Anions
+Anion samples collected in 2020 by field crews other than ADA were analyzed at EPA Cincinnati.  All bromide blanks were below the detection limit, as where most of the unknowns.  Most chloride blanks were below the detection limit and all were several orders of magnitude below the unknowns.  Lake 233 had a high F blank, but all others were at DL.  Sulfate blanks were near the detection limit and serveral orders of magnitude below the unknowns.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
 
 # table
@@ -124,15 +125,14 @@ d.anions %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, anion, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
-                  caption = "Minimum and Maximum Anion Concentrations in Unknowns") %>% # table title
-  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2))  # header above the unknowns
-  # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 9, 12) # space between second and third lake
+                  caption = "Minimum and Maximum Anion Concentrations Measured at CIN") %>% # table title
+  kableExtra::column_spec(1, bold = TRUE) %>%
+  kableExtra::collapse_rows(columns = 1, valign = "top")
 
 
-ada.anions %>% ungroup() %>%
+d.anions %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
@@ -140,11 +140,14 @@ ada.anions %>% ungroup() %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
+  scale_y_log10() +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
              color = "red") + # add horizontal lines for det. limits
-  theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("Anion field blanks") +
-  facet_wrap(~name, scales = "free")
+  theme(legend.title = element_blank(),  # remove legend titles
+          axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ggtitle("CIN Anion Samples") +
+  facet_wrap(~name, scales = "free") +
+  theme(legend.position = "bottom")
 
 ```
 
@@ -190,7 +193,8 @@ ada.anions %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Metals field blanks") +
-  facet_wrap(~name, scales = "free")
+  facet_wrap(~name, scales = "free") +
+  theme(legend.position = "bottom")
 
 ```
 
