@@ -51,15 +51,13 @@ SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-name = c("tno2_3", "tnh4", "trp", "tp", "tn", "toc", "chla", "al", "as", "ba", "be", 
-         "ca", "cd", "cr", "cu", "fe", "k", "li", "mg", "mn", "na", "ni", "pb", "p", 
-         "sb", "si", "sn", "sr", "s", "v", "zn", "no2_3", "no2", "no3", "nh4", "op", 
-         "tp", "tn", "toc", "doc", "br", "cl", "so4", "f")
-mdl = c(6, 6, 3, 5, 25, 100, 9, 4, 4, 1, 5, 10, 0.3, 1, 1, 1, 300, 5, 5, 1, 30, 1,
-        2, 5, 3, 20, 1, 1, 3, 1, 0.5, 0.01, 0.012, 0.01, 0.00171, 0.002, 0.002, 0.002, 
-        0.102, 0.102, 0.041, 0.026, 0.151, 0.014)
+name = c("al", "as", "ba", "be", "br", "br", "ca", "cd", "chla", "chla", "cl", "cl", "cr", "cu", "doc", "f", "f", "fe", "k", "li", "mg", "mn", "na", "nh4", "nh4", "nh4", "ni", "no2", "no2", "no2", "no2_3", "no2_3", "no2_3", "no3", "no3", "no3", "op", "p", "pb", "po4", "po4", "s", "sb", "si", "sn", "so4", "so4", "sr", "tn", "tn", "tn", "toc", "toc", "tp", "tp", "tp", "trp", "trp", "v", "zn") 
+mdl = c(4, 4, 1, 5, 0.041, 0.02, 10, 0.3, 9, NA, 0.026, 0.03, 1, 1, 0.102, 0.014, 0.005, 1, 300, 5, 5, 1, 30, 6, 6, 0.00171, 1, 0.019, 0.015, 0.012, 6, 6, 0.01, 0.049, 0.004, 0.01, 0.002, 5, 2, 0.054, 0.015, 3, 3, 20, 1, 0.151, 0.025, 1, 20.9, 25, 0.002, 100, 0.102, 8, 5, 0.002, 3, 3, 1, 0.5)
+lab = c("CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "NAR", "ADA", "CIN", "CIN", "CIN", "ADA", "ADA", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "ADA", "CIN", "ADA", "CIN", "CIN", "ADA", "ADA", "CIN", "ADA", "ADA", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "ADA", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN") 
+year = c("All", "All", "All", "All", "2021", "2021", "All", "All", "2018", ">= 2020", "2021", "2021", "All", "All", "2021", "2021", "2021", "All", "All", "All", "All", "All", "All", "2018", "2021", "2020", "All", "2021", "2021", "2020", "2018", "2021", "2020", "2021", "2021", "2020", "2020", "All", "All", "2021", "2021", "All", "All", "All", "All", "2021", "2021", "All", "2018", "2021", "2020", "All", "2021", "2018", "2021", "2020", "2018", "2021", "All", "All")
+
 # need to add chl-a detection limit when available
-detlimits <- data.frame(name, mdl) 
+detlimits <- data.frame(name, mdl, lab, year) 
 
 ```
 
@@ -82,7 +80,8 @@ ada.anions %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Anion Concentrations Measured at ADA") %>% # table title
@@ -95,7 +94,7 @@ ada.anions %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -125,7 +124,8 @@ d.anions %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, anion, blank, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -138,7 +138,7 @@ d.anions %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -171,9 +171,10 @@ chem18 %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, anion, blank, minimum, maximum) %>%
+  left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
+  select(-lab) %>%
+  rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, nutrient, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
@@ -184,7 +185,7 @@ chem18 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -216,9 +217,10 @@ ada.nutrients %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, anion, blank, minimum, maximum) %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  select(-lab) %>%
+  rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, nutrient, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
@@ -229,7 +231,7 @@ ada.nutrients %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -261,9 +263,10 @@ chem21 %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, anion, blank, minimum, maximum) %>%
+  left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
+  select(-lab) %>%
+  rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, nutrient, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
@@ -274,7 +277,7 @@ chem21 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -308,8 +311,9 @@ tteb.all %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  select(-lab, -year) %>%
+  rename(metal = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Metals Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) # header above the unknowns
@@ -318,11 +322,12 @@ tteb.all %>%
   # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
-ada.anions %>% ungroup() %>%
+tteb.all %>% ungroup() %>%
+  select(-cin_shipping_notes, -comment) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -353,8 +358,9 @@ ada.oc %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  select(-lab, -year) %>%
+  rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) # header above the unknowns
@@ -367,7 +373,7 @@ ada.oc %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -397,8 +403,9 @@ toc.masi %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  select(-lab, -year) %>%
+  rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) # header above the unknowns
@@ -411,7 +418,7 @@ toc.masi %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -440,7 +447,8 @@ chl18 %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(chla = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown)  %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Chlorophyll-A Concentrations in Unknowns") %>% # table title
@@ -454,7 +462,7 @@ chl18 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -485,7 +493,8 @@ ada.anions %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Anion Concentrations Measured at ADA") %>% # table title
@@ -498,14 +507,14 @@ ada.anions %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("ADA Anion Samples") +
+  ggtitle("ADA Anion field duplicates") +
   facet_wrap(~name, scales = "free")  +
   theme(legend.position = "bottom")
 
@@ -528,7 +537,8 @@ d.anions %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, anion, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -541,7 +551,7 @@ d.anions %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -550,7 +560,7 @@ d.anions %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("CIN Anion Samples") +
+  ggtitle("CIN Anion field duplicates") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -574,9 +584,10 @@ chem18 %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, anion, duplicate, minimum, maximum, mdl) %>%
+  left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
+  select(-lab) %>%
+  rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
@@ -587,7 +598,7 @@ chem18 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -596,7 +607,7 @@ chem18 %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("2018 PLACEHOLDER") +
+  ggtitle("2018 nutrients field duplicates") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -619,9 +630,10 @@ ada.nutrients %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, anion, duplicate, minimum, maximum, mdl) %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  select(-lab) %>%
+  rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
@@ -632,7 +644,7 @@ ada.nutrients %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -641,7 +653,7 @@ ada.nutrients %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("Nutrient PLACEHOLDER") +
+  ggtitle("Nutrients field duplicates") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -664,9 +676,10 @@ chem21 %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
-  rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, anion, duplicate, minimum, maximum, mdl) %>%
+  left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
+  select(-lab) %>%
+  rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
@@ -677,7 +690,7 @@ chem21 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -686,7 +699,7 @@ chem21 %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("Nutrient PLACEHOLDER") +
+  ggtitle("Nutrients field duplicates") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -711,7 +724,8 @@ tteb.all %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(metal = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, metal, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -722,18 +736,19 @@ tteb.all %>%
   # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
-ada.anions %>% ungroup() %>%
+tteb.all %>% ungroup() %>%
+  select(-cin_shipping_notes, -comment) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("Metals field blanks") +
+  ggtitle("Metals field duplicates") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -757,7 +772,8 @@ ada.oc %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(analyte = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, analyte, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -772,14 +788,14 @@ ada.oc %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("TOC field blanks") +
+  ggtitle("TOC field duplicates") +
   facet_wrap(~name, scales = "free")
 
 ```
@@ -802,7 +818,8 @@ toc.masi %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  select(-lab, -year) %>%
   rename(analyte = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, analyte, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -817,14 +834,14 @@ toc.masi %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("TOC field blanks") +
+  ggtitle("TOC field duplicates") +
   facet_wrap(~name, scales = "free")
 
 ```
@@ -846,7 +863,7 @@ chl18 %>%
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   rename(chla = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown)  %>%
   relocate(lake_id, chla, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -861,14 +878,14 @@ chl18 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = detlimits, by = "name") %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"), 
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("Chlorophyll-A field blanks") +
+  ggtitle("Chlorophyll-A field duplicates") +
   facet_wrap(~name, scales = "free")
 
 ```
