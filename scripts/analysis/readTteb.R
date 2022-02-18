@@ -16,16 +16,16 @@
 # 1. READ CHEMISTRY DATA--------------
 # Files contain samples from SuRGE + other studies.  Filter below.
 tteb.BEAULIEU <- read_excel(paste0(userPath, 
-                           "data/chemistry/tteb/BEAULIEU_01_20_2022_update.xlsx")) 
+                                   "data/chemistry/tteb/BEAULIEU_01_20_2022_update.xlsx")) 
 
 tteb.SURGE <- read_excel(paste0(userPath, 
-                             "data/chemistry/tteb/SURGE_2021_01_20_2022_update.xlsx"))
+                                "data/chemistry/tteb/SURGE_2021_01_20_2022_update.xlsx"))
 
 
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
-   select(-colldate, -studyid, -tn, -flag) %>% # remove unneeded columns
+  select(-colldate, -studyid, -tn, -flag) %>% # remove unneeded columns
   rename(lab_id = labid,
          toc = toc_comb) %>%
   
@@ -44,9 +44,9 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>%
   mutate(across(al:zn, # nice code Joe!
                 ~ if_else(. < 0 , "<", NA_character_), # bd reported as -detection limit
                 .names = "{col}_flag")) %>%
-  # create 'units' columns. All units will be converted to ug/L below; see Wiki page 
+  # create 'units' columns. Most units in mg/L 
   mutate(across(al:zn, # 
-                ~ "ug/l", 
+                ~ "mg_l", 
                 .names = "{col}_units")) %>%
   mutate(toc_units = "mg_c_l") %>% # TOC is the exception
   mutate(across(al:zn, # make all values positive. absolute value of - detection limit
@@ -56,7 +56,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>%
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, everything()) # put these columns first
 
-  
+
 
 # 2. READ CHAIN OF CUSTODY----------------
 # Read in chain on custody data for SuRGE samples submitted to TTEB
@@ -145,4 +145,5 @@ tteb.all <- tteb.all %>% select(-lab_id, -coc, -notes, -sampid) %>%
   rename(tteb.toc = toc, # rename these fields for the full_join in the merge script
          tteb.toc_units = toc_units, 
          tteb.toc_flag = toc_flag) 
+
 
