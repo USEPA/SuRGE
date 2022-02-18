@@ -52,7 +52,7 @@ SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 name = c("al", "as", "ba", "be", "br", "br", "ca", "cd", "chla", "chla", "cl", "cl", "cr", "cu", "doc", "f", "f", "fe", "k", "li", "mg", "mn", "na", "nh4", "nh4", "nh4", "ni", "no2", "no2", "no2", "no2_3", "no2_3", "no2_3", "no3", "no3", "no3", "op", "p", "pb", "po4", "po4", "s", "sb", "si", "sn", "so4", "so4", "sr", "tn", "tn", "tn", "toc", "toc", "tp", "tp", "tp", "op", "op", "v", "zn") 
-mdl = c(4, 4, 1, 5, 0.041, 0.02, 10, 0.3, 9, NA, 0.026, 0.03, 1, 1, 0.102, 0.014, 0.005, 1, 300, 5, 5, 1, 30, 6, 6, 0.00171, 1, 0.019, 0.015, 0.012, 6, 6, 0.01, 0.049, 0.004, 0.01, 0.002, 5, 2, 0.054, 0.015, 3, 3, 20, 1, 0.151, 0.025, 1, 20.9, 25, 0.002, 0.1, 0.102, 8, 5, 0.002, 3, 3, 1, 0.5)
+mdl = c(0.004, 0.004, 0.001, 0.005, 0.041, 0.02, 0.010, 0.0003, 9, NA, 0.026, 0.03, 0.001, 0.001, 0.102, 0.014, 0.005, 0.001, 0.300, 0.005, 0.005, 0.001, 0.030, 6, 6, 1.71, 0.001, 1.2, 6, 1.2, 6, 6, 10, 10, 6, 10, 2, 0.005, 0.002, 2, 15, 3, 0.003, 0.020, 0.001, 0.151, 0.025, 0.001, 20.9, 25, 2, 0.1, 0.102, 8, 5, 2, 3, 3, 0.001, 0.0005)
 lab = c("CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "NAR", "ADA", "CIN", "CIN", "CIN", "ADA", "ADA", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "ADA", "CIN", "ADA", "CIN", "CIN", "ADA", "ADA", "CIN", "ADA", "ADA", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "ADA", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN") 
 year = c("All", "All", "All", "All", "2021", "2021", "All", "All", "2018", ">= 2020", "2021", "2021", "All", "All", "2021", "2021", "2021", "All", "All", "All", "All", "All", "All", "2018", "2021", "2020", "All", "2021", "2021", "2020", "2018", "2021", "2020", "2021", "2021", "2020", "2020", "All", "All", "2021", "2021", "All", "All", "All", "All", "2021", "2021", "All", "2018", "2021", "2020", "All", "2021", "2018", "2021", "2020", "2018", "2021", "All", "All")
 
@@ -77,15 +77,16 @@ ada.anions %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
-  summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
+  summarize(min = round(min(value),3),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, anion, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Anion Concentrations Measured at ADA") %>% # table title
-  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
+  kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::collapse_rows(columns = 1, valign = "top")
 
@@ -121,15 +122,16 @@ d.anions %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
-  summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
+  summarize(min = round(min(value),3),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, anion, blank, minimum, maximum, mdl) %>%
+  relocate(lake_id, anion, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Anion Concentrations Measured at CIN") %>% # table title
+  kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::collapse_rows(columns = 1, valign = "top")
 
@@ -155,7 +157,7 @@ d.anions %>% ungroup() %>%
 
 
 ### Nutrients 2018
-Nutrients 2018 text placeholder. 
+Nutrient samples collected by Region 10 in 2018 were analyzed via Lachat in CIN. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
@@ -168,15 +170,16 @@ chem18 %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
-  summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
+  summarize(min = round(min(value),3),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
-  select(-lab) %>%
+  select(-lab, -year) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, nutrient, blank, minimum, maximum) %>%
+  relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
-                  caption = "Minimum and Maximum Nutrient Concentrations PLACEHOLDER") %>% # table title
+                  caption = "Minimum and Maximum Nutrient Concentrations Measured in 2018 Samples Analyzed at CIN") %>% # table title
+    kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::collapse_rows(columns = 1, valign = "top")
 
@@ -194,14 +197,14 @@ chem18 %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("2018 Nutrients PLACEHOLDER blanks") +
+  ggtitle("2018 Nutrients Analyzed at CIN") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
 ```
 
 ### Nutrients ADA
-Nutrients ADA text placeholder. 
+2021 SuRGE samples collected by ADA field crew were analyzed at the General Paramaters Laboratory in ADA.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
@@ -221,9 +224,10 @@ ada.nutrients %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, nutrient, blank, minimum, maximum) %>%
+  relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
-                  caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
+                  caption = "Minimum and Maximum Nutrient Concentrations Measured at ADA") %>% # table title
+cccc
   kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::collapse_rows(columns = 1, valign = "top")
 
@@ -242,14 +246,14 @@ ada.nutrients %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("Nutrients Ada PLACEHOLDER") +
+  ggtitle("2021 Nutrients Analyzed at ADA") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
 ```
 
 ### Nutrients AWBERC
-Nutrients AWBERC placeholder. 
+2021 SuRGE samples collected by field crews other than ADA were analyzed in CIN. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
@@ -266,11 +270,12 @@ chem21 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
-  select(-lab) %>%
+  select(-lab, -year) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, nutrient, blank, minimum, maximum) %>%
+  relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
-                  caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
+                  caption = "Minimum and Maximum Nutrient Concentrations Measured in 2021 SuRGE Samples Analyzed at CIN") %>% # table title
+  kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::collapse_rows(columns = 1, valign = "top")
 
@@ -288,7 +293,7 @@ chem21 %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("Nutrients AWBERC 20 & 21 PLACEHOLDER") +
+  ggtitle("2021 Nutrients Analyzed at AWBERC") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -305,7 +310,7 @@ Text about metals placeholder.
 # formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
 tteb.all %>% 
   ungroup() %>%
-  select(-cin_shipping_notes, -comment) %>%
+  select(-cin_shipping_notes, -comment, -contains("toc")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
@@ -316,12 +321,13 @@ tteb.all %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year) %>%
   rename(metal = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, metal, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Metals Concentrations in Unknowns") %>% # table title
-  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) # header above the unknowns
-  # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 9, 12) # space between second and third lake
+  kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
+  kableExtra::column_spec(1, bold = TRUE) %>%
+  kableExtra::collapse_rows(columns = 1, valign = "top")
+
 
 
 tteb.all %>% ungroup() %>%
