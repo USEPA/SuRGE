@@ -12,7 +12,7 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
- # localName <- "Jake/" # R proj folder at SP.
+localName <- "Jake/" # R proj folder at SP.
 localName <- "Joe/" # R proj folder at SP.
 
 # load project libraries
@@ -47,17 +47,11 @@ SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey
 
 ## Detection Limits
 
-### Create dataframe of detection limits for use with all following plots
+Detection limits vary by analyte, analytical method, lab, and possibly by year.  See `Analtyical` section of Wiki for details.  Detection limits are read in below.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-name = c("al", "as", "ba", "be", "br", "br", "ca", "cd", "cl", "cl", "cr", "cu", "doc", "f", "f", "fe", "k", "li", "mg", "mn", "na", "nh4", "nh4", "nh4", "ni", "no2", "no2", "no2", "no2_3", "no2_3", "no2_3", "no3", "no3", "no3", "op", "p", "pb", "po4", "po4", "s", "sb", "si", "sn", "so4", "so4", "sr", "tn", "tn", "tn", "toc", "toc", "tp", "tp", "tp", "op", "op", "v", "zn") 
-mdl = c(0.004, 0.004, 0.001, 0.005, 0.041, 0.02, 0.010, 0.0003, 0.026, 0.03, 0.001, 0.001, 0.102, 0.014, 0.005, 0.001, 0.300, 0.005, 0.005, 0.001, 0.030, 6, 6, 1.71, 0.001, 1.2, 6, 1.2, 6, 6, 10, 10, 6, 10, 2, 0.005, 0.002, 2, 15, 3, 0.003, 0.020, 0.001, 0.151, 0.025, 0.001, 20.9, 25, 2, 0.1, 0.102, 8, 5, 2, 3, 3, 0.001, 0.0005)
-lab = c("CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "ADA", "ADA", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "ADA", "CIN", "ADA", "CIN", "CIN", "ADA", "ADA", "CIN", "ADA", "ADA", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN", "ADA", "CIN", "ADA", "CIN", "CIN", "ADA", "CIN", "CIN", "CIN", "CIN") 
-year = c("All", "All", "All", "All", "2021", "2021", "All", "All", "2021", "2021", "All", "All", "2021", "2021", "2021", "All", "All", "All", "All", "All", "All", "2018", "2021", "2020", "All", "2021", "2021", "2020", "2018", "2021", "2020", "2021", "2021", "2020", "2020", "All", "All", "2021", "2021", "All", "All", "All", "All", "2021", "2021", "All", "2018", "2021", "2020", "All", "2021", "2018", "2021", "2020", "2018", "2021", "All", "All")
-
-# need to add chl-a detection limit when available
-detlimits <- data.frame(name, mdl, lab, year) 
+detlimits <- read_xls(path = paste0(userPath,"data/chemistry/detectionLimits.xls"))
 
 ```
 
@@ -81,7 +75,7 @@ ada.anions %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, anion, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -126,7 +120,7 @@ d.anions %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, anion, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -174,7 +168,7 @@ chem18 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -222,7 +216,7 @@ ada.nutrients %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -270,7 +264,7 @@ chem21 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -319,7 +313,7 @@ tteb.all %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(metal = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, metal, mdl, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -367,7 +361,7 @@ ada.oc %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
@@ -412,7 +406,7 @@ toc.masi %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
@@ -456,7 +450,7 @@ chl18 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(chla = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown)  %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Chlorophyll-A Concentrations in Unknowns") %>% # table title
@@ -502,7 +496,7 @@ ada.anions %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Anion Concentrations Measured at ADA") %>% # table title
@@ -546,7 +540,7 @@ d.anions %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, anion, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -593,7 +587,7 @@ chem18 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
-  select(-lab) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -640,7 +634,7 @@ ada.nutrients %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
-  select(-lab) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -687,7 +681,7 @@ chem21 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
-  select(-lab) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -735,7 +729,7 @@ tteb.all %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(metal = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, metal, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -783,7 +777,7 @@ ada.oc %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(analyte = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, analyte, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -829,7 +823,7 @@ toc.masi %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
-  select(-lab, -year) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   rename(analyte = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, analyte, duplicate, minimum, maximum, mdl) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
@@ -876,6 +870,7 @@ chl18 %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   rename(chla = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown)  %>%
   relocate(lake_id, chla, duplicate, minimum, maximum, mdl) %>%
+  select(-lab, -year, -units, -analyte_group) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Minimum and Maximum Chlorophyll-A Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2))# %>% # header above the unknowns
