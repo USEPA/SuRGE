@@ -73,6 +73,7 @@ ada.anions %>%
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),3),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
@@ -117,17 +118,19 @@ d.anions %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),3),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(anion = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, anion, mdl, blank, minimum, maximum) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Anion Concentrations Measured at CIN") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 d.anions %>% ungroup() %>%
@@ -165,17 +168,19 @@ chem18 %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),3),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured in 2018 Samples Analyzed at CIN") %>% # table title
     kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 chem18 %>% ungroup() %>%
@@ -213,17 +218,18 @@ ada.nutrients %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at ADA") %>% # table title
-cccc
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 ada.nutrients %>% ungroup() %>%
@@ -262,16 +268,18 @@ chem21 %>%
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, mdl, blank, minimum, maximum) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured in 2021 SuRGE Samples Analyzed at CIN") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 chem21 %>% ungroup() %>%
@@ -310,17 +318,20 @@ tteb.all %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(metal = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, metal, mdl, blank, minimum, maximum) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Metals Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
+
 
 
 
@@ -351,14 +362,15 @@ TOC MASI text placeholder.
 
 # table
 # formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
-ada.oc %>% 
+toc.masi %>% 
   ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
@@ -371,7 +383,7 @@ ada.oc %>%
   # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
-ada.oc %>% ungroup() %>%
+toc.masi %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
@@ -396,14 +408,15 @@ OC ADA text placeholder.
 
 # table
 # formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
-toc.masi %>% 
+ada.oc %>% 
   ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
@@ -416,7 +429,7 @@ toc.masi %>%
   # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
-toc.masi %>% ungroup() %>%
+ada.oc %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
@@ -447,7 +460,8 @@ chl18 %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
@@ -494,6 +508,7 @@ ada.anions %>%
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
@@ -538,15 +553,17 @@ d.anions %>%
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(anion = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, anion, duplicate, minimum, maximum, mdl) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Anion Concentrations Measured at CIN") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 d.anions %>% ungroup() %>%
@@ -584,16 +601,18 @@ chem18 %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 chem18 %>% ungroup() %>%
@@ -631,16 +650,18 @@ ada.nutrients %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 ada.nutrients %>% ungroup() %>%
@@ -678,16 +699,18 @@ chem21 %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(nutrient = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, nutrient, duplicate, minimum, maximum, mdl) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at PLACEHOLDER") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top")
+  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 chem21 %>% ungroup() %>%
@@ -726,18 +749,20 @@ tteb.all %>%
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(metal = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, metal, duplicate, minimum, maximum, mdl) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Metals Concentrations in Unknowns") %>% # table title
-  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) # header above the unknowns
+  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) %>% # header above the unknowns
   # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
   # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
   # kableExtra::pack_rows("", 9, 12) # space between second and third lake
+  kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
 tteb.all %>% ungroup() %>%
@@ -767,14 +792,15 @@ TOC MASI text placeholder.
 
 # table
 # formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
-ada.oc %>% 
+toc.masi %>% 
   ungroup() %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
@@ -788,7 +814,7 @@ ada.oc %>%
   # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
-ada.oc %>% ungroup() %>%
+toc.masi %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
@@ -813,14 +839,15 @@ OC ADA text placeholder.
 
 # table
 # formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
-toc.masi %>% 
+ada.oc %>% 
   ungroup() %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
   summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>% 
+  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
+  filter(is.na(min_duplicate) == FALSE) %>%
   select(-max_duplicate) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
@@ -834,7 +861,7 @@ toc.masi %>%
   # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
-toc.masi %>% ungroup() %>%
+ada.oc %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
