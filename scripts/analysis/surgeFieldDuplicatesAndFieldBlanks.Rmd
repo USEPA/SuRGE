@@ -42,7 +42,7 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChl
 
 ## Background
 
-SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey of methane (CH4) and carbon dioxide (CO2) emissions from US reservoirs.  Gas emissions are measured at >= 15 locations within each reservoir.  Water chemistry samples are collected from two depths (near the air-water interface and the sediment-water interface) at one location within each reservoir.  At a subset of the reservoirs, field blanks and field duplicates are also collected.  This report details results from the field blanks and duplicates.
+SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey of methane (CH~4~) and carbon dioxide (CO~2~) emissions from US reservoirs.  Gas emissions are measured at >= 15 locations within each reservoir.  Water chemistry samples are collected from two depths (near the air-water interface and the sediment-water interface) at one location within each reservoir.  At a subset of the reservoirs, field blanks and field duplicates are also collected.  This report details results from the field blanks and duplicates.
 
 
 ## Detection Limits
@@ -154,7 +154,7 @@ d.anions %>% ungroup() %>%
 
 
 ### Nutrients 2018
-Nutrient samples collected by Region 10 in 2018 were analyzed via Lachat in CIN. 
+Nutrient samples were collected at 8 lakes by Region 10 in 2018 and were analyzed via Lachat in CIN. A field blank was collected at one lake.  Analyte concentrations were at or near the mdl for the field blank.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
@@ -203,7 +203,11 @@ chem18 %>% ungroup() %>%
 ```
 
 ### Nutrients ADA
-2021 SuRGE samples collected by ADA field crew were analyzed at the General Paramaters Laboratory in ADA.
+The ADA General Parameters Laboratory analyzed SuRGE nutrient sample collected by the CIN fiedl crew during the 2020 sampling season.  These samples were frozen after collection and stored until the laboratory reopened following the COVID shutdown.  The ADA General Parameters Laboratory also analyzed 2021 SuRGE samples collected by ADA field crew.
+
+All TN blanks, with the exception of lake 191, were at the MDL.  TP blanks were generally greater than the MDL and lower than the unknowns; but TP blanks at lakes 191 and 235 were of similar magnitude as the unknowns.  NH4 blanks were generally 2-5 fold greater than the MDL and of similar magnitude as the unknowns in some lakes. NO2.3 blanks were at the MDL in 8 out of 12 lakes.  op field blanks exceeded the MDL in all but one lake. 
+
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
@@ -253,7 +257,7 @@ ada.nutrients %>% ungroup() %>%
 ```
 
 ### Nutrients AWBERC
-2021 SuRGE samples collected by field crews other than ADA were analyzed in CIN. 
+2021 SuRGE samples collected by field crews other than ADA were analyzed in CIN. TP and TN blanks were often greater than the MDL, but NH4, NO2, and NO2.3 field blanks were generally at, or just slightly elevated above the MDL.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
@@ -305,7 +309,7 @@ chem21 %>% ungroup() %>%
 ### Metals
 Text about metals placeholder. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
 
 # table

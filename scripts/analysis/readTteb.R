@@ -51,8 +51,6 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>%
   mutate(toc_units = "mg_c_l") %>% # TOC is the exception
   mutate(across(al:zn, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
-  mutate(across(c(al:zn, -toc), # convert values from mg/l to ug/l; see Wiki page
-                ~ .*1000)) %>%
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, everything()) # put these columns first
 
