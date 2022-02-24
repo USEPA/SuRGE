@@ -104,10 +104,8 @@ setdiff(chem.samples.foo %>%
 # this when we get the data.
 
 # 275
-# 01July2021 sample tracking form has a shallow duplicate and two shallow unknowns 
-# for metals.  I suspect one of the unknowns is the blank.  Will have to sort out 
+# 01July2021 sample tracking form doesn't show a DOC blank.  Will try to sort out 
 # after  we get data from TTEB.
-# I don't see anything that could have been the doc blank.
 
 # 298
 # One of the shallow unknown metals that was submitted (203558, 203580) is likely

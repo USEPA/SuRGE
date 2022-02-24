@@ -37,12 +37,43 @@ toc.masi %>% select(matches("id|sample")) %>%
   janitor::get_dupes()
 
 
-# sample inventory.  All 2020 TOC samples were sent to MASI.
+# INSPECT LABORATORY DUPLICATES ----------------- 
+# These are extra samples collected per MASI's
+# internal qa.qc requirements.  No other qa.qc collected at these sites. Treat
+# as laboratory duplicates to prevent downstream merging headaches.
+labDupIds <- toc.masi %>% 
+  filter(sample_type == "lab_duplicate") %>%
+  mutate(id = paste0(lake_id, sample_depth))
+
+labDups <- toc.masi %>% mutate(id = paste0(lake_id, sample_depth)) %>%
+  filter(id %in% labDupIds$id)
+
+# one of the 102 shallow samples is way too high (>25mg/l).  
+ggplot(labDups, aes(id, toc)) + 
+  geom_point() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+toc.masi <- toc.masi %>% filter(toc<25) # delete outlier
+
+
+# aggregate across remaining laboratory duplicates
+toc.masi <- toc.masi %>%
+  pivot_wider(names_from = sample_type, values_from = toc) %>% # cast to wide
+  mutate(unknown = case_when(is.na(lab_duplicate) ~ unknown, # if no lab dup, then unknown
+                             TRUE ~ (unknown + lab_duplicate)/2)) %>% # if lab dup, then aggregate
+  select(-lab_duplicate) %>% # remove lab_duplicate
+  pivot_longer(c(unknown, blank, duplicate), # pivot back to long
+               names_to = "sample_type", 
+               values_to = "toc") %>%
+  filter(!is.na(toc)) # remove extra records created from pivoting.
+
+# SAMPLE INVENTORY ANALYSIS---------------
+# All 2020 TOC samples were sent to MASI.
 # print rows in toc.masi not in chem.samples
-# only samples showing up are duplicate TOC samples that were requested by MASI,
-# but collected at non qa.qc lakes.  No problem.
+# All samples sent to MASI were expected, good.
 setdiff(toc.masi[,c("lake_id", "sample_depth", "sample_type")],
-        chem.samples.foo[c("lake_id", "sample_depth", "sample_type")]) %>% print(n=Inf)
+        chem.samples.foo[c("lake_id", "sample_depth", "sample_type")])
+
 
 
 # Have all 2020 toc samples comprehensive sample list been analyzed by MASI?

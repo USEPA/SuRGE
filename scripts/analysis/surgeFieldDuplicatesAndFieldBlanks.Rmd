@@ -13,7 +13,7 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
 localName <- "Jake/" # R proj folder at SP.
-localName <- "Joe/" # R proj folder at SP.
+#localName <- "Joe/" # R proj folder at SP.
 
 # load project libraries
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/masterLibrary.R"))
@@ -39,7 +39,8 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTte
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTaxonomy.R")) # GB taxonomy
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
 
-source("scripts/analysis/mergeChemistry.R") # merge all chem objects #chemistry all
+source(paste0(userPath, "rProjects/", localName,
+              "SuRGE/scripts/analysis/mergeChemistry.R")) # merge all chem objects #chemistry all
 ```
 
 ## Background
@@ -371,7 +372,7 @@ tteb.all %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Metals field blanks") +
-  facet_wrap(~name, scales = "free", ncol = 3, nrow = 4) +
+  facet_wrap(~name, scales = "free", ncol = 3, nrow = 5) +
   theme(legend.position = "bottom")
 
 
@@ -518,7 +519,7 @@ chl18 %>% ungroup() %>%
 ## Field duplicates
 Field duplicates were collected at a subset of SuRGE lakes.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-#set up for below
+# set up needed for all analyte groups below
 
 # identify lakes, sites, and depths with duplicates
 duplicate_ids <- chemistry_all %>% filter(sample_type == "duplicate") %>%
@@ -531,53 +532,63 @@ chemistry_all_dups <- chemistry_all %>%
   filter(id %in% duplicate_ids$id) %>% # pull out duplicates and corresponding unknowns
   select(-contains("flag"), -contains("qual"), -contains("units"), 
          -sample_type, -id, -cin_shipping_notes, -comment, -no3) %>%
-  pivot_longer(!c(lake_id, site_id, sample_depth))
+  pivot_longer(!c(lake_id, site_id, sample_depth)) %>%
+  group_by(lake_id, site_id, sample_depth, name) %>%
+  mutate(difference = abs(diff(value)), # difference between dup and unknown
+         mean = mean(value), # mean of dup and unknown
+         rpd = (difference/mean)*100,
+         rpd_flag = case_when(rpd > 50 ~ ">50% rpd", # used to color code plots
+                              TRUE ~ "<50% rpd")) %>%
+  ungroup()
 
 
 
 ```
 ### Nutrients
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# vector of nutrient names
+# set up and calculations specific to nutrients
+
+# vector of nutrient names.  Needed to extract nutrients from chemistry_all_dups
 nutrient_name <- detlimits %>% 
   filter(analyte_group == "nutrients") %>%
   select(name) %>% 
   pull()
 
-# calculate mean relative percent difference among field replicates
-nutrients_rpd <- chemistry_all_dups %>% 
-  filter(name %in% nutrient_name) %>%
-  group_by(lake_id, site_id, sample_depth, name) %>%
-  mutate(difference = abs(diff(value)), # difference between dup and unknown
-         mean = mean(value), # mean of dup and unknown
-         rpd = (difference/mean)*100) %>% # rpd
-    distinct() %>%
-  group_by(name) %>%
+# pull out unknowns, field duplicates, and rpd for lakes with field dups
+nutrients_rpd <- chemistry_all_dups %>% # this object included rpd calculation
+  filter(name %in% nutrient_name) 
+
+# mean relative percent difference by analyte.  Aggregate across analyte
+nutrients_rpd_analyte <- nutrients_rpd %>%
+  distinct() %>% # currently reported for both dups
+  group_by(name) %>% # group by analyte
   summarize(rpd = mean(rpd, na.rm = TRUE))
 
 
 ```
-Relative percent agreement among nutrient duplicates was greatest for `r nutrients_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()`(`r nutrients_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r nutrients_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()`(`r nutrients_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
+Relative percent agreement among nutrient duplicates was greatest for `r nutrients_rpd_analyte %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()`(`r nutrients_rpd_analyte %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r nutrients_rpd_analyte %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()`(`r nutrients_rpd_analyte %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).  Plots of measured nutrient concentrations in unknowns and field duplicates don't reveal any obvious issues.  Lake 191 nh4 and tp unknown and field duplicate differ considerably, but values for both samples are realistic.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-nutrients_rpd %>%
+# table of mean RPD by analyte
+nutrients_rpd_analyte %>%
   mutate(rpd = round(rpd, 1)) %>%
   rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
   kableExtra::kbl(booktabs = TRUE, # nice formatting
                   caption = "Mean relative percent difference among unknowns and field duplicates") 
-      
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(chemistry_all_dups %>% 
-         filter(name %in% nutrient_name) %>%
-         mutate, 
-       aes(lake_id, value)) +
-  geom_point() +
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+# figure of unknowns and corresponding field duplicate
+ggplot(nutrients_rpd, aes(lake_id, value)) +
+  geom_point(aes(color = rpd_flag)) + # color by rpd value
+  ylab("ug N or P /L") +
   facet_wrap(~name, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.title.x = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank())
 
 
 ```
@@ -888,7 +899,7 @@ tteb.all %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Metals field duplicates") +
-  facet_wrap(~name, scales = "free", ncol = 3, nrow = 4) +
+  facet_wrap(~name, scales = "free", ncol = 3, nrow = 5) +
   theme(legend.position = "bottom")
 ```
 
