@@ -38,6 +38,8 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTte
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # NAR chl, phyco, and microcystin
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTaxonomy.R")) # GB taxonomy
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
+
+source("scripts/analysis/mergeChemistry.R") # merge all chem objects #chemistry all
 ```
 
 ## Background
@@ -309,7 +311,7 @@ chem21 %>% ungroup() %>%
 ### Metals
 Text about metals placeholder. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=18}
 
 
 # table
@@ -321,11 +323,12 @@ tteb.all %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>% 
   pivot_longer(!c(lake_id, sample_type)) %>% 
   group_by(lake_id, name, sample_type) %>% 
-  summarize(min = round(min(value),2),  max = round(max(value),2)) %>% 
+  summarize(min = round(min(value),3),  max = round(max(value),3)) %>% 
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
   filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  mutate(mdl = round(mdl, 3)) %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(metal = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
   relocate(lake_id, metal, mdl, blank, minimum, maximum) %>%
@@ -496,6 +499,74 @@ chl18 %>% ungroup() %>%
 
 
 ## Field duplicates
+Field duplicates were collected at a subset of SuRGE lakes.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#set up for below
+
+# identify lakes, sites, and depths with duplicates
+duplicate_ids <- chemistry_all %>% filter(sample_type == "duplicate") %>%
+  select(lake_id, site_id, sample_depth) %>%
+  mutate(id = paste0(lake_id, site_id, sample_depth))
+
+# pull out data from lakes, sites, and depths with duplicates
+chemistry_all_dups <- chemistry_all %>% 
+  mutate(id = paste0(lake_id, site_id, sample_depth)) %>% # create unique id
+  filter(id %in% duplicate_ids$id) %>% # pull out duplicates and corresponding unknowns
+  select(-contains("flag"), -contains("qual"), -contains("units"), 
+         -sample_type, -id, -cin_shipping_notes, -comment, -no3) %>%
+  pivot_longer(!c(lake_id, site_id, sample_depth))
+
+
+
+```
+### Nutrients
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# vector of nutrient names
+nutrient_name <- detlimits %>% 
+  filter(analyte_group == "nutrients") %>%
+  select(name) %>% 
+  pull()
+
+# calculate mean relative percent difference among field replicates
+nutrients_rpd <- chemistry_all_dups %>% 
+  filter(name %in% nutrient_name) %>%
+  group_by(lake_id, site_id, sample_depth, name) %>%
+  mutate(difference = abs(diff(value)), # difference between dup and unknown
+         mean = mean(value), # mean of dup and unknown
+         rpd = (difference/mean)*100) %>% # rpd
+    distinct() %>%
+  group_by(name) %>%
+  summarize(rpd = mean(rpd, na.rm = TRUE))
+
+
+```
+Relative percent agreement among nutrient duplicates was greatest for `r nutrients_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()`(`r nutrients_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r nutrients_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()`(`r nutrients_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+nutrients_rpd %>%
+  mutate(rpd = round(rpd, 1)) %>%
+  rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
+  kableExtra::kbl(booktabs = TRUE, # nice formatting
+                  caption = "Mean relative percent difference among unknowns and field duplicates") 
+      
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(chemistry_all_dups %>% 
+         filter(name %in% nutrient_name) %>%
+         mutate, 
+       aes(lake_id, value)) +
+  geom_point() +
+  facet_wrap(~name, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+
+
 ### ADA Anions
 Fluoride and bromide were below the detection limit for all field blanks from ADA.  Chloride and sulfate were about 3-fold greater than the detection limit in field blanks from lake 148, but were still 4-5 orders of magnitude lower than the unknowns from that lake. 
 
