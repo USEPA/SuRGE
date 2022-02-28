@@ -1,0 +1,158 @@
+---
+title: "Sylvan Lake Water Quality Survey"
+author: "J. Beaulieu"
+date: "2/24/2022"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sf)
+library(leaflet)
+
+# Identify local path for each user
+userPath <- paste0(Sys.getenv("USERPROFILE"), 
+                   "/Environmental Protection Agency (EPA)/",
+                   "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+```
+
+## 1. Background
+
+Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the United States (Figure 1).  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
+
+A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, water temperature, and turbidity near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
+
+This preliminary report presents water quality results for Sylvan Lake. These data will be included in a formal peer-reviewed publication to be submitted for publication in 2024.  
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, results='hide', fig.cap='*Location of the 108 Reservoirs Included in Study.*'}
+# Read survey design.  
+dsn <- read_sf(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.gdb"), 
+               layer = "main_sampled_sites") %>%
+  st_transform(5070) # Conus Albers
+st_crs(dsn) # 5070
+
+
+# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER ------------------
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+# Simplified by Alex Hall.
+
+ecoR <- st_read(dsn = paste0(userPath, "data/spatial"),
+                layer = "aggr_ecoregions_simple") %>%
+  st_transform(5070) # convert to CONUS Albers
+
+
+# SET UP CUSTOM COLORS FOR ECOREGIONS---------
+# Custom color pallette for ecoregion polygons.  Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
+
+# Get states map
+states <- USAboundaries::us_states() %>%
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
+  st_transform(5070)
+
+
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+  geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3) + # see dsgn.R
+  scale_fill_manual("Ecoregion", values = cols) +
+  ggtitle("Sample Sites") +
+theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position = c(1.08, .5), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm")) 
+
+
+```
+
+## 2.  Sylvan Lake Survey Design
+
+You can also embed plots, for example:
+
+```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap='*Location of the 15 sampling sites in Sylvan Lake.*'}
+# Read lake perimeter 
+perim <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
+               layer = "main_merc235") %>%
+  st_transform(5070) # Conus Albers
+
+# Read main sample point
+pts <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
+               layer = "main_mainSitesMerc235") %>%
+  st_transform(5070) # Conus Albers
+
+
+# # ggplot example, no base map-----------
+# ggplot() +
+#   geom_sf(data = perim, fill = "steelblue2") +
+#   geom_sf(data = pts) +
+#   theme_bw() +
+#   theme(panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank(),
+#         plot.title = element_text(hjust = 0.5),
+#         axis.title.x = element_blank(),
+#         axis.text.x = element_blank(),
+#         axis.ticks.x = element_blank(),
+#         axis.title.y = element_blank(),
+#         axis.text.y = element_blank(),
+#         axis.ticks.y = element_blank(),
+#         panel.border = element_blank())
+
+# leaflet
+
+perimWgs <- perim %>% st_transform(4326)
+ptsWgs <- pts %>% st_transform(4326) %>% 
+  mutate(index = case_when(siteID == "S-03" ~ "index",
+                           TRUE ~ "routine"))
+factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = ptsWgs$index)
+
+  colorAdditions <- paste0(colors, "; border-radius: 50%; width:", sizes, "px; height:", sizes, "px")
+  
+l <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(ptsWgs)[,1]),
+            lng2 = max(st_coordinates(ptsWgs)[,1]),
+            lat1 = min(st_coordinates(ptsWgs)[,2]),
+            lat2 = max(st_coordinates(ptsWgs)[,2])) %>%
+  addPolygons(data = st_zm(perimWgs), # removes z and m values, if present
+              color = "black", weight = 1,
+              fillOpacity = 1) %>%
+  addCircleMarkers(data = ptsWgs,
+                   fillColor = ~factpal.points(index),
+                   fillOpacity = 1) %>%
+  addLegend(position = "bottomleft", pal = factpal.points,
+            opacity = 1,
+            values = as.character(ptsWgs$index),
+            title = "Sample sites") %>%
+  addScaleBar()
+
+l
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
