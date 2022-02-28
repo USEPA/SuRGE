@@ -154,6 +154,7 @@ d.anions %>% ungroup() %>%
 
 ```
 
+\newpage
 
 ### Nutrients 2018
 Nutrient samples were collected at 8 lakes by Region 10 in 2018 and were analyzed via Lachat in CIN. A field blank was collected at one lake.  Analyte concentrations were at or near the mdl for the field blank.
@@ -204,6 +205,8 @@ chem18 %>% ungroup() %>%
 
 ```
 
+\newpage
+
 ### Nutrients ADA
 The ADA General Parameters Laboratory analyzed SuRGE nutrient sample collected by the CIN fiedl crew during the 2020 sampling season.  These samples were frozen after collection and stored until the laboratory reopened following the COVID shutdown.  The ADA General Parameters Laboratory also analyzed 2021 SuRGE samples collected by ADA field crew.
 
@@ -234,7 +237,7 @@ ada.nutrients %>%
   kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Nutrient Concentrations Measured at ADA") %>% # table title
   kableExtra::column_spec(1, bold = TRUE) %>%
-  kableExtra::collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::collapse_rows(columns = 1, valign = "bottom") %>%
   kableExtra::kable_styling(latex_options = c("repeat_header"))
 
 
@@ -257,6 +260,8 @@ ada.nutrients %>% ungroup() %>%
   theme(legend.position = "bottom")
 
 ```
+
+\newpage
 
 ### Nutrients AWBERC
 2021 SuRGE samples collected by field crews other than ADA were analyzed in CIN. TP and TN blanks were often greater than the MDL, but NH4, NO2, and NO2.3 field blanks were generally at, or just slightly elevated above the MDL.
@@ -307,6 +312,7 @@ chem21 %>% ungroup() %>%
 
 ```
 
+\newpage
 
 ### Metals
 Text about metals placeholder.
@@ -354,8 +360,15 @@ tteb.all %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Metals field blanks") +
+  theme(axis.text.x = element_text(angle = 90)) + 
   facet_wrap(~name, scales = "free", ncol = 3, nrow = 4) +
   theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=18}
 
 tteb.all %>% ungroup() %>%
   select(-cin_shipping_notes, -comment) %>%
@@ -371,12 +384,14 @@ tteb.all %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Metals field blanks") +
+  theme(axis.text.x = element_text(angle = 90)) + 
   facet_wrap(~name, scales = "free", ncol = 3, nrow = 5) +
   theme(legend.position = "bottom")
 
 
 ```
 
+\newpage
 
 ### Organic Carbon MASI
 TOC MASI text placeholder.
@@ -419,10 +434,12 @@ toc.masi %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("TOC field blanks") +
+  theme(axis.text.x = element_text(angle = 90)) +
   facet_wrap(~name, scales = "free")
 
 ```
 
+\newpage
 
 ### Organic Carbon ADA
 OC ADA text placeholder.
@@ -469,6 +486,8 @@ ada.oc %>% ungroup() %>%
 
 ```
 
+\newpage
+
 ### Algal pigments
 Text about algal pigments here.
 
@@ -514,6 +533,7 @@ chl18 %>% ungroup() %>%
 
 ```
 
+\newpage
 
 ## Field duplicates
 Field duplicates were collected at a subset of SuRGE lakes.
@@ -536,6 +556,9 @@ chemistry_all_dups <- chemistry_all %>%
 
 
 ```
+
+\newpage
+
 ### Nutrients
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # vector of nutrient names
@@ -582,7 +605,7 @@ ggplot(chemistry_all_dups %>%
 
 ```
 
-
+\newpage
 
 ### Anions
 
@@ -630,6 +653,8 @@ ggplot(chemistry_all_dups %>%
 
 ```
 
+\newpage
+
 ### Metals
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -675,6 +700,11 @@ ggplot(chemistry_all_dups %>%
 
 
 ```
+
+
+\newpage
+
+### OC
 
 <!-- ### Organic Carbon -->
 
@@ -723,50 +753,48 @@ ggplot(chemistry_all_dups %>%
 ```
 
 
+\newpage
+
 ### Algal pigments
-Text about algal pigments here.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-
-# table
-# formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
-chl18 %>%
-  ungroup() %>%
-  mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
-  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
-  pivot_longer(!c(lake_id, sample_type)) %>%
-  group_by(lake_id, name, sample_type) %>%
-  summarize(min = round(min(value),2),  max = round(max(value),2)) %>%
-  pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
-  select(-max_duplicate) %>%
-  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  rename(chla = name, duplicate = min_duplicate, minimum = min_unknown, maximum = max_unknown)  %>%
-  relocate(lake_id, chla, duplicate, minimum, maximum, mdl) %>%
-  select(-lab, -year, -units, -analyte_group) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
-                  caption = "Minimum and Maximum Chlorophyll-A Concentrations in Unknowns") %>% # table title
-  kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2))# %>% # header above the unknowns
-  # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 9, 12) # space between second and third lake
-
-
-chl18 %>% ungroup() %>%
-  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
-  mutate(sample_type = case_when(sample_type == "blank" ~ "unknown", TRUE ~ sample_type)) %>%
-  pivot_longer(cols = !c(lake_id, sample_type)) %>%
-  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  ggplot() +
-  aes(lake_id, value) +
-  geom_point(aes(color = sample_type)) +
-  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
-             color = "red") + # add horizontal lines for det. limits
-  theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("Chlorophyll-A field duplicates") +
-  facet_wrap(~name, scales = "free")
+# calculate mean relative percent difference among field replicates
+chlorophyll_rpd <- chemistry_all_dups %>% 
+  filter(name == "chla") %>%
+  group_by(lake_id, site_id, sample_depth, name) %>%
+  mutate(difference = abs(diff(value)), # difference between dup and unknown
+         mean = mean(value), # mean of dup and unknown
+         rpd = (difference/mean)*100) %>% # rpd
+    distinct() %>%
+  group_by(name) %>%
+  summarize(rpd = mean(rpd, na.rm = TRUE))
 
 ```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+chlorophyll_rpd %>%
+  mutate(rpd = round(rpd, 1)) %>%
+  rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
+  kableExtra::kbl(booktabs = TRUE, # nice formatting
+                  caption = "Mean relative percent difference among unknowns and field duplicates") 
+      
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(chemistry_all_dups %>% 
+         filter(name == "chla") %>%
+         mutate, 
+       aes(lake_id, value)) +
+  geom_point() +
+  facet_wrap(~name, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
 
 
 
