@@ -8,44 +8,79 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(sf)
 library(leaflet)
+library(readxl)
+
+# identify lake
+lake_id_i <- "235"
+lake_name_i <- "Sylvan Lake"
+site_id_i <- 3
+nla_id_i <- "NLA17_IN-10010"
+
+# identify ecoregion.
+# CPL, NAP, NPL, SAP, SPL, TPL, UMW, WMT, XER
+ecoregion_i <- "UMW"
 
 # Identify local path for each user
 userPath <- paste0(Sys.getenv("USERPROFILE"), 
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
+
+localName <- "Jake/" # R proj folder at SP.
+#localName <- "Joe/" # R proj folder at 
+
+
+# load chemistry and field data.
+# see "scripts/analysis/mergeChemistryFieldSheets.R"
+load(paste0(userPath, "rProjects/", localName, "SuRGE/output/chem_fld.RDATA")) #chem_fld
+
+chem_fld_i <- chem_fld %>% filter(lake_id == lake_id_i)
+
+
+# load depth profile
+# set up directories to search
+labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS") # all labs
+paths <- paste0(userPath, "data/", labs) # set up path to search
+pattern_i <- paste0("surgeDepthProfile", lake_id_i, ".xlsx") # pattern to match
+
+depth_prf <- fs::dir_ls(path = paths, # search all paths
+                        regexp = 'surgeDepthProfile', # file names containing this pattern
+                        recurse = TRUE) %>% # look in all subdirectories
+  .[!grepl(c(".pdf|.docx"), .)] %>% # exclude random files
+  .[grepl(pattern_i, .)] %>% # match depth profile file name
+  read_excel(.) # read data
+
 ```
 
 ## 1. Background
 
-Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the United States (Figure 1).  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
+Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the nine major US ecoregions (Figure 1) as part of the SuRGE project.  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
 
-A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, water temperature, and turbidity near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
+All reservoirs included in this project were previously sampled by the USEPA as part of the 2017 National Lakes Assessment (NLA).  Data from this study can be downloaded [here](https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys).  `r lake_name_i` is identified with a SITE_ID value of `r nla_id_i` in the data files.
 
-This preliminary report presents water quality results for Sylvan Lake. These data will be included in a formal peer-reviewed publication to be submitted for publication in 2024.  
+For the SuRGE project, water quality parameters (dissolved oxygen, pH, conductivity, water temperature, and turbidity) are measured near the water surface using a field sensor at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
 
-```{r message=FALSE, warning=FALSE, echo=FALSE, results='hide', fig.cap='*Location of the 108 Reservoirs Included in Study.*'}
+This preliminary report presents water quality results for `r lake_name_i`. These data will be included in a formal peer-reviewed publication to be submitted for publication in 2024.  
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='*Figure 1.  Location of the 108 Reservoirs Included in Study.*'}
+# READ DATA--------------
 # Read survey design.  
 dsn <- read_sf(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.gdb"), 
-               layer = "main_sampled_sites") %>%
-  st_transform(5070) # Conus Albers
-st_crs(dsn) # 5070
+               layer = "main_sampled_sites", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
 
 
-# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER ------------------
+# Read ecoregion shapefile
 # Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
 # Simplified by Alex Hall.
 
 ecoR <- st_read(dsn = paste0(userPath, "data/spatial"),
-                layer = "aggr_ecoregions_simple") %>%
-  st_transform(5070) # convert to CONUS Albers
+                layer = "aggr_ecoregions_simple", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
 
-
-# SET UP CUSTOM COLORS FOR ECOREGIONS---------
 # Custom color pallette for ecoregion polygons.  Attempted to mirror
 # https://www.epa.gov/national-aquatic-resource-surveys/
 # ecoregional-results-national-lakes-assessment-2012
@@ -62,40 +97,72 @@ cols <- c("Coastal Plains" = "orange1",
 # Get states map
 states <- USAboundaries::us_states() %>%
   dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
-  st_transform(5070)
+  st_transform(4326) # WGS84
+
+# GGPLOT APPROACH-------
+# Deprecated in favor of leaflet below.
+# If using ggplot, transform all object to 5070 conus albers
+# ggplot() +
+#   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+#   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+#   geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3) + # see dsgn.R
+#   scale_fill_manual("Ecoregion", values = cols) +
+#   ggtitle("Sample Sites") +
+# theme_bw() +
+#   theme(panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank(),
+#         plot.title = element_text(hjust = 0.5),
+#         axis.title.x = element_blank(),
+#         axis.text.x = element_blank(),
+#         axis.ticks.x = element_blank(),
+#         axis.title.y = element_blank(),
+#         axis.text.y = element_blank(),
+#         axis.ticks.y = element_blank(),
+#         panel.border = element_blank(),
+#         plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+#         legend.position = c(1.08, .5), # move legend to immediate right of plot  
+#         legend.text = element_text(size = 6),
+#         legend.title = element_text(size = 6),
+#         legend.key.size = unit(0.5, "cm")) 
 
 
-ggplot() +
-  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
-  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
-  geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3) + # see dsgn.R
-  scale_fill_manual("Ecoregion", values = cols) +
-  ggtitle("Sample Sites") +
-theme_bw() +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        plot.title = element_text(hjust = 0.5),
-        axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        panel.border = element_blank(),
-        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
-        legend.position = c(1.08, .5), # move legend to immediate right of plot  
-        legend.text = element_text(size = 6),
-        legend.title = element_text(size = 6),
-        legend.key.size = unit(0.5, "cm")) 
+# LEAFLET APPROACH----
 
+dsn <- dsn %>% filter(!is.na(sample_year))
+
+
+factpal <- colorFactor(c("orange1", "lightpink1", "darksalmon",
+                         "mediumturquoise", "khaki4", "forestgreen", 
+                         "deepskyblue4", "saddlebrown", "lightskyblue4"), 
+                       ecoR$WSA9_NAME)
+  
+l <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(dsn)[,1]),
+            lng2 = max(st_coordinates(dsn)[,1]),
+            lat1 = min(st_coordinates(dsn)[,2]),
+            lat2 = max(st_coordinates(dsn)[,2])) %>%
+  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75) %>%
+  addPolygons(data = st_zm(states), # removes z and m values, if present
+              color = "cornsilk3", stroke = TRUE, weight = 0.5, opacity = 1) %>%
+  addCircleMarkers(data = dsn, radius = 0.1) %>%
+  addLegend(position = "bottomleft", pal = factpal,
+            opacity = 1,
+            values = as.character(ecoR$WSA9_NAME),
+            title = "Ecoregions") %>%
+  addScaleBar()
+
+l
 
 ```
 
 ## 2.  Sylvan Lake Survey Design
 
-You can also embed plots, for example:
-
-```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap='*Location of the 15 sampling sites in Sylvan Lake.*'}
+The `r lake_name_i` survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == lake_id_i, site_id == site_id_i) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  
+  
+   
+```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap='*Figure 2.  Location of the 15 sampling sites in Sylvan Lake.*'}
 # Read lake perimeter 
 perim <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
                layer = "main_merc235") %>%
@@ -127,11 +194,10 @@ pts <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"),
 
 perimWgs <- perim %>% st_transform(4326)
 ptsWgs <- pts %>% st_transform(4326) %>% 
-  mutate(index = case_when(siteID == "S-03" ~ "index",
-                           TRUE ~ "routine"))
+  mutate(index = case_when(siteID == "S-03" ~ "water chemistry site",
+                           TRUE ~ "sensor sites"))
 factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = ptsWgs$index)
 
-  colorAdditions <- paste0(colors, "; border-radius: 50%; width:", sizes, "px; height:", sizes, "px")
   
 l <- leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>%
@@ -146,7 +212,7 @@ l <- leaflet() %>%
   addCircleMarkers(data = ptsWgs,
                    fillColor = ~factpal.points(index),
                    fillOpacity = 1) %>%
-  addLegend(position = "bottomleft", pal = factpal.points,
+  addLegend(position = "topright", pal = factpal.points,
             opacity = 1,
             values = as.character(ptsWgs$index),
             title = "Sample sites") %>%
@@ -155,4 +221,351 @@ l <- leaflet() %>%
 l
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## 3.  Lake Disturbance and Trophic Status
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# lake chlorophyll based on lab measurements
+chla_i <- chem_fld_i %>% filter(sample_depth == "shallow") %>% select(chla) %>% pull()
+
+trophic_i <- if (is.nan(chla_i)) {
+  "missing chlorophyll"
+} else if (chla_i <= 2) {
+  "oligotrophic"
+} else if (chla_i >2 & chla_i <=7) {
+  "mesotrophic"
+} else if (chla_i >7 & chla_i <=30){
+  "eutrophic"
+} else if (chla_i > 30) {
+  "hypereutrophic"
+}
+
+
+```
+Lakes are often classified according to their trophic state.  There are four trophic state categories that reflect nutrient availability and plant growth within a lake.  A eutrophic lake has high nutrients and high algal and/or macrophyte plant growth. An oligotrophic lake has low nutrient concentrations and low plant growth. Mesotrophic lakes fall somewhere in between eutrophic and oligotrophic lakes and hypereutrophic lakes have very high nutrients and plant growth. Lake trophic state is typically determined by a wide variety of natural factors that control nutrient supply, climate, and basin morphometry. A metric commonly used for defining trophic state is the concentration of chlorophyll a (chla), an indicator of algae abundance, in the water column.  Chlorophyll a concentration was `r chla_i` ug/L during the sampling, indicating the lake was `r  trophic_i`.
+  
+    
+```{r trophic_table, echo=FALSE, message=FALSE, warning=FALSE}
+# table of chla based trophic thresholds
+tibble(Analyte = "chlorophyll a (ug/L)", Oligotrophic = "<=2", Mesotrophic = ">2 and <=7", Eutrophic = ">7 and <=30", Hypereutrophic = ">30") %>%
+  kableExtra::kbl(align = "lcccc", # nice formatting
+                  caption = "Trophic State Classification") %>%
+  kableExtra::kable_classic() %>%
+  kableExtra::kable_styling(full_width = TRUE)
+  
+
+```
+
+```{r disturbance, echo=FALSE, message=FALSE, warning=FALSE}
+# Calculate disturbance metrics
+
+# Read in NL threshold values
+thresholds <- read_excel(paste0(userPath,
+                                "projectDocuments/literature/nlaIndicatorThresholds.xlsx"),
+                         sheet = "data") %>%
+  filter(ecoregion == ecoregion_i) %>%
+  select(-ecoregion)
+
+
+# NLA DO threshold is based on DO measured averaged across 0-2m depth
+depth_prf_mean <- depth_prf %>% filter(sample.depth.m <= 2) %>% 
+  select(contains(c("do", "turbidity"))) %>% 
+  select(-contains(c("flag", "comment"))) %>%
+  summarize(across(everything(), mean)) %>%
+  rename(do = do.mg.l, turbidity = turbidity.ntu)
+
+# pull out tn, tp, and chla
+nutrients <- chem_fld_i %>% filter(sample_depth == "shallow") %>% select(tp,tn, chla)
+
+# kable
+disturbance_i <- cbind(depth_prf_mean, nutrients) %>% # join nutrients and 0-2m sonde data
+  pivot_longer(everything(), names_to = "parameter") %>%
+  full_join(., thresholds) %>% # merge with NLA threshold values
+  # define condition status
+  mutate(status = case_when(value < least ~ "least disturbed",
+                            value >= least & value < most ~ "moderately disturbed",
+                            value >= most ~ "most disturbed",
+                            TRUE ~ NA_character_),
+         # fix calculation for do
+         status = if_else(parameter == "do",
+                          case_when(value > least ~ "least disturbed",
+                                    value <= least & value > most ~ "moderately disturbed",
+                                    value <= most ~ "most disturbed",
+                                    TRUE ~ NA_character_),
+                          status)) %>%
+  select(parameter, units, `least disturbed`, `moderately disturbed`, 
+         `most disturbed`, value, status) %>%
+  rename(concentration = value)
+
+
+# define range of disturbance levels for in text code below
+min_disturbance_i <- if (any(grepl("least", disturbance_i$status))) {
+  "least"
+} else if (any(grepl("moderately", disturbance_i$status))) {
+  "moderately"
+} else if (any(grepl("most", disturbance_i$status))){
+  "most"
+} 
+
+max_disturbance_i <- if (any(grepl("most", disturbance_i$status))){
+  "most"
+} else if (any(grepl("moderately", disturbance_i$status))) {
+  "moderately"
+} else if (any(grepl("least", disturbance_i$status))) {
+  "least"
+} 
+
+range_disturbance_i <- if (min_disturbance_i == max_disturbance_i) {
+  min_disturbance_i
+} else if (min_disturbance_i != max_disturbance_i) {
+  paste0(min_disturbance_i, " to ", max_disturbance_i)
+  }
+```
+   
+   
+In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus, total nitrogen), suspended sediment (turbidity), chlorophyll a, and dissolved oxygen.  Lake disturbance values range from `r range_disturbance_i` disturbed.
+  
+    
+```{r disturbance_table, echo=FALSE, message=FALSE, warning=FALSE}
+# Disturbance table
+disturbance_i %>%
+  kableExtra::kbl(align = "lcccccc", # nice formatting
+                  caption = "Chemical Condition Indicators") %>%
+  kableExtra::kable_classic() %>%
+  kableExtra::add_header_above(c(" ", " ", "Threshold Values" = 3, "Observed Values" = 2)) %>%
+  kableExtra::kable_styling(font_size = 13)
+```
+
+
+## 4.  Within-lake Spatial Patterns
+A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
+
+
+
+```{r scatterplot_3d_setup, echo=FALSE, message=FALSE, warning=FALSE}
+# using old scatterplot3d function.  This was written for an sp spatial
+# object, not sf.
+# load scatterplot3d function
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/lakeReports/scatterplot3d_edit.R"))
+
+# Convert lake perimeter and points to sp 
+perim_sp <- as_Spatial(perim)
+pts_sp <- as_Spatial(pts)
+
+# Add data to pts_sp
+pts_sp@data <- pts_sp@data %>% # convert siteID to SuRGE convention (see Wiki)
+  mutate(siteID = as.numeric(gsub(".*?([0-9]+).*", "\\1", siteID)))
+
+pts_sp@data <- left_join(pts_sp@data, chem_fld_i, by = c("siteID" = "site_id"))
+
+# grab coordinates from polygon (in order to plot as a line on the xy plane of 3D plot)
+coords = fortify(perim_sp)
+coords <- subset(coords, !hole)
+```
+
+
+```{r scatterplot_3d_temperature, echo=FALSE, message=FALSE, warning=FALSE}
+##########################################################################
+### Water Temperature
+with(pts_sp@data, {
+  temp_plot <- scatterplot3d_edit(x=coords$long, y=coords$lat, z=rep(0,length(coords$long)),   # x y and z data, respectively
+                                   color="#282830",                               # color of lake outline
+                                   lwd=2.0,                                       # line width of lake outline
+                                   type="l",                                      # plot type - "l" = line, "h" = the lollipop style with a line  connecting to the horizontal plane 
+                                   angle=80,                                      # angle aspect of plot (-40)
+                                   fill="#d4f1f9",
+                                 scale.y=0.5,                                   # scale y axis (increase by 175% (1.75))
+                                   main="Water Temperature",      # main plot title
+                                   xlab="",                                       # x-axis label (left blank here to reposition later)
+                                   ylab="",                                       # y-axis label
+                                    cex.axis = 0.7, 
+                                 # cex.axis = 1.3,
+                                   cex.lab = 1.1,
+                                 #cex.lab = 2,
+                                   mar = c(5,6,4,2)+0.1,
+                                   zlab="Water Temperature (C)",                      # z-axis label
+                                   zlim=range(0,27),                            # range of z data shown - I grabbed the max from previously plotting the methane data here. Set so when I add the points, the z-axis fits that data. 
+                                   lty.axis=1,                                    # the line type of the axes
+                                   axis=TRUE,                                     # whether to include axes
+                                   tick.marks = TRUE,
+                                  label.tick.marks = TRUE,   #whether or not to include tick mark labels for all three axes
+                                 x.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                 y.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                 grid=c('xy','xz','yz'),                        # which grids to show - added to edited version of scatterplot3d fx
+                                   lty.grid.xy = 1,                               # grid line type  
+                                   lty.grid.xz = 3,
+                                   lty.grid.yz = 3,
+                                   lwd.grid.xy = 1,                               # line width of grid 
+                                   lwd.grid.xz = 1,
+                                   lwd.grid.yz = 1,
+                                   box=FALSE                                      # get rid of the box around the plot
+                                    
+                                 )
+  
+
+  # add the lollipop points
+  temp_plot$points3d(x=xcoord, y=ycoord, z=temp_s, # x y and z data
+                      col="#282830",                      # color of lines connecting points to lake outline
+                      lwd=1.5,                            # line width of lines connecting points to lake outline
+                      pch=21,                             # type of point to plot
+                      bg="#000000",                       # fill color of points
+                      type="h",                           # plot type = lines to the horizontal plane
+                      cex=2 #(vRateBest/500) + 0.5          # scaling of point sizes - this will need to be adjusted for each variable
+  )
+})
+```
+
+```{r scatterplot_3d_ph, echo=FALSE, message=FALSE, warning=FALSE}
+### Water Temperature
+with(pts_sp@data, {
+  temp_plot <- scatterplot3d_edit(x=coords$long, y=coords$lat, z=rep(0,length(coords$long)),   # x y and z data, respectively
+                                   color="#282830",                               # color of lake outline
+                                   lwd=2.0,                                       # line width of lake outline
+                                   type="l",                                      # plot type - "l" = line, "h" = the lollipop style with a line  connecting to the horizontal plane 
+                                   angle=80,                                      # angle aspect of plot (-40)
+                                   fill="#d4f1f9",
+                                 scale.y=0.5,                                   # scale y axis (increase by 175% (1.75))
+                                   main="pH",      # main plot title
+                                   xlab="",                                       # x-axis label (left blank here to reposition later)
+                                   ylab="",                                       # y-axis label
+                                    cex.axis = 0.7, 
+                                 # cex.axis = 1.3,
+                                   cex.lab = 1.1,
+                                 #cex.lab = 2,
+                                   mar = c(5,6,4,2)+0.1,
+                                   zlab="pH",                      # z-axis label
+                                   zlim=range(0,10),                            # range of z data shown - I grabbed the max from previously plotting the methane data here. Set so when I add the points, the z-axis fits that data. 
+                                   lty.axis=1,                                    # the line type of the axes
+                                   axis=TRUE,                                     # whether to include axes
+                                   tick.marks = TRUE,
+                                  label.tick.marks = TRUE,   #whether or not to include tick mark labels for all three axes
+                                 x.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                 y.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                 grid=c('xy','xz','yz'),                        # which grids to show - added to edited version of scatterplot3d fx
+                                   lty.grid.xy = 1,                               # grid line type  
+                                   lty.grid.xz = 3,
+                                   lty.grid.yz = 3,
+                                   lwd.grid.xy = 1,                               # line width of grid 
+                                   lwd.grid.xz = 1,
+                                   lwd.grid.yz = 1,
+                                   box=FALSE                                      # get rid of the box around the plot
+                                    
+                                 )
+  
+
+  # add the lollipop points
+  temp_plot$points3d(x=xcoord, y=ycoord, z=ph_s, # x y and z data
+                      col="#282830",                      # color of lines connecting points to lake outline
+                      lwd=1.5,                            # line width of lines connecting points to lake outline
+                      pch=21,                             # type of point to plot
+                      bg="#000000",                       # fill color of points
+                      type="h",                           # plot type = lines to the horizontal plane
+                      cex=2 #(vRateBest/500) + 0.5          # scaling of point sizes - this will need to be adjusted for each variable
+  )
+})
+```
+
+
+```{r scatterplot_3d_turb, echo=FALSE, message=FALSE, warning=FALSE}
+### Turbidity
+with(pts_sp@data, {
+  temp_plot <- scatterplot3d_edit(x=coords$long, y=coords$lat, z=rep(0,length(coords$long)),   # x y and z data, respectively
+                                  color="#282830",                               # color of lake outline
+                                  lwd=2.0,                                       # line width of lake outline
+                                  type="l",                                      # plot type - "l" = line, "h" = the lollipop style with a line  connecting to the horizontal plane 
+                                  angle=80,                                      # angle aspect of plot (-40)
+                                  fill="#d4f1f9",
+                                  scale.y=0.5,                                   # scale y axis (increase by 175% (1.75))
+                                  main="Turbidity",      # main plot title
+                                  xlab="",                                       # x-axis label (left blank here to reposition later)
+                                  ylab="",                                       # y-axis label
+                                  cex.axis = 0.7, 
+                                  # cex.axis = 1.3,
+                                  cex.lab = 1.1,
+                                  #cex.lab = 2,
+                                  mar = c(5,6,4,2)+0.1,
+                                  zlab="Turbidity (NTU)",                      # z-axis label
+                                  zlim=range(0,32),                            # range of z data shown - I grabbed the max from previously plotting the methane data here. Set so when I add the points, the z-axis fits that data. 
+                                  lty.axis=1,                                    # the line type of the axes
+                                  axis=TRUE,                                     # whether to include axes
+                                  tick.marks = TRUE,
+                                  label.tick.marks = TRUE,   #whether or not to include tick mark labels for all three axes
+                                  x.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                  y.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                  grid=c('xy','xz','yz'),                        # which grids to show - added to edited version of scatterplot3d fx
+                                  lty.grid.xy = 1,                               # grid line type  
+                                  lty.grid.xz = 3,
+                                  lty.grid.yz = 3,
+                                  lwd.grid.xy = 1,                               # line width of grid 
+                                  lwd.grid.xz = 1,
+                                  lwd.grid.yz = 1,
+                                  box=FALSE                                      # get rid of the box around the plot
+                                  
+  )
+  
+  
+  # add the lollipop points
+  temp_plot$points3d(x=xcoord, y=ycoord, z=turb_s, # x y and z data
+                     col="#282830",                      # color of lines connecting points to lake outline
+                     lwd=1.5,                            # line width of lines connecting points to lake outline
+                     pch=21,                             # type of point to plot
+                     bg="#000000",                       # fill color of points
+                     type="h",                           # plot type = lines to the horizontal plane
+                     cex=2 #(vRateBest/500) + 0.5          # scaling of point sizes - this will need to be adjusted for each variable
+  )
+})
+```
+
+
+
+```{r scatterplot_3d_do, echo=FALSE, message=FALSE, warning=FALSE}
+### Dissolved oxygen
+with(pts_sp@data, {
+  temp_plot <- scatterplot3d_edit(x=coords$long, y=coords$lat, z=rep(0,length(coords$long)),   # x y and z data, respectively
+                                   color="#282830",                               # color of lake outline
+                                   lwd=2.0,                                       # line width of lake outline
+                                   type="l",                                      # plot type - "l" = line, "h" = the lollipop style with a line  connecting to the horizontal plane 
+                                   angle=80,                                      # angle aspect of plot (-40)
+                                   fill="#d4f1f9",
+                                 scale.y=0.5,                                   # scale y axis (increase by 175% (1.75))
+                                   main="Dissolved Oxygen",      # main plot title
+                                   xlab="",                                       # x-axis label (left blank here to reposition later)
+                                   ylab="",                                       # y-axis label
+                                    cex.axis = 0.7, 
+                                 # cex.axis = 1.3,
+                                   cex.lab = 1.1,
+                                 #cex.lab = 2,
+                                   mar = c(5,6,4,2)+0.1,
+                                   zlab="Dissolved Oxygen (mg/L)",                      # z-axis label
+                                   zlim=range(0,12),                            # range of z data shown - I grabbed the max from previously plotting the methane data here. Set so when I add the points, the z-axis fits that data. 
+                                   lty.axis=1,                                    # the line type of the axes
+                                   axis=TRUE,                                     # whether to include axes
+                                   tick.marks = TRUE,
+                                  label.tick.marks = TRUE,   #whether or not to include tick mark labels for all three axes
+                                 x.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                 y.ticklabs=NA,                                 # NA to suppress labels, NULL to include
+                                 grid=c('xy','xz','yz'),                        # which grids to show - added to edited version of scatterplot3d fx
+                                   lty.grid.xy = 1,                               # grid line type  
+                                   lty.grid.xz = 3,
+                                   lty.grid.yz = 3,
+                                   lwd.grid.xy = 1,                               # line width of grid 
+                                   lwd.grid.xz = 1,
+                                   lwd.grid.yz = 1,
+                                   box=FALSE                                      # get rid of the box around the plot
+                                    
+                                 )
+  
+
+  # add the lollipop points
+  temp_plot$points3d(x=xcoord, y=ycoord, z=do_mg_s, # x y and z data
+                      col="#282830",                      # color of lines connecting points to lake outline
+                      lwd=1.5,                            # line width of lines connecting points to lake outline
+                      pch=21,                             # type of point to plot
+                      bg="#000000",                       # fill color of points
+                      type="h",                           # plot type = lines to the horizontal plane
+                      cex=2 #(vRateBest/500) + 0.5          # scaling of point sizes - this will need to be adjusted for each variable
+  )
+})
+
+
+```
+
+
