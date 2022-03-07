@@ -1,31 +1,30 @@
 # File for reading doc and toc from ADA.
 # See ...data/chemistry/oc_ada_masi/ADA/.... for data.
 
-# See Wiki for analtye name and unique identifier conventions.
+# See Wiki for analyte name and unique identifier conventions.
 
 
 # Function to read-in and collate data from excel files 
 get_ada_data21 <- function(path, datasheet) { 
   
-  #'toptable' contains analyte names and MDL values
+  # toptable contains analyte names and MDL values
   toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
-                         sheet = "Data", range = "c8:N500") %>% # up to 492 rows
+                         sheet = "Data", range = "C8:N50", col_names = FALSE) %>% # up to 492 rows
+    row_to_names(row_number = 1, remove_row = FALSE) %>% # column names = first row of data
+    clean_names(case = "upper_camel") %>% # keep case consistent
+    filter(Analytes %in% c("Analytes", "Unit", "MDL"), ignore.case=TRUE) %>% # # remove unneeded rows
+    pivot_longer(cols = -Analytes, names_to = "variable")  %>% # transpose the tibble
+    pivot_wider(names_from = Analytes, values_from = value) %>% # transpose the tibble
+    select(-variable) %>% # no longer needed
     janitor::remove_empty("rows") %>% # remove empty rows
-    select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
-    rownames_to_column() %>% # transpose the tibble 
-    pivot_longer(-rowname, 'variable', 'value') %>% # transpose the tibble
-    pivot_wider(variable, rowname) %>% # transpose the tibble
-    row_to_names(1) %>% # transpose the tibble
-    select(starts_with("Analytes"), MDL, starts_with("Unit")) %>% # select only columns w/ analyte names, units, & MDL
-    rename(Analytes = starts_with("Analytes")) %>%
-    filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
+    filter(str_detect(Analytes, "nalytes") == FALSE) %>% # if necessary, removes superfluous row
     mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
     column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
     mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
-  
+
   analyte_names <- row.names(toptable) # pass analyte names to maintable, below
-  
-  #'maintable' combines 'toptable' with results
+
+  # # maintable combines toptable with results
   maintable <- read_excel(paste0(path, datasheet), # get the results
                           sheet = "Data", range = "A14:N500") %>% # up to 492 rows
     janitor::remove_empty("rows") %>% # remove empty rows
@@ -62,9 +61,9 @@ get_ada_data21 <- function(path, datasheet) {
     mutate(across(ends_with("analyzed"), # determine if holding time exceeded
                   ~ if_else(.>28, TRUE, FALSE))) %>% # TRUE = hold time violation
     mutate(site_id = "") # create empty column for site_id (id is populated later)
-  
+
   return(maintable)
-  
+
 }
 
 
@@ -177,3 +176,4 @@ ada.oc <- list(jea = list(jea1), key = list(key1),
   arrange(lake_id) %>%
   mutate(site_id = as.numeric(site_id)) %>% # make site id numeric
   ungroup()
+

@@ -7,25 +7,25 @@
 # Function to read-in and collate data from excel files 
 get_ada_data21 <- function(path, datasheet) { 
   
-  #'toptable' contains analyte names and MDL values
+  # toptable contains analyte names and MDL values
   toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
-                         sheet = "Data", range = "c8:S500") %>% # up to 492 rows
+                         sheet = "Data", range = "C8:T50", col_names = FALSE) %>% # up to 492 rows
+    row_to_names(row_number = 1, remove_row = FALSE) %>% # column names = first row of data
+    clean_names(case = "upper_camel") %>% # keep case consistent
+    filter(Analytes %in% c("Analytes", "Unit", "MDL"), ignore.case=TRUE) %>% # # remove unneeded rows
+    pivot_longer(cols = -Analytes, names_to = "variable")  %>% # transpose the tibble
+    pivot_wider(names_from = Analytes, values_from = value) %>% # transpose the tibble
+    select(-variable) %>% # no longer needed
     janitor::remove_empty("rows") %>% # remove empty rows
-    select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
-    rownames_to_column() %>% # transpose the tibble 
-    pivot_longer(-rowname, 'variable', 'value') %>% # transpose the tibble
-    pivot_wider(variable, rowname) %>% # transpose the tibble
-    row_to_names(1) %>% # transpose the tibble
-    select(starts_with("Analytes"), MDL, starts_with("Unit")) %>% # select only columns w/ analyte names, units, & MDL
-    rename(Analytes = starts_with("Analytes")) %>%
-    filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
+    filter(str_detect(Analytes, "nalytes") == FALSE) %>% # if necessary, removes superfluous row
     mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
     column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
     mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
   
   analyte_names <- row.names(toptable) # pass analyte names to maintable, below
+  print(toptable)
 
-  #'maintable' combines 'toptable' with results
+  # maintable combines toptable with results
   maintable <- read_excel(paste0(path, datasheet), # get the results
                           sheet = "Data", range = "A14:S500") %>% # up to 492 rows
     janitor::remove_empty("rows") %>% # remove empty rows
@@ -37,7 +37,7 @@ get_ada_data21 <- function(path, datasheet) {
     # Note: unlike other data files, all anions will have the same date analyzed
     mutate(date_analyzed = word(date_analyzed, -1)) %>% # extract last date from range of dates
     mutate(across(starts_with("date"), # convert all dates to as.Date format
-                  ~ ifelse(str_detect(., "/"), as.Date(., format = "%m/%d/%Y"), as.Date(.)))) %>% 
+                  ~ ifelse(str_detect(., "/"), as.Date(., format = "%m/%d/%Y"), as.Date(.)))) %>%
     mutate(across(ends_with("/L"), # create qual column for all remaining analytes
                   ~ as.numeric(date_analyzed - date_collected),
                   .names = "{col}__date_analyzed")) %>%
@@ -64,8 +64,6 @@ get_ada_data21 <- function(path, datasheet) {
     mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
     rename(lake_id = sampleid) %>% # enforce project formatting.  See Wiki
     mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
-    mutate(across(ends_with("analyzed"), # determine if holding time exceeded
-                  ~ if_else(.>28, TRUE, FALSE))) %>%  # TRUE = hold time violation
     mutate(site_id = "") # create empty column for site_id (id is populated later)
 
   return(maintable)
@@ -146,12 +144,12 @@ dup_agg21 <- function(data) {
                      ~ mean(., na.rm = TRUE))) 
   
   e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
-    mutate(across(3:last_col(), # convert NaN to NA
-                  ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
     select(order(colnames(.))) %>% # alphabetize column names
     select(lake_id, site_id, sample_depth, sample_type, labdup, everything()) %>% # put 'sampleid' first
     mutate(across(ends_with("flag"), # convert all _flag values back to text
                   ~ if_else(.<1, NA_character_, "<"))) %>% 
+    mutate(across(3:last_col(), # convert NaN to NA
+                  ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
     filter(labdup != "LAB DUP") %>% # remove the lab dup
     select(-labdup) # remove labdup column. 
   

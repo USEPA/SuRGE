@@ -9,25 +9,24 @@ get_ada_data21 <- function(path, datasheet) {
  
    # for 2020 data (and 2022 onward), as field_sample_id is in different format
    
-  #'toptable' contains analyte names and MDL values
+  # toptable contains analyte names and MDL values
    toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
-                          sheet = "Data", range = "c8:N500") %>% # up to 492 rows
+                          sheet = "Data", range = "C8:N50", col_names = FALSE) %>% # up to 492 rows
+      row_to_names(row_number = 1, remove_row = FALSE) %>% # column names = first row of data
+      clean_names(case = "upper_camel") %>% # keep case consistent
+      filter(Analytes %in% c("Analytes", "Unit", "MDL"), ignore.case=TRUE) %>% # # remove unneeded rows
+      pivot_longer(cols = -Analytes, names_to = "variable")  %>% # transpose the tibble
+      pivot_wider(names_from = Analytes, values_from = value) %>% # transpose the tibble
+      select(-variable) %>% # no longer needed
       janitor::remove_empty("rows") %>% # remove empty rows
-      select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
-      rownames_to_column() %>% # transpose the tibble 
-      pivot_longer(-rowname, 'variable', 'value') %>% # transpose the tibble
-      pivot_wider(variable, rowname) %>% # transpose the tibble
-      row_to_names(1) %>% # transpose the tibble
-      select(starts_with("Analytes"), MDL, starts_with("Unit")) %>% # select only columns w/ analyte names, units, & MDL
-      rename(Analytes = starts_with("Analytes")) %>%
-      filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
+      filter(str_detect(Analytes, "nalytes") == FALSE) %>% # if necessary, removes superfluous row
       mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
       column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
       mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
 
 analyte_names <- row.names(toptable) # pass analyte names to maintable, below
 
-   #'maintable' combines 'toptable' with results
+   # maintable combines toptable with results
    maintable <- read_excel(paste0(path, datasheet), # get the results
                            sheet = "Data", range = "A14:N500") %>% # up to 492 rows
       janitor::remove_empty("rows") %>% # remove empty rows
@@ -62,7 +61,7 @@ analyte_names <- row.names(toptable) # pass analyte names to maintable, below
       rename(lake_id = sampleid) %>% # change name to match chemCoc
       mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
       mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
-                    ~ if_else(.>28, TRUE, FALSE))) %>% 
+                    ~ if_else(.>28, TRUE, FALSE))) %>%
       mutate(site_id = "") # create empty column for site_id (id is populated later
 
   return(maintable)
@@ -201,6 +200,7 @@ jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP
    mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
    dup_agg21 # aggregate lab duplicates (optional)
 
+
 jea2 <- get_ada_data21(cin.ada.path, "EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    conv_units("EPAGPA054SS#7773,AE2.6,Forshay,7-14-21,TNTPGPKR.xls") %>%
    mutate(site_id = "1") %>% # add site_id, U-01
@@ -275,21 +275,19 @@ get_ada_data <- function(path, datasheet) {
    
 # for 2020 data and 2022 onward, assuming field_sample_id format is the same
    
-   #'toptable' contains analyte names and MDL values
+   # toptable contains analyte names and MDL values
    toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
-                          sheet = "Data", range = "c8:N500", na = "-") %>% # up to 492 rows
+                          sheet = "Data", range = "C8:N50", col_names = FALSE) %>% # up to 492 rows
+      row_to_names(row_number = 1, remove_row = FALSE) %>% # column names = first row of data
+      clean_names(case = "upper_camel") %>% # keep case consistent
+      filter(Analytes %in% c("Analytes", "Unit", "MDL"), ignore.case=TRUE) %>% # # remove unneeded rows
+      pivot_longer(cols = -Analytes, names_to = "variable")  %>% # transpose the tibble
+      pivot_wider(names_from = Analytes, values_from = value) %>% # transpose the tibble
+      select(-variable) %>% # no longer needed
       janitor::remove_empty("rows") %>% # remove empty rows
-      select(-(starts_with("."))) %>% # get rid of empty/unneeded columns
-      rownames_to_column() %>% # transpose the tibble 
-      pivot_longer(-rowname, 'variable', 'value') %>% # transpose the tibble
-      pivot_wider(variable, rowname) %>% # transpose the tibble
-      row_to_names(1) %>% # transpose the tibble
-      select(starts_with("Analytes"), MDL, starts_with("Unit")) %>% # select only columns w/ analyte names, units, & MDL
-      rename(Analytes = starts_with("Analytes")) %>%
-      filter(str_detect(Analytes, "Analyte", negate = TRUE)) %>% # filter out superfluous "Analytes..."
+      filter(str_detect(Analytes, "nalytes") == FALSE) %>% # if necessary, removes superfluous row
       mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
       column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
-      mutate(MDL = str_replace_all(MDL, pattern = "\\*", "")) %>%
       mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
    
    analyte_names <- row.names(toptable) # pass analyte names to maintable, below
