@@ -13,7 +13,7 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
 localName <- "Jake/" # R proj folder at SP.
-localName <- "Joe/" # R proj folder at SP.
+#localName <- "Joe/" # R proj folder at SP.
 
 # load project libraries
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/masterLibrary.R"))

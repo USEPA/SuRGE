@@ -111,39 +111,45 @@ dg_sheet %>% filter(is.na(atm_pressure) | is.na(air_temperature) | is.na(water_v
   distinct(lake_id) %>% print(n=Inf)
 
 
-# 
-# 
-# # right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
-# 
-# trap.air.extList <- map(mylist.data, function(x) select(x, lake.id, site.id, contains("extn")) %>%
-#                  select(!contains("notes"))) %>%
-#   #map(., function(x) any(x == 1389)) # works
-#   #map(., function(x) any(x %in% c("SG210639", "SG210650"))) # doesn't work
-#   map(., function(x) pivot_longer(x, !c(lake.id, site.id), names_to = "extn")) %>% # pivot to longer
-#   map(., function(x) mutate(x, extn = case_when(grepl("trap", extn) ~ "trap",
-#                                                 grepl("air", extn) ~ "air",
-#                                                 TRUE ~ extn)) %>%
-#         filter(!is.na(value))) %>%
-#   do.call("rbind", .)
-# 
-# dg.extList <- map(mylist.dg, function(x) select(x, lake.id, site.id, dg.extn)) %>%
-#   map(., function(x) mutate(x, extn = "dg") %>%
-#         rename(value = dg.extn) %>%
-#         filter(!is.na(value))) %>%
-#   do.call("rbind", .)
-# 
-# extn.list <- rbind(trap.air.extList, dg.extList)
-# 
-# extn.list %>% janitor::get_dupes() # no dups
-# extn.list %>% filter(is.na(value)) # no missing values
-# extn.list %>% filter(nchar(value) != 8) # no strangely formatted values.
-# 
-# # code to help identify random samples that showed up on my desk
-# unknown.extn <- read_excel(paste0(userPath, "data/gases/unknown_exetainers_from_JakeBs_desk_20220106.xlsx"), sheet = "data")
-# 
-# extn.list %>% filter(value %in% unknown.extn$value) # o yes, some of these are samples
-# inner_join(extn.list, unknown.extn)
-# 
+
+
+# right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
+
+trap.air.extList <- fld_sheet %>% 
+  select(lake_id, site_id, trap_deply_date, contains("extn")) %>%
+  select(!contains("notes")) 
+
+dg.extList <- dg_sheet %>% 
+  select(lake_id, site_id, dg_extn) 
+
+dim(trap.air.extList) #1036,9
+dim(dg.extList) #364,3
+
+extList <- full_join(trap.air.extList, dg.extList) %>% #1341, 10
+  pivot_longer(!c(lake_id, site_id, trap_deply_date), names_to = "extn") %>% # pivot to longer
+  mutate(extn = case_when(grepl("trap", extn) ~ "trap",
+                          grepl("air", extn) ~ "air",
+                          grepl("dg", extn) ~ "dg",
+                          TRUE ~ "poo")) %>%
+        filter(!is.na(value)) %>%
+  distinct() #1375
+
+
+extList %>% janitor::get_dupes() # no dups
+extList %>% filter(is.na(value)) # no missing values
+extList %>% filter(nchar(value) != 8) # 2018 R10 are formatted differently
+
+extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
+  {table(.$extn)} # 102 air, 212 dg, 525 trap
+
+extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
+  {table(.$extn, .$lake_id)} # 1-42 trap sample per lake
+
+extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
+  select(lake_id) %>%
+  distinct(.) # 38 lakes
+  
+
 # #################################################################
 # ######CODE BELOW NOT YET UPDATED FOR SURGE#######################
 # # 3. Strip column names that are not consisent (or necessary) across different .dbf
