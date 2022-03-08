@@ -39,7 +39,8 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTte
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTaxonomy.R")) # GB taxonomy
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
 
-source("scripts/analysis/mergeChemistry.R") # merge all chem objects #chemistry all
+source(paste0(userPath, "rProjects/", localName,
+  "SuRGE/scripts/analysis/mergeChemistry.R")) # merge all chem objects #chemistry all
 ```
 
 ## Background
@@ -208,7 +209,7 @@ chem18 %>% ungroup() %>%
 \newpage
 
 ### Nutrients ADA
-The ADA General Parameters Laboratory analyzed SuRGE nutrient sample collected by the CIN fiedl crew during the 2020 sampling season.  These samples were frozen after collection and stored until the laboratory reopened following the COVID shutdown.  The ADA General Parameters Laboratory also analyzed 2021 SuRGE samples collected by ADA field crew.
+The ADA General Parameters Laboratory analyzed SuRGE nutrient sample collected by the CIN field crew during the 2020 sampling season.  These samples were frozen after collection and stored until the laboratory reopened following the COVID shutdown.  The ADA General Parameters Laboratory also analyzed 2021 SuRGE samples collected by ADA field crew.
 
 All TN blanks, with the exception of lake 191, were at the MDL.  TP blanks were generally greater than the MDL and lower than the unknowns; but TP blanks at lakes 191 and 235 were of similar magnitude as the unknowns.  NH4 blanks were generally 2-5 fold greater than the MDL and of similar magnitude as the unknowns in some lakes. NO2.3 blanks were at the MDL in 8 out of 12 lakes.  op field blanks exceeded the MDL in all but one lake.
 
@@ -317,7 +318,7 @@ chem21 %>% ungroup() %>%
 ### Metals
 Text about metals placeholder.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=18}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
 
 
 # table
@@ -347,12 +348,12 @@ tteb.all %>%
 
 
 tteb.all %>% ungroup() %>%
-  select(-cin_shipping_notes, -comment) %>%
+  select(-cin_shipping_notes, -comment, -contains("toc")) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  filter(name < "mn") %>% # plot al:mg only
+  filter(name < "fe") %>% # plot al:mg only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -361,7 +362,7 @@ tteb.all %>% ungroup() %>%
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Metals field blanks") +
   theme(axis.text.x = element_text(angle = 90)) + 
-  facet_wrap(~name, scales = "free", ncol = 3, nrow = 4) +
+  facet_wrap(~name, scales = "free", ncol = 2, nrow = 4) +
   theme(legend.position = "bottom")
 
 ```
@@ -394,9 +395,9 @@ tteb.all %>% ungroup() %>%
 \newpage
 
 ### Organic Carbon MASI
-TOC MASI text placeholder.
+During the 2020 field season, TOC samples were analyzed at MASI, an external contract laboratory.  All field blanks were at the detection limit.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height=4, fig.width=8}
 
 
 # table
@@ -434,15 +435,14 @@ toc.masi %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("TOC field blanks") +
-  theme(axis.text.x = element_text(angle = 90)) +
-  facet_wrap(~name, scales = "free")
+  theme(axis.text.x = element_text(angle = 90))
 
 ```
 
 \newpage
 
 ### Organic Carbon ADA
-OC ADA text placeholder.
+Dissolved and total organic carbon samples (oc) collected by the ADA field crew were analyzed at ADA's General Parameters Laboraotry.  Field blanks had oc concentrations that were 2 to 6 times greater than the mdl, but an order of magnitude less than the unknowns. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -488,8 +488,8 @@ ada.oc %>% ungroup() %>%
 
 \newpage
 
-### Algal pigments
-Text about algal pigments here.
+### Chlorophyll a: CIN and BSA 
+Chlorophyll a samples collected by Region 10 in 2018 were extracted in CIN.  Some of the extracts were analyzed in CIN and the balance were analyzed by BSA, an outside contract laboratory.  Defining a mdl for chlorophyll is difficult because it is dependent upon the sample volume filtered.  Below we report the values of the field blank and unknowns.  
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -534,6 +534,8 @@ chl18 %>% ungroup() %>%
 ```
 
 \newpage
+### Chlorophyll a: Naragansett
+Placeholder for chlorophyll data from Narragansett.
 
 ## Field duplicates
 Field duplicates were collected at a subset of SuRGE lakes.
@@ -557,10 +559,11 @@ chemistry_all_dups <- chemistry_all %>%
 
 ```
 
-\newpage
 
 ### Nutrients
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+# set up for below
+
 # vector of nutrient names
 nutrient_name <- detlimits %>% 
   filter(analyte_group == "nutrients") %>%
@@ -593,14 +596,17 @@ nutrients_rpd %>%
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=8}
 ggplot(chemistry_all_dups %>% 
          filter(name %in% nutrient_name) %>%
          mutate, 
        aes(lake_id, value)) +
   geom_point() +
+  xlab("ug N or P / L") +
   facet_wrap(~name, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  ggtitle("Concentrations of Field Duplicates and Paired Unknowns: nutrients") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.title.y = element_blank())
 
 
 ```
@@ -629,7 +635,7 @@ anions_rpd <- chemistry_all_dups %>%
 
 ```
 
-Relative percent agreement among ANIONS duplicates was greatest for `r anions_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()`(`r anions_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r anions_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()`(`r anions_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
+Relative percent agreement among anion duplicates was greatest for `r anions_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()` (`r anions_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r anions_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()` (`r anions_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 anions_rpd %>%
@@ -647,6 +653,7 @@ ggplot(chemistry_all_dups %>%
          mutate, 
        aes(lake_id, value)) +
   geom_point() +
+  ggtitle("Concentration of Field Duplicates and Paired Unknowns: anions") +
   facet_wrap(~name, scales = "free") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
@@ -677,7 +684,7 @@ metals_rpd <- chemistry_all_dups %>%
 
 ```
 
-Relative percent agreement among METALS duplicates was greatest for `r metals_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()`(`r metals_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r metals_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()`(`r metals_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
+Relative percent agreement among METALS duplicates was greatest for `r metals_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()` (`r metals_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r metals_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()` (`r metals_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 metals_rpd %>%
@@ -728,7 +735,7 @@ organic_rpd <- chemistry_all_dups %>%
 
 ```
 
-Relative percent agreement among ORGANIC duplicates was greatest for `r organic_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()`(`r organic_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r organic_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()`(`r organic_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
+Relative percent agreement among organic carbon duplicates was greatest for `r organic_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()` (`r organic_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r organic_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()` (`r organic_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 organic_rpd %>%
@@ -757,6 +764,7 @@ ggplot(chemistry_all_dups %>%
 
 ### Algal pigments
 
+Placeholder text.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # calculate mean relative percent difference among field replicates
