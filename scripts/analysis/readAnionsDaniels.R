@@ -106,7 +106,9 @@ d.anions <- d.anions %>%
 
 
 janitor::get_dupes(d.anions %>% # no dups
-                     select(lake_id, site_id, sample_depth, sample_type)
+                     select(lake_id, site_id, sample_depth, sample_type))
+
+
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
@@ -132,5 +134,10 @@ setdiff(d.anions[c("lake_id", "sample_depth", "sample_type")],
 #   arrange(lake_id) %>%
 #   write.table(file = paste0(userPath, "data/chemistry/anions_ada_daniels/danielsMissingAnions.txt"), row.names = FALSE)
 
+# Decision Tree:
+# If multiple values are provided for an analyte, give preference to the value where the corresponding analyte_qual field == FALSE (no holding time violation).
+# If multiple values are provided for an analyte AND both records have the same analyte_qual field AND both records have the same value in the analyte_flag column, then average values.
+# If multiple values are provided for an analyte AND both records have the same analyte_qual field AND the records have different values in the analyte_flag column, choose record where analyte_qual == NA.
+# If an analyte concentration is reported in one record, but is NA in the other, then choose the reported concentration.
 
-
+# 

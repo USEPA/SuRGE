@@ -12,8 +12,8 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
-localName <- "Jake/" # R proj folder at SP.
-#localName <- "Joe/" # R proj folder at SP.
+# localName <- "Jake/" # R proj folder at SP.
+localName <- "Joe/" # R proj folder at SP.
 
 # load project libraries
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/masterLibrary.R"))
@@ -50,7 +50,7 @@ SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey
 
 ## Detection Limits
 
-Detection limits vary by analyte, analytical method, lab, and possibly by year.  See `Analtyical` section of Wiki for details.  Detection limits are read in below.
+Detection limits vary by analyte, analytical method, lab, and possibly by year.  See `Analytical` section of Wiki for details.  Detection limits are read in below.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -63,7 +63,7 @@ detlimits <- read_xls(path = paste0(userPath,"data/chemistry/detectionLimits.xls
 ### ADA Anions
 Fluoride and bromide were below the detection limit for all field blanks from ADA.  Chloride and sulfate were about 3-fold greater than the detection limit in field blanks from lake 148, but were still 4-5 orders of magnitude lower than the unknowns from that lake.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
 
 
 # table
@@ -100,11 +100,14 @@ ada.anions %>% ungroup() %>%
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("ADA Anion Samples") +
-  facet_wrap(~name, scales = "free")  +
+  labs(title = "ADA Anion Samples",
+       x =NULL, y = "mg/L") + 
+  facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
 ```
+
+\newpage
 
 ### CIN Anions
 Anion samples collected in 2020 by field crews other than ADA were analyzed at EPA Cincinnati.  All bromide blanks were below the detection limit, as where most of the unknowns.  Most chloride blanks were below the detection limit and all were several orders of magnitude below the unknowns.  Lake 233 had a high F blank, but all others were at DL.  Sulfate blanks were near the detection limit and several orders of magnitude below the unknowns.
@@ -149,7 +152,8 @@ d.anions %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("CIN Anion Samples") +
+  labs(title = "CIN Anion Samples",
+       x =NULL, y = "mg/L") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -192,6 +196,7 @@ chem18 %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
+  filter(name %in% c("nh4", "no2", "no2_3", "no3", "tn")) %>% # plot n only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -200,7 +205,31 @@ chem18 %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("2018 Nutrients Analyzed at CIN") +
+  labs(title = "2018 Nutrients Analyzed at CIN",
+     x =NULL, y = "μg n/L") +
+  facet_wrap(~name, scales = "free") +
+  theme(legend.position = "bottom")
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+
+chem18 %>% ungroup() %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = filter(detlimits, lab == "CIN" & year == "2018"), by = "name") %>%
+  filter(name %in% c("tp", "op")) %>% # plot p only
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  scale_y_log10() +
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank(),  # remove legend titles
+          axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "2018 Nutrients Analyzed at CIN",
+     x =NULL, y = "μg p/L") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -248,6 +277,7 @@ ada.nutrients %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  filter(name %in% c("nh4", "no2", "no2_3", "no3", "tn")) %>% # plot n only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -256,7 +286,32 @@ ada.nutrients %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("2021 Nutrients Analyzed at ADA") +
+  labs(title = "2021 Nutrients Analyzed at ADA",
+       x =NULL, y = "μg n/L") +
+  facet_wrap(~name, scales = "free") +
+  theme(legend.position = "bottom")
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+
+ada.nutrients %>% ungroup() %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  select(-no3) %>% # not needed for now
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
+  filter(name %in% c("tp", "op")) %>% # plot p only
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  scale_y_log10() +
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank(),  # remove legend titles
+          axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "2021 Nutrients Analyzed at ADA",
+       x =NULL, y = "μg p/L") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -299,6 +354,7 @@ chem21 %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
+  filter(name %in% c("nh4", "no2", "no2_3", "no3", "tn")) %>% # plot n only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -307,7 +363,30 @@ chem21 %>% ungroup() %>%
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank(),  # remove legend titles
           axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ggtitle("2021 Nutrients Analyzed at AWBERC") +
+  labs(title = "2021 Nutrients Analyzed at AWBERC",
+       x =NULL, y = "μg n/L") +
+  facet_wrap(~name, scales = "free") +
+  theme(legend.position = "bottom")
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+chem21 %>% ungroup() %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = filter(detlimits, lab == "CIN" & year == "2021"), by = "name") %>%
+  filter(name %in% c("tp", "op")) %>% # plot p only
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  scale_y_log10() +
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank(),  # remove legend titles
+          axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "2021 Nutrients Analyzed at AWBERC",
+       x =NULL, y = "μg p/L") +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 
@@ -353,14 +432,15 @@ tteb.all %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  filter(name < "fe") %>% # plot al:mg only
+  filter(name < "fe") %>% # plot al:cu only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("Metals field blanks") +
+   labs(title = "Metals field blanks",
+        x =NULL, y = "mg/L") +
   theme(axis.text.x = element_text(angle = 90)) + 
   facet_wrap(~name, scales = "free", ncol = 2, nrow = 4) +
   theme(legend.position = "bottom")
@@ -369,7 +449,7 @@ tteb.all %>% ungroup() %>%
 
 \newpage
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=18}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
 
 tteb.all %>% ungroup() %>%
   select(-cin_shipping_notes, -comment) %>%
@@ -377,16 +457,41 @@ tteb.all %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  filter(name > "mg") %>% # plot mn:zn only
+  filter(name > "cu" & name < "pb") %>% # plot fe:p only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("Metals field blanks") +
+  labs(title = "Metals field blanks",
+       x =NULL, y = "mg/L") +
   theme(axis.text.x = element_text(angle = 90)) + 
-  facet_wrap(~name, scales = "free", ncol = 3, nrow = 5) +
+  facet_wrap(~name, scales = "free", ncol = 2, nrow = 4) +
+  theme(legend.position = "bottom")
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
+
+tteb.all %>% ungroup() %>%
+  select(-cin_shipping_notes, -comment) %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  filter(name > "p") %>% # plot pb:zn only
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank()) + # remove legend titles
+  labs(title = "Metals field blanks",
+       x =NULL, y = "mg/L") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  facet_wrap(~name, scales = "free", ncol = 2, nrow = 5) +
   theme(legend.position = "bottom")
 
 
@@ -415,12 +520,11 @@ toc.masi %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  relocate(lake_id, OC, mdl, blank, minimum, maximum) %>%
+  mutate(mdl = sprintf("%.2f", mdl)) %>% # add trailing zero
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) # header above the unknowns
-  # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
 toc.masi %>% ungroup() %>%
@@ -434,7 +538,8 @@ toc.masi %>% ungroup() %>%
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("TOC field blanks") +
+  labs(title = "TOC field blanks",
+       x =NULL, y = "mg/L") +
   theme(axis.text.x = element_text(angle = 90))
 
 ```
@@ -462,12 +567,11 @@ ada.oc %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
   rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  relocate(lake_id, OC, mdl, blank, minimum, maximum) %>%
+  mutate(mdl = sprintf("%.2f", mdl)) %>% # add trailing zero
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2)) # header above the unknowns
-  # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
 ada.oc %>% ungroup() %>%
@@ -481,7 +585,8 @@ ada.oc %>% ungroup() %>%
   geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
              color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
-  ggtitle("TOC field blanks") +
+  labs(title = "TOC field blanks",
+       x =NULL, y = "mg/L") +
   facet_wrap(~name, scales = "free")
 
 ```
@@ -506,15 +611,10 @@ chl18 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
   filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
-  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  select(-lab, -year, -units, -analyte_group) %>%
   rename(chla = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown)  %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Chlorophyll-A Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2))# %>% # header above the unknowns
-  # kableExtra::pack_rows("", 1, 4) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 5, 8) %>% # space between first and second lake
-  # kableExtra::pack_rows("", 9, 12) # space between second and third lake
 
 
 chl18 %>% ungroup() %>%
@@ -525,15 +625,16 @@ chl18 %>% ungroup() %>%
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
-  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
-             color = "red") + # add horizontal lines for det. limits
   theme(legend.title = element_blank()) + # remove legend titles
   ggtitle("Chlorophyll-A field blanks") +
+  labs(title = "Chlorophyll-A field blanks",
+       x =NULL, y = NULL) +
   facet_wrap(~name, scales = "free")
 
 ```
 
 \newpage
+
 ### Chlorophyll a: Naragansett
 Placeholder for chlorophyll data from Narragansett.
 
@@ -590,7 +691,7 @@ Relative percent agreement among nutrient duplicates was greatest for `r nutrien
 nutrients_rpd %>%
   mutate(rpd = round(rpd, 1)) %>%
   rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Mean relative percent difference among unknowns and field duplicates") 
       
 ```
@@ -599,14 +700,29 @@ nutrients_rpd %>%
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=8}
 ggplot(chemistry_all_dups %>% 
          filter(name %in% nutrient_name) %>%
+         filter(name %in% c("nh4", "no2", "no2_3", "no3", "tn")) %>% # plot n only
          mutate, 
        aes(lake_id, value)) +
   geom_point() +
-  xlab("ug N or P / L") +
   facet_wrap(~name, scales = "free") +
-  ggtitle("Concentrations of Field Duplicates and Paired Unknowns: nutrients") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1),
-        axis.title.y = element_blank())
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: nutrients",
+       x =NULL, y = "μg n/L") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=8}
+ggplot(chemistry_all_dups %>% 
+         filter(name %in% nutrient_name) %>%
+         filter(name %in% c("tp", "op")) %>% # plot n only
+         mutate, 
+       aes(lake_id, value)) +
+  geom_point() +
+  facet_wrap(~name, scales = "free") +
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: nutrients",
+       x =NULL, y = "μg p/L") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
 
 
 ```
@@ -641,7 +757,7 @@ Relative percent agreement among anion duplicates was greatest for `r anions_rpd
 anions_rpd %>%
   mutate(rpd = round(rpd, 1)) %>%
   rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Mean relative percent difference among unknowns and field duplicates") 
       
 ```
@@ -653,7 +769,8 @@ ggplot(chemistry_all_dups %>%
          mutate, 
        aes(lake_id, value)) +
   geom_point() +
-  ggtitle("Concentration of Field Duplicates and Paired Unknowns: anions") +
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: anions",
+       x =NULL, y = "mg/L") +
   facet_wrap(~name, scales = "free") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
@@ -690,24 +807,56 @@ Relative percent agreement among METALS duplicates was greatest for `r metals_rp
 metals_rpd %>%
   mutate(rpd = round(rpd, 1)) %>%
   rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Mean relative percent difference among unknowns and field duplicates") 
       
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=18}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
 ggplot(chemistry_all_dups %>% 
          filter(name %in% metal_name) %>%
+         filter(name < "fe") %>%
          mutate, 
        aes(lake_id, value)) +
   geom_point() +
   facet_wrap(~name, scales = "free") +
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: metals",
+       x =NULL, y = "mg/L") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
 ```
 
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
+ggplot(chemistry_all_dups %>% 
+         filter(name %in% metal_name) %>%
+         filter(name > "cu" & name < "pb") %>%
+         mutate, 
+       aes(lake_id, value)) +
+  geom_point() +
+  facet_wrap(~name, scales = "free") +
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: metals",
+       x =NULL, y = "mg/L") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
+ggplot(chemistry_all_dups %>% 
+         filter(name %in% metal_name) %>%
+         filter(name > "p") %>%
+         mutate, 
+       aes(lake_id, value)) +
+  geom_point() +
+  facet_wrap(~name, scales = "free") +
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: metals",
+       x =NULL, y = "mg/L") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
 
 \newpage
 
@@ -741,7 +890,7 @@ Relative percent agreement among organic carbon duplicates was greatest for `r o
 organic_rpd %>%
   mutate(rpd = round(rpd, 1)) %>%
   rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Mean relative percent difference among unknowns and field duplicates") 
       
 ```
@@ -754,6 +903,8 @@ ggplot(chemistry_all_dups %>%
        aes(lake_id, value)) +
   geom_point() +
   facet_wrap(~name, scales = "free") +
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: OC",
+       x =NULL, y = "mg/L") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
@@ -785,7 +936,7 @@ chlorophyll_rpd <- chemistry_all_dups %>%
 chlorophyll_rpd %>%
   mutate(rpd = round(rpd, 1)) %>%
   rename(Analyte = name, `Relative Percent Difference` = rpd) %>%
-  kableExtra::kbl(booktabs = TRUE, # nice formatting
+  kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Mean relative percent difference among unknowns and field duplicates") 
       
 ```
@@ -798,6 +949,8 @@ ggplot(chemistry_all_dups %>%
        aes(lake_id, value)) +
   geom_point() +
   facet_wrap(~name, scales = "free") +
+  labs(title = "Concentrations of Field Duplicates and Paired Unknowns: chlorophyll",
+       x =NULL, y = "mg/L") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
