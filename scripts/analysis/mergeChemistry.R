@@ -29,7 +29,7 @@
 # Inspect objects----
 
 # inspect object to merge
-# each df contains 10 - 95 observations
+# each df contains 10 - 352 observations
 list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
      ada.oc, toc.masi, tteb.all, chl18) %>% 
   map_dfc(., nrow)
@@ -71,29 +71,28 @@ janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type))
 metal.chl <- tteb.all %>%
   full_join(chl18)
 janitor::get_dupes(select(metal.chl, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 275).  lake 275 dupe is known (see readTteb.R)
 
 metal.chl.oc <- metal.chl %>%
   full_join(oc)
 janitor::get_dupes(select(metal.chl.oc, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
+
 
 metal.chl.oc.anions <- metal.chl.oc %>%
   full_join(anions)
 janitor::get_dupes(select(metal.chl.oc.anions, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
+
 
 chemistry_all <- nutrients2 %>%
   full_join(metal.chl.oc.anions)
 janitor::get_dupes(select(chemistry_all, lake_id, site_id, sample_depth, sample_type)) 
-# 2 dupe (lake 275) lake 275 dupe is known (see readTteb.R)
 
 
 
-# The tteb.all object contains metals and TOC data.  To prevent erroneous duplicates
+
+# The tteb.all object contains metals, DOC, and TOC data.  To prevent erroneous duplicates
 # when joining tteb.all with other objects containing TOC data, we appended "tteb."
-# to TOC column names in tteb.all (see readTteb.R).  Any samples where TOC was run
-# at TTEB will have TOC numbers in the tteb.toc columns AND NAs in the TOC columns
+# to TOC and DOC column names in tteb.all (see readTteb.R).  Any samples where TOC/DOC was run
+# at TTEB will have TOC/DOC numbers in the tteb.toc/tteb.doc columns AND NAs in the TOC/DOC columns
 # that came from toc.masi and ada.oc.  For any observations that meet these criteria,
 # move the tteb OC data into the OC columns, then remove the tteb.toc columns.
 # TTEB will also run anions from the 2022 field season.  When we get those data,
@@ -109,6 +108,15 @@ chemistry_all <- chemistry_all %>%
   mutate(toc_units = case_when(
     is.na(toc_units) & !is.na(tteb.toc_units) ~ "mg_c_l",
     TRUE ~ toc_units)) %>%
+  mutate(doc = case_when(
+    is.na(doc) & !is.na(tteb.doc) ~ tteb.doc,
+    TRUE ~ doc)) %>%
+  mutate(doc_flag = case_when(
+    is.na(doc_flag) & !is.na(tteb.doc_flag) ~ tteb.doc_flag,
+    TRUE ~ doc_flag)) %>%
+  mutate(doc_units = case_when(
+    is.na(doc_units) & !is.na(tteb.doc_units) ~ "mg_c_l",
+    TRUE ~ doc_units)) %>%
   select(-contains("tteb"))
 
 

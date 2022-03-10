@@ -8,10 +8,13 @@
 # SuRGE samples collected in 2020.  Data are in `SURGE_2021_01_20_2022_update.xlsx`.
 
 # During the summer of 2021, TTEB ran metals, TOC, and DOC on SuRGE samples
-# multiple locations.  Data are in `SURGE_2022_01_20_2022_update.xlsx`.
+# multiple locations.  Data are in `SURGE_2022_03_10_2022_update.xlsx` and
+# `SURGE_03_10_2022_update.xlsx`
 
-# As of 1/25/2022, the `SURGE_2022_01_20_2022_update.xlsx` file contains a
-# subset of the data.  We are waiting for an update from TTEB.
+# As of 3/10/2022, `SURGE_2022_03_10_2022_update.xlsx` and `SURGE_03_10_2022_update.xlsx`
+# files contains a subset of the data.  We are waiting for an update from TTEB.
+
+
 
 # 1. READ CHEMISTRY DATA--------------
 # Files contain samples from SuRGE + other studies.  Filter below.
@@ -19,10 +22,12 @@ tteb.BEAULIEU <- read_excel(paste0(userPath,
                                    "data/chemistry/tteb/BEAULIEU_01_20_2022_update.xlsx")) 
 
 tteb.SURGE <- read_excel(paste0(userPath, 
-                                "data/chemistry/tteb/SURGE_2021_01_20_2022_update.xlsx"))
+                                "data/chemistry/tteb/SURGE_2021_03_10_2022_update.xlsx"))
 
+tteb.SURGE2 <- read_excel(paste0(userPath, 
+                                "data/chemistry/tteb/SURGE_03_10_2022_update.xlsx"))
 
-tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>% 
+tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE, tteb.SURGE2) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
   select(-colldate, -studyid, -tn, -flag) %>% # remove unneeded columns
@@ -70,7 +75,7 @@ janitor::get_dupes(ttebCoc, lab_id) # no duplicates
 
 # Compare list of submitted samples to comprehensive sample list
 # print rows in ttebSampleIds not in chem.samples.
-# [Jan. 21, 2022] No extra samples, all good 
+# [Mar. 10, 2022] No extra samples, all good 
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
@@ -83,7 +88,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
-# Missing some from 147, 275, 298, and 68
+# All samples accounted for
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
                  #sample_year >= 2020, # no 2018 samples sent to TTEB
@@ -97,49 +102,71 @@ setdiff(chem.samples.foo %>%
         ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")]) %>%
   arrange(lake_id)
 
-# 147
-# ttebMetals19July2021.pdf contains three shallow metals samples for lake 147.  
-# None of three lines report whether they are unknowns, duplicates, or blanks.  
-# All three are entered as unknown in ttebSampleIds, but we will need to change 
-# this when we get the data.
-
-# 275
-# 01July2021 sample tracking form doesn't show a DOC blank.  Will try to sort out 
-# after  we get data from TTEB.
-
-# 298
-# One of the shallow unknown metals that was submitted (203558, 203580) is likely
-# the missing blank.  Will sort out after we get tteb data.
-
-# 68
-# Two DOC blanks submitted (204165, 204166).  One of them is likely the TOC blank.
-# will sort out after we get tteb data.
 
 
 # 4. JOIN TTEB DATA WITH CoC--------------
 # inner_join will keep all matched samples.  Since
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
-tteb.all <- inner_join(ttebCoc %>% select(-analyte), tteb)
-nrow(tteb.all) # 95 records
+tteb.all <- inner_join(ttebCoc, tteb)
+nrow(tteb.all) # 352 records [3/10/2022] 
 
+
+# 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
+tteb.all <- tteb.all %>%
+  mutate(doc = case_when(analyte == "doc" ~ toc,
+                         TRUE ~ NA_real_),
+         doc_units = "mg_c_l",
+         doc_flag = case_when(analyte == "doc" ~ toc_flag,
+                              TRUE ~ NA_character_)) %>%
+  mutate(toc = case_when(analyte == "doc" ~ NA_real_,
+                         TRUE ~ toc))
+
+# 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
-# no, missing a ton.  Waiting for update from Maily.
+# missing 33 samples.  Waiting for update from Maily. [3/10/2022]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id))
-# list of missing metals samples to send to Maily [1/25/2022]
+# list of missing samples to send to Maily [3/10/2022]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
-  filter(analyte == "metals") %>%
-  write.table(paste0(userPath, "data/chemistry/tteb/missingMetals01252022.txt"), row.names = FALSE)
+  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb03102022.txt"), row.names = FALSE)
 
 
-# clean up final object
-tteb.all <- tteb.all %>% select(-lab_id, -coc, -notes, -sampid) %>%
-  rename(cin_shipping_notes = shipping_notes) %>%
+# 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
+# any combination of lake_id, site_id, sample_depth, and sample_type could
+# be repeated for metals, doc, and toc.  To eliminate replicates of rows
+# that share unique IDs, split by analyte, select columns that contain data
+# for the analyte, then merge by unique ID.
+tteb.all <- tteb.all %>% 
+  filter(lake_id == "16") %>%
+  group_split(analyte) %>% # split by analyte
+  map(., function(x) 
+    if (unique(x$analyte == "doc")) { # if contains doc
+      x %>% select(lake_id, site_id, sample_depth, sample_type, contains("doc")) # select doc stuff
+    } else if (unique(x$analyte == "toc")) { # if contains toc
+      x %>% select(lake_id, site_id, sample_depth, sample_type, contains("toc")) # select toc stuff
+    } else if (unique(x$analyte == "metals")) { # if contains metals
+      x %>% select(lake_id, site_id, sample_depth, sample_type, 
+                   ni, ni_flag, ni_units, # if ni in matches, also grabs units (i.e. doc_units)
+                   s, s_flag, s_units, # if s in matches, grabs too many variable
+                   matches("(al|as|ba|be|ca|cd|cr|cu|fe|k|li|mg|
+                         mn|na|p|pb|sb|si|sn|sr|v|zn)")) # select metals stuff
+    }) %>%
+  reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type
+
+dim(tteb.all) #82 rows.  Good, reduced from 352 to 82.
+
+
+# 7. CLEAN UP FINAL OBJECT
+tteb.all <- tteb.all %>% 
+  select(-analyte, -sampid) %>%
   mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # remove non numeric chars
-  # rename the toc fields to enable a clean join with other objects containing
-  # TOC data (i.e. oc.ada, masi.toc).  See mergeChemistry.R
+  # rename the toc and doc fields to enable a clean join with other objects containing
+  # TOC data (i.e. oc.ada, masi.toc). DOC data (ada.oc). See mergeChemistry.R
   rename(tteb.toc = toc, # rename these fields for the full_join in the merge script
          tteb.toc_units = toc_units, 
-         tteb.toc_flag = toc_flag) 
+         tteb.toc_flag = toc_flag,
+         tteb.doc = doc,
+         tteb.doc_units = doc_units,
+         tteb.doc_flag = doc_flag) 
 
 

@@ -128,6 +128,8 @@ chem.samples.foo <- chem.samples %>%
   filter(!(lake_id == "67" & sample_type == "blank" & analyte %in% c("doc", "toc"))) %>%
   # chl unknown filter tore during sample prep at 148.  no replacement available
   filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla")) %>%
+  # no DOC blank collected at 275
+  filter(!(lake_id == "275" & sample_type == "blank" & analyte == "doc")) %>%
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          
