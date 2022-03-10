@@ -109,6 +109,65 @@ janitor::get_dupes(d.anions %>% # no dups
                      select(lake_id, site_id, sample_depth, sample_type))
 
 
+dup_agg <- function(data) {
+  
+  d <- data %>% # pivot longer and split all dupes into separate groups
+    pivot_longer(cols = c(f, cl, br, so4), names_to = "analyte") %>%
+    group_split(lake_id, site_id, sample_depth, sample_type, analyte) 
+    
+  
+  # sub-function to implement decision tree & aggregate dupes
+  selector <- function(data) {
+
+    anion = as.character(data[1,"analyte"]) # get the analyte name
+
+    v <- data %>% select(starts_with(anion), analyte, site_id, sample_depth,
+           sample_type, lake_id, value) %>% # only keep fields for that analyte
+      as.tibble() %>%
+      rename(qual = ends_with("qual"), # strip the analyte name from fields
+             units = ends_with("units"), 
+             flag = ends_with("flag")) %>%
+      mutate(qual = ifelse(is.na(qual) == TRUE, TRUE, qual)) %>%
+      arrange(qual, flag, value) # ordering the values for the condional statements below
+
+      # FILTERING:
+      # If all rows are completely identical, use slice_head to keep one of them
+      # if the first row of x is qual = FALSE, we only want qual = FALSE rows
+      # after filtering, we either have all qual = TRUE or all qual = FALSE
+      # if the last row of x is flag = NA, we only want flag = NA rows
+      # after filtering, we either have all flag < or all flag NA
+      # now we can average whatever is left (NAs are irrelevant now)
+    
+    w <- v %>% # if all rows are identical in all values, just keep the first row
+      {if (n_distinct(v) == 1) slice_head(v) else v} 
+
+    x <- w %>% # if the first row qual = FALSE, then only keep FALSE rows
+      {if (slice_head(v)$qual == FALSE) filter(w, qual == FALSE) else w} %>% 
+      arrange(qual, flag, value)
+      
+    y <- x %>% # check  slice_tail(x)$flag. if is.na(flag) == TRUE, keep only flag = NA rows
+      {if (is.na(slice_tail(x)$flag) == TRUE) filter(x, is.na(flag) == TRUE) else x}
+    
+    z <- y %>% # get the mean of any remaining groups with multiple rows
+      dplyr::group_by(across(!value)) %>% summarize(value = mean(value, na.rm = TRUE))
+      
+
+    return(z)
+      
+  }
+  
+  e <- map(d, ~ selector(.)) # map the function across all of the grouped dupes 
+    
+  f <- bind_rows(e)
+  
+  return(f)
+
+}
+
+options(dplyr.summarise.inform = FALSE) # summarize() causes lots of console spam
+
+d.anions.aggregated <- dup_agg(d.anions) 
+
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
@@ -133,11 +192,3 @@ setdiff(d.anions[c("lake_id", "sample_depth", "sample_type")],
 #         d.anions[,c("lake_id", "sample_depth", "sample_type")]) %>%
 #   arrange(lake_id) %>%
 #   write.table(file = paste0(userPath, "data/chemistry/anions_ada_daniels/danielsMissingAnions.txt"), row.names = FALSE)
-
-# Decision Tree:
-# If multiple values are provided for an analyte, give preference to the value where the corresponding analyte_qual field == FALSE (no holding time violation).
-# If multiple values are provided for an analyte AND both records have the same analyte_qual field AND both records have the same value in the analyte_flag column, then average values.
-# If multiple values are provided for an analyte AND both records have the same analyte_qual field AND the records have different values in the analyte_flag column, choose record where analyte_qual == NA.
-# If an analyte concentration is reported in one record, but is NA in the other, then choose the reported concentration.
-
-# 
