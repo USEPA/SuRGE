@@ -120,8 +120,7 @@ dup_agg <- function(data) {
       rename(qual = ends_with("qual"), # strip the analyte name from fields
              units = ends_with("units"), 
              flag = ends_with("flag")) %>%
-      mutate(qual = ifelse(is.na(qual) == TRUE, TRUE, qual)) %>%
-      arrange(qual, flag, value) # ordering the values for the condional statements below
+      arrange(qual, flag, value) # ordering the values for the conditional statements below
 
       # FILTERING:
       # If all rows are completely identical, use slice_head to keep one of them
@@ -153,17 +152,21 @@ dup_agg <- function(data) {
     
   f <- bind_rows(e)
   
-  return(f)
+  g <- f %>%
+    pivot_wider(names_from = analyte, # pivot to wide
+                values_from = c(flag, value, units, qual),
+                names_glue = "{analyte}_{.value}") %>%
+    rename_with(~str_remove(., "_value"), .cols = contains("value")) 
+    
+    
+  return(g)
 
 }
 
 options(dplyr.summarise.inform = FALSE) # summarize() causes lots of console spam
 
-d.anions.aggregated <- dup_agg(d.anions) %>% # still in long format
-  pivot_wider(names_from = analyte, # pivot to wide
-              values_from = c(flag, value, units, qual),
-              names_glue = "{analyte}_{.value}") %>%
-  rename_with(~str_remove(., "_value"), .cols = contains("value")) 
+d.anions.aggregated <- dup_agg(d.anions) 
+
 
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
