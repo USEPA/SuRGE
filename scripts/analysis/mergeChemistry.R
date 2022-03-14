@@ -29,7 +29,7 @@
 # Inspect objects----
 
 # inspect object to merge
-# each df contains 10 - 352 observations
+# each df contains 10 - 149 observations
 list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
      ada.oc, toc.masi, tteb.all, chl18) %>% 
   map_dfc(., nrow)
@@ -59,7 +59,7 @@ janitor::get_dupes(select(nutrients2, lake_id, site_id, sample_depth, sample_typ
 # no dupes
 
 anions <- ada.anions %>%
-  full_join(d.anions)
+  full_join(d.anions.aggregated)
 janitor::get_dupes(select(anions, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
 
@@ -119,5 +119,5 @@ chemistry_all <- chemistry_all %>%
     TRUE ~ doc_units)) %>%
   select(-contains("tteb"))
 
-
+janitor::get_dupes(select(chemistry_all, lake_id, site_id, sample_depth, sample_type)) 
 

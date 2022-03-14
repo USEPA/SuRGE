@@ -125,7 +125,7 @@ dg.extList <- dg_sheet %>%
 dim(trap.air.extList) #1036,9
 dim(dg.extList) #364,3
 
-extList <- full_join(trap.air.extList, dg.extList) %>% #1341, 10
+extList <- full_join(trap.air.extList, dg.extList) %>% 
   pivot_longer(!c(lake_id, site_id, trap_deply_date), names_to = "extn") %>% # pivot to longer
   mutate(extn = case_when(grepl("trap", extn) ~ "trap",
                           grepl("air", extn) ~ "air",
@@ -143,7 +143,7 @@ extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 
   {table(.$extn)} # 102 air, 212 dg, 525 trap
 
 extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
-  {table(.$extn, .$lake_id)} # 1-42 trap sample per lake
+  {table(.$extn, .$lake_id)} # 0-42 trap sample per lake
 
 extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
   select(lake_id) %>%

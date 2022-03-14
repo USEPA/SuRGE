@@ -16,7 +16,7 @@ get_daniels <- function(path, sheet){
     janitor::clean_names() %>%
     select(-matches(("no2|no3|po4|full|dilution"))) %>% # these analytes are taken from Lachat
     mutate(sample_depth = case_when(grepl("blank", sample_id, ignore.case = TRUE) ~ "blank",
-                                    grepl("shallow", sample_id, ignore.case = TRUE) ~ "shallow",
+                                    grepl("shallo", sample_id, ignore.case = TRUE) ~ "shallow",
                                     grepl("deep", sample_id, ignore.case = TRUE) ~ "deep",
                                     TRUE ~ "oops"),
            sample_type = case_when(grepl("dup", sample_id, ignore.case = TRUE) ~ "duplicate",
@@ -83,9 +83,9 @@ sample_date <- fld_sheet %>%
   summarize(sample_col_date = min(trap_deply_date))
 
 # join date with d.anions
-dim(d.anions) # 147 rows
+dim(d.anions) # 149 rows
 d.anions <- left_join(d.anions, sample_date) 
-dim(d.anions) # 147 rows
+dim(d.anions) # 149 rows
 
 
 # calculate holding time violation (-qual)
@@ -101,13 +101,6 @@ d.anions <- d.anions %>%
 
 # 4. Merge lake_id, site_id, sample_depth, sample_type  
 # see issue #32 for details
-
-
-
-
-janitor::get_dupes(d.anions %>% # no dups
-                     select(lake_id, site_id, sample_depth, sample_type))
-
 
 dup_agg <- function(data) {
   
@@ -166,16 +159,20 @@ dup_agg <- function(data) {
 
 options(dplyr.summarise.inform = FALSE) # summarize() causes lots of console spam
 
-d.anions.aggregated <- dup_agg(d.anions) 
+d.anions.aggregated <- dup_agg(d.anions) %>% # still in long format
+  pivot_wider(names_from = analyte, # pivot to wide
+              values_from = c(flag, value, units, qual),
+              names_glue = "{analyte}_{.value}") %>%
+  rename_with(~str_remove(., "_value"), .cols = contains("value")) 
 
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
 # 5. Compare samples analyzed to those in comprehensive sample list.
-# [1/25/2022] all samples in comprehensive list. Good
+# [3/14/2022] all samples in data are also in comprehensive list. Good
 
 # print rows in d.anions not in chem.samples.
-setdiff(d.anions[c("lake_id", "sample_depth", "sample_type")],
+setdiff(d.anions.aggregated[c("lake_id", "sample_depth", "sample_type")],
         chem.samples.foo %>% 
           filter(analyte_group == "anions",
                  sample_year >= 2020,
@@ -184,11 +181,11 @@ setdiff(d.anions[c("lake_id", "sample_depth", "sample_type")],
 
 # 6. # Have all Daniels anion samples in comprehensive sample list been analyzed?
 # Print rows from comprehensive sample list not in Daniels anion data.
-# Missing a bunch
-# setdiff(chem.samples.foo %>% filter(analyte_group == "anions", 
-#                                     sample_year == 2021, # only 2021 samples to daniels
-#                                     lab != "ADA") %>% # ADA ran their own anions 
-#           select(lake_id, sample_depth, sample_type),
-#         d.anions[,c("lake_id", "sample_depth", "sample_type")]) %>%
-#   arrange(lake_id) %>%
-#   write.table(file = paste0(userPath, "data/chemistry/anions_ada_daniels/danielsMissingAnions.txt"), row.names = FALSE)
+# Missing blank and dup from 68 and 75.  Pegasus has been unable to locate
+# these last four sample.
+setdiff(chem.samples.foo %>% filter(analyte_group == "anions",
+                                    sample_year == 2021, # only 2021 samples to daniels
+                                    lab != "ADA") %>% # ADA ran their own anions
+          select(lake_id, sample_depth, sample_type),
+        d.anions[,c("lake_id", "sample_depth", "sample_type")]) %>%
+  arrange(lake_id) 
