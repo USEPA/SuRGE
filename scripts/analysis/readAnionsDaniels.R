@@ -83,9 +83,9 @@ sample_date <- fld_sheet %>%
   summarize(sample_col_date = min(trap_deply_date))
 
 # join date with d.anions
-dim(d.anions) # 149 rows
+dim(d.anions) # 152 rows
 d.anions <- left_join(d.anions, sample_date) 
-dim(d.anions) # 149 rows
+dim(d.anions) # 152 rows
 
 
 # calculate holding time violation (-qual)

@@ -8,26 +8,25 @@
 # SuRGE samples collected in 2020.  Data are in `SURGE_2021_01_20_2022_update.xlsx`.
 
 # During the summer of 2021, TTEB ran metals, TOC, and DOC on SuRGE samples
-# multiple locations.  Data are in `SURGE_2022_03_10_2022_update.xlsx` and
-# `SURGE_03_10_2022_update.xlsx`
+# multiple locations.  Data are in `SURGE_2021_03_10_2022_update.xlsx`.
 
-# As of 3/10/2022, `SURGE_2022_03_10_2022_update.xlsx` and `SURGE_03_10_2022_update.xlsx`
+# As of 3/10/2022, `SURGE_2021_03_10_2022_update.xlsx` and `SURGE_03_10_2022_update.xlsx`
 # files contains a subset of the data.  We are waiting for an update from TTEB.
 
-
+# As of 3/17/2022, the tteb sharedrive (L:\Public\CESER-PUB\IPCB) contains 
+# SURGE.dbf.  The records in this file are duplicates of those in SURGE 2021.dbf
 
 # 1. READ CHEMISTRY DATA--------------
 # Files contain samples from SuRGE + other studies.  Filter below.
+
 tteb.BEAULIEU <- read_excel(paste0(userPath, 
                                    "data/chemistry/tteb/BEAULIEU_01_20_2022_update.xlsx")) 
 
 tteb.SURGE <- read_excel(paste0(userPath, 
                                 "data/chemistry/tteb/SURGE_2021_03_10_2022_update.xlsx"))
 
-tteb.SURGE2 <- read_excel(paste0(userPath, 
-                                "data/chemistry/tteb/SURGE_03_10_2022_update.xlsx"))
 
-tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE, tteb.SURGE2) %>% 
+tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
   select(-colldate, -studyid, -tn, -flag) %>% # remove unneeded columns
@@ -66,7 +65,8 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE, tteb.SURGE2) %>%
 # Need to add R10 2018 samples to ttebSampleIds.xlsx
 ttebCoc <- read_excel(paste0(userPath, 
                              "data/chemistry/tteb/ttebSampleIds.xlsx")) %>%
-  clean_names(.)
+  clean_names(.) %>%
+  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))
 
 janitor::get_dupes(ttebCoc, lab_id) # no duplicates
 
@@ -109,7 +109,7 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 352 records [3/10/2022] 
+nrow(tteb.all) # 319 records [3/17/2022] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -124,9 +124,9 @@ tteb.all <- tteb.all %>%
 
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
-# missing 33 samples.  Waiting for update from Maily. [3/10/2022]
+# missing 33 samples.  Waiting for update from Maily. [3/17/2022]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id))
-# list of missing samples to send to Maily [3/10/2022]
+# list of missing samples to send to Maily [3/17/2022]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
   write.table(paste0(userPath, "data/chemistry/tteb/missingTteb03102022.txt"), row.names = FALSE)
 
@@ -136,8 +136,7 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
 # be repeated for metals, doc, and toc.  To eliminate replicates of rows
 # that share unique IDs, split by analyte, select columns that contain data
 # for the analyte, then merge by unique ID.
-tteb.all <- tteb.all %>% 
-  filter(lake_id == "16") %>%
+tteb.all <- tteb.all %>%
   group_split(analyte) %>% # split by analyte
   map(., function(x) 
     if (unique(x$analyte == "doc")) { # if contains doc
@@ -168,5 +167,7 @@ tteb.all <- tteb.all %>%
          tteb.doc = doc,
          tteb.doc_units = doc_units,
          tteb.doc_flag = doc_flag) 
+
+janitor::get_dupes(tteb.all %>% select(lake_id, site_id, sample_type, sample_depth))
 
 

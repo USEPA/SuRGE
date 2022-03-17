@@ -1,7 +1,7 @@
 ---
 title: "SuRGE Field Duplicates and Field Blanks"
 author: "J. Beaulieu and J. Corra"
-date: "1/24/2022"
+date: "3/17/2022"
 output: pdf_document
 ---
 
@@ -12,8 +12,11 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
-# localName <- "Jake/" # R proj folder at SP.
-localName <- "Joe/" # R proj folder at SP.
+# R proj folder at SP.
+localName <- if (grepl("JBEAULIE", userPath)) {
+"Jake/"
+} else if (grepl("JCOR", userPath)) {
+"Joe/"} 
 
 # load project libraries
 source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/masterLibrary.R"))
@@ -47,10 +50,20 @@ source(paste0(userPath, "rProjects/", localName,
 
 SuRGE (Survey of Reservoir Greenhouse gas Emissions) is an national-scale survey of methane (CH~4~) and carbon dioxide (CO~2~) emissions from US reservoirs.  Gas emissions are measured at >= 15 locations within each reservoir.  Water chemistry samples are collected from two depths (near the air-water interface and the sediment-water interface) at one location within each reservoir.  At a subset of the reservoirs, field blanks and field duplicates are also collected.  This report details results from the field blanks and duplicates.
 
+## Executive Summary
+Agreement among unknowns and field replicates was acceptable across the full suite of analytes that are important to SuRGE.  Field blanks were occasionally high for ammonium (nh4), dissolved reactive phosphorus (oP), total nitrogen (TN), and total phosphorus (TP).  The following corrective actions are recommended:
+  
+* deionized water used for field blanks should have a resistivity >= 18 Mohms.
+* the vessel used to transport deionized water into the field should be washed with laboratory grade detergent, soaked in an acid bath, and thoroughly rinsed with deionized prior between uses.
+* filters should be flushed with a minimum of 30mL of sample water prior to collecting a sample.
+* sample bottles should be rinsed with sample water a minimum of three times prior to collecting a sample.
+* analysts should wear laboratory grade gloves during sample collection.
+
+
 
 ## Detection Limits
 
-Detection limits vary by analyte, analytical method, lab, and possibly by year.  See `Analytical` section of Wiki for details.  Detection limits are read in below.
+Detection limits vary by analyte, analytical method, lab, and possibly by year.  See `Analytical` section of Wiki for details.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -212,7 +225,7 @@ chem18 %>% ungroup() %>%
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 
 chem18 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
@@ -293,7 +306,7 @@ ada.nutrients %>% ungroup() %>%
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 
 ada.nutrients %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
@@ -370,7 +383,7 @@ chem21 %>% ungroup() %>%
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=11}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 chem21 %>% ungroup() %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
@@ -404,7 +417,7 @@ Text about metals placeholder.
 # formatting guide https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_pdf.pdf
 tteb.all %>%
   ungroup() %>%
-  select(-cin_shipping_notes, -comment, -contains("toc")) %>%
+  select(-shipping_notes, -contains("tteb")) %>% # remove tteb TOC and DOC
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   pivot_longer(!c(lake_id, sample_type)) %>%
@@ -427,7 +440,7 @@ tteb.all %>%
 
 
 tteb.all %>% ungroup() %>%
-  select(-cin_shipping_notes, -comment, -contains("toc")) %>%
+  select(-shipping_notes, -contains("tteb")) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
@@ -452,7 +465,7 @@ tteb.all %>% ungroup() %>%
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
 
 tteb.all %>% ungroup() %>%
-  select(-cin_shipping_notes, -comment) %>%
+  select(-shipping_notes) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
@@ -476,7 +489,7 @@ tteb.all %>% ungroup() %>%
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
 
 tteb.all %>% ungroup() %>%
-  select(-cin_shipping_notes, -comment) %>%
+  select(-shipping_notes) %>%
   select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
@@ -519,8 +532,8 @@ toc.masi %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
-  rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, OC, mdl, blank, minimum, maximum) %>%
+  rename(analyte = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, analyte, mdl, blank, minimum, maximum) %>%
   mutate(mdl = sprintf("%.2f", mdl)) %>% # add trailing zero
   kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
@@ -566,8 +579,8 @@ ada.oc %>%
   select(-max_blank) %>%
   left_join(y = filter(detlimits, lab == "ADA"), by = "name") %>%
   select(-lab, -year, -units, -analyte_group) %>%
-  rename(OC = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
-  relocate(lake_id, OC, mdl, blank, minimum, maximum) %>%
+  rename(analyte = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown) %>%
+  relocate(lake_id, analyte, mdl, blank, minimum, maximum) %>%
   mutate(mdl = sprintf("%.2f", mdl)) %>% # add trailing zero
   kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum TOC Concentrations in Unknowns") %>% # table title
@@ -611,7 +624,8 @@ chl18 %>%
   pivot_wider(names_from = sample_type, values_from = c(min, max)) %>%
   filter(is.na(min_blank) == FALSE) %>%
   select(-max_blank) %>%
-  rename(chla = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown)  %>%
+  rename(analyte = name, blank = min_blank, minimum = min_unknown, maximum = max_unknown)  %>%
+  relocate(lake_id, analyte, blank, minimum, maximum) %>%
   kableExtra::kbl(booktabs = TRUE, longtable = TRUE, # nice formatting
                   caption = "Minimum and Maximum Chlorophyll-A Concentrations in Unknowns") %>% # table title
   kableExtra::add_header_above(c(" ", " ", " ", "Unknowns" = 2))# %>% # header above the unknowns
@@ -653,7 +667,7 @@ chemistry_all_dups <- chemistry_all %>%
   mutate(id = paste0(lake_id, site_id, sample_depth)) %>% # create unique id
   filter(id %in% duplicate_ids$id) %>% # pull out duplicates and corresponding unknowns
   select(-contains("flag"), -contains("qual"), -contains("units"), 
-         -sample_type, -id, -cin_shipping_notes, -comment, -no3) %>%
+         -sample_type, -id, -shipping_notes, -no3) %>%
   pivot_longer(!c(lake_id, site_id, sample_depth))
 
 
@@ -712,7 +726,7 @@ ggplot(chemistry_all_dups %>%
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=8}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=6}
 ggplot(chemistry_all_dups %>% 
          filter(name %in% nutrient_name) %>%
          filter(name %in% c("tp", "op")) %>% # plot n only
@@ -763,7 +777,7 @@ anions_rpd %>%
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=8}
 ggplot(chemistry_all_dups %>% 
          filter(name %in% anion_name) %>%
          mutate, 
@@ -801,7 +815,7 @@ metals_rpd <- chemistry_all_dups %>%
 
 ```
 
-Relative percent agreement among METALS duplicates was greatest for `r metals_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()` (`r metals_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r metals_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()` (`r metals_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).
+Relative percent agreement among METALS duplicates was greatest for `r metals_rpd %>% filter(rpd == max(rpd)) %>% select(name) %>% pull()` (`r metals_rpd %>% filter(rpd == max(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%) and lowest for `r metals_rpd %>% filter(rpd == min(rpd)) %>% select(name) %>% pull()` (`r metals_rpd %>% filter(rpd == min(rpd)) %>% select(rpd) %>% pull() %>% round(.,1)`%).  Although the analysis quantifies many analytes, calcium and magnesium are the most relevant for SuRGE.  The relative percent agreement for those two analytes was quite good.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 metals_rpd %>%

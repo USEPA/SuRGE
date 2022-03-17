@@ -24,9 +24,9 @@ source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl
 
 
 # Aggregate and review chemistry
-source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects
 source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates
+source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
 
 # Merge chemistry and field sheets
 source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld
