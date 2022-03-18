@@ -13,9 +13,9 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
 # R proj folder at SP.
-localName <- if (grepl("JBEAULIE", userPath)) {
+localName <- if (grepl("JBEAULIE", userPath, ignore.case = TRUE)) {
 "Jake/"
-} else if (grepl("JCOR", userPath)) {
+} else if (grepl("JCOR", userPath, ignore.case = TRUE)) {
 "Joe/"} 
 
 # load project libraries
@@ -445,7 +445,7 @@ tteb.all %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  filter(name < "fe") %>% # plot al:cu only
+  filter(name < "cr") %>% # plot al:cd only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -470,7 +470,59 @@ tteb.all %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  filter(name > "cu" & name < "pb") %>% # plot fe:p only
+  filter(name > "cd" & name < "mn") %>% # plot cr:mg only
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank()) + # remove legend titles
+  labs(title = "Metals field blanks",
+       x =NULL, y = "mg/L") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  facet_wrap(~name, scales = "free", ncol = 2, nrow = 3) +
+  theme(legend.position = "bottom")
+
+
+```
+
+\newpage
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
+
+tteb.all %>% ungroup() %>%
+  select(-shipping_notes) %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  filter(name > "mg" & name < "si") %>% # plot mn:sb only
+  ggplot() +
+  aes(lake_id, value) +
+  geom_point(aes(color = sample_type)) +
+  geom_hline(aes(yintercept=mdl, linetype = "minimum detection limit"),
+             color = "red") + # add horizontal lines for det. limits
+  theme(legend.title = element_blank()) + # remove legend titles
+  labs(title = "Metals field blanks",
+       x =NULL, y = "mg/L") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  facet_wrap(~name, scales = "free", ncol = 2, nrow = 3) +
+  theme(legend.position = "bottom")
+
+
+```
+
+\newpage
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
+
+tteb.all %>% ungroup() %>%
+  select(-shipping_notes) %>%
+  select(!c(site_id, sample_depth), -matches("flag|qual|units")) %>%
+  mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
+  pivot_longer(cols = !c(lake_id, sample_type)) %>%
+  left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
+  filter(name > "s" & name < "tteb.doc") %>% # plot si:sr only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -486,6 +538,8 @@ tteb.all %>% ungroup() %>%
 
 ```
 
+\newpage
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.5, fig.height=11}
 
 tteb.all %>% ungroup() %>%
@@ -494,7 +548,7 @@ tteb.all %>% ungroup() %>%
   mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown", TRUE ~ sample_type)) %>%
   pivot_longer(cols = !c(lake_id, sample_type)) %>%
   left_join(y = filter(detlimits, lab == "CIN"), by = "name") %>%
-  filter(name > "p") %>% # plot pb:zn only
+  filter(name > "sr") %>% # plot tteb:zn only
   ggplot() +
   aes(lake_id, value) +
   geom_point(aes(color = sample_type)) +
@@ -504,14 +558,11 @@ tteb.all %>% ungroup() %>%
   labs(title = "Metals field blanks",
        x =NULL, y = "mg/L") +
   theme(axis.text.x = element_text(angle = 90)) + 
-  facet_wrap(~name, scales = "free", ncol = 2, nrow = 5) +
+  facet_wrap(~name, scales = "free", ncol = 2, nrow = 4) +
   theme(legend.position = "bottom")
 
 
 ```
-
-\newpage
-
 ### Organic Carbon MASI
 During the 2020 field season, TOC samples were analyzed at MASI, an external contract laboratory.  All field blanks were at the detection limit.
 
