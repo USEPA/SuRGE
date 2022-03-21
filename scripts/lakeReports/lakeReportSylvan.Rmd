@@ -132,7 +132,6 @@ states <- USAboundaries::us_states() %>%
 
 dsn <- dsn %>% filter(!is.na(sample_year))
 
-
 factpal <- colorFactor(c("orange1", "lightpink1", "darksalmon",
                          "mediumturquoise", "khaki4", "forestgreen", 
                          "deepskyblue4", "saddlebrown", "lightskyblue4"), 
@@ -148,7 +147,9 @@ l <- leaflet() %>%
   addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75) %>%
   addPolygons(data = st_zm(states), # removes z and m values, if present
               color = "cornsilk3", stroke = TRUE, weight = 0.5, opacity = 1) %>%
-  addCircleMarkers(data = dsn, radius = 0.1) %>%
+  addCircleMarkers(data = dsn, radius = 0.1, 
+                   label = ~site_id,
+                   labelOptions = labelOptions(interactive = TRUE)) %>%
   addLegend(position = "bottomleft", pal = factpal,
             opacity = 1,
             values = as.character(ecoR$WSA9_NAME),
@@ -201,7 +202,6 @@ ptsWgs <- pts %>% st_transform(4326) %>%
                            TRUE ~ "sensor sites"))
 factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = ptsWgs$index)
 
-  
 l <- leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>%
   #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
@@ -214,7 +214,9 @@ l <- leaflet() %>%
               fillOpacity = 1) %>%
   addCircleMarkers(data = ptsWgs,
                    fillColor = ~factpal.points(index),
-                   fillOpacity = 1) %>%
+                   fillOpacity = 1,
+                  label = ~siteID,
+                   labelOptions = labelOptions(interactive = TRUE)) %>%
   addLegend(position = "topright", pal = factpal.points,
             opacity = 1,
             values = as.character(ptsWgs$index),
