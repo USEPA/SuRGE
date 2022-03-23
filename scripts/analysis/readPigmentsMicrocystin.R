@@ -26,39 +26,64 @@ setdiff(chem.samples.foo %>% filter(analyte_group == "algae.nar",
         nar.samples[c("lake_id", "analyte", "sample_type")]) %>%
   arrange(lake_id) %>% print(n=Inf)
 
-
+# Jeff Hollister: the values are the concentration in the sample 
+# (i.e. filter volume has been accounted for)
 get_chla_data <- function(path, data, sheet) { 
   
   d <- read_csv(paste0(path, data)) %>% #
     janitor::clean_names() %>% # 
-    # mutate(site_id = str_extract(sample_id, # create site_id   
-    #                              "U02|U22|U35|U10|U31|U05|U08|U33|U04|U10|U09|SU05|SU03|SU31|SU34"), # R10 2018 site_id values
-    #        site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # convert to numeric
-    # mutate(sample_type = str_sub(sample_id, -3)) %>% # get sample_type
-    # mutate(sample_type = case_when( # convert sample_type to SuRGE format
-    #   sample_type == "BLK" ~ "blank",
-    #   sample_type == "DUP" ~ "duplicate",
-    #   sample_type == "UKN" ~ "unknown",
-    #   sample_type == "UNK" ~ "unknown",
-    #   TRUE   ~ sample_type)) %>%
-    # rename(chla = chl_a_jh) %>% # see Wiki for naming conventions
-    # mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
-    # mutate(extract_conc = (5 * chla) / extract_volume_l) %>% # extracted concentration
-    # mutate(filter_hold_time = collection_date - extraction_date) %>% # get hold time
-    # mutate(extract_hold_time = analysis_date - extraction_date) %>% # get hold time
-    # mutate(chla_qual = case_when( # qual flag if either hold time exceeded
-    #   filter_hold_time > 60 ~ "1",
-    #   extract_hold_time > 300 ~ "1",
+    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site))) %>% # convert to numeric
+    mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
+    mutate(units = "ug_l") %>% # to match naming conventions
+    
+    # PLACEHOLDERS until data available 
+    mutate(chla_qual = "H") %>% # qual (holding time) flag
+    mutate(chla_ship = "S") %>% # shipping flag 
+    
+    rename(sample_type = reps, 
+           lake_id = waterbody, 
+           chla_units = units, 
+           chla = value)  %>%
+    # mutate(hold_time = collection_date - extraction_date) %>% # get hold time
+    # mutate(chla_qual = case_when( # flag with "H" if hold time exceeded
+    #   hold_time > 60 ~ "H",
     #   TRUE   ~ "")) %>%
-    # mutate(chla_flag = case_when( # flag if conc is below detection limit 
-    #   extract_conc < 9 ~ "<",
-    #   TRUE   ~ "")) %>%
-    # select(lake_id, site_id, sample_type, sample_depth, chla, extract_conc, 
-    #        chla_flag, chla_qual)
+    # No detection limits reported for 2020-2021 chlorophyll data
+    unite("chla_flag", chla_qual, chla_ship, sep = ", ") %>% # merge all flag columns
+    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag)
   
   return(d)
   
 }
+
+get_phyco_data <- function(path, data, sheet) { 
+  
+  d <- read_csv(paste0(path, data)) %>% #
+    janitor::clean_names() %>% # 
+    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site))) %>% # convert to numeric
+    mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
+    mutate(units = "ug_l") %>% # to match naming conventions
+    
+    # PLACEHOLDERS until data available 
+    mutate(phycocyanin_qual = "H") %>% # qual (holding time) flag
+    mutate(phycocyanin_ship = "S") %>% # shipping flag 
+    
+    rename(sample_type = reps, 
+           lake_id = waterbody, 
+           phycocyanin_units = units, 
+           phycocyanin = value)  %>%
+    # mutate(hold_time = collection_date - extraction_date) %>% # get hold time
+    # mutate(chla_qual = case_when( # flag with "H" if hold time exceeded
+    #   hold_time > 60 ~ "H",
+    #   TRUE   ~ "")) %>%
+    # No detection limits reported for 2020-2021 phycocyanin data
+    unite("phycocyanin_flag", phycocyanin_qual, phycocyanin_ship, sep = ", ") %>% # merge all flag columns
+    select(lake_id, site_id, sample_type, sample_depth, phycocyanin, phycocyanin_flag)
+  
+  return(d)
+  
+}
+
 
 # chlorophyll, phycocyanin, and microcystin results
 cin.pig.path <- paste0(userPath,
@@ -66,3 +91,11 @@ cin.pig.path <- paste0(userPath,
 
 chla_20_21 <- get_chla_data(cin.pig.path,
                                "surge_chla_all_2020_2021.csv")
+
+phycocyanin_20_21 <- get_phyco_data(cin.pig.path,
+                            "surge_phyco_all_2020_2021.csv")
+
+
+pigments_20_21 <- left_join(chla_20_21, phycocyanin_20_21, 
+                            by = c("lake_id", "site_id", 
+                                   "sample_depth", "sample_type"))
