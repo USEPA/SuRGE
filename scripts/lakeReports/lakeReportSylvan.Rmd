@@ -13,7 +13,6 @@ library(tidyverse)
 library(sf)
 library(leaflet)
 library(readxl)
-
 # identify lake
 lake_id_i <- "235"
 
@@ -57,6 +56,10 @@ depth_prf <- fs::dir_ls(path = paths, # search all paths
   read_excel(.) # read data
 
 ```
+
+---
+subtitle: "`r lake_name_i` Water Quality Survey"  
+---
 
 ## 1. Background
 
@@ -159,10 +162,6 @@ l
 
 ```
 
-
----
-subtitle: "`r lake_name_i` Water Quality Survey"  
----
 
 ## 2.  Sylvan Lake Survey Design
 
@@ -586,5 +585,31 @@ The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(la
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Add depth plot here
+
+# adapted from https://stackoverflow.com/questions/3099219/ggplot-with-2-y-axes-on-each-side-and-different-scales
+# make a double y-axis plot, then flip the plot
+# create limits for both y-axes
+ylim.prim <- c(min(chem_fld_i$do_mg_d, na.rm = TRUE), max(chem_fld_i$do_mg_d, na.rm = TRUE))   
+ylim.sec <- c(min(chem_fld_i$temp_d, na.rm = TRUE), max(chem_fld_i$temp_d, na.rm = TRUE)) 
+
+# create slope and intercept for the secondary axis data (water temp)
+b <- diff(ylim.prim)/diff(ylim.sec)
+a <- ylim.prim[1] - b*ylim.sec[1] 
+
+ggplot(chem_fld_i, aes(sample_depth_d, do_mg_d)) +
+  geom_line(color = "#56B4E9", size = 2) + # primary axis data (DO)
+  geom_point(color = "#56B4E9", size = 3) + # primary axis data (DO)
+  geom_line(aes(y = a + temp_d*b), color = "#E69F00", size = 2) + # secondary axis data (water temp)
+  geom_point(aes(y = a + temp_d*b), color = "#E69F00", size = 3) + # secondary axis data (water temp)
+  scale_y_continuous(expression(paste("Dissolved Oxygen (", mg^-1, ")"), g^1), sec.axis = sec_axis(~ (. - a)/b, name = "Temperature (°C)")) + # scale and label both axes
+  scale_x_continuous() + # this will become y-axis when we flip
+  ggtitle(lake_name_i) + 
+  xlab("Depth (m)") + 
+  coord_flip() + # flip the axes so depth is on the y-axis
+  scale_x_reverse() + # reverse depth scale (now shown as the y-axis)
+  theme_classic() + 
+  theme(axis.title.x.top = element_text(color = "#E69F00")) +
+  theme(axis.title.x.bottom = element_text(color = "#56B4E9"))
+
 
 ```
