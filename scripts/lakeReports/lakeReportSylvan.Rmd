@@ -205,6 +205,15 @@ ptsWgs <- pts %>% st_transform(4326) %>%
                            TRUE ~ "sensor sites"))
 factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = ptsWgs$index)
 
+popupData <- chem_fld_i %>% # subset popup data from chem_fld_i 
+  mutate(site_id = str_c("S-", str_pad(as.character(site_id), 2, "left", "0"))) %>% # change site_id field to match ptsWgs
+  select(site_id, temp_s, ph_s, turb_s, do_mg_s)
+
+ptsWgs <- ptsWgs %>% # join popup data with ptsWgs 
+  left_join(popupData, by = c("siteID" = "site_id")) %>% 
+  mutate(popup = paste0(siteID, "<br>", "water temp.(°C): ", temp_s, "<br>", "pH: ", ph_s, "<br>", "turbidity (NTU): ", turb_s,"<br>",  "DO (mg/L): ", do_mg_s)) # create new field with all of the popup data
+
+
 l <- leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>%
   #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
@@ -215,11 +224,10 @@ l <- leaflet() %>%
   addPolygons(data = st_zm(perimWgs), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(data = ptsWgs,
+  addCircleMarkers(data = ptsWgs, 
                    fillColor = ~factpal.points(index),
-                   fillOpacity = 1,
-                  label = ~siteID,
-                   labelOptions = labelOptions(interactive = TRUE)) %>%
+                   fillOpacity = 1, 
+                   popup = ~popup) %>%
   addLegend(position = "topright", pal = factpal.points,
             opacity = 1,
             values = as.character(ptsWgs$index),
@@ -590,7 +598,7 @@ The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(la
 # make a double y-axis plot, then flip the plot
 # create limits for both y-axes
 ylim.prim <- c(min(chem_fld_i$do_mg_d, na.rm = TRUE), max(chem_fld_i$do_mg_d, na.rm = TRUE))   
-ylim.sec <- c(min(chem_fld_i$temp_d, na.rm = TRUE), max(chem_fld_i$temp_d, na.rm = TRUE)) 
+ylim.sec <- c(min(5), max(32))# manually scale axis for temperatures
 
 # create slope and intercept for the secondary axis data (water temp)
 b <- diff(ylim.prim)/diff(ylim.sec)
