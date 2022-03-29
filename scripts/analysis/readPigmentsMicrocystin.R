@@ -98,4 +98,6 @@ phycocyanin_20_21 <- get_phyco_data(cin.pig.path,
 
 pigments_20_21 <- left_join(chla_20_21, phycocyanin_20_21, 
                             by = c("lake_id", "site_id", 
-                                   "sample_depth", "sample_type"))
+                                   "sample_depth", "sample_type")) %>%
+  select(-chla_flag, -phycocyanin_flag) # exclude these fields for now. 3/29/2022
+
