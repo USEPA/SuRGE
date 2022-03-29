@@ -1,7 +1,7 @@
 ---
 title: "Survey of Reservoir Greenhouse gas Emissions"
 author: "J. Beaulieu"
-date: "2/24/2022"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
     df_print: paged
@@ -165,10 +165,7 @@ l
 
 ## 2.  Sylvan Lake Survey Design
 
-The Sylvan Lake survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  
-
-
----Add site labels to map
+The Sylvan Lake survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click onany of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
 ```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap='*Figure 2.  Location of the 15 sampling sites in Sylvan Lake.*'}
 # Read lake perimeter 
 perim <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
@@ -354,7 +351,6 @@ disturbance_i %>%
 ## 4.  Within-lake Spatial Patterns
 A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
 
---- Add table of these parameters
 
 ```{r scatterplot_3d_setup, echo=FALSE, message=FALSE, warning=FALSE}
 # using old scatterplot3d function.  This was written for an sp spatial
