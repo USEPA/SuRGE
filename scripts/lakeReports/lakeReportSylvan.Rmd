@@ -427,10 +427,18 @@ with(pts_sp@data, {
                       cex=2 #(vRateBest/500) + 0.5          # scaling of point sizes - this will need to be adjusted for each variable
   )
 })
+
+tibble(pts_sp@data) %>% 
+  select(siteID, temp_s) %>%
+  filter(is.na(temp_s) == FALSE) %>%
+  kableExtra::kbl(caption = paste0("<br>", "Water Temperature")) %>%
+  kableExtra::kable_classic(full_width = FALSE, 
+                            font_size = 16, position = "float_right") 
+
 ```
 
 ```{r scatterplot_3d_ph, echo=FALSE, message=FALSE, warning=FALSE}
-### Water Temperature
+### pH
 with(pts_sp@data, {
   temp_plot <- scatterplot3d_edit(x=coords$long, y=coords$lat, z=rep(0,length(coords$long)),   # x y and z data, respectively
                                    color="#282830",                               # color of lake outline
@@ -477,6 +485,14 @@ with(pts_sp@data, {
                       cex=2 #(vRateBest/500) + 0.5          # scaling of point sizes - this will need to be adjusted for each variable
   )
 })
+
+tibble(pts_sp@data) %>% 
+  select(siteID, ph_s) %>%
+  filter(is.na(ph_s) == FALSE) %>%
+  kableExtra::kbl(caption = paste0("<br>", "pH")) %>%
+  kableExtra::kable_classic(full_width = FALSE, 
+                            font_size = 16, position = "float_right") 
+
 ```
 
 
@@ -528,6 +544,14 @@ with(pts_sp@data, {
                      cex=2 #(vRateBest/500) + 0.5          # scaling of point sizes - this will need to be adjusted for each variable
   )
 })
+
+tibble(pts_sp@data) %>% 
+  select(siteID, turb_s) %>%
+  filter(is.na(turb_s) == FALSE) %>%
+  kableExtra::kbl(caption = paste0("<br>", "Turbidity")) %>%
+  kableExtra::kable_classic(full_width = FALSE, 
+                            font_size = 16, position = "float_right") 
+
 ```
 
 
@@ -581,6 +605,12 @@ with(pts_sp@data, {
   )
 })
 
+tibble(pts_sp@data) %>% 
+  select(siteID, do_mg_s) %>%
+  filter(is.na(do_mg_s) == FALSE) %>%
+  kableExtra::kbl(caption = paste0("<br>", "Dissolved Oxygen")) %>%
+  kableExtra::kable_classic(full_width = FALSE, 
+                            font_size = 16, position = "float_right") 
 
 ```
   
