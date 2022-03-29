@@ -2,28 +2,29 @@
 
 # Bring in chemistry data objects----
 
-# localName <- "Joe/" # R proj folder at SP
+localName <- "Joe/" # R proj folder at SP
 # # localName <- "Jake/" # R proj folder at SP
 # 
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
-# # data object name: ada.anions
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
-# # data object name: d.anions
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
-# # data object name: ada.nutrients
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results
-# # data object name: chem21
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsR10_2018.R")) # read AWBERC nutrients for 2018 R10
-# # data object name: chem18
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcAda.R")) # read ADA TOC/DOC data
-# # data object name: ada.oc
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcMasi.R")) # read 2020 TOC run at MASI lab
-# # data object name: toc.masi
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
-# # data object name: tteb.all
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
-# # data object name: chl18
-
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
+# data object name: ada.anions
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
+# data object name: d.anions
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
+# data object name: ada.nutrients
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results
+# data object name: chem21
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsR10_2018.R")) # read AWBERC nutrients for 2018 R10
+# data object name: chem18
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcAda.R")) # read ADA TOC/DOC data
+# data object name: ada.oc
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcMasi.R")) # read 2020 TOC run at MASI lab
+# data object name: toc.masi
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
+# data object name: tteb.all
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
+# data object name: chl18
+source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # 2020+ chloro/phyco
+# data object name: pigments_20_21
 
 
 # Inspect objects----
@@ -31,12 +32,12 @@
 # inspect object to merge
 # each df contains 10 - 149 observations
 list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
   map_dfc(., nrow)
 
 # are the unique IDs formatted identically across the dfs? yes
 list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
   map(., function(x) select(x, lake_id, site_id, sample_depth, sample_type) %>% str(.))
 
 
@@ -68,22 +69,25 @@ oc <- ada.oc %>%
 janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
 
-metal.chl <- tteb.all %>%
-  full_join(chl18)
-janitor::get_dupes(select(metal.chl, lake_id, site_id, sample_depth, sample_type)) 
+pigments <- chl18 %>%
+  full_join(pigments_20_21)
+janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type)) 
 
-metal.chl.oc <- metal.chl %>%
+metal.pig <- tteb.all %>%
+  full_join(pigments)
+janitor::get_dupes(select(metal.pig, lake_id, site_id, sample_depth, sample_type)) 
+
+metal.pig.oc <- metal.pig %>%
   full_join(oc)
-janitor::get_dupes(select(metal.chl.oc, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(select(metal.pig.oc, lake_id, site_id, sample_depth, sample_type)) 
 
 
-metal.chl.oc.anions <- metal.chl.oc %>%
+metal.pig.oc.anions <- metal.pig.oc %>%
   full_join(anions)
-janitor::get_dupes(select(metal.chl.oc.anions, lake_id, site_id, sample_depth, sample_type)) 
-
+janitor::get_dupes(select(metal.pig.oc.anions, lake_id, site_id, sample_depth, sample_type)) 
 
 chemistry_all <- nutrients2 %>%
-  full_join(metal.chl.oc.anions)
+  full_join(metal.pig.oc.anions)
 janitor::get_dupes(select(chemistry_all, lake_id, site_id, sample_depth, sample_type)) 
 
 
