@@ -1,6 +1,7 @@
 ---
 title: "Survey of Reservoir Greenhouse gas Emissions"
-author: "J. Beaulieu"
+author:
+- J. Beaulieu^[United States Environmental Protection Agency, Office of Research and Development, Beaulieu.Jake@epa.gov]
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
@@ -203,12 +204,12 @@ ptsWgs <- pts %>% st_transform(4326) %>%
 factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = ptsWgs$index)
 
 popupData <- chem_fld_i %>% # subset popup data from chem_fld_i 
-  mutate(site_id = str_c("S-", str_pad(as.character(site_id), 2, "left", "0"))) %>% # change site_id field to match ptsWgs
   select(site_id, temp_s, ph_s, turb_s, do_mg_s)
 
 ptsWgs <- ptsWgs %>% # join popup data with ptsWgs 
+  mutate(siteID = as.numeric(gsub(".*?([0-9]+).*", "\\1", siteID))) %>% 
   left_join(popupData, by = c("siteID" = "site_id")) %>% 
-  mutate(popup = paste0(siteID, "<br>", "water temp.(°C): ", temp_s, "<br>", "pH: ", ph_s, "<br>", "turbidity (NTU): ", turb_s,"<br>",  "DO (mg/L): ", do_mg_s)) # create new field with all of the popup data
+  mutate(popup = paste0("siteID: ", siteID, "<br>", "water temp.(°C): ", temp_s, "<br>", "pH: ", ph_s, "<br>", "turbidity (NTU): ", turb_s,"<br>",  "DO (mg/L): ", do_mg_s)) # create new field with all of the popup data
 
 
 l <- leaflet() %>% 
