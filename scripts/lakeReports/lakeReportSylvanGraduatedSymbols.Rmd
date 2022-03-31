@@ -461,28 +461,17 @@ Turbidity is highest near the river inflows, but decreases toward the dam as wat
 
 ``` {r temperature, echo=FALSE, message=FALSE, warning=FALSE}
 
-  
-# Filter out any missing temperature data
+
 ptsTemp <- pts %>% 
-  filter(!is.na(temp_s)) 
+  filter(!is.na(temp_s)) %>% 
+  select(siteID, temp_s) # datatable is simpler if we select columns first. 
+# I think the datatable() function only identifies columns by number, not name.
 
-# %>% 
-#   mutate(site_id = paste("siteID:", site_id)) # add text to site_id for label
+factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), domain = ptsTemp$temp_s)
 
-factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), 
-                                        domain = ptsTemp$temp_s)
+tempdata = SharedData$new(ptsTemp) # data: siteid, temp_s, and geometry
 
-
-
-# tibble(ptsTemp) %>%
-#   select(siteID, temp_s) %>%
-#   filter(!is.na(temp_s)) %>%
-#   kableExtra::kbl(caption = paste0("<br>", "Water Temperature")) %>%
-#   kableExtra::kable_classic(full_width = FALSE,
-#                             font_size = 16, position = "float_right")
-
-
-bscols(widths = c(9,3), leaflet() %>% 
+bscols(widths = c(9,3), leaflet(tempdata) %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>%
   #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
   fitBounds(lng1 = min(st_coordinates(ptsTemp)[,1]),
@@ -492,20 +481,28 @@ bscols(widths = c(9,3), leaflet() %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(data = ptsTemp, 
+  addCircleMarkers(
                    fillColor = ~factpal.points(temp_s),
                    fillOpacity = 1,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
-  addLegend_decreasing(position = "topright", 
-                       pal = factpal.points,
-                       opacity = 1,
-                       values = ptsTemp$temp_s,
-                       title = "Water Temperature (C)",
-                       decreasing = TRUE) %>%
+  addLegend(map, position = c("topright"), 
+            pal = factpal.points, 
+            values = ~(temp_s),
+            title = "Water Temperature (°C)") %>%
+  # addLegend_decreasing(position = "topright",
+  #                      pal = factpal.points,
+  #                      opacity = 1,
+  #                      values = ~temp_s,
+  #                      title = "Water Temperature (C)",
+  #                      decreasing = TRUE) %>%
   addScaleBar(),
-  datatable(select(st_drop_geometry(ptsTemp), siteID, temp_s), 
-            options = list(dom = "t", pageLength = 20), width = "50%", 
-            class = "compact", rownames = FALSE)
+  datatable(tempdata, 
+            options = list(dom = "t", # show table only (no buttons)
+                           columnDefs = list(list(visible=FALSE, 
+                                                  targets = c(2))),# hide column
+                           pageLength = 20), # show up to 20 sites
+            width = "50%", class = "compact", rownames = FALSE,# resize 
+            colnames= c("water temp" = "temp_s")) #rename column
 )
 
 
