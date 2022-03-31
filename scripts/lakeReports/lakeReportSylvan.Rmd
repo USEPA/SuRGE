@@ -1,7 +1,7 @@
 ---
 title: "Survey of Reservoir Greenhouse gas Emissions"
 author:
-- J. Beaulieu^[United States Environmental Protection Agency, Office of Research and Development, Beaulieu.Jake@epa.gov]
+- Jake Beaulieu^[Jake Beaulieu, United States Environmental Protection Agency, Office of Research and Development, Beaulieu.Jake@epa.gov]
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
@@ -284,17 +284,12 @@ depth_prf_mean <- depth_prf %>% filter(sample.depth.m <= 2) %>%
   select(contains(c("do", "turbidity"))) %>% 
   select(-contains(c("flag", "comment"))) %>%
   summarize(across(everything(), mean)) %>%
-  mutate(do.mg.l = format(do.mg.l, digits = 0),
-         turbidity.ntu = format(turbidity.ntu, digits = 2, nsmall = 2)) %>%
   rename(do = do.mg.l, turbidity = turbidity.ntu)
 
 # pull out tn, tp, and chla
 nutrients <- chem_fld_i %>% 
   filter(sample_depth == "shallow") %>% 
   select(tp, tn, chla) %>%
-  mutate(tp = format(tp, digits = 0),
-         tn = format(tn, digits = 0),
-         chla = format(chla, digits = 1, nsmall = 1)) %>%
   rename(`chlorophyll a` = chla)
 
 # kable
@@ -315,7 +310,12 @@ disturbance_i <- cbind(depth_prf_mean, nutrients) %>% # join nutrients and 0-2m 
                           status)) %>%
   select(parameter, units, `least disturbed`, `moderately disturbed`, 
          `most disturbed`, value, status) %>%
-  rename(concentration = value)
+  rename(concentration = value) %>%
+  mutate(concentration = case_when(parameter == "do" ~ format(concentration, digits = 0, nsmall = 0),
+                                   parameter == "turbidity" ~ format(concentration, digits = 2, nsmall = 2),
+                                   parameter == "tp" ~ format(concentration, digits = 0, nsmall = 0),
+                                   parameter == "tn" ~ format(concentration, digits = 0, nsmall = 0),
+                                   parameter == "chlorophyll a" ~ format(concentration, digits = 1, nsmall = 1)))
 
 
 # define range of disturbance levels for in text code below

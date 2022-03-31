@@ -1,0 +1,27 @@
+---
+title: "Crosstalk"
+author: "J. Beaulieu"
+date: "3/31/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(crosstalk)
+library(leaflet)
+library(DT)
+
+```
+
+``` {r}
+
+shared_quakes <- SharedData$new(quakes[sample(nrow(quakes), 10),])
+bscols(
+  leaflet(shared_quakes, width = "100%", height = 300) %>%
+    addTiles() %>%
+    addMarkers(),
+  datatable(shared_quakes)
+)
+
+
+
+```

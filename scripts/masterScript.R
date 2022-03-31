@@ -21,6 +21,7 @@ source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  tteb.all
 #source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin
 #source("scripts/analysis/readTaxonomy.R") # GB taxonomy
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl18
+source("scripts/analysis/readPigmentsMicrocystin.R") # 2020+ chloro/phyco
 
 
 # Aggregate and review chemistry

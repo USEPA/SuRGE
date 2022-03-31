@@ -1,0 +1,581 @@
+---
+title: "Survey of Reservoir Greenhouse gas Emissions"
+author:
+- Jake Beaulieu^[Jake Beaulieu, United States Environmental Protection Agency, Office of Research and Development, Beaulieu.Jake@epa.gov]
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rlibrary(tidyverse)
+library(sf)
+library(leaflet)
+library(readxl)
+library(htmltools) # for leaflet labels `htmlEscape`
+# identify lake
+lake_id_i <- "235"
+
+lake_name_i <- "Sylvan Lake"
+
+# identify ecoregion.
+# CPL, NAP, NPL, SAP, SPL, TPL, UMW, WMT, XER
+ecoregion_i <- "UMW"
+
+# Identify local path for each user
+userPath <- paste0(Sys.getenv("USERPROFILE"), 
+                   "/Environmental Protection Agency (EPA)/",
+                   "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+
+# R proj folder at SP.
+localName <- if (grepl("JBEAULIE", userPath)) {
+"Jake/"
+} else if (grepl("JCOR", userPath, ignore.case = TRUE)) {
+"Joe/"}  
+
+
+# load chemistry and field data.
+# see "scripts/analysis/mergeChemistryFieldSheets.R"
+load(paste0(userPath, "rProjects/", localName, "SuRGE/output/chem_fld.RDATA")) #chem_fld
+
+chem_fld_i <- chem_fld %>% filter(lake_id == lake_id_i)
+
+
+# load depth profile
+# set up directories to search
+labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS") # all labs
+paths <- paste0(userPath, "data/", labs) # set up path to search
+pattern_i <- paste0("surgeDepthProfile", lake_id_i, ".xlsx") # pattern to match
+
+depth_prf <- fs::dir_ls(path = paths, # search all paths
+                        regexp = 'surgeDepthProfile', # file names containing this pattern
+                        recurse = TRUE) %>% # look in all subdirectories
+  .[!grepl(c(".pdf|.docx"), .)] %>% # exclude random files
+  .[grepl(pattern_i, .)] %>% # match depth profile file name
+  read_excel(.) # read data
+
+
+
+addLegend_decreasing <- function (map, position = c("topright", "bottomright", "bottomleft","topleft"),
+                                  pal, values, na.label = "NA", bins = 7, colors, 
+                                  opacity = 0.5, labels = NULL, labFormat = labelFormat(), 
+                                  title = NULL, className = "info legend", layerId = NULL, 
+                                  group = NULL, data = getMapData(map), decreasing = FALSE) {
+  
+        position <- match.arg(position)
+        type <- "unknown"
+        na.color <- NULL
+        extra <- NULL
+        if (!missing(pal)) {
+            if (!missing(colors)) 
+                stop("You must provide either 'pal' or 'colors' (not both)")
+            if (missing(title) && inherits(values, "formula")) 
+                title <- deparse(values[[2]])
+            values <- evalFormula(values, data)
+            type <- attr(pal, "colorType", exact = TRUE)
+            args <- attr(pal, "colorArgs", exact = TRUE)
+            na.color <- args$na.color
+            if (!is.null(na.color) && col2rgb(na.color, alpha = TRUE)[[4]] == 
+                    0) {
+                na.color <- NULL
+            }
+            if (type != "numeric" && !missing(bins)) 
+                warning("'bins' is ignored because the palette type is not numeric")
+            if (type == "numeric") {
+                cuts <- if (length(bins) == 1) 
+                    pretty(values, bins)
+                else bins   
+                if (length(bins) > 2) 
+                    if (!all(abs(diff(bins, differences = 2)) <= 
+                                     sqrt(.Machine$double.eps))) 
+                        stop("The vector of breaks 'bins' must be equally spaced")
+                n <- length(cuts)
+                r <- range(values, na.rm = TRUE)
+                cuts <- cuts[cuts >= r[1] & cuts <= r[2]]
+                n <- length(cuts)
+                p <- (cuts - r[1])/(r[2] - r[1])
+                extra <- list(p_1 = p[1], p_n = p[n])
+                p <- c("", paste0(100 * p, "%"), "")
+                if (decreasing == TRUE){
+                    colors <- pal(rev(c(r[1], cuts, r[2])))
+                    labels <- rev(labFormat(type = "numeric", cuts))
+                }else{
+                    colors <- pal(c(r[1], cuts, r[2]))
+                    labels <- rev(labFormat(type = "numeric", cuts))
+                }
+                colors <- paste(colors, p, sep = " ", collapse = ", ")
+            }
+            else if (type == "bin") {
+                cuts <- args$bins
+                n <- length(cuts)
+                mids <- (cuts[-1] + cuts[-n])/2
+                if (decreasing == TRUE){
+                    colors <- pal(rev(mids))
+                    labels <- rev(labFormat(type = "bin", cuts))
+                }else{
+                    colors <- pal(mids)
+                    labels <- labFormat(type = "bin", cuts)
+                }
+            }
+            else if (type == "quantile") {
+                p <- args$probs
+                n <- length(p)
+                cuts <- quantile(values, probs = p, na.rm = TRUE)
+                mids <- quantile(values, probs = (p[-1] + p[-n])/2, na.rm = TRUE)
+                if (decreasing == TRUE){
+                    colors <- pal(rev(mids))
+                    labels <- rev(labFormat(type = "quantile", cuts, p))
+                }else{
+                    colors <- pal(mids)
+                    labels <- labFormat(type = "quantile", cuts, p)
+                }
+            }
+            else if (type == "factor") {
+                v <- sort(unique(na.omit(values)))
+                colors <- pal(v)
+                labels <- labFormat(type = "factor", v)
+                if (decreasing == TRUE){
+                    colors <- pal(rev(v))
+                    labels <- rev(labFormat(type = "factor", v))
+                }else{
+                    colors <- pal(v)
+                    labels <- labFormat(type = "factor", v)
+                }
+            }
+            else stop("Palette function not supported")
+            if (!any(is.na(values))) 
+                na.color <- NULL
+        }
+        else {
+            if (length(colors) != length(labels)) 
+                stop("'colors' and 'labels' must be of the same length")
+        }
+        legend <- list(colors = I(unname(colors)), labels = I(unname(labels)), 
+                                     na_color = na.color, na_label = na.label, opacity = opacity, 
+                                     position = position, type = type, title = title, extra = extra, 
+                                     layerId = layerId, className = className, group = group)
+        invokeMethod(map, data, "addLegend", legend)
+}
+
+```
+
+---
+subtitle: "`r lake_name_i` Water Quality Survey"  
+---
+
+## 1. Background
+
+Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the United States (Figure 1).  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
+
+A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, water temperature, and turbidity near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
+
+This preliminary report presents water quality results for Sylvan Lake. These data will be included in a formal peer-reviewed publication to be submitted for publication in 2024.  
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='*Figure 1.  Location of the 108 Reservoirs Included in Study.*'}
+# READ DATA--------------
+# Read survey design.  
+dsn <- read_sf(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.gdb"), 
+               layer = "main_sampled_sites", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
+
+
+# Read ecoregion shapefile
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+# Simplified by Alex Hall.
+
+ecoR <- st_read(dsn = paste0(userPath, "data/spatial"),
+                layer = "aggr_ecoregions_simple", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
+
+# Custom color pallette for ecoregion polygons.  Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
+
+# Get states map
+states <- USAboundaries::us_states() %>%
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
+  st_transform(4326) # WGS84
+
+# GGPLOT APPROACH-------
+# Deprecated in favor of leaflet below.
+# If using ggplot, transform all object to 5070 conus albers
+# ggplot() +
+#   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+#   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+#   geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3) + # see dsgn.R
+#   scale_fill_manual("Ecoregion", values = cols) +
+#   ggtitle("Sample Sites") +
+# theme_bw() +
+#   theme(panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank(),
+#         plot.title = element_text(hjust = 0.5),
+#         axis.title.x = element_blank(),
+#         axis.text.x = element_blank(),
+#         axis.ticks.x = element_blank(),
+#         axis.title.y = element_blank(),
+#         axis.text.y = element_blank(),
+#         axis.ticks.y = element_blank(),
+#         panel.border = element_blank(),
+#         plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+#         legend.position = c(1.08, .5), # move legend to immediate right of plot  
+#         legend.text = element_text(size = 6),
+#         legend.title = element_text(size = 6),
+#         legend.key.size = unit(0.5, "cm")) 
+
+
+# LEAFLET APPROACH----
+
+dsn <- dsn %>% filter(!is.na(sample_year))
+
+factpal <- colorFactor(c("orange1", "lightpink1", "darksalmon",
+                         "mediumturquoise", "khaki4", "forestgreen", 
+                         "deepskyblue4", "saddlebrown", "lightskyblue4"), 
+                       ecoR$WSA9_NAME)
+  
+l <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(dsn)[,1]),
+            lng2 = max(st_coordinates(dsn)[,1]),
+            lat1 = min(st_coordinates(dsn)[,2]),
+            lat2 = max(st_coordinates(dsn)[,2])) %>%
+  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75) %>%
+  addPolygons(data = st_zm(states), # removes z and m values, if present
+              color = "cornsilk3", stroke = TRUE, weight = 0.5, opacity = 1) %>%
+  addCircleMarkers(data = dsn, radius = 0.1, 
+                   label = ~site_id,
+                   labelOptions = labelOptions(interactive = TRUE)) %>%
+  addLegend(position = "bottomleft", pal = factpal,
+            opacity = 1,
+            values = as.character(ecoR$WSA9_NAME),
+            title = "Ecoregions") %>%
+  addScaleBar()
+
+l
+
+```
+
+
+## 2.  Sylvan Lake Survey Design
+
+The Sylvan Lake survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click onany of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
+```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap='*Figure 2.  Location of the 15 sampling sites in Sylvan Lake.*'}
+# Read lake perimeter 
+perim <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
+               layer = "main_merc235") %>%
+  st_transform(4326) 
+
+# Read main sample point
+pts <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
+               layer = "main_mainSitesMerc235") %>%
+  st_transform(4326) 
+
+# Identify Index Site
+pts <- pts %>% mutate(index = case_when(siteID == "S-03" ~ "water chemistry site",
+                           TRUE ~ "sensor sites"))
+
+# Color scheme for Index vs other sites
+factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = pts$index)
+
+# Data for popup
+popupData <- chem_fld_i %>% # subset popup data from chem_fld_i 
+  select(site_id, temp_s, ph_s, turb_s, do_mg_s)
+
+# join popup data with ptsWgs 
+pts <- pts %>% 
+  mutate(siteID = as.numeric(gsub(".*?([0-9]+).*", "\\1", siteID))) %>% 
+  left_join(popupData, by = c("siteID" = "site_id")) %>% 
+  # create new field with popup data
+  mutate(popup = paste0("siteID: ", siteID, "<br>", 
+                        "water temp.(°C): ", temp_s, "<br>", 
+                        "pH: ", ph_s, "<br>", 
+                        "turbidity (NTU): ", turb_s,"<br>",  
+                        "DO (mg/L): ", do_mg_s)) 
+
+
+l <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(pts)[,1]),
+            lng2 = max(st_coordinates(pts)[,1]),
+            lat1 = min(st_coordinates(pts)[,2]),
+            lat2 = max(st_coordinates(pts)[,2])) %>%
+  addPolygons(data = st_zm(perim), # removes z and m values, if present
+              color = "black", weight = 1,
+              fillOpacity = 1) %>%
+  addCircleMarkers(data = pts, 
+                   fillColor = ~factpal.points(index),
+                   fillOpacity = 1, 
+                   popup = ~popup) %>%
+  addLegend(position = "topright", pal = factpal.points,
+            opacity = 1,
+            values = as.character(pts$index),
+            title = "Sample sites") %>%
+  addScaleBar()
+
+l
+```
+
+## 3.  Lake Disturbance and Trophic Status
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# lake chlorophyll based on lab measurements
+chla_i <- chem_fld_i %>% filter(sample_depth == "shallow") %>% select(chla) %>% pull()
+
+trophic_i <- if (is.nan(chla_i)) {
+  "missing chlorophyll"
+} else if (chla_i <= 2) {
+  "oligotrophic"
+} else if (chla_i >2 & chla_i <=7) {
+  "mesotrophic"
+} else if (chla_i >7 & chla_i <=30){
+  "eutrophic"
+} else if (chla_i > 30) {
+  "hypereutrophic"
+}
+
+
+```
+Lakes are often classified according to their trophic state.  There are four trophic state categories that reflect nutrient availability and plant growth within a lake.  A eutrophic lake has high nutrients and high algal and/or macrophyte plant growth. An oligotrophic lake has low nutrient concentrations and low plant growth. Mesotrophic lakes fall somewhere in between eutrophic and oligotrophic lakes and hypereutrophic lakes have very high nutrients and plant growth. Lake trophic state is typically determined by a wide variety of natural factors that control nutrient supply, climate, and basin morphometry. A metric commonly used for defining trophic state is the concentration of chlorophyll a (chla), an indicator of algae abundance, in the water column.  Chlorophyll a concentration was `r format(chla_i, digits = 0, nsmall = 0)` ug/L during the sampling, indicating the lake was `r  trophic_i`.
+  
+    
+```{r trophic_table, echo=FALSE, message=FALSE, warning=FALSE}
+# table of chla based trophic thresholds
+tibble(Analyte = "chlorophyll a (ug/L)", Oligotrophic = "<=2", Mesotrophic = ">2 and <=7", Eutrophic = ">7 and <=30", Hypereutrophic = ">30") %>%
+  kableExtra::kbl(align = "lcccc", # nice formatting
+                  caption = "Trophic State Classification") %>%
+  kableExtra::kable_classic() %>%
+  kableExtra::kable_styling(full_width = TRUE)
+  
+
+```
+
+```{r disturbance, echo=FALSE, message=FALSE, warning=FALSE}
+# Calculate disturbance metrics
+
+# Read in NL threshold values
+thresholds <- read_excel(paste0(userPath,
+                                "projectDocuments/literature/nlaIndicatorThresholds.xlsx"),
+                         sheet = "data") %>%
+  filter(ecoregion == ecoregion_i) %>%
+  select(-ecoregion)
+
+
+# NLA DO threshold is based on DO measured averaged across 0-2m depth
+depth_prf_mean <- depth_prf %>% filter(sample.depth.m <= 2) %>% 
+  select(contains(c("do", "turbidity"))) %>% 
+  select(-contains(c("flag", "comment"))) %>%
+  summarize(across(everything(), mean)) %>%
+  rename(do = do.mg.l, turbidity = turbidity.ntu)
+
+# pull out tn, tp, and chla
+nutrients <- chem_fld_i %>% 
+  filter(sample_depth == "shallow") %>% 
+  select(tp, tn, chla) %>%
+  rename(`chlorophyll a` = chla)
+
+# kable
+disturbance_i <- cbind(depth_prf_mean, nutrients) %>% # join nutrients and 0-2m sonde data
+  pivot_longer(everything(), names_to = "parameter") %>%
+  full_join(., thresholds) %>% # merge with NLA threshold values
+  # define condition status
+  mutate(status = case_when(value < least ~ "least disturbed",
+                            value >= least & value < most ~ "moderately disturbed",
+                            value >= most ~ "most disturbed",
+                            TRUE ~ NA_character_),
+         # fix calculation for do
+         status = if_else(parameter == "do",
+                          case_when(value > least ~ "least disturbed",
+                                    value <= least & value > most ~ "moderately disturbed",
+                                    value <= most ~ "most disturbed",
+                                    TRUE ~ NA_character_),
+                          status)) %>%
+  select(parameter, units, `least disturbed`, `moderately disturbed`, 
+         `most disturbed`, value, status) %>%
+  rename(concentration = value) %>%
+  mutate(concentration = case_when(parameter == "do" ~ format(concentration, digits = 0, nsmall = 0),
+                                   parameter == "turbidity" ~ format(concentration, digits = 2, nsmall = 2),
+                                   parameter == "tp" ~ format(concentration, digits = 0, nsmall = 0),
+                                   parameter == "tn" ~ format(concentration, digits = 0, nsmall = 0),
+                                   parameter == "chlorophyll a" ~ format(concentration, digits = 1, nsmall = 1)))
+
+
+# define range of disturbance levels for in text code below
+min_disturbance_i <- if (any(grepl("least", disturbance_i$status))) {
+  "least"
+} else if (any(grepl("moderately", disturbance_i$status))) {
+  "moderately"
+} else if (any(grepl("most", disturbance_i$status))){
+  "most"
+} 
+
+max_disturbance_i <- if (any(grepl("most", disturbance_i$status))){
+  "most"
+} else if (any(grepl("moderately", disturbance_i$status))) {
+  "moderately"
+} else if (any(grepl("least", disturbance_i$status))) {
+  "least"
+} 
+
+range_disturbance_i <- if (min_disturbance_i == max_disturbance_i) {
+  min_disturbance_i
+} else if (min_disturbance_i != max_disturbance_i) {
+  paste0(min_disturbance_i, " to ", max_disturbance_i)
+  }
+```
+   
+   
+In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), suspended sediment (turbidity), chlorophyll a, and dissolved oxygen (do).  Lake disturbance values range from `r range_disturbance_i` disturbed.
+  
+    
+```{r disturbance_table, echo=FALSE, message=FALSE, warning=FALSE}
+# Disturbance table
+disturbance_i %>%
+  kableExtra::kbl(align = "lcccccc", # nice formatting
+                  caption = "Chemical Condition Indicators") %>%
+  kableExtra::kable_classic() %>%
+  kableExtra::add_header_above(c(" ", " ", "Threshold Values" = 3, "Observed Values" = 2)) %>%
+  kableExtra::kable_styling(font_size = 13)
+```
+
+
+## 4.  Within-lake Spatial Patterns
+A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID.
+
+Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
+
+
+
+``` {r temperature, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Filter out any missing temperature data
+ptsTemp <- pts %>% 
+  filter(!is.na(temp_s)) 
+
+# %>% 
+#   mutate(site_id = paste("siteID:", site_id)) # add text to site_id for label
+
+factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), 
+                                        domain = ptsTemp$temp_s)
+
+
+
+tibble(ptsTemp) %>%
+  select(siteID, temp_s) %>%
+  filter(!is.na(temp_s)) %>%
+  kableExtra::kbl(caption = paste0("<br>", "Water Temperature")) %>%
+  kableExtra::kable_classic(full_width = FALSE,
+                            font_size = 16, position = "float_right")
+
+
+l <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(ptsTemp)[,1]),
+            lng2 = max(st_coordinates(ptsTemp)[,1]),
+            lat1 = min(st_coordinates(ptsTemp)[,2]),
+            lat2 = max(st_coordinates(ptsTemp)[,2])) %>%
+  addPolygons(data = st_zm(perim), # removes z and m values, if present
+              color = "black", weight = 1,
+              fillOpacity = 1) %>%
+  addCircleMarkers(data = ptsTemp, 
+                   fillColor = ~factpal.points(temp_s),
+                   fillOpacity = 1,
+                   label = ~htmlEscape(paste("siteID: ", siteID))) %>%
+  addLegend_decreasing(position = "topright", 
+                       pal = factpal.points,
+                       opacity = 1,
+                       values = ptsTemp$temp_s,
+                       title = "Water Temperature (C)",
+                       decreasing = TRUE) %>%
+  addScaleBar()
+
+l
+
+
+
+
+
+# 
+# #pH
+# tibble(pts_sp@data) %>% 
+#   select(siteID, ph_s) %>%
+#   filter(is.na(ph_s) == FALSE) %>%
+#   kableExtra::kbl(caption = paste0("<br>", "pH")) %>%
+#   kableExtra::kable_classic(full_width = FALSE, 
+#                             font_size = 16, position = "float_right") 
+# 
+# 
+# 
+# # turbidity
+# tibble(pts_sp@data) %>% 
+#   select(siteID, turb_s) %>%
+#   filter(is.na(turb_s) == FALSE) %>%
+#   kableExtra::kbl(caption = paste0("<br>", "Turbidity")) %>%
+#   kableExtra::kable_classic(full_width = FALSE, 
+#                             font_size = 16, position = "float_right") 
+# 
+# # dissolved oxygen
+# tibble(pts_sp@data) %>% 
+#   select(siteID, do_mg_s) %>%
+#   filter(is.na(do_mg_s) == FALSE) %>%
+#   kableExtra::kbl(caption = paste0("<br>", "Dissolved Oxygen")) %>%
+#   kableExtra::kable_classic(full_width = FALSE, 
+#                             font_size = 16, position = "float_right") 
+
+
+```
+
+
+
+
+
+
+  
+## 5. Depth Profiles
+Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
+
+The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of deep and shallow waters is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Add depth plot here
+
+# adapted from https://stackoverflow.com/questions/3099219/ggplot-with-2-y-axes-on-each-side-and-different-scales
+# make a double y-axis plot, then flip the plot
+# create limits for both y-axes
+ylim.prim <- c(min(chem_fld_i$do_mg_d, na.rm = TRUE), max(chem_fld_i$do_mg_d, na.rm = TRUE))   
+ylim.sec <- c(min(5), max(32))# manually scale axis for temperatures
+
+# create slope and intercept for the secondary axis data (water temp)
+b <- diff(ylim.prim)/diff(ylim.sec)
+a <- ylim.prim[1] - b*ylim.sec[1] 
+
+ggplot(chem_fld_i, aes(sample_depth_d, do_mg_d)) +
+  geom_line(color = "#56B4E9", size = 1) + # primary axis data (DO)
+  geom_point(color = "#56B4E9", size = 4) + # primary axis data (DO)
+  geom_line(aes(y = a + temp_d*b), color = "#E69F00", size = 1) + # secondary axis data (water temp)
+  geom_point(aes(y = a + temp_d*b), color = "#E69F00", size = 4) + # secondary axis data (water temp)
+  scale_y_continuous(expression(paste("Dissolved Oxygen (", "mg ", L^-1, ")"), g^1), sec.axis = sec_axis(~ (. - a)/b, name = "Temperature (°C)")) + # scale and label both axes
+  scale_x_continuous() + # this will become y-axis when we flip
+  ggtitle(paste(lake_name_i, "Depth Profiles")) + 
+  xlab("Depth (m)") + 
+  coord_flip() + # flip the axes so depth is on the y-axis
+  scale_x_reverse() + # reverse depth scale (now shown as the y-axis)
+  theme_classic() + 
+  theme(axis.title.x.top = element_text(color = "#E69F00")) +
+  theme(axis.title.x.bottom = element_text(color = "#56B4E9"))
+
+
+```
