@@ -272,7 +272,7 @@ l
 
 ## 2.  Sylvan Lake Survey Design
 
-The Sylvan Lake survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click onany of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
+The Sylvan Lake survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
 ```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap='*Figure 2.  Location of the 15 sampling sites in Sylvan Lake.*'}
 # Read lake perimeter 
 perim <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
@@ -453,7 +453,7 @@ disturbance_i %>%
 
 
 ## 4.  Within-lake Spatial Patterns
-A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID.
+A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID coresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
 Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
 
@@ -488,7 +488,7 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(
+  addCircleMarkers(stroke = FALSE,
                    fillColor = ~factpal.points(temp_s),
                    fillOpacity = 1,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
@@ -508,19 +508,7 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
             colnames= c("water temp" = "temp_s")) #rename column
 )
 
-
-
-# 
-# 
-
-# 
-# # dissolved oxygen
-# tibble(pts_sp@data) %>% 
-#   select(siteID, do_mg_s) %>%
-#   filter(is.na(do_mg_s) == FALSE) %>%
-#   kableExtra::kbl(caption = paste0("<br>", "Dissolved Oxygen")) %>%
-#   kableExtra::kable_classic(full_width = FALSE, 
-#                             font_size = 16, position = "float_right") 
+ 
 
 
 ```
@@ -546,7 +534,7 @@ bscols(widths = c(9,3), leaflet(pHdata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(
+  addCircleMarkers(stroke = FALSE,
                    fillColor = ~factpal.points(ph_s),
                    fillOpacity = 1,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
@@ -584,7 +572,7 @@ bscols(widths = c(9,3), leaflet(turbdata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(
+  addCircleMarkers(stroke = FALSE,
                    fillColor = ~factpal.points(turb_s),
                    fillOpacity = 1,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
@@ -595,7 +583,7 @@ bscols(widths = c(9,3), leaflet(turbdata) %>%
   addScaleBar(),
   datatable(turbdata, width = "50%", class = "compact", 
             rownames = FALSE,# resize 
-            colnames= c("NTU" = "turb_s")) #rename column
+            colnames= c("Turbidity (NTU)" = "turb_s")) #rename column
 )
 
 
@@ -622,7 +610,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(
+  addCircleMarkers(stroke = FALSE,
                    fillColor = ~factpal.points(do_mg_s),
                    fillOpacity = 1,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
@@ -641,9 +629,9 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
 
   
 ## 5. Depth Profiles
-Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
+Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep water cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted of oxygen as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
 
-The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of deep and shallow waters is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
+The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
