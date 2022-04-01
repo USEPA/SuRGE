@@ -491,6 +491,7 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
   addCircleMarkers(
                    fillColor = ~factpal.points(temp_s),
                    fillOpacity = 1,
+                   stroke = FALSE, 
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
   addLegend(map, position = c("topright"), 
             pal = factpal.points, 
@@ -549,6 +550,7 @@ bscols(widths = c(9,3), leaflet(pHdata) %>%
   addCircleMarkers(
                    fillColor = ~factpal.points(ph_s),
                    fillOpacity = 1,
+                   stroke = FALSE,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
   addLegend(map, position = c("topright"), 
             pal = factpal.points, 
@@ -587,6 +589,7 @@ bscols(widths = c(9,3), leaflet(turbdata) %>%
   addCircleMarkers(
                    fillColor = ~factpal.points(turb_s),
                    fillOpacity = 1,
+                   stroke = FALSE,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
   addLegend(map, position = c("topright"), 
             pal = factpal.points, 
@@ -625,6 +628,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
   addCircleMarkers(
                    fillColor = ~factpal.points(do_mg_s),
                    fillOpacity = 1,
+                   stroke = FALSE,
                    label = ~htmlEscape(paste("siteID: ", siteID))) %>%
   addLegend(map, position = c("topright"), 
             pal = factpal.points, 
