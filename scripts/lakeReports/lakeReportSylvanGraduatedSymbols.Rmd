@@ -488,7 +488,7 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(stroke = FALSE,
+  addCircleMarkers(
                    fillColor = ~factpal.points(temp_s),
                    fillOpacity = 1,
                    stroke = FALSE, 
@@ -535,7 +535,7 @@ bscols(widths = c(9,3), leaflet(pHdata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(stroke = FALSE,
+  addCircleMarkers(
                    fillColor = ~factpal.points(ph_s),
                    fillOpacity = 1,
                    stroke = FALSE,
@@ -574,7 +574,7 @@ bscols(widths = c(9,3), leaflet(turbdata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(stroke = FALSE,
+  addCircleMarkers(
                    fillColor = ~factpal.points(turb_s),
                    fillOpacity = 1,
                    stroke = FALSE,
@@ -613,7 +613,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
   addPolygons(data = st_zm(perim), # removes z and m values, if present
               color = "black", weight = 1,
               fillOpacity = 1) %>%
-  addCircleMarkers(stroke = FALSE,
+  addCircleMarkers(
                    fillColor = ~factpal.points(do_mg_s),
                    fillOpacity = 1,
                    stroke = FALSE,
