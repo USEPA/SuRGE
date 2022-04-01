@@ -457,7 +457,15 @@ A field sensor was used to measure water temperature, pH, dissolved oxygen, and 
 
 Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
 
+``` {r datatable global options, echo=FALSE}
 
+options(DT.options = list(dom = "t", # show table only (no buttons)
+                           columnDefs = list(list(visible=FALSE, 
+                                                  targets = c(2))),# hide column
+                           pageLength = 20))
+```
+
+                        
 
 ``` {r temperature, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -465,7 +473,6 @@ Turbidity is highest near the river inflows, but decreases toward the dam as wat
 ptsTemp <- pts %>% 
   filter(!is.na(temp_s)) %>% 
   select(siteID, temp_s) # datatable is simpler if we select columns first. 
-# I think the datatable() function only identifies columns by number, not name.
 
 factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), domain = ptsTemp$temp_s)
 
@@ -496,34 +503,16 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
   #                      title = "Water Temperature (C)",
   #                      decreasing = TRUE) %>%
   addScaleBar(),
-  datatable(tempdata, 
-            options = list(dom = "t", # show table only (no buttons)
-                           columnDefs = list(list(visible=FALSE, 
-                                                  targets = c(2))),# hide column
-                           pageLength = 20), # show up to 20 sites
-            width = "50%", class = "compact", rownames = FALSE,# resize 
+  datatable(tempdata, width = "50%", class = "compact", 
+            rownames = FALSE,# resize 
             colnames= c("water temp" = "temp_s")) #rename column
 )
 
 
-# 
-# #pH
-# tibble(pts_sp@data) %>% 
-#   select(siteID, ph_s) %>%
-#   filter(is.na(ph_s) == FALSE) %>%
-#   kableExtra::kbl(caption = paste0("<br>", "pH")) %>%
-#   kableExtra::kable_classic(full_width = FALSE, 
-#                             font_size = 16, position = "float_right") 
+
 # 
 # 
-# 
-# # turbidity
-# tibble(pts_sp@data) %>% 
-#   select(siteID, turb_s) %>%
-#   filter(is.na(turb_s) == FALSE) %>%
-#   kableExtra::kbl(caption = paste0("<br>", "Turbidity")) %>%
-#   kableExtra::kable_classic(full_width = FALSE, 
-#                             font_size = 16, position = "float_right") 
+
 # 
 # # dissolved oxygen
 # tibble(pts_sp@data) %>% 
@@ -536,10 +525,119 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
 
 ```
 
+``` {r pH, echo=FALSE, message=FALSE, warning=FALSE}
 
 
+ptspH <- pts %>% 
+  filter(!is.na(ph_s)) %>% 
+  select(siteID, ph_s) # datatable is simpler if we select columns first. 
+
+factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), domain = ptspH$ph_s)
+
+pHdata = SharedData$new(ptspH) # data: siteid, ph_s, and geometry
+
+bscols(widths = c(9,3), leaflet(pHdata) %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(ptspH)[,1]),
+            lng2 = max(st_coordinates(ptspH)[,1]),
+            lat1 = min(st_coordinates(ptspH)[,2]),
+            lat2 = max(st_coordinates(ptspH)[,2])) %>%
+  addPolygons(data = st_zm(perim), # removes z and m values, if present
+              color = "black", weight = 1,
+              fillOpacity = 1) %>%
+  addCircleMarkers(
+                   fillColor = ~factpal.points(ph_s),
+                   fillOpacity = 1,
+                   label = ~htmlEscape(paste("siteID: ", siteID))) %>%
+  addLegend(map, position = c("topright"), 
+            pal = factpal.points, 
+            values = ~(ph_s),
+            title = "pH") %>%
+  addScaleBar(),
+  datatable(pHdata, width = "50%", class = "compact", 
+            rownames = FALSE,# resize 
+            colnames= c("pH" = "ph_s")) #rename column
+)
 
 
+```
+
+``` {r turbidity, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+ptsTurb <- pts %>% 
+  filter(!is.na(turb_s)) %>% 
+  select(siteID, turb_s) # datatable is simpler if we select columns first. 
+
+factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), domain = ptspH$turb_s)
+
+turbdata = SharedData$new(ptsTurb) # data: siteid, turb_s, and geometry
+
+bscols(widths = c(9,3), leaflet(turbdata) %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(ptsTurb)[,1]),
+            lng2 = max(st_coordinates(ptsTurb)[,1]),
+            lat1 = min(st_coordinates(ptsTurb)[,2]),
+            lat2 = max(st_coordinates(ptsTurb)[,2])) %>%
+  addPolygons(data = st_zm(perim), # removes z and m values, if present
+              color = "black", weight = 1,
+              fillOpacity = 1) %>%
+  addCircleMarkers(
+                   fillColor = ~factpal.points(turb_s),
+                   fillOpacity = 1,
+                   label = ~htmlEscape(paste("siteID: ", siteID))) %>%
+  addLegend(map, position = c("topright"), 
+            pal = factpal.points, 
+            values = ~(turb_s),
+            title = "Turbidity (NTU)") %>%
+  addScaleBar(),
+  datatable(turbdata, width = "50%", class = "compact", 
+            rownames = FALSE,# resize 
+            colnames= c("NTU" = "turb_s")) #rename column
+)
+
+
+```
+
+``` {r do, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+ptsDo <- pts %>% 
+  filter(!is.na(do_mg_s)) %>% 
+  select(siteID, do_mg_s) # datatable is simpler if we select columns first. 
+
+factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), domain = ptsDo$do_mg_s)
+
+dodata = SharedData$new(ptsDo) # data: siteid, turb_s, and geometry
+
+bscols(widths = c(9,3), leaflet(dodata) %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(ptsDo)[,1]),
+            lng2 = max(st_coordinates(ptsDo)[,1]),
+            lat1 = min(st_coordinates(ptsDo)[,2]),
+            lat2 = max(st_coordinates(ptsDo)[,2])) %>%
+  addPolygons(data = st_zm(perim), # removes z and m values, if present
+              color = "black", weight = 1,
+              fillOpacity = 1) %>%
+  addCircleMarkers(
+                   fillColor = ~factpal.points(do_mg_s),
+                   fillOpacity = 1,
+                   label = ~htmlEscape(paste("siteID: ", siteID))) %>%
+  addLegend(map, position = c("topright"), 
+            pal = factpal.points, 
+            values = ~(do_mg_s),
+            title = "Dissolved Oxygen (mg/L)") %>%
+  addScaleBar(),
+  datatable(dodata, width = "50%", class = "compact", 
+            rownames = FALSE,# resize 
+            colnames= c("DO (mg/L)" = "do_mg_s")) #rename column
+)
+
+
+```
 
   
 ## 5. Depth Profiles
