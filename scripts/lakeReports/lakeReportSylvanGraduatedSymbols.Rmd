@@ -319,7 +319,7 @@ l <- leaflet() %>%
               fillOpacity = 1) %>%
   addCircleMarkers(data = pts, 
                    fillColor = ~factpal.points(index),
-                   fillOpacity = 1, 
+                   fillOpacity = 1,
                    popup = ~popup) %>%
   addLegend(position = "topright", pal = factpal.points,
             opacity = 1,
@@ -496,13 +496,7 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
   addLegend(map, position = c("topright"), 
             pal = factpal.points, 
             values = ~(temp_s),
-            title = "Water Temperature (°C)") %>%
-  # addLegend_decreasing(position = "topright",
-  #                      pal = factpal.points,
-  #                      opacity = 1,
-  #                      values = ~temp_s,
-  #                      title = "Water Temperature (C)",
-  #                      decreasing = TRUE) %>%
+            title = paste0("Water", "<br>", "Temp.", "<br>", "(°C)")) %>%
   addScaleBar(),
   datatable(tempdata, width = "50%", class = "compact", 
             rownames = FALSE,# resize 
@@ -582,7 +576,7 @@ bscols(widths = c(9,3), leaflet(turbdata) %>%
   addLegend(map, position = c("topright"), 
             pal = factpal.points, 
             values = ~(turb_s),
-            title = "Turbidity (NTU)") %>%
+            title = paste0("Turbidity", "<br>",  "(NTU)")) %>%
   addScaleBar(),
   datatable(turbdata, width = "50%", class = "compact", 
             rownames = FALSE,# resize 
@@ -621,7 +615,8 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
   addLegend(map, position = c("topright"), 
             pal = factpal.points, 
             values = ~(do_mg_s),
-            title = "Dissolved Oxygen (mg/L)") %>%
+            title = paste0("Dissolved", "<br>", 
+                           "Oxygen", "<br>", "(mg/L)")) %>%
   addScaleBar(),
   datatable(dodata, width = "50%", class = "compact", 
             rownames = FALSE,# resize 
