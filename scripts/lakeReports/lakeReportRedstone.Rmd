@@ -22,18 +22,18 @@ library(DT)
 
 
 # identify lake
-lake_id_i <- ""
+lake_id_i <- "233"
 
-lake_name_i <- ""
+lake_name_i <- "Lake Redstone"
 
 # identify ecoregion.
 # CPL, NAP, NPL, SAP, SPL, TPL, UMW, WMT, XER
-ecoregion_i <- ""
+ecoregion_i <- "UMW"
 
 # identify file and layer names
-gdb_name <- "" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
-perim_layer <- "" # e.g., "main_merc233"
-sample_layer <- "" # e.g., "main_mainSitesMerc233"
+gdb_name <- "lakeDsn/CIN/CH4-233/merc233.gdb"
+perim_layer <- "main_merc233"
+sample_layer <- "main_mainSitesMerc233"
 
 # Identify local path for each user
 userPath <- paste0(Sys.getenv("USERPROFILE"), 
@@ -56,7 +56,7 @@ load(paste0(userPath, "rProjects/", localName, "SuRGE/output/chem_fld.RDATA")) #
 
 chem_fld_i <- chem_fld %>% filter(lake_id == lake_id_i)
 
-index_site <- chem_fld_i %>% # identify index site # using the deep sample 
+index_site <- chem_fld_i %>% 
   filter(sample_depth == "deep") %>% 
   pull(site_id)
 
