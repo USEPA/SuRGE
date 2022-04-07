@@ -22,7 +22,7 @@ library(DT)
 
 
 # identify lake
-lake_id_i <- ""
+lake_id_i <- "" # if there's a leading zero, DO NOT omit it
 
 lake_name_i <- ""
 
@@ -54,7 +54,7 @@ localName <- if (grepl("JBEAULIE", userPath)) {
 # see "scripts/analysis/mergeChemistryFieldSheets.R"
 load(paste0(userPath, "rProjects/", localName, "SuRGE/output/chem_fld.RDATA")) #chem_fld
 
-chem_fld_i <- chem_fld %>% filter(lake_id == lake_id_i)
+chem_fld_i <- chem_fld %>% filter(lake_id == as.numeric(lake_id_i))
 
 index_site <- chem_fld_i %>% # identify index site # using the deep sample 
   filter(sample_depth == "deep") %>% 
@@ -163,7 +163,7 @@ l
 
 ## 2.  `r lake_name_i` Survey Design
 
-The `r lake_name_i` survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == lake_id_i, site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
+The `r lake_name_i` survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
 ```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap=paste0("*Figure 2.  Location of the 15 sampling sites in ", lake_name_i, ".*")}
 # Read lake perimeter 
 perim <- read_sf(paste0(userPath, gdb_name), 
@@ -177,8 +177,8 @@ pts <- read_sf(paste0(userPath, gdb_name),
 
 
 # Identify Index Site
-# make siteID format match; e.g., 3 -> "S-03"
-pts <- pts %>% mutate(index = case_when(siteID == paste0("S-", str_pad(index_site, 2, "left", 0)) ~ "water chemistry site", TRUE ~ "sensor sites"))
+# make siteID format match; e.g., "S-03" -> 3
+pts <- pts %>% mutate(index = case_when(abs(parse_number(siteID)) == index_site ~ "water chemistry site", TRUE ~ "sensor sites"))
 
 # Color scheme for Index vs other sites
 factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = pts$index)
@@ -522,7 +522,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
 ## 5. Depth Profiles
 Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep water cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted of oxygen as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
 
-The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == lake_id_i, site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
+The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
