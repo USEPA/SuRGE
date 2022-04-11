@@ -22,18 +22,18 @@ library(DT)
 
 
 # identify lake
-lake_id_i <- "" # If there's 2-digit ID with a leading zero, typically you will retain the zero to match the file name. If it throws an error when knitting, try removing the zero. 
+lake_id_i <- "138" # if there's a leading zero, DO NOT omit it
 
-lake_name_i <- ""
+lake_name_i <- "Suck Creek"
 
 # identify ecoregion.
 # CPL, NAP, NPL, SAP, SPL, TPL, UMW, WMT, XER
-ecoregion_i <- ""
+ecoregion_i <- "SAP"
 
 # identify file and layer names
-gdb_name <- "" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
-perim_layer <- "" # e.g., "main_merc233"
-sample_layer <- "" # e.g., "main_mainSitesMerc233"
+gdb_name <- "lakeDsn/RTP/CH4-138/merc138.gdb" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
+perim_layer <- "main_merc138" # e.g., "main_merc233"
+sample_layer <- "main_mainSitesMerc138" # e.g., "main_mainSitesMerc233"
 
 # Identify local path for each user
 userPath <- paste0(Sys.getenv("USERPROFILE"), 

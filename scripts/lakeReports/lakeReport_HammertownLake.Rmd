@@ -22,18 +22,18 @@ library(DT)
 
 
 # identify lake
-lake_id_i <- "" # If there's 2-digit ID with a leading zero, typically you will retain the zero to match the file name. If it throws an error when knitting, try removing the zero. 
+lake_id_i <- "101" # if there's a leading zero, DO NOT omit it
 
-lake_name_i <- ""
+lake_name_i <- "Hammertown Lake"
 
 # identify ecoregion.
 # CPL, NAP, NPL, SAP, SPL, TPL, UMW, WMT, XER
-ecoregion_i <- ""
+ecoregion_i <- "SAP"
 
 # identify file and layer names
-gdb_name <- "" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
-perim_layer <- "" # e.g., "main_merc233"
-sample_layer <- "" # e.g., "main_mainSitesMerc233"
+gdb_name <- "lakeDsn/CIN/CH4-101/merc101.gdb" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
+perim_layer <- "main_merc101" # e.g., "main_merc233"
+sample_layer <- "main_mainSitesMerc101" # e.g., "main_mainSitesMerc233"
 
 # Identify local path for each user
 userPath <- paste0(Sys.getenv("USERPROFILE"), 
@@ -103,7 +103,8 @@ This preliminary report presents water quality results for `r lake_name_i`. Thes
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='*Figure 1.  Location of the 108 Reservoirs Included in Study.*'}
 # READ DATA--------------
-
+print(index_site)
+print(select(chem_fld_i, site_id, sample_depth, site_depth))
 # Read ecoregion shapefile
 # Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
 # Simplified by Alex Hall.

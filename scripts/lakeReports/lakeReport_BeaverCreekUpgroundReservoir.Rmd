@@ -17,19 +17,30 @@ library(readxl)
 library(htmltools) # for leaflet labels `htmlEscape`
 library(crosstalk)
 library(DT)
-# identify lake
-lake_id_i <- "235"
 
-lake_name_i <- "Sylvan Lake"
+
+
+
+# identify lake
+lake_id_i <- "204" # if there's a leading zero, DO NOT omit it
+
+lake_name_i <- "Beaver Creek Upground Reservoir"
 
 # identify ecoregion.
 # CPL, NAP, NPL, SAP, SPL, TPL, UMW, WMT, XER
-ecoregion_i <- "UMW"
+ecoregion_i <- "TPL"
+
+# identify file and layer names
+gdb_name <- "lakeDsn/CIN/CH4-204/merc204.gdb" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
+perim_layer <- "main_merc204" # e.g., "main_merc233"
+sample_layer <- "main_mainSitesMerc204" # e.g., "main_mainSitesMerc233"
 
 # Identify local path for each user
 userPath <- paste0(Sys.getenv("USERPROFILE"), 
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+
 
 
 # R proj folder at SP.
@@ -43,8 +54,11 @@ localName <- if (grepl("JBEAULIE", userPath)) {
 # see "scripts/analysis/mergeChemistryFieldSheets.R"
 load(paste0(userPath, "rProjects/", localName, "SuRGE/output/chem_fld.RDATA")) #chem_fld
 
-chem_fld_i <- chem_fld %>% filter(lake_id == lake_id_i)
+chem_fld_i <- chem_fld %>% filter(lake_id == as.numeric(lake_id_i))
 
+index_site <- chem_fld_i %>% # identify index site # using the deep sample 
+  filter(sample_depth == "deep") %>% 
+  pull(site_id)
 
 # load depth profile
 # set up directories to search
@@ -59,108 +73,17 @@ depth_prf <- fs::dir_ls(path = paths, # search all paths
   .[grepl(pattern_i, .)] %>% # match depth profile file name
   read_excel(.) # read data
 
+# Read survey design.  
+dsn <- read_sf(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.gdb"), 
+               layer = "main_sampled_sites", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
 
 
-addLegend_decreasing <- function (map, position = c("topright", "bottomright", "bottomleft","topleft"),
-                                  pal, values, na.label = "NA", bins = 7, colors, 
-                                  opacity = 0.5, labels = NULL, labFormat = labelFormat(), 
-                                  title = NULL, className = "info legend", layerId = NULL, 
-                                  group = NULL, data = getMapData(map), decreasing = FALSE) {
-  
-        position <- match.arg(position)
-        type <- "unknown"
-        na.color <- NULL
-        extra <- NULL
-        if (!missing(pal)) {
-            if (!missing(colors)) 
-                stop("You must provide either 'pal' or 'colors' (not both)")
-            if (missing(title) && inherits(values, "formula")) 
-                title <- deparse(values[[2]])
-            values <- evalFormula(values, data)
-            type <- attr(pal, "colorType", exact = TRUE)
-            args <- attr(pal, "colorArgs", exact = TRUE)
-            na.color <- args$na.color
-            if (!is.null(na.color) && col2rgb(na.color, alpha = TRUE)[[4]] == 
-                    0) {
-                na.color <- NULL
-            }
-            if (type != "numeric" && !missing(bins)) 
-                warning("'bins' is ignored because the palette type is not numeric")
-            if (type == "numeric") {
-                cuts <- if (length(bins) == 1) 
-                    pretty(values, bins)
-                else bins   
-                if (length(bins) > 2) 
-                    if (!all(abs(diff(bins, differences = 2)) <= 
-                                     sqrt(.Machine$double.eps))) 
-                        stop("The vector of breaks 'bins' must be equally spaced")
-                n <- length(cuts)
-                r <- range(values, na.rm = TRUE)
-                cuts <- cuts[cuts >= r[1] & cuts <= r[2]]
-                n <- length(cuts)
-                p <- (cuts - r[1])/(r[2] - r[1])
-                extra <- list(p_1 = p[1], p_n = p[n])
-                p <- c("", paste0(100 * p, "%"), "")
-                if (decreasing == TRUE){
-                    colors <- pal(rev(c(r[1], cuts, r[2])))
-                    labels <- rev(labFormat(type = "numeric", cuts))
-                }else{
-                    colors <- pal(c(r[1], cuts, r[2]))
-                    labels <- rev(labFormat(type = "numeric", cuts))
-                }
-                colors <- paste(colors, p, sep = " ", collapse = ", ")
-            }
-            else if (type == "bin") {
-                cuts <- args$bins
-                n <- length(cuts)
-                mids <- (cuts[-1] + cuts[-n])/2
-                if (decreasing == TRUE){
-                    colors <- pal(rev(mids))
-                    labels <- rev(labFormat(type = "bin", cuts))
-                }else{
-                    colors <- pal(mids)
-                    labels <- labFormat(type = "bin", cuts)
-                }
-            }
-            else if (type == "quantile") {
-                p <- args$probs
-                n <- length(p)
-                cuts <- quantile(values, probs = p, na.rm = TRUE)
-                mids <- quantile(values, probs = (p[-1] + p[-n])/2, na.rm = TRUE)
-                if (decreasing == TRUE){
-                    colors <- pal(rev(mids))
-                    labels <- rev(labFormat(type = "quantile", cuts, p))
-                }else{
-                    colors <- pal(mids)
-                    labels <- labFormat(type = "quantile", cuts, p)
-                }
-            }
-            else if (type == "factor") {
-                v <- sort(unique(na.omit(values)))
-                colors <- pal(v)
-                labels <- labFormat(type = "factor", v)
-                if (decreasing == TRUE){
-                    colors <- pal(rev(v))
-                    labels <- rev(labFormat(type = "factor", v))
-                }else{
-                    colors <- pal(v)
-                    labels <- labFormat(type = "factor", v)
-                }
-            }
-            else stop("Palette function not supported")
-            if (!any(is.na(values))) 
-                na.color <- NULL
-        }
-        else {
-            if (length(colors) != length(labels)) 
-                stop("'colors' and 'labels' must be of the same length")
-        }
-        legend <- list(colors = I(unname(colors)), labels = I(unname(labels)), 
-                                     na_color = na.color, na_label = na.label, opacity = opacity, 
-                                     position = position, type = type, title = title, extra = extra, 
-                                     layerId = layerId, className = className, group = group)
-        invokeMethod(map, data, "addLegend", legend)
-}
+# See this URL for function enabling the leaflet legend for continuous data to 
+# descend from top to bottom (opposite of default behavior).  This function
+# doesn't work in conjunction with crosstalk, so omitted from .rmd.
+# https://stackoverflow.com/questions/40276569/reverse-order-in-r-leaflet-continuous-legend
+
 
 ```
 
@@ -172,17 +95,14 @@ subtitle: "`r lake_name_i` Water Quality Survey"
 
 Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the United States (Figure 1).  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
 
+All reservoirs included in this study were previously sampled by the USEPA during the 2017 National Lakes Assessment (2017 NLA). Data from the 2017 NLA can be found at the EPA website. Data for `r lake_name_i` can be found under SITE_ID `r dsn %>% filter(site_id == paste0("CH4-", lake_id_i)) %>% select(site_id_2) %>% pull(site_id_2)`.
+
 A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, water temperature, and turbidity near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
 
-This preliminary report presents water quality results for Sylvan Lake. These data will be included in a formal peer-reviewed publication to be submitted for publication in 2024.  
+This preliminary report presents water quality results for `r lake_name_i`. These data will be included in a formal peer-reviewed publication to be submitted for publication in 2024.  
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.cap='*Figure 1.  Location of the 108 Reservoirs Included in Study.*'}
 # READ DATA--------------
-# Read survey design.  
-dsn <- read_sf(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.gdb"), 
-               layer = "main_sampled_sites", quiet = TRUE) %>%
-  st_transform(4326) # WGS84
-
 
 # Read ecoregion shapefile
 # Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
@@ -209,32 +129,6 @@ cols <- c("Coastal Plains" = "orange1",
 states <- USAboundaries::us_states() %>%
   dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
   st_transform(4326) # WGS84
-
-# GGPLOT APPROACH-------
-# Deprecated in favor of leaflet below.
-# If using ggplot, transform all object to 5070 conus albers
-# ggplot() +
-#   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
-#   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
-#   geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3) + # see dsgn.R
-#   scale_fill_manual("Ecoregion", values = cols) +
-#   ggtitle("Sample Sites") +
-# theme_bw() +
-#   theme(panel.grid.major = element_blank(), 
-#         panel.grid.minor = element_blank(),
-#         plot.title = element_text(hjust = 0.5),
-#         axis.title.x = element_blank(),
-#         axis.text.x = element_blank(),
-#         axis.ticks.x = element_blank(),
-#         axis.title.y = element_blank(),
-#         axis.text.y = element_blank(),
-#         axis.ticks.y = element_blank(),
-#         panel.border = element_blank(),
-#         plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
-#         legend.position = c(1.08, .5), # move legend to immediate right of plot  
-#         legend.text = element_text(size = 6),
-#         legend.title = element_text(size = 6),
-#         legend.key.size = unit(0.5, "cm")) 
 
 
 # LEAFLET APPROACH----
@@ -270,23 +164,24 @@ l
 ```
 
 
-## 2.  Sylvan Lake Survey Design
+## 2.  `r lake_name_i` Survey Design
 
-The Sylvan Lake survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
-```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap='*Figure 2.  Location of the 15 sampling sites in Sylvan Lake.*'}
+The `r lake_name_i` survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
+```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap=paste0("*Figure 2.  Location of the 15 sampling sites in ", lake_name_i, ".*")}
 # Read lake perimeter 
-perim <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
-               layer = "main_merc235") %>%
+perim <- read_sf(paste0(userPath, gdb_name), 
+               layer = perim_layer) %>%
   st_transform(4326) 
 
 # Read main sample point
-pts <- read_sf(paste0(userPath, "lakeDsn/CIN/CH4-235/merc235.gdb"), 
-               layer = "main_mainSitesMerc235") %>%
+pts <- read_sf(paste0(userPath, gdb_name), 
+               layer = sample_layer) %>%
   st_transform(4326) 
 
+
 # Identify Index Site
-pts <- pts %>% mutate(index = case_when(siteID == "S-03" ~ "water chemistry site",
-                           TRUE ~ "sensor sites"))
+# make siteID format match; e.g., "S-03" -> 3
+pts <- pts %>% mutate(index = case_when(abs(parse_number(siteID)) == index_site ~ "water chemistry site", TRUE ~ "sensor sites"))
 
 # Color scheme for Index vs other sites
 factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = pts$index)
@@ -630,7 +525,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
 ## 5. Depth Profiles
 Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep water cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted of oxygen as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
 
-The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == 235, site_id == 3) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
+The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
