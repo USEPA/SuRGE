@@ -22,7 +22,7 @@ library(DT)
 
 
 # identify lake
-lake_id_i <- "82" # leading zero omitted for this particular lake
+lake_id_i <- "82" # leading zero omitted for this particular lake; zero re-added where needed in Section 1
 
 lake_name_i <- "Lake Montclair"
 
@@ -95,7 +95,7 @@ subtitle: "`r lake_name_i` Water Quality Survey"
 
 Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the United States (Figure 1).  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
 
-All reservoirs included in this study were previously sampled by the USEPA during the 2017 National Lakes Assessment (2017 NLA). Data from the 2017 NLA can be found at the EPA website. Data for `r lake_name_i` can be found under SITE_ID `r dsn %>% filter(site_id == paste0("CH4-", lake_id_i)) %>% select(site_id_2) %>% pull(site_id_2)`.
+All reservoirs included in this study were previously sampled by the USEPA during the 2017 National Lakes Assessment (2017 NLA). Data from the 2017 NLA can be found at the EPA website. Data for `r lake_name_i` can be found under SITE_ID `r dsn %>% filter(site_id == paste0("CH4-0", lake_id_i)) %>% select(site_id_2) %>% pull(site_id_2)`.
 
 A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, water temperature, and turbidity near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
 
@@ -281,7 +281,7 @@ nutrients <- chem_fld_i %>%
   filter(sample_depth == "shallow") %>% 
   select(tp, tn, chla) %>%
   rename(`chlorophyll a` = chla)
-
+print(nutrients)
 # kable
 disturbance_i <- cbind(depth_prf_mean, nutrients) %>% # join nutrients and 0-2m sonde data
   pivot_longer(everything(), names_to = "parameter") %>%
