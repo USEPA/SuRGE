@@ -84,8 +84,9 @@ get_phyco_data <- function(path, data, sheet) {
 cin.pig.path <- paste0(userPath,
                        "data/algalIndicators/pigments/")
 
+
 chla_20_21 <- get_chla_data(cin.pig.path,
-                               "surge_chla_all_2020_2021.csv")
+                               "surge_chla_all_2020_2021.csv") 
 
 phycocyanin_20_21 <- get_phyco_data(cin.pig.path,
                             "surge_phyco_all_2020_2021.csv")

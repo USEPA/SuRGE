@@ -281,7 +281,7 @@ nutrients <- chem_fld_i %>%
   filter(sample_depth == "shallow") %>% 
   select(tp, tn, chla) %>%
   rename(`chlorophyll a` = chla)
-print(nutrients)
+
 # kable
 disturbance_i <- cbind(depth_prf_mean, nutrients) %>% # join nutrients and 0-2m sonde data
   pivot_longer(everything(), names_to = "parameter") %>%

@@ -227,6 +227,7 @@ l
 
 ## 3.  Lake Disturbance and Trophic Status
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+# KEEPING HERE, BUT NOT USING.  CHLOROPHYLL SAMPLE LOST
 # lake chlorophyll based on lab measurements
 chla_i <- chem_fld_i %>% filter(sample_depth == "shallow") %>% select(chla) %>% pull()
 
@@ -244,16 +245,18 @@ trophic_i <- if (is.nan(chla_i)) {
 
 
 ```
-Lakes are often classified according to their trophic state.  There are four trophic state categories that reflect nutrient availability and plant growth within a lake.  A eutrophic lake has high nutrients and high algal and/or macrophyte plant growth. An oligotrophic lake has low nutrient concentrations and low plant growth. Mesotrophic lakes fall somewhere in between eutrophic and oligotrophic lakes and hypereutrophic lakes have very high nutrients and plant growth. Lake trophic state is typically determined by a wide variety of natural factors that control nutrient supply, climate, and basin morphometry. A metric commonly used for defining trophic state is the concentration of chlorophyll a (chla), an indicator of algae abundance, in the water column.  Chlorophyll a concentration was `r format(chla_i, digits = 0, nsmall = 0)` ug/L during the sampling, indicating the lake was `r  trophic_i`.
+
+
   
     
 ```{r trophic_table, echo=FALSE, message=FALSE, warning=FALSE}
+# IGNORE, MISSING CHLOROPHYLL
 # table of chla based trophic thresholds
-tibble(Analyte = "chlorophyll a (ug/L)", Oligotrophic = "<=2", Mesotrophic = ">2 and <=7", Eutrophic = ">7 and <=30", Hypereutrophic = ">30") %>%
-  kableExtra::kbl(align = "lcccc", # nice formatting
-                  caption = "Trophic State Classification") %>%
-  kableExtra::kable_classic() %>%
-  kableExtra::kable_styling(full_width = TRUE)
+# tibble(Analyte = "chlorophyll a (ug/L)", Oligotrophic = "<=2", Mesotrophic = ">2 and <=7", Eutrophic = ">7 and <=30", Hypereutrophic = ">30") %>%
+#   kableExtra::kbl(align = "lcccc", # nice formatting
+#                   caption = "Trophic State Classification") %>%
+#   kableExtra::kable_classic() %>%
+#   kableExtra::kable_styling(full_width = TRUE)
   
 
 ```
