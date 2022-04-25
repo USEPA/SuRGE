@@ -22,18 +22,18 @@ library(DT)
 
 
 # identify lake
-lake_id_i <- "" # If there's 2-digit ID with a leading zero, typically you will retain the zero to match the file name. If it throws an error when knitting, try removing the zero. 
+lake_id_i <- "233" # If there's 2-digit ID with a leading zero, typically you will retain the zero to match the file name. If it throws an error when knitting, try removing the zero. 
 
-lake_name_i <- ""
+lake_name_i <- "Lake Redstone"
 
 # identify ecoregion.
 # CPL, NAP, NPL, SAP, SPL, TPL, UMW, WMT, XER
-ecoregion_i <- ""
+ecoregion_i <- "UMW"
 
 # identify file and layer names
-gdb_name <- "" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
-perim_layer <- "" # e.g., "main_merc233"
-sample_layer <- "" # e.g., "main_mainSitesMerc233"
+gdb_name <- "lakeDsn/CIN/CH4-233/merc233.gdb" # e.g., "lakeDsn/CIN/CH4-233/merc233.gdb"
+perim_layer <- "main_merc233" # e.g., "main_merc233"
+sample_layer <- "main_mainSitesMerc233" # e.g., "main_mainSitesMerc233"
 
 # Identify local path for each user
 userPath <- paste0(Sys.getenv("USERPROFILE"), 
@@ -95,7 +95,7 @@ subtitle: "`r lake_name_i` Water Quality Survey"
 
 Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the United States (Figure 1).  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
 
-All reservoirs included in this study were previously sampled by the USEPA during the 2017 National Lakes Assessment (2017 NLA). Data from the 2017 NLA can be found at the EPA website. Data for `r lake_name_i` can be found under SITE_ID `r dsn %>% filter(site_id == paste0("CH4-", lake_id_i)) %>% select(site_id_2) %>% pull(site_id_2)`.
+All reservoirs included in this study were previously sampled by the USEPA during the 2017 National Lakes Assessment (2017 NLA). Data from the 2017 NLA can be found at the [EPA website](https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys). Data for `r lake_name_i` can be found under SITE_ID `r dsn %>% filter(site_id == paste0("CH4-", lake_id_i)) %>% select(site_id_2) %>% pull(site_id_2)`.
 
 A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, water temperature, and turbidity near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
 
@@ -531,21 +531,23 @@ The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(la
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Add depth plot here
 
+# will have to search for folder that contains the string lake_name_i
+
 # adapted from https://stackoverflow.com/questions/3099219/ggplot-with-2-y-axes-on-each-side-and-different-scales
 # make a double y-axis plot, then flip the plot
 # create limits for both y-axes
-ylim.prim <- c(min(chem_fld_i$do_mg_d, na.rm = TRUE), max(chem_fld_i$do_mg_d, na.rm = TRUE))   
-ylim.sec <- c(min(5), max(32))# manually scale axis for temperatures
+ylim.prim <- c(min(depth_prf$do.mg.l, na.rm = TRUE), max(depth_prf$do.mg.l, na.rm = TRUE))   
+ylim.sec <- c(min(10), max(30))# manually scale axis for temperatures
 
 # create slope and intercept for the secondary axis data (water temp)
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1] 
 
-ggplot(chem_fld_i, aes(sample_depth_d, do_mg_d)) +
+ggplot(depth_prf, aes(sample.depth.m, do.mg.l)) +
   geom_line(color = "#56B4E9", size = 1) + # primary axis data (DO)
   geom_point(color = "#56B4E9", size = 4) + # primary axis data (DO)
-  geom_line(aes(y = a + temp_d*b), color = "#E69F00", size = 1) + # secondary axis data (water temp)
-  geom_point(aes(y = a + temp_d*b), color = "#E69F00", size = 4) + # secondary axis data (water temp)
+  geom_line(aes(y = a + temp.C*b), color = "#E69F00", size = 1) + # secondary axis data (water temp)
+  geom_point(aes(y = a + temp.C*b), color = "#E69F00", size = 4) + # secondary axis data (water temp)
   scale_y_continuous(expression(paste("Dissolved Oxygen (", "mg ", L^-1, ")"), g^1), sec.axis = sec_axis(~ (. - a)/b, name = "Temperature (°C)")) + # scale and label both axes
   scale_x_continuous() + # this will become y-axis when we flip
   ggtitle(paste(lake_name_i, "Depth Profiles")) + 
