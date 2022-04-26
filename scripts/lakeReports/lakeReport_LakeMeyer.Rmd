@@ -40,7 +40,7 @@ userPath <- paste0(Sys.getenv("USERPROFILE"),
                    "/Environmental Protection Agency (EPA)/",
                    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
 
-
+# *** All turbidity measurements collected from this lake were inaccurate (likely due to faulty probe). All turbidity data have been removed from this report. ***
 
 
 # R proj folder at SP.
@@ -95,9 +95,9 @@ subtitle: "`r lake_name_i` Water Quality Survey"
 
 Between 2020 and 2023 the US Environmental Protection Agency (USEPA) will survey water quality and greenhouse gas (GHG) emissions from 108 reservoirs distributed across the United States (Figure 1).  The objective of the research is to estimate the magnitude of GHG emissions from US reservoirs. 
 
-All reservoirs included in this study were previously sampled by the USEPA during the 2017 National Lakes Assessment (2017 NLA). Data from the 2017 NLA can be found at the EPA website. Data for `r lake_name_i` can be found under SITE_ID `r dsn %>% filter(site_id == paste0("CH4-", lake_id_i)) %>% select(site_id_2) %>% pull(site_id_2)`.
+All reservoirs included in this study were previously sampled by the USEPA during the 2017 National Lakes Assessment (2017 NLA). Data from the 2017 NLA can be found at the [EPA website](https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys). Data for `r lake_name_i` can be found under SITE_ID `r dsn %>% filter(site_id == paste0("CH4-", lake_id_i)) %>% select(site_id_2) %>% pull(site_id_2)`.
 
-A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, water temperature, and turbidity near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
+A field sensor is used to measure chlorophyll a, dissolved oxygen, pH, specific conductivity, and water temperature near the water surface at a minimum of 15 locations within each reservoir.  Water samples are collected from the deepest site for analysis of nutrients and chlorophyll a.    
 
 This preliminary report presents water quality results for `r lake_name_i`. These data will be included in a formal peer-reviewed publication to be submitted for publication in 2024.  
 
@@ -166,7 +166,7 @@ l
 
 ## 2.  `r lake_name_i` Survey Design
 
-The `r lake_name_i` survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
+The `r lake_name_i` survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, and dissolved oxygen at the water surface.
 ```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap=paste0("*Figure 2.  Location of the 15 sampling sites in ", lake_name_i, ".*")}
 # Read lake perimeter 
 perim <- read_sf(paste0(userPath, gdb_name), 
@@ -188,6 +188,7 @@ factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = pt
 
 # Data for popup
 popupData <- chem_fld_i %>% # subset popup data from chem_fld_i 
+  filter(sample_depth != 'deep' | is.na(sample_depth == TRUE)) %>%
   select(site_id, temp_s, ph_s, turb_s, do_mg_s)
 
 # join popup data with ptsWgs 
@@ -198,7 +199,6 @@ pts <- pts %>%
   mutate(popup = paste0("siteID: ", siteID, "<br>", 
                         "water temp.(°C): ", temp_s, "<br>", 
                         "pH: ", ph_s, "<br>", 
-                        "turbidity (NTU): ", turb_s,"<br>",  
                         "DO (mg/L): ", do_mg_s)) 
 
 
@@ -271,10 +271,10 @@ thresholds <- read_excel(paste0(userPath,
 
 # NLA DO threshold is based on DO measured averaged across 0-2m depth
 depth_prf_mean <- depth_prf %>% filter(sample.depth.m <= 2) %>% 
-  select(contains(c("do", "turbidity"))) %>% 
+  select(contains(c("do"))) %>% 
   select(-contains(c("flag", "comment"))) %>%
   summarize(across(everything(), mean)) %>%
-  rename(do = do.mg.l, turbidity = turbidity.ntu)
+  rename(do = do.mg.l)
 
 # pull out tn, tp, and chla
 nutrients <- chem_fld_i %>% 
@@ -302,7 +302,6 @@ disturbance_i <- cbind(depth_prf_mean, nutrients) %>% # join nutrients and 0-2m 
          `most disturbed`, value, status) %>%
   rename(concentration = value) %>%
   mutate(concentration = case_when(parameter == "do" ~ format(concentration, digits = 0, nsmall = 0),
-                                   parameter == "turbidity" ~ format(concentration, digits = 2, nsmall = 2),
                                    parameter == "tp" ~ format(concentration, digits = 0, nsmall = 0),
                                    parameter == "tn" ~ format(concentration, digits = 0, nsmall = 0),
                                    parameter == "chlorophyll a" ~ format(concentration, digits = 1, nsmall = 1)))
@@ -333,12 +332,13 @@ range_disturbance_i <- if (min_disturbance_i == max_disturbance_i) {
 ```
    
    
-In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), suspended sediment (turbidity), chlorophyll a, and dissolved oxygen (do).  Lake disturbance values range from `r range_disturbance_i` disturbed.
+In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), chlorophyll a, and dissolved oxygen (do).  Lake disturbance values range from `r range_disturbance_i` disturbed.
   
     
 ```{r disturbance_table, echo=FALSE, message=FALSE, warning=FALSE}
 # Disturbance table
 disturbance_i %>%
+  filter(parameter != "turbidity") %>%
   kableExtra::kbl(align = "lcccccc", # nice formatting
                   caption = "Chemical Condition Indicators") %>%
   kableExtra::kable_classic() %>%
@@ -348,9 +348,9 @@ disturbance_i %>%
 
 
 ## 4.  Within-lake Spatial Patterns
-A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID coresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
+A field sensor was used to measure water temperature, pH, and dissolved oxygen near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID coresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
-Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
+Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
 
 ``` {r datatable global options, echo=FALSE}
 
@@ -442,45 +442,6 @@ bscols(widths = c(9,3), leaflet(pHdata) %>%
 
 ```
 
-``` {r turbidity, echo=FALSE, message=FALSE, warning=FALSE}
-
-
-ptsTurb <- pts %>% 
-  filter(!is.na(turb_s)) %>% 
-  select(siteID, turb_s) # datatable is simpler if we select columns first. 
-
-factpal.points <- leaflet::colorNumeric(palette = c('#67a9cf','#f7f7f7', '#ef8a62'), domain = ptspH$turb_s)
-
-turbdata = SharedData$new(ptsTurb) # data: siteid, turb_s, and geometry
-
-bscols(widths = c(9,3), leaflet(turbdata) %>% 
-  addProviderTiles(providers$Esri.WorldImagery) %>%
-  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
-  fitBounds(lng1 = min(st_coordinates(ptsTurb)[,1]),
-            lng2 = max(st_coordinates(ptsTurb)[,1]),
-            lat1 = min(st_coordinates(ptsTurb)[,2]),
-            lat2 = max(st_coordinates(ptsTurb)[,2])) %>%
-  addPolygons(data = st_zm(perim), # removes z and m values, if present
-              color = "black", weight = 1,
-              fillOpacity = 1) %>%
-  addCircleMarkers(
-                   fillColor = ~factpal.points(turb_s),
-                   fillOpacity = 1,
-                   stroke = FALSE,
-                   label = ~htmlEscape(paste("siteID: ", siteID))) %>%
-  addLegend(map, position = c("topright"), 
-            pal = factpal.points, 
-            values = ~(turb_s),
-            title = paste0("Turbidity", "<br>",  "(NTU)")) %>%
-  addScaleBar(),
-  datatable(turbdata, width = "50%", class = "compact", 
-            rownames = FALSE,# resize 
-            colnames= c("Turbidity (NTU)" = "turb_s")) #rename column
-)
-
-
-```
-
 ``` {r do, echo=FALSE, message=FALSE, warning=FALSE}
 
 
@@ -534,18 +495,18 @@ The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(la
 # adapted from https://stackoverflow.com/questions/3099219/ggplot-with-2-y-axes-on-each-side-and-different-scales
 # make a double y-axis plot, then flip the plot
 # create limits for both y-axes
-ylim.prim <- c(min(chem_fld_i$do_mg_d, na.rm = TRUE), max(chem_fld_i$do_mg_d, na.rm = TRUE))   
-ylim.sec <- c(min(5), max(32))# manually scale axis for temperatures
+ylim.prim <- c(min(depth_prf$do.mg.l, na.rm = TRUE), max(depth_prf$do.mg.l, na.rm = TRUE))   
+ylim.sec <- c(min(10), max(30))# manually scale axis for temperatures
 
 # create slope and intercept for the secondary axis data (water temp)
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1] 
 
-ggplot(chem_fld_i, aes(sample_depth_d, do_mg_d)) +
+ggplot(depth_prf, aes(sample.depth.m, do.mg.l)) +
   geom_line(color = "#56B4E9", size = 1) + # primary axis data (DO)
   geom_point(color = "#56B4E9", size = 4) + # primary axis data (DO)
-  geom_line(aes(y = a + temp_d*b), color = "#E69F00", size = 1) + # secondary axis data (water temp)
-  geom_point(aes(y = a + temp_d*b), color = "#E69F00", size = 4) + # secondary axis data (water temp)
+  geom_line(aes(y = a + temp.C*b), color = "#E69F00", size = 1) + # secondary axis data (water temp)
+  geom_point(aes(y = a + temp.C*b), color = "#E69F00", size = 4) + # secondary axis data (water temp)
   scale_y_continuous(expression(paste("Dissolved Oxygen (", "mg ", L^-1, ")"), g^1), sec.axis = sec_axis(~ (. - a)/b, name = "Temperature (°C)")) + # scale and label both axes
   scale_x_continuous() + # this will become y-axis when we flip
   ggtitle(paste(lake_name_i, "Depth Profiles")) + 

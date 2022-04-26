@@ -188,6 +188,7 @@ factpal.points <- leaflet::colorFactor(palette = c("yellow", "red"), domain = pt
 
 # Data for popup
 popupData <- chem_fld_i %>% # subset popup data from chem_fld_i 
+  filter(sample_depth != 'deep' | is.na(sample_depth == TRUE)) %>%
   select(site_id, temp_s, ph_s, turb_s, do_mg_s)
 
 # join popup data with ptsWgs 
@@ -326,14 +327,14 @@ max_disturbance_i <- if (any(grepl("most", disturbance_i$status))){
 } 
 
 range_disturbance_i <- if (min_disturbance_i == max_disturbance_i) {
-  min_disturbance_i
+  paste0("All lake disturbance values are ",min_disturbance_i) 
 } else if (min_disturbance_i != max_disturbance_i) {
-  paste0(min_disturbance_i, " to ", max_disturbance_i)
+  paste0("Lake disturbance values range from ", min_disturbance_i, " to ", max_disturbance_i)
   }
 ```
    
    
-In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), suspended sediment (turbidity), chlorophyll a, and dissolved oxygen (do).  Lake disturbance values range from `r range_disturbance_i` disturbed.
+In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), suspended sediment (turbidity), chlorophyll a, and dissolved oxygen (do).  `r range_disturbance_i` disturbed.
   
     
 ```{r disturbance_table, echo=FALSE, message=FALSE, warning=FALSE}
