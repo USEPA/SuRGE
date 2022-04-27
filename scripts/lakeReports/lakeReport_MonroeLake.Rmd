@@ -349,7 +349,7 @@ disturbance_i %>%
 
 
 ## 4.  Within-lake Spatial Patterns
-A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID coresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
+A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
 Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
 
@@ -361,7 +361,8 @@ options(DT.options = list(dom = "t", # show table only (no buttons)
                            pageLength = 20))
 ```
 
-                        
+###
+<br><br><br><br>                        
 
 ``` {r temperature, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -399,10 +400,11 @@ bscols(widths = c(9,3), leaflet(tempdata) %>%
             colnames= c("water temp" = "temp_s")) #rename column
 )
 
- 
-
 
 ```
+
+###
+<br><br><br><br>
 
 ``` {r pH, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -439,9 +441,11 @@ bscols(widths = c(9,3), leaflet(pHdata) %>%
             rownames = FALSE,# resize 
             colnames= c("pH" = "ph_s")) #rename column
 )
-<br>
 
 ```
+
+###
+<br><br><br><br>
 
 ``` {r turbidity, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -482,6 +486,9 @@ bscols(widths = c(9,3), leaflet(turbdata) %>%
 
 ```
 
+###
+<br><br><br><br>
+
 ``` {r do, echo=FALSE, message=FALSE, warning=FALSE}
 
 
@@ -514,7 +521,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
             title = paste0("Dissolved", "<br>", 
                            "Oxygen", "<br>", "(mg/L)")) %>%
   addScaleBar(),
-  datatable(dodata, width = "50%", class = "compact", 
+  datatable(dodata, width = "50%", class = "compact", , 
             rownames = FALSE,# resize 
             colnames= c("DO (mg/L)" = "do_mg_s")) #rename column
 )
@@ -522,7 +529,9 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
 
 ```
 
-  
+###
+<br><br><br><br>
+
 ## 5. Depth Profiles
 Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep water cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted of oxygen as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
 

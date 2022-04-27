@@ -325,14 +325,14 @@ max_disturbance_i <- if (any(grepl("most", disturbance_i$status))){
 } 
 
 range_disturbance_i <- if (min_disturbance_i == max_disturbance_i) {
-  min_disturbance_i
+paste0('All lake disturbance values are ',min_disturbance_i)
 } else if (min_disturbance_i != max_disturbance_i) {
-  paste0(min_disturbance_i, " to ", max_disturbance_i)
+  paste0('Lake disturbance values range from ', min_disturbance_i, " to ", max_disturbance_i)
   }
 ```
    
    
-In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), chlorophyll a, and dissolved oxygen (do).  Lake disturbance values range from `r range_disturbance_i` disturbed.
+In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), chlorophyll a, and dissolved oxygen (do).  `r range_disturbance_i` disturbed.
   
     
 ```{r disturbance_table, echo=FALSE, message=FALSE, warning=FALSE}
@@ -348,7 +348,7 @@ disturbance_i %>%
 
 
 ## 4.  Within-lake Spatial Patterns
-A field sensor was used to measure water temperature, pH, and dissolved oxygen near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID coresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
+A field sensor was used to measure water temperature, pH, and dissolved oxygen near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
 Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
 
