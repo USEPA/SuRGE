@@ -349,7 +349,7 @@ disturbance_i %>%
 
 
 ## 4.  Within-lake Spatial Patterns
-A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID coresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
+A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
 Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
 
