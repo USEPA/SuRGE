@@ -360,7 +360,7 @@ options(DT.options = list(dom = "t", # show table only (no buttons)
                                                   targets = c(2))),# hide column
                            pageLength = 20))
 
-pts <- pts %>% filter(site_depth == "shallow")
+#pts <- pts %>% filter(site_depth == "shallow")
 ```
 
                         
