@@ -43,7 +43,7 @@ get_ada_data21 <- function(path, datasheet) {
                   ~ if_else(str_detect(., "ND"), "<", NA_character_),
                   .names = "{col}_flag")) %>%
     mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
-                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),1], .))) %>% # note this is base::ifelse
+                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),2], .))) %>% # note this is base::ifelse
     mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
     mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
     mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
