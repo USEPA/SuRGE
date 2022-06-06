@@ -288,8 +288,8 @@ get_ada_data <- function(path, datasheet) {
       filter(str_detect(Analytes, "nalytes") == FALSE) %>% # if necessary, removes superfluous row
       mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
       column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
+      mutate(MDL = str_replace(MDL, "\\**", "")) %>% # remove asterisks from MDL value
       mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
-   
    analyte_names <- row.names(toptable) # pass analyte names to maintable, below
    
    #'maintable' combines 'toptable' with results
