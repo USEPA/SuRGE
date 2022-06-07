@@ -63,7 +63,7 @@ st_write(obj = surgeDsnSampled,
 # Quick look at what remains to be sampled
 surgeDsnSampled %>% 
   filter(sample_year >= 2022 | is.na(sample_year)) %>% # only those remaining
-  {table(.$lab)} # only 16 for CIN
+  {table(.$lab)} # only 15 for CIN
 
 
 # CIN sampled in 2021

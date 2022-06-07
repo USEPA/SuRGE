@@ -129,3 +129,7 @@ chemistry_all <- chemistry_all %>%
 
 janitor::get_dupes(select(chemistry_all, lake_id, site_id, sample_depth, sample_type)) 
 
+# arrange columns
+chemistry_all <- chemistry_all %>%
+  relocate(lake_id, site_id, sample_depth, sample_type, shipping_notes, #ID plus rando column
+           sort(colnames(.))) # others arranged alphabetically

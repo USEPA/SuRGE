@@ -1,0 +1,97 @@
+---
+title: "SuRGE"
+subtitle: "Survey of Reservoir Greenhouse gas Emissions"
+author: "J. Beaulieu"
+date: "3/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(sf)
+library(leaflet)
+
+# Identify local path for each user
+userPath <- paste0(Sys.getenv("USERPROFILE"), 
+                   "/Environmental Protection Agency (EPA)/",
+                   "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+
+localName <- "Jake/" # R proj folder at SP.
+```
+## Background
+
+SuRGE (Survey of Reservoir Greenhouse gas Emissions) is a national scale survey of greenhouse gas emissions from US reservoirs.  The survey design includes 108 reservoirs distributed across the nine major ecoregions in the conterminous US.  Each reservoir will be sampled one time between June and September of 2020, 2021, 2022, or 2023.  Please contact Jake Beaulieu (ORD/CEMM/WECD, beaulieu.jake@epa.gov) for more information.
+  
+  
+```{r warning=FALSE, echo=FALSE}
+# READ DATA--------------
+# Read survey design.  
+dsn <- read_sf(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.gdb"), 
+               layer = "main_sampled_sites", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
+
+
+# Read ecoregion shapefile
+# Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+# Simplified by Alex Hall.
+
+ecoR <- st_read(dsn = paste0(userPath, "data/spatial"),
+                layer = "aggr_ecoregions_simple", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
+
+# Custom color pallette for ecoregion polygons.  Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
+
+# Get states map
+states <- USAboundaries::us_states() %>%
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
+  st_transform(4326) # WGS84
+
+
+# LEAFLET APPROACH----
+
+dsn <- dsn %>% filter(!is.na(sample_year)) %>%
+  mutate(popup = paste0("NHD COMID: ", comid)) # popup info
+
+
+factpal <- colorFactor(c("orange1", "lightpink1", "darksalmon",
+                         "mediumturquoise", "khaki4", "forestgreen", 
+                         "deepskyblue4", "saddlebrown", "lightskyblue4"), 
+                       ecoR$WSA9_NAME)
+
+
+l <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(dsn)[,1]),
+            lng2 = max(st_coordinates(dsn)[,1]),
+            lat1 = min(st_coordinates(dsn)[,2]),
+            lat2 = max(st_coordinates(dsn)[,2])) %>%
+  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75, group = "Ecoregion") %>%
+  addPolygons(data = st_zm(states), # removes z and m values, if present
+              color = "#444444", stroke = TRUE, weight = 1, opacity = 1, group = "States") %>%
+  addCircleMarkers(data = dsn, radius = 0.1, group = "SuRGE Sites", color = "red", popup = ~popup) %>%
+  addLegend(position = "bottomleft", pal = factpal,
+            opacity = 1,
+            values = as.character(ecoR$WSA9_NAME),
+            title = "Ecoregions") %>%
+  addLayersControl(#overlayGroups = "SuRGE Sites",
+                   #baseGroups = c("Ecoregion", "States"),
+                   overlayGroups = c("Ecoregion", "States", "SuRGE Sites"),
+                   options = layersControlOptions(collapsed = FALSE)) %>%
+  addScaleBar()
+
+l
+```
+

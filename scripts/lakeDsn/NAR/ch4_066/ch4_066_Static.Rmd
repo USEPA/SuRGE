@@ -1,0 +1,56 @@
+---
+title: "Design files for CH4-066, Norton Reservoir"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+This 589 acre impoundment of the Rumford River has an average depth of 5
+feet and a maximum depth of 11 feet. The bottom is hard sand throughout
+except for the deep area, which is mud. The water is extremely fertile with
+transparency at less than a foot during certain times of the year. Aquatic
+vegetation is scant expect for emergent vegetation along the shoreline.
+
+**Access**
+Boat access to the pond is provided by a sand ramp which is managed by the
+town of Norton. The ramp has parking for half a dozen vehicles and trailers
+and is located off Lazy Lane on the eastern shore of the pond (71°11'43.72"W
+41°59'22.99"N). Cartop and shorefishing access is also available on the
+southern end of the pond off of Route 140 across from Freeman Street.
+Please contact the town of Norton for additional information and/or
+restrictions pertaining to public access of Norton Reservoir. 
+
+## Index Site
+The lake is fairly shallow.  The maximum depth of 11 feet is in a small hole in front of dam (see Norton Reservoir.pdf for bathymetry).  There are a few sites in 6-9 feet of water (sites 6, 14, and 9) that could serve as the Index site.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/NAR/CH4-066/066_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/NAR/CH4-066/066_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/NAR/CH4-066/ch4_066Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

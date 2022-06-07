@@ -147,12 +147,11 @@ tteb.all <- tteb.all %>%
       x %>% select(lake_id, site_id, sample_depth, sample_type, 
                    ni, ni_flag, ni_units, # if ni in matches, also grabs units (i.e. doc_units)
                    s, s_flag, s_units, # if s in matches, grabs too many variable
-                   matches("(al|as|ba|be|ca|cd|cr|cu|fe|k|li|mg|
-                         mn|na|p|pb|sb|si|sn|sr|v|zn)")) # select metals stuff
+                   matches("(al|as|ba|be|ca|cd|cr|cu|fe|k|li|mg|mn|na|p|pb|sb|si|sn|sr|v|zn)")) # select metals stuff
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type
 
-dim(tteb.all) #82 rows.  Good, reduced from 352 to 82.
+dim(tteb.all) #85 rows.  Good, reduced from 352 to 85.
 
 
 # 7. CLEAN UP FINAL OBJECT

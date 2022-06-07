@@ -48,7 +48,7 @@ get_data_sheet <- function(paths){
              regexp = 'surgeData', # file names containing this pattern
              recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
-   # .[12] %>%
+    # .[12] %>%
     # map will read each file in fs_path list generated above
     purrr::map(~read_excel(., skip = 1, sheet = "data", 
                            na = c("NA", "", "N/A", "n/a"))) %>%
@@ -60,7 +60,10 @@ get_data_sheet <- function(paths){
                  tolower(.) %>% # i.e. Lacustrine -> lacustrine
                  str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
                  str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
-               site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
+               site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
+               long = case_when(long > 0 ~ long * -1, # longitude should be negative
+                                TRUE ~ long),
+                across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
         # Format date and time objects
         mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
                across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
@@ -75,7 +78,8 @@ get_data_sheet <- function(paths){
 }
 
 # 3. Read 'data' tab of surgeData files.
-fld_sheet <- get_data_sheet(paths = paths)
+fld_sheet <- get_data_sheet(paths = paths) %>%
+  select(-x69) # this random column is getting read in from somewhere.  Short term fix to remove
 
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.

@@ -1,0 +1,52 @@
+---
+title: "Survey of Reservoir Greenhouse gas Emissions"
+author:
+- Jake Beaulieu^[Jake Beaulieu, United States Environmental Protection Agency, Office of Research and Development, Beaulieu.Jake@epa.gov]
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+---
+subtitle: "Harsh Lake Sampling Plan"  
+---
+
+## General Information
+Harsha Lake has a surface area of approximately 8 km^2^.  We are using an unstratified equal-probability survey design with 15 main sites and 20 oversample sites.  Be cautious when navigating to site U-06.  The main channel hugs the western bank.  There are lots of submerged stumps on the east bank that pose a navigation hazard.  Use the boat's navigation system to stay in the main channel.
+
+Much of the southeastern section of the lake is a no wake zone.  Be on the lookout for submerged stumps and navigate with caution.
+
+
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/harsha/harsha_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/harsha/harsha_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/harsha/ch4_harshaSites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

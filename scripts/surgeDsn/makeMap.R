@@ -7,6 +7,20 @@ dsn <- read_sf("../../../surgeDsn/SuRGE_design_20191206_eval_status.gdb",
   st_transform(5070) # Conus Albers
 st_crs(dsn) # 5070
 
+# READ NLA17 SAMPLED SITES-------
+# loaded object is 'dg'
+load(paste0(Sys.getenv("USERPROFILE"),
+            "/Environmental Protection Agency (EPA)/",
+            "ORD NLA17 Dissolved Gas - Documents/",
+            "inputData/dg.2021-02-01.RData"))
+
+coords <- data.frame(longitude = dg$map.lon.dd, latitude = dg$map.lat.dd)
+
+dg.sf <- st_as_sf(dg, coords = c("map.lon.dd", "map.lat.dd"), 
+                  crs = 4269) %>% # standard for lat/lon
+  st_transform(5070) # project to CONUS ALBERS for plotting
+
+
 
 # READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER ------------------
 # Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
@@ -109,7 +123,7 @@ ggsave(filename="output/figures/surgeMainSitesByLab.tiff",
 
 ggplot() +
   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
-  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.5) +
   geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3) + # see dsgn.R
   scale_fill_manual("Ecoregion", values = cols) +
   ggtitle("SuRGE Sample Sites") +
@@ -132,5 +146,37 @@ theme_bw() +
 
 
 ggsave(filename="output/figures/surgeMainSites.tiff",
+       width=8,height=5.5, units="in",
+       dpi=800,compression="lzw")
+
+
+# SuRGE main sites with NLA
+
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
+  geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.5) +
+  geom_sf(data = dg.sf, size = 1) +
+  geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3, color = "red") + # see dsgn.R
+  scale_fill_manual("Ecoregion", values = cols) +
+  ggtitle("Reservoir Sample Sites") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position = c(1.08, .5), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm")) 
+
+
+ggsave(filename="output/figures/surgeMainSitesNla17sites.tiff",
        width=8,height=5.5, units="in",
        dpi=800,compression="lzw")
