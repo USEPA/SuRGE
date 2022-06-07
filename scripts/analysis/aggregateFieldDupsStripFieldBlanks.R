@@ -71,7 +71,9 @@ clean_chem <- function(data) {
                   ~ ifelse(all(. == TRUE), TRUE, # if all _qual values are TRUE, the TRUE
                            ifelse(all(. == FALSE), FALSE, # if both qual fields are F, then F
                                   FALSE))),  # if T and F, report F
-           across(contains("units"), unique)) %>% # identical units for all observations within a group
+           across(contains("units"),
+                  ~ ifelse(any(str_detect(., "_") == TRUE), first(str_sort(.)), # if any group has units ("_" detected), use same units  
+                                  .))) %>% # if no units in group, no change (i.e., NA)
     filter(!(sample_type == "duplicate")) %>% # now we can remove dups
     select(-sample_type) %>% # no longer need sample_type (all unknowns)
       ungroup() # remove grouping
