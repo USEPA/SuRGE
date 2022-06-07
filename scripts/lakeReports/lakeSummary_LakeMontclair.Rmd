@@ -56,8 +56,12 @@ load(paste0(userPath, "rProjects/", localName, "SuRGE/output/chem_fld.RDATA")) #
 
 chem_fld_i <- chem_fld %>% filter(lake_id == as.numeric(lake_id_i))
 
-index_site <- chem_fld_i %>% # identify index site # using the deep sample 
-  filter(sample_depth == "deep") %>% 
+# identify index site based on rows where the units are reported.  Units are
+# only reported if a chemistry sample was analyzed, this only occurs at Index
+# site.
+index_site <- chem_fld_i %>%
+  filter(!if_all(contains("units"), is.na)) %>% # if units are reported for any analyte
+  distinct(site_id) %>% # pull out site_id, should be one value
   pull(site_id)
 
 # load depth profile
@@ -166,7 +170,7 @@ l
 
 ## 2.  `r lake_name_i` Survey Design
 
-The `r lake_name_i` survey design included 15 sampling sites.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
+The `r lake_name_i` survey design included 15 sampling sites that were sampled on `r chem_fld_i %>% filter(!is.na(sample_date)) %>% distinct(sample_date) %>% filter(sample_date == min(sample_date)) %>% pull()`.  Water chemistry samples were collected from a `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()`m deep site nearby the dam (Figure 2).  Click on any of the sites to see the site id, water temperature, pH, turbidity, and dissolved oxygen at the water surface.
 ```{r message=FALSE, warning=FALSE, echo=FALSE,  fig.cap=paste0("*Figure 2.  Location of the 15 sampling sites in ", lake_name_i, ".*")}
 # Read lake perimeter 
 perim <- read_sf(paste0(userPath, gdb_name), 
