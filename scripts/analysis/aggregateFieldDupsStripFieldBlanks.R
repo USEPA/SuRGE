@@ -59,14 +59,17 @@
 # Generalize to function----------------
 clean_chem <- function(data) {
   data %>% 
+    mutate(across(contains("flag"), ~ # convert all NA flags to "no value" if corresponding analyte is NA
+                    ifelse(is.na(get(word(paste(cur_column(), .), sep = "_"))) == TRUE, 
+                           "no value", .))) %>%
     group_by(lake_id, site_id, sample_depth) %>%
     filter(!(sample_type == "blank")) %>% 
     # site_id is numeric, but ignored below because it is a grouping variable.
     mutate(across(where(is.numeric), mean, na.rm = TRUE),
            across(contains("flag"), 
-                  ~ ifelse(all(is.na(.)), NA, # if all _flag values are NA, then NA
-                           ifelse(all(!is.na(.)), "<",  # if both _flag values are <, then <
-                                  NA))), # if only one _flag is <, then NA
+                  ~ ifelse(any(is.na(.) == TRUE), NA, # if any _flag values are NA, then NA
+                           ifelse(any(. == "<"), "<",  # if any _flag values are <, then <
+                                  "no value"))), # any remaining cases = "no value" (i.e., corresponding analytes are NA)
            across(contains("qual"),
                   ~ ifelse(all(. == TRUE), TRUE, # if all _qual values are TRUE, the TRUE
                            ifelse(all(. == FALSE), FALSE, # if both qual fields are F, then F
