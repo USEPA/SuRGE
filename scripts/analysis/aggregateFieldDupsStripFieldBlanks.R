@@ -81,9 +81,11 @@ clean_chem <- function(data) {
     filter(!(sample_type == "duplicate")) %>% # now we can remove dups
     rename(no2_3 = no23, no2_3_flag = no23_flag) %>% # changes columns back to original names in wiki
     select(-sample_type) %>% # no longer need sample_type (all unknowns)
-      ungroup() # remove grouping
+    ungroup() %>% # remove grouping
+    mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
+                  ~ ifelse(. == "no value", NA, .)))
   
-}
+} 
 
 chemistry <- clean_chem(chemistry_all)
 dim(chemistry_all) # 210, 131 [3/30/2022]
