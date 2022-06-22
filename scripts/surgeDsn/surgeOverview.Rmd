@@ -1,138 +1,165 @@
 ---
-title: "SuRGE"
-author: "Survey of Reservoir Greenhouse gas Emissions <br> <br> <br> Dr. Jake Beaulieu"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-    df_print: paged
-    toc: true
-    toc_float: true
-    fig_caption: yes
-    depth: 2
-    number_sections: true
-    code_folding: hide
-  editor_options: 
-  chunk_output_type: console
+title: "Gathering and Analyzing Emissions Data from U.S. Reservoirs"
+author: "<br><br>Survey of Reservoir Greenhouse gas Emissions (SuRGE)"
+output: html_document
 ---
 
-```{r results='hide', message=FALSE, warning=FALSE}
+```{r results='hide', message=FALSE, warning=FALSE, include = FALSE}
 # load libraries
 library(sf) # spatial data
 library(tidyverse) # dplyr, ggplot
 library(leaflet)
 
+leaflet(options = leafletOptions(zoomControl = FALSE,
+                                 minZoom = 3, maxZoom = 3,
+                                 dragging = FALSE)) %>%
+    addTiles()
+
+# Identify local path for each user
+userPath <- paste0(Sys.getenv("USERPROFILE"), 
+                   "/Environmental Protection Agency (EPA)/",
+                   "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+
+localName <- "Jake/" # R proj folder at SP.
 ```
 
 
 
 # Background
-The USEPA Office of Air and Radiation has requested that methane (CH4) and carbon dioxide (CO2) emissions from reservoirs be included in the *Inventory of U.S. Greenhouse Gas Emissions and Sinks*.  The Intergovernmental Panel on Climate Change (IPCC) has issued guidance for estimating these emissions, but the model used to derive the IPCC emission factors was trained with a global data set which included very few measurements from the US.  It is therefore uncertain how accurate the IPCC emission factors are for US reservoirs.  Methane emission rates vary by three orders of magnitude across US reservoirs and a small bias in IPCC emission factors could strongly bias the inventory estimate.
-To address this problem, the Office of Research and Development will execute a four-year survey of CH4 and CO2 emission rates from US reservoirs.  This will be a collaborative effort involving several ORD locations, EPA Regional Biologists, and other collaborators.
+EPA scientists are collaborating with researchers at the U.S. Geological Survey and the U.S. Department of Energy to measure methane and carbon dioxide emissions from 108 U.S. reservoirs during a four-year survey taking place from 2020 through 2023. The Survey of Reservoir Greenhouse gas Emissions (known as SuRGE) is aimed at gaining greater understanding of the amount of greenhouse gas emissions reservoirs emit. 
 
 
 # Survey Design
+  
+Methane and carbon dioxide emissions measurements are being collected each year of the survey between June 1 and September 15 when there are traditionally minimal seasonal variations and temperature changes. Each reservoir is being sampled one time during the survey. Within each reservoir, 15 to 25 measurement sites are being monitored by the scientists. The scientists are measuring nutrient concentrations, chlorophyll a, dissolved oxygen, pH, conductivity, water temperature, and water surface turbidity along with the methane and carbon dioxide emissions. Each of the reservoirs in this survey was previously sampled by EPA researchers during the [2017 National Lakes Assessment](https://www.epa.gov/national-aquatic-resource-surveys), part of the [National Aquatic Resource Surveys (NARS)](https://www.epa.gov/national-aquatic-resource-surveys) conducted by EPA along with state and tribal partners.
 
-The SuRGE project (Survey of Reservoir Greenhouse gas Emissions) is a statistical survey of CH4 and CO2 emission rates from 108 U.S. reservoirs.  The survey design includes stratification by ecoregion, depth, and chlorophyll, thereby ensuring large gradients in environmental drivers (i.e. depth, chla) to inform subsequent modeling efforts.  Each waterbody was previously sampled by the US EPA during the [2017 National Lakes Assessment](https://www.epa.gov/national-aquatic-resource-surveys).
+The 108 SuRGE reservoirs were randomly selected to represent the population of reservoirs within each of the nine major ecoregions in the contiguous United States.  An ecoregion is an area in which climate, ecological features, and plant and animal communities are similar.  The survey design was further stratified by reservoir depth and chlorophyll a content (an index for algae abundance in the water) within each ecoregion.  Water depth and chlorophyll content are known to correlate with methane emissions, so this feature of the survey design will ensure that SuRGE includes high and low emitting reservoirs within each ecoregion. This characteristic of the SuRGE dataset will enable the development of models that can predict carbon dioxide and methane emissions from reservoirs throughout the contiguous U.S.
 
-```{r message=FALSE, warning=FALSE, results='hide'}
-# READ ECOREGION SHAPEFILE PROVIDED BY MARC WEBER
+# Data Collection Sources
+Emissions data is being gathered from reservoirs distributed across 41 states and the nine major ecoregions of the contiguous United States.  Ownership of the 108 reservoirs in the SuRGE Project encompass public, private, and Native American tribal lands. Access to the reservoirs is being arranged with each local landowner. 
+
+
+```{r message=FALSE, warning=FALSE, echo = FALSE}
+# READ DATA--------------
+# Read survey design.  
+dsn <- read_sf(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.gdb"), 
+               layer = "main_sampled_sites", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
+
+
+# Read ecoregion shapefile
 # Original shapefile provided by Marc Weber on 1/3/2017 in Albers.
+# Simplified by Alex Hall.
 
-ecoR <- st_read(dsn = paste0("C:\\Users\\JBEAULIE\\OneDrive - Environmental Protection Agency (EPA)\\",
-                             "GIS_data\\locater_data\\ecoRegions"),
-                layer = "aggr_ecoregions_simple",
-                quiet = TRUE)
+ecoR <- st_read(dsn = paste0(userPath, "data/spatial"),
+                layer = "aggr_ecoregions_simple", quiet = TRUE) %>%
+  st_transform(4326) # WGS84
 
-# Check CRS
-st_crs(ecoR) # 3857
-ecoR <- st_transform(ecoR, 4326) # convert to CONUS Albers
+# Custom color pallette for ecoregion polygons.  Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
 
-
-# READ EPA REGIONS SHAPEFILE
-epaR <- st_read(dsn = "../../inputData/epaRegions",
-                layer = "EPA_Regions",
-                quiet = TRUE)
-# Check CRS
-st_crs(epaR) # 4269
-epaR <- st_transform(epaR, 4326) # convert to CONUS Albers
-
-
-# READ SURVEY DESIGN FILE
-surge <- st_read(dsn = "../../../../../surgeDsn/modifiedDesign",
-                 layer = "SuRGE_design_20191206",
-                 quiet = TRUE)
-
-# Check CRS
-st_crs(surge) # 9001
-surge <- st_transform(surge, 4326) # convert to CONUS Albers
-
-#  SET UP MAP
-# Call the color function (colorNumeric) to create a new palette function 
-factpal <- colorFactor(palette = c("red", "green", "blue"), domain = ecoR$WSA9_NAME) # ecoregions
-factpal.regions <- colorFactor(palette = c("red", "green", "blue"), domain = epaR$EPAREGION) # ecoregions
+# Get states map
+states <- USAboundaries::us_states() %>%
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
+  st_transform(4326) # WGS84
 
 
+# LEAFLET APPROACH----
 
-map <- leaflet() %>%
-  addProviderTiles(providers$Esri.WorldTopoMap) %>%
-  setView(lng = -98.583, lat = 39.833, zoom = 4) %>%
-  addPolygons(data = ecoR, 
-              label = ~WSA9_NAME,
-              color = "black", weight = 1, fillOpacity = 0.5,
-              fillColor = ~factpal(WSA9_NAME),
-              group = "Ecoregions",
-              highlightOptions = highlightOptions(color = "white",
-                                                  weight = 5,
-                                                  bringToFront = TRUE)) %>%
-  addPolygons(data = epaR,
-              label = ~EPAREGION,
-              color = "black", weight = 1, fillOpacity = 0.5,
-              fillColor = ~factpal.regions(EPAREGION),
-              group = "Regions",
-               highlightOptions = highlightOptions(color = "white",
-                                                  weight = 5,
-                                                  bringToFront = TRUE)) %>%
-  addCircleMarkers(data = filter(surge, panel == "Base"),
-                   label = ~siteID,
-                   radius = 4, 
-                   color = "black", 
-                   fillOpacity = 1, 
-                   stroke = FALSE) %>%
-  #addLegend(pal = factpal, values = as.character(ecoR$WSA9_NAME), opacity = 0.5, title = "Ecoregion") %>%
-  addLayersControl(overlayGroups = c("Ecoregions", "Regions"),
-                   options = layersControlOptions(collapsed = FALSE)) %>%
-  hideGroup("Ecoregions")
+dsn <- dsn %>% filter(!is.na(sample_year)) %>%
+  mutate(popup = paste0("NHD COMID: ", comid)) # popup info
 
-map
+
+factpal <- colorFactor(c("orange1", "lightpink1", "darksalmon",
+                         "mediumturquoise", "khaki4", "forestgreen", 
+                         "deepskyblue4", "saddlebrown", "lightskyblue4"), 
+                       ecoR$WSA9_NAME)
+
+
+l <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  #setView(st_coordinates(cntr_crds)[1], st_coordinates(cntr_crds)[2], zoom = 15) %>%
+  fitBounds(lng1 = min(st_coordinates(dsn)[,1]),
+            lng2 = max(st_coordinates(dsn)[,1]),
+            lat1 = min(st_coordinates(dsn)[,2]),
+            lat2 = max(st_coordinates(dsn)[,2])) %>%
+  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75, group = "Ecoregion") %>%
+  addPolygons(data = st_zm(states), # removes z and m values, if present
+              color = "#444444", stroke = TRUE, weight = 1, opacity = 1, group = "States") %>%
+  addCircleMarkers(data = dsn, radius = 0.1, group = "SuRGE Sites", color = "red", popup = ~popup) %>%
+  addLegend(position = "bottomleft", pal = factpal,
+            opacity = 1,
+            values = as.character(ecoR$WSA9_NAME),
+            title = "Ecoregions") %>%
+  # addLayersControl(#overlayGroups = "SuRGE Sites",
+  #                  #baseGroups = c("Ecoregion", "States"),
+  #                  overlayGroups = c("Ecoregion", "States", "SuRGE Sites"),
+  #                  options = layersControlOptions(collapsed = FALSE)) %>%
+  addScaleBar()
+
+l
 
 ```
+
 
 
   
 
 
-# Measurement Details
-Each of the 108 waterbodies in the survey will be sampled one time during the four year program (2020 - 2023). All sampling will be conducted between June 1 and Sept. 15.  Each waterbody will contain 15 - 25 sites where ebullitive (i.e. bubbling) emission rates will be measured via overnight deployments of inverted funnels.  Diffusive emissions will be measured at the sites via ~3 minute floating chamber deployments.  Ancillary measurements include water chemistry, chlorophyll, and dissolved gas concentrations.  
+# Methods for Collecting Reservoir Emissions
+During the survey, each site is being monitored by quantifying two main emission mechanisms: ebullition and diffusion. Ebullition occurs when bubbles are released from reservoir sediment, rise vertically toward the water’s surface, and are released into the atmosphere. Methane often constitutes greater than 50 percent of gas in these bubbles and ebullition can be an important emission mechanism for this greenhouse gas.  Ebullition is measured by deploying inverted funnels that capture bubbles as they rise through the water column. The diameter of these funnels is approximately two and a half feet, and the funnels are flipped upside down and hang beneath anchored buoys. The sampling devices are deployed for approximately 19 hours at 15-25 locations within each reservoir.
+ 
+Diffusive emissions occur when greenhouse gas concentrations in the water exceed that of the atmosphere, causing the gases to move from the water into the atmosphere. Diffusion rates are quantified by deploying floating chambers for around three minutes that capture and measure these gases as they move into the atmosphere. The aluminum floating chamber is connected to a greenhouse gas analyzer on the boat that provides real-time monitoring of carbon dioxide and methane concentrations in the chamber. The chamber is buoyed by two three-feet-long horizontal tubes that float on the water’s surface. 
 
 ```{r, echo=FALSE, out.width="100%"}
 # This should be image of single waterbody survey design, floating chamber, and inverted funnel.
 knitr::include_graphics("../../scripts/surgeDsn/imagesForRmd/fieldMethods.PNG")
 ```
 
+# Next Steps
+Survey results will inform future research modeling efforts and provide information to help water quality managers improve water quality while helping to reduce greenhouse gas emissions. Results of the survey will also be considered for inclusion in EPA’s Inventory of U.S. Greenhouse Gas Emissions and Sinks. This annual report provides a comprehensive accounting of total greenhouse gas emissions for all man-made sources in the United States. 
 
-# Collaborators
-Dr. Jake Beaulieu (ORD/CEMM/WECD/WMB) is the project lead based out of Cincinnati.  Co-leads include Lil Herger (EPA Region 10 @ Seattle), John Walker (ORD/CEMM/AEMD @ Research Triangle Park, NC), Ken Forshay (ORD/CESER/CGRD @ Ada, OK), Jeff Hollister (ORD/CEMM/ACESD @ Narragansett, RI), and Bridget Deemer (USGS @ Flagstaff, AZ).  Field crews will be deployed from these six locations.  
 
-# Contact
-Jake Beaulieu  
-ORD/CEMM/WECD/WMB  
-513-569-7842  
-beaulieu.jake@epa.gov
+
+# Related Research
+Other recent research conducted by EPA scientists [(Waldo, et.al., 2021)](https://bg.copernicus.org/preprints/bg-2021-36/bg-2021-36.pdf) found that reservoirs with poor water quality from algal blooms, emit higher rates of methane, a greenhouse gas, than reservoirs with cleaner water. These algal blooms have been associated with excess nutrients that enter waterbodies from stormwater runoff, and agriculture and industry chemicals.
+
+High-resolution methane emission measurements collected by EPA scientists, allowed them to identify connections between methane emission rates and three important environmental conditions: the formation of algal blooms, the temperature of sediment at the bottom of reservoirs, and the amount of pressure from the air and water above the sediment at the bottom of the reservoirs.
+
+A possible explanation for the connection between algal blooms and methane emissions is that algae is a source of high-quality carbon that can be rapidly converted to methane by microorganisms in sediments. This important finding suggests that algal blooms not only degrade water quality and impair the recreational value of lakes and reservoirs, but also contribute to a warming climate.
+
+# Learn More
+[New Monitoring Method Improves Ability to Measure Methane Emissions from Reservoirs](https://www.epa.gov/sciencematters/new-monitoring-method-improves-ability-measure-methane-emissions-reservoirs)
+
+[EPA’s Inventory of U.S. Greenhouse Gas Emissions and Sinks](https://www.epa.gov/ghgemissions/inventory-us-greenhouse-gas-emissions-and-sinks)
+
 
 # Selected References
+
+Beaulieu, J. J., Waldo, S., Balz, D. A., Barnett, W., Hall, A., Platz, M. C., & White, K. M. (2020). Methane and Carbon Dioxide Emissions From Reservoirs: Controls and Upscaling. Journal of Geophysical Research: Biogeosciences, 125(12). [doi:10.1029/2019jg005474](https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2019JG005474)
 
 DelSontro, T., Beaulieu, J. J., & Downing, J. A. (2018). Greenhouse gas emissions from lakes and impoundments: Upscaling in the face of global change. Limnology and Oceanography Letters, 3(3), 64-75. [doi:10.1002/lol2.10073](https://aslopubs.onlinelibrary.wiley.com/doi/pdf/10.1002/lol2.10073)  
 
 Prairie, Y. T., Alm, J., Beaulieu, J., Barros, N., Battin, T., Cole, J., . . . Vachon, D. (2017). Greenhouse Gas Emissions from Freshwater Reservoirs: What Does the Atmosphere See? Ecosystems. [doi:10.1007/s10021-017-0198-9](https://link.springer.com/content/pdf/10.1007%2Fs10021-017-0198-9.pdf)  
 
 Beaulieu, J. J., Smolenski, R. L., Nietch, C. T., Townsend-Small, A., & Elovitz, M. S. (2014). High Methane Emissions from a Midlatitude Reservoir Draining an Agricultural Watershed. Environmental Science & Technology, 48(19), 11100-11108. [doi:10.1021/es501871g](http://pubs.acs.org/doi/pdfplus/10.1021/es501871g)
+
+# Collaborators
+Dr. Jake Beaulieu (ORD/CEMM/WECD/WMB) is the project lead based out of Cincinnati.  Co-leads include Lil Herger (EPA Region 10 @ Seattle), John Walker (ORD/CEMM/AEMD @ Research Triangle Park, NC), Ken Forshay (ORD/CESER/CGRD @ Ada, OK), Jeff Hollister (ORD/CEMM/ACESD @ Narragansett, RI), Stephen Shivers (ORD/CEMM/ACESD @ Narragansett, RI), Avery Tatters (ORD/CEMM/GEMMD @ Gulf Breeze, FL), Natalie Griffiths (Department of Energy, Oak Ridge, TN), and Bridget Deemer (USGS @ Flagstaff, AZ).
+
+# Contact
+Jake Beaulieu  
+ORD/CEMM/WECD/WMB  
+513-569-7842  
+beaulieu.jake@epa.gov

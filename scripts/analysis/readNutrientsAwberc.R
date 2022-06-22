@@ -37,7 +37,8 @@ coc.list <- fs::dir_ls(path = paste0(userPath,  "data/chemistry/nutrients"), # g
   # map will read each file and select columns of interest
   purrr::map(~read_excel(.x, skip = 5, 
                          sheet = which(str_detect(excel_sheets(.x), "water"))) %>%
-               select(contains("Lake"), contains("Site"))) 
+               select(contains("Lake"), contains("Site")) %>%
+               mutate(across(everything(), ~as.character(.)))) # mix of character and double causes merge issues.  coerce all to character
 
 
 # 2. in some COC the lake_id value is in the LakeID column, whereas in others it
@@ -263,7 +264,7 @@ chem21 <- dup_agg(chem21) # final object, cast to wide with dups aggregated
 # Are all collected samples included?
 
 # Samples collected
-chem21.inventory.expected <- chem.samples.foo %>% 
+chem21.inventory.expected <- chem.samples.foo %>% # see chemSampleList.R, [6/17/22] no 2022 lakes included yet
   filter(lab != "R10", # see readNutrientsR10_2018.R for 2018 R10 samples
          # See readNutrientsAda.R for R10 2020 nutrient data
          lab != "ADA", # Ada analyzed their own. readNutrientsAda.R  
