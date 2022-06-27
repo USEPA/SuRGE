@@ -150,7 +150,7 @@ l <- leaflet() %>%
             lng2 = max(st_coordinates(dsn)[,1]),
             lat1 = min(st_coordinates(dsn)[,2]),
             lat2 = max(st_coordinates(dsn)[,2])) %>%
-  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75) %>%
+  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.5) %>%
   addPolygons(data = st_zm(states), # removes z and m values, if present
               color = "cornsilk3", stroke = TRUE, weight = 0.5, opacity = 1) %>%
   addCircleMarkers(data = dsn, radius = 0.1, 
@@ -343,7 +343,7 @@ In addition to classifying lakes by trophic status, lakes can be classified by d
 disturbance_i %>%
   filter(parameter != "turbidity") %>% 
   kableExtra::kbl(align = "lcccccc", # nice formatting
-                  caption = "Chemical Condition Indicators") %>%
+                  caption = "Chemical Condition Indicators Measured at Water Chemistry Site") %>%
   kableExtra::kable_classic() %>%
   kableExtra::add_header_above(c(" ", " ", "Threshold Values" = 3, "Observed Values" = 2)) %>%
   kableExtra::kable_styling(font_size = 13)
@@ -353,8 +353,7 @@ disturbance_i %>%
 ## 4.  Within-lake Spatial Patterns
 A field sensor was used to measure water temperature, pH, and dissolved oxygen near the water surface at all sampling sites.  Data are reported in figures and tables below. Hover the curser over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
-Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
-
+Water temperature, dissolved oxygen, and pH showed very little spatial variation across the reservoir's surface waters.
 ``` {r datatable global options, echo=FALSE}
 
 options(DT.options = list(dom = "t", # show table only (no buttons)
@@ -490,7 +489,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
 ## 5. Depth Profiles
 Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep water cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted of oxygen as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
 
-The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
+The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  The top 5m of the water column was relatively warm, but temperature dropped rapidly below 5m, indicating strong thermal stratification.  Dissolved oxygen was also lower below 5 m.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}

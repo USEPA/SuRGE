@@ -151,7 +151,7 @@ l <- leaflet() %>%
             lng2 = max(st_coordinates(dsn)[,1]),
             lat1 = min(st_coordinates(dsn)[,2]),
             lat2 = max(st_coordinates(dsn)[,2])) %>%
-  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75) %>%
+  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.5) %>%
   addPolygons(data = st_zm(states), # removes z and m values, if present
               color = "cornsilk3", stroke = TRUE, weight = 0.5, opacity = 1) %>%
   addCircleMarkers(data = dsn, radius = 0.1, 
@@ -180,7 +180,8 @@ perim <- read_sf(paste0(userPath, gdb_name),
 # Read main sample point
 pts <- read_sf(paste0(userPath, gdb_name), 
                layer = sample_layer) %>%
-  st_transform(4326) 
+  st_transform(4326) %>%
+  filter(siteID != "U-13") # inacessible
 
 
 # Identify Index Site
@@ -308,7 +309,7 @@ disturbance_i <- cbind(depth_prf_mean, nutrients) %>% # join nutrients and 0-2m 
   mutate(concentration = case_when(parameter == "do" ~ format(concentration, digits = 0, nsmall = 0),
                                    parameter == "tp" ~ format(concentration, digits = 0, nsmall = 0),
                                    parameter == "tn" ~ format(concentration, digits = 0, nsmall = 0),
-                                   parameter == "chlorophyll a" ~ format(concentration, digits = 1, nsmall = 1)))
+                                   parameter == "chlorophyll a" ~ format(concentration, digits = 2, nsmall = 0)))
 
 
 # define range of disturbance levels for in text code below
@@ -336,7 +337,7 @@ paste0('All lake disturbance values are ',min_disturbance_i)
 ```
    
    
-In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), chlorophyll a, and dissolved oxygen (do).  `r range_disturbance_i` disturbed.
+In addition to classifying lakes by trophic status, lakes can be classified by degree of disturbance relative to undisturbed lakes (i.e. reference lakes) within the ecoregion.  Degree of disturbance can be based on a wide variety of metrics, but here we use nutrients (total phosphorus (tp), total nitrogen (tn)), chlorophyll a, and dissolved oxygen (do).  `r range_disturbance_i` disturbed.  Total nitrogen was unusually high, particularly given the low tp and chlorophyll a in the lake.  Total nitrogen was composed primarily of nitrate (data not shown).  Common sources of nitrate include fertilizer runoff from lawns and crop fields, as well as septic systems.
   
     
 ```{r disturbance_table, echo=FALSE, message=FALSE, warning=FALSE}
@@ -344,7 +345,7 @@ In addition to classifying lakes by trophic status, lakes can be classified by d
 disturbance_i %>%
   filter(parameter != "turbidity") %>%
   kableExtra::kbl(align = "lcccccc", # nice formatting
-                  caption = "Chemical Condition Indicators") %>%
+                  caption = "Chemical Condition Indicators Measured at Water Chemistry Site") %>%
   kableExtra::kable_classic() %>%
   kableExtra::add_header_above(c(" ", " ", "Threshold Values" = 3, "Observed Values" = 2)) %>%
   kableExtra::kable_styling(font_size = 13)
@@ -352,9 +353,9 @@ disturbance_i %>%
 
 
 ## 4.  Within-lake Spatial Patterns
-A field sensor was used to measure water temperature, pH, and dissolved oxygen near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
+A field sensor was used to measure water temperature, pH, and dissolved oxygen near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
-Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
+There were no consistent spatial patterns in water temperature, pH, or dissolved oxygen in the surface waters of the lake.
 
 ``` {r datatable global options, echo=FALSE}
 
@@ -490,7 +491,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
 ## 5. Depth Profiles
 Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep water cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted of oxygen as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
 
-The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had only minor thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
+The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had minor thermal stratification and dissolved oxygen was greatest near the sediment water interface.   This is a very unusual dissolved oxygen profile, but is sometimes seen when lake managers install an aerator to maintain high dissolved oxygen in the lake.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}

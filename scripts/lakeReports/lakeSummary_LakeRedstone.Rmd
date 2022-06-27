@@ -151,7 +151,7 @@ l <- leaflet() %>%
             lng2 = max(st_coordinates(dsn)[,1]),
             lat1 = min(st_coordinates(dsn)[,2]),
             lat2 = max(st_coordinates(dsn)[,2])) %>%
-  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.75) %>%
+  addPolygons(data = st_zm(ecoR), fillColor = ~factpal(WSA9_NAME), stroke = FALSE, fillOpacity = 0.5) %>%
   addPolygons(data = st_zm(states), # removes z and m values, if present
               color = "cornsilk3", stroke = TRUE, weight = 0.5, opacity = 1) %>%
   addCircleMarkers(data = dsn, radius = 0.1, 
@@ -180,6 +180,7 @@ perim <- read_sf(paste0(userPath, gdb_name),
 # Read main sample point
 pts <- read_sf(paste0(userPath, gdb_name), 
                layer = sample_layer) %>%
+  filter(siteID != "S-01") %>% # inaccesible
   st_transform(4326) 
 
 
@@ -345,7 +346,7 @@ In addition to classifying lakes by trophic status, lakes can be classified by d
 # Disturbance table
 disturbance_i %>%
   kableExtra::kbl(align = "lcccccc", # nice formatting
-                  caption = "Chemical Condition Indicators") %>%
+                  caption = "Chemical Condition Indicators Measured at Water Chemistry Site") %>%
   kableExtra::kable_classic() %>%
   kableExtra::add_header_above(c(" ", " ", "Threshold Values" = 3, "Observed Values" = 2)) %>%
   kableExtra::kable_styling(font_size = 13)
@@ -355,7 +356,7 @@ disturbance_i %>%
 ## 4.  Within-lake Spatial Patterns
 A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
-Turbidity is highest near the river inflows, but decreases toward the dam as water velocity decreases and suspended sediment drops out of the water column.  Water temperature is greatest close to the dam, reflecting gradual warming of river water as it moves through the reservoir.  Dissolved oxygen and pH are also greatest near the dam, likely reflecting high rates of algal metabolism in the relatively warm and clear water near the dam.
+Water temperature, pH, turbidity, and dissolved oxygen were greatest near the river inflow.  This pattern is sometimes observed when the tributary is the primary nutrient source to the water surface.  Elevated nutrients near the tributary can stimulate algal growth, leading to elevated DO, algal turbidity, and pH.  Elevated water temperature can further stimulate algae growth.
 
 ``` {r datatable global options, echo=FALSE}
 
