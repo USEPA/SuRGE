@@ -52,6 +52,10 @@ get_data_sheet <- function(paths){
     # map will read each file in fs_path list generated above
     purrr::map(~read_excel(., skip = 1, sheet = "data", 
                            na = c("NA", "", "N/A", "n/a"))) %>%
+    # remove empty dataframes.  Pegasus put empty Excel files in each lake
+    # folder at begining of season.  These files will be populated eventually,
+    # but are causing issues with code below
+    purrr::discard(~ nrow(.x) == 0) %>% 
     # format data
     map(., function(x){
       janitor::clean_names(x) %>%
@@ -78,9 +82,7 @@ get_data_sheet <- function(paths){
 }
 
 # 3. Read 'data' tab of surgeData files.
-fld_sheet <- get_data_sheet(paths = paths) %>%
-  select(-x69) # this random column is getting read in from somewhere.  Short term fix to remove
-
+fld_sheet <- get_data_sheet(paths = paths)
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
 get_dg_sheet <- function(paths){
@@ -93,6 +95,10 @@ get_dg_sheet <- function(paths){
     # map will read each file in fs_path list generated above
     purrr::map(~read_excel(., skip = 1, sheet = "dissolved.gas", 
                            na = c("NA", "", "N/A", "n/a"))) %>%
+    # remove empty dataframes.  Pegasus put empty Excel files in each lake
+    # folder at begining of season.  These files will be populated eventually,
+    # but are causing issues with code below
+    purrr::discard(~ nrow(.x) == 0) %>% 
     # format data
     map(., function(x){
       janitor::clean_names(x) %>%
