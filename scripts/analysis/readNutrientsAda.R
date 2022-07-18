@@ -321,7 +321,7 @@ get_ada_data <- function(path, datasheet) {
                     ~ as.numeric(.))) %>%
       mutate(sample_depth = str_sub(sampleid, 6, 6)) %>% # get sample depth from sampleid
       mutate(sample_type = str_sub(sampleid, 7, 7)) %>% # get sample type from sampleid
-      mutate(sample_filter = str_sub(sampleid, 1, 1)) %>% # get sample type from sampleid
+      mutate(sample_filter = str_sub(sampleid, 1, 1)) %>% # get sample filter from sampleid
       mutate(sampleid = str_sub(sampleid, 3, 5)) %>% # make sampleid 3-digit numeric lake id only
       mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
       mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
@@ -411,8 +411,92 @@ lmp3 <- get_ada_data(cin.ada.path, "EPAGPA053SS#7759ForshayLakeMethaneProject7-6
 lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id))) # all records have site_id
 
 
+
+# 2022 NUTRIENT SAMPLES-----------------------------------------------------------
+
+get_ada_data22 <- function(path, datasheet) { 
+  
+  # toptable contains analyte names and MDL values
+  toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
+                         sheet = "Data", range = "C8:N50", col_names = FALSE) %>% # up to 492 rows
+    row_to_names(row_number = 1, remove_row = FALSE) %>% # column names = first row of data
+    clean_names(case = "upper_camel") %>% # keep case consistent
+    filter(Analytes %in% c("Analytes", "Unit", "MDL"), ignore.case=TRUE) %>% # # remove unneeded rows
+    pivot_longer(cols = -Analytes, names_to = "variable")  %>% # transpose the tibble
+    pivot_wider(names_from = Analytes, values_from = value) %>% # transpose the tibble
+    select(-variable) %>% # no longer needed
+    janitor::remove_empty("rows") %>% # remove empty rows
+    filter(str_detect(Analytes, "nalytes") == FALSE) %>% # if necessary, removes superfluous row
+    mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
+    column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
+    mutate(MDL = str_replace(MDL, "\\**", "")) %>% # remove asterisks from MDL value
+    mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
+  
+  analyte_names <- row.names(toptable) # pass analyte names to maintable, below
+
+
+  #'maintable' combines 'toptable' with results
+  maintable <- read_excel(paste0(path, datasheet), # get the results
+                          sheet = "Data", range = "A14:N500", na = "-") %>% # up to 492 rows
+    janitor::remove_empty("rows") %>% # remove empty rows
+    janitor::clean_names() %>%
+    mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase since Ada isn't consistent
+    mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), "LAB DUP", "")) %>% # flag the dups
+    select(field_sample_id, labdup, starts_with("dat")) %>% # remove unneeded columns
+    rename_with(~paste0(analyte_names), .cols = starts_with("data")) %>% # rename using analyte names
+    rename_with(~paste0(analyte_names, "_date_analyzed"), .cols = starts_with("date_a")) %>% # rename using analyte names
+    mutate(across(ends_with("analyzed"), # compute holding time of analytes
+                  ~ as.numeric(as.Date(., format = "%m/%d/%Y") - as.Date(date_collected, format = "%m/%d/%Y")))) %>%
+    rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
+    filter(str_count(sampleid) == 5) %>% # retain only rows where sampleid is exactly 5 char long
+    select(sampleid, labdup, everything(), -date_collected) %>% # reorder columns for the following mutate()
+    mutate(across(ends_with("/L"), # create new flag column if analyte not detected
+                  ~ if_else(str_detect(., "ND"), "<", NA_character_),
+                  .names = "{col}_flag")) %>%
+    mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
+                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),2], .))) %>% # note this is base::ifelse
+    mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
+    mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
+    mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
+    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
+                  ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
+    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
+                  ~ as.numeric(.))) %>%
+    mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
+    mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
+    mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
+    mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
+    mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
+    rename(lake_id = sampleid) %>% # change name to match chemCoc
+    mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
+    mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
+                  ~ if_else(.>28, TRUE, FALSE))) %>%
+    mutate(site_id = "") # create empty column for site_id (id is populated later)
+
+  return(maintable)
+
+}
+
+# 1. Read in root path for 2022 chemistry data analyzed in ADA.
+cin.ada.path <- paste0(userPath, 
+                       "data/chemistry/nutrients/ADA/2022/")
+
+  
+# apply get_ada_data and dup_agg functions to each spreadsheet 
+# NO2, NO3, NO2+NO3, NH4
+no2no3nh4.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") 
+tntp.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") 
+op146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_oP.xls") 
+op166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_166_oP.xls") 
+op184.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_oP.xls") 
+
+# TO DO: add conv units, keep only filtered op, 
+  # add site IDs, create new dup_agg, join with other data below.
+
+# JOIN ALL DATA OBJECTS------------------------------------------------------------
+
 # Join all of the data objects
-ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
+ada.nutrients.22 <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
                       ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3)) %>% 
    map_depth(2, ~select(., -sample_filter)) %>%
    map_depth(1, function(x) reduce(x, left_join)) %>%
