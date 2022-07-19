@@ -471,7 +471,13 @@ get_ada_data22 <- function(path, datasheet) {
     mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
     mutate(across(ends_with("analyzed"), # replace no. days w/ "HOLD" if holding time violated
                   ~ if_else(.>28, TRUE, FALSE))) %>%
-    mutate(site_id = "") # create empty column for site_id (id is populated later)
+    # For 2022, SITE ID as follows: lakeid 184:3, lakeid 166:6, lakeid 146:4, lakeid 190:8
+    mutate(site_id = case_when( # add site_id
+      lake_id == "146" ~ "4",
+      lake_id == "166" ~ "6", 
+      lake_id == "184" ~ "3", 
+      lake_id == "190" ~ "8", 
+      TRUE ~ "")) # NA if no match, but this will only occur if lake_id is missing/wrong
 
   return(maintable)
 
@@ -481,27 +487,80 @@ get_ada_data22 <- function(path, datasheet) {
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/2022/")
 
+dup_agg22 <- function(data) {
   
-# apply get_ada_data and dup_agg functions to each spreadsheet 
-# NO2, NO3, NO2+NO3, NH4
-no2no3nh4.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") 
-tntp.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") 
-op146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_oP.xls") 
-op166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_166_oP.xls") 
-op184.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_oP.xls") 
+  # Note: identical to dup_agg21 function (as of 19 Jul 2022)
+  
+  # first, convert all _flag columns to a numeric for summarize operations;
+  # Must be performed in the event that a lab dup has a different flag than the sample.
+  
+  data <- data %>% 
+    mutate(across(ends_with("flag"), 
+                  ~ ifelse(str_detect(., "<"), 1, 0))) 
+  
+  # carve out the _flag and _units columns so they can be re-joined later
+  c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")))
+  
+  d <- data %>%
+    dplyr::group_by(sample_depth, sample_type) %>%
+    # '!' to exclude columns we don't want to aggregate
+    summarize(across(!ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")), 
+                     ~ mean(., na.rm = TRUE))) 
+  
+  e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
+    mutate(across(3:last_col(), # convert NaN to NA
+                  ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
+    select(order(colnames(.))) %>% # alphabetize column names
+    select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
+    mutate(across(ends_with("flag"), # convert all _flag values back to text
+                  ~ if_else(.<1, "", "<"))) %>% 
+    filter(labdup != "LAB DUP") %>% # remove the lab dup
+    select(-labdup) # remove labdup column. 
+  
+  return(e)
+  
+}
+  
 
-# TO DO: add conv units, keep only filtered op, 
-  # add site IDs, create new dup_agg, join with other data below.
+
+# apply get_ada_data22 and dup_agg22 functions to each excel file
+no2no3nh4.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
+  conv_units(filename = "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
+  mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
+  dup_agg22 # aggregate lab duplicates (optional)
+
+tntp.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
+  conv_units(filename = "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
+  mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
+  dup_agg22 # aggregate lab duplicates (optional)
+
+op146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_oP.xls") %>%
+  conv_units(filename = "EPAGPA076_146_190_oP.xls") %>%
+  mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
+  dup_agg22 # aggregate lab duplicates (optional)
+
+op166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_166_oP.xls") %>%
+  conv_units(filename = "EPAGPA076_166_oP.xls") %>%
+  mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
+  dup_agg22 # aggregate lab duplicates (optional)
+
+op184.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_oP.xls") %>%
+  conv_units(filename = "EPAGPA076_184_oP.xls") %>%
+  mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
+  dup_agg22 # aggregate lab duplicates (optional)
+
 
 # JOIN ALL DATA OBJECTS------------------------------------------------------------
 
 # Join all of the data objects
-ada.nutrients.22 <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
-                      ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3)) %>% 
+ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
+                      ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3),
+                      ada22 = list(no2no3nh4.22, tntp.22, op146190.22, 
+                                   op166.22, op184.22)) %>% 
    map_depth(2, ~select(., -sample_filter)) %>%
    map_depth(1, function(x) reduce(x, left_join)) %>%
    reduce(full_join) %>%
-   mutate(site_id = as.numeric(site_id)) %>% 
+   mutate(site_id = as.numeric(site_id)) %>%
    arrange(lake_id) %>%
    ungroup()
    
