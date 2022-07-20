@@ -477,7 +477,7 @@ get_ada_data22 <- function(path, datasheet) {
       lake_id == "166" ~ "6", 
       lake_id == "184" ~ "3", 
       lake_id == "190" ~ "8", 
-      TRUE ~ "")) # NA if no match, but this will only occur if lake_id is missing/wrong
+      TRUE ~ "")) # blank if no match, but this will only occur if lake_id is missing/wrong
 
   return(maintable)
 
@@ -502,12 +502,12 @@ dup_agg22 <- function(data) {
   c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")))
   
   d <- data %>%
-    dplyr::group_by(sample_depth, sample_type) %>%
+    dplyr::group_by(lake_id, sample_depth, sample_type) %>%
     # '!' to exclude columns we don't want to aggregate
     summarize(across(!ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")), 
                      ~ mean(., na.rm = TRUE))) 
   
-  e <- left_join(d, c, by = c("sample_depth", "sample_type")) %>% # rejoin the data
+  e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% # rejoin the data
     mutate(across(3:last_col(), # convert NaN to NA
                   ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
     select(order(colnames(.))) %>% # alphabetize column names

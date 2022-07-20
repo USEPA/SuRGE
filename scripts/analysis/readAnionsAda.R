@@ -223,7 +223,7 @@ get_ada_data22 <- function(path, datasheet) {
     mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
   
   analyte_names <- row.names(toptable) # pass analyte names to maintable, below
-  print(toptable)
+
 
   # maintable combines toptable with results
   maintable <- read_excel(paste0(path, datasheet), # get the results
@@ -243,7 +243,6 @@ get_ada_data22 <- function(path, datasheet) {
                   .names = "{col}__date_analyzed")) %>%
     rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
     filter(str_count(sampleid) == 5)# %>% # retain only rows where sampleid is exactly 5 char long
-  #   filter(str_starts(sampleid, "\\(")) %>% # retain only rows where sampleid starts with '('
   #   select(sampleid, labdup, everything(),
   #          -date_collected, -date_analyzed) %>% # reorder columns for the following mutate()
   #   mutate(across(ends_with("/L"), # create new flag column if analyte not detected
@@ -271,7 +270,7 @@ get_ada_data22 <- function(path, datasheet) {
   #     lake_id == "166" ~ "6", 
   #     lake_id == "184" ~ "3", 
   #     lake_id == "190" ~ "8", 
-  #     TRUE ~ "")) # NA if no match, but this will only occur if lake_id is missing/wrong
+  #     TRUE ~ "")) # blank if no match, but this will only occur if lake_id is missing/wrong
 
   return(maintable)
   
