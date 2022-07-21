@@ -63,9 +63,9 @@ fld_sheet_sonde <- fld_sheet_sonde %>%
 
 # Now merge in non depth specific fields from fld_sheets
 fld_sheet_sonde1 <- full_join(fld_sheet_sonde, fld_sheet_no_depth)
-dim(fld_sheet_sonde) # 2060, 22 [6/2/2022]
-dim(fld_sheet_no_depth) #1030, 6 [6/2/2022]
-dim(fld_sheet_sonde1) #2060, 26 good [6/2/2022]
+dim(fld_sheet_sonde) # 2060, 22 [7/20/2022]
+dim(fld_sheet_no_depth) #1030, 6 [7/20/2022]
+dim(fld_sheet_sonde1) #2060, 26 good [7/20/2022]
 
 # Will merge on common names: lake_id and site_id
 names(chemistry)[names(chemistry) %in% names(fld_sheet_sonde1)] #lake_id, site_id, sample_depth
@@ -74,8 +74,8 @@ class(chemistry$lake_id) == class(fld_sheet_sonde1$lake_id) # TRUE
 class(chemistry$site_id) == class(fld_sheet_sonde1$site_id) # TRUE
 
 # Check dimensions
-dim(chemistry) # 153, 133 [5/31/2022]
-dim(fld_sheet_sonde1) # 2060, 26 [5/31/2022]
+dim(chemistry) # 153, 133 [7/20/2022]
+dim(fld_sheet_sonde1) # 2060, 26 [7/20/2022]
 
 # Check for correspondence among unique identifiers
 # 7 lakes in chemistry, but not in field sheets.  These are all
@@ -91,7 +91,7 @@ fld_sheet_sonde1 %>% filter(!(lake_id %in% chemistry$lake_id)) %>%
 
 chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
   relocate(lake_id, site_id, lat, long, sample_date, site_depth, sample_depth, sample_depth_m)
-dim(chem_fld) # 2090, 156 [5/31/2022]
+dim(chem_fld) # 2090, 156 [7/20/2022]
 
 # write to disk for reference in lake reports
 save(chem_fld, file = "output/chem_fld.RDATA")

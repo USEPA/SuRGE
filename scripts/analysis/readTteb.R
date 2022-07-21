@@ -20,13 +20,15 @@
 # Files contain samples from SuRGE + other studies.  Filter below.
 
 tteb.BEAULIEU <- read_excel(paste0(userPath, 
-                                   "data/chemistry/tteb/BEAULIEU_01_20_2022_update.xlsx")) 
+                                   "data/chemistry/tteb/BEAULIEU_06_30_2022_update.xlsx")) 
+# all records in SURGE are in SURGE2021
+# tteb.SURGE <- read_excel(paste0(userPath, 
+#                                 "data/chemistry/tteb/SURGE_03_09_2022_update.xlsx"))
 
-tteb.SURGE <- read_excel(paste0(userPath, 
-                                "data/chemistry/tteb/SURGE_2021_03_10_2022_update.xlsx"))
+tteb.SURGE2021 <- read_excel(paste0(userPath, 
+                                "data/chemistry/tteb/SURGE_2021_06_30_2022_update.xlsx"))
 
-
-tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE) %>% 
+tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
   select(-colldate, -studyid, -tn, -flag) %>% # remove unneeded columns
@@ -75,7 +77,8 @@ janitor::get_dupes(ttebCoc, lab_id) # no duplicates
 
 # Compare list of submitted samples to comprehensive sample list
 # print rows in ttebSampleIds not in chem.samples.
-# [Mar. 10, 2022] No extra samples, all good 
+# [July. 14, 2022] No extra samples, all good 
+# Need to update master sample list for 2022
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
@@ -109,7 +112,7 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 319 records [3/17/2022] 
+nrow(tteb.all) # 347 records [7/20/2022] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -124,11 +127,20 @@ tteb.all <- tteb.all %>%
 
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
-# missing 33 samples.  Waiting for update from Maily. [3/17/2022]
-ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id))
-# list of missing samples to send to Maily [3/17/2022]
+# missing 5 samples, but four of them were due to instrument failure.
+ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
+# per Maily, 4/21/2022: During these weeks of running, the instrument was having 
+# many instrument failures including mechanical arm failures and injection errors. 
+# After many attempts to rerun the samples over these several days, the sample was 
+# depleted and we were unable to reanalyze the samples. "203642, 203643, and 203644 
+# will not have results as there were instrument failures with that run and after 
+# several attempts it looks like they ran out of sample."
+
+# After filtering those lost to instrument failure, only missing one sample 203165
+# Waiting for update from Maily. [7/20/2022]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
-  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb03102022.txt"), row.names = FALSE)
+  filter(!(lab_id %in% c(203606, 203642:203645))) %>% # instrument failure
+  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb07202022.txt"), row.names = FALSE)
 
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
@@ -151,7 +163,7 @@ tteb.all <- tteb.all %>%
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type
 
-dim(tteb.all) #85 rows.  Good, reduced from 352 to 85.
+dim(tteb.all) #175 rows.  Good, reduced from 347 to 175.
 
 
 # 7. CLEAN UP FINAL OBJECT

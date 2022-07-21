@@ -34,7 +34,7 @@ source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAni
 # Inspect objects----
 
 # inspect object to merge
-# each df contains 10 - 174 observations [3/30/2022]
+# each df contains 10 - 175 observations [7/20/2022]
 list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
   map_dfc(., nrow)

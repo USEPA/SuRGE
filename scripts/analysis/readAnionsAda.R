@@ -191,17 +191,6 @@ ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrF
   dup_agg21 # aggregate lab duplicates (optional)
 
 
-# create path for Canton Lake
-# file path for Canton lake is currently too long.  asked katie to shorten [6/22/22]
-cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/anions_ada_daniels/ADA/CH4_146_Canton Lake/")
-
-# apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
-can1 <- get_ada_data21(cin.ada.path, "EPAGPA076SS#7862,AE2.6.2,Forshay,LakeMethaneProject,6-7-2022ClSO4BrF,NO3,NO2,GPKR.xls") %>%
-  conv_units(filename = "EPAGPA076SS#7862,AE2.6.2,Forshay,LakeMethaneProject,6-7-2022ClSO4BrF,NO3,NO2,GPKR.xls") %>%
-  mutate(site_id = 4) %>% # add site_id
-  dup_agg21 # aggregate lab duplicates (optional)
-
 
 
 # Join all of the data objects
