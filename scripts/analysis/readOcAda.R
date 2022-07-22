@@ -41,7 +41,7 @@ get_ada_data21 <- function(path, datasheet) {
     filter(str_starts(sampleid, "\\(")) %>% # retain only rows where sampleid starts with '('
     select(sampleid, labdup, everything(), -date_collected) %>% # reorder columns for the following mutate()
     mutate(across(ends_with("/L"), # create new flag column if analyte not detected
-                  ~ if_else(str_detect(., "ND"), "<", NA_character_),
+                  ~ if_else(str_detect(., "ND"), "ND", ""),
                   .names = "{col}_flag")) %>%
     mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
                   ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),2], .))) %>% # note this is base::ifelse
@@ -60,7 +60,7 @@ get_ada_data21 <- function(path, datasheet) {
     rename(lake_id = sampleid) %>% # change name to match chemCoc
     mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
     mutate(across(ends_with("analyzed"), # determine if holding time exceeded
-                  ~ if_else(.>28, TRUE, FALSE))) %>% # TRUE = hold time violation
+                  ~ if_else(.>28, "H", ""))) %>% # TRUE = hold time violation
     mutate(site_id = "") # create empty column for site_id (id is populated later)
 
   return(maintable)
@@ -77,7 +77,7 @@ conv_units <- function(data, filename) {
   # TOC/DOC
 
   # note that no unit conversions were required for TOC/DOC data
-    f <- data %>%
+    e <- data %>%
       mutate(across(ends_with("/L"), 
                     ~ case_when( # results are identical; no conversion needed. 
                       str_detect(paste(cur_column()), "mg/") ~ .*1, 
@@ -92,13 +92,16 @@ conv_units <- function(data, filename) {
                     ~ "mg_c_l",
                     .names = "{col}_units")) 
   
+  f <- e %>% # merge the flag columns for each analyte; will be blank if no flags exist.
+    unite("toc_flags", toc_flag, toc_qual, sep = " ") %>% 
+    unite("doc_flags", doc_flag, doc_qual, sep = " ")
 
   # select and order columns
-  f <- f %>% 
+  g <- f %>% 
     select(order(colnames(.))) %>% # alphabetize and reorder columns
     select(lake_id, site_id, sample_depth, sample_type, labdup, everything())
   
-  return(f)
+  return(g)
   
 }
 
