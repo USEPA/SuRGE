@@ -11,7 +11,7 @@ localName <- if (grepl("JBEAULIE", userPath)) {
 # Can source scripts that generate data objects here, or run them from masterScript.R
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
 # # data object name: ada.anions
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
 # data object name: d.anions, d anions.aggregated
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
 # # data object name: ada.nutrients

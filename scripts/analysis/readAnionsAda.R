@@ -298,18 +298,21 @@ dup_agg22 <- function(data) {
   
 }
 
-cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/anions_ada_daniels/ADA/2022/")
 
-# apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
-anions146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_anions.xls") 
-# %>%
-#   conv_units(filename = "EPAGPA076_146_190_anions.xls") %>%
+# #  COMMENTING OUT 2022 DATA UNTIL DATA FILE QUESTION HAS BEEN RESOLVED
+# #  SEE EMAIL TO KATIE BUCKLER ON 7/20/2022 
+# cin.ada.path <- paste0(userPath, 
+#                        "data/chemistry/anions_ada_daniels/ADA/2022/")
+# 
+# # apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
+# anions146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_anions.xls") 
+# # %>%
+# #   conv_units(filename = "EPAGPA076_146_190_anions.xls") %>%
+# #   dup_agg22 # aggregate lab duplicates (optional)
+# 
+# anions184166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_166_anions.xls") %>%
+#   conv_units(filename = "EPAGPA076_184_166_anions.xls") %>%
 #   dup_agg22 # aggregate lab duplicates (optional)
-
-anions184166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_166_anions.xls") %>%
-  conv_units(filename = "EPAGPA076_184_166_anions.xls") %>%
-  dup_agg22 # aggregate lab duplicates (optional)
 
 
 ### JOIN DATA OBJECTS------------------------------------------------------------

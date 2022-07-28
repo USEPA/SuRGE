@@ -250,7 +250,7 @@ trophic_i <- if (is.nan(chla_i)) {
 
 
 ```
-Lakes are often classified according to their trophic state.  There are four trophic state categories that reflect nutrient availability and plant growth within a lake.  A eutrophic lake has high nutrients and high algal and/or macrophyte plant growth. An oligotrophic lake has low nutrient concentrations and low plant growth. Mesotrophic lakes fall somewhere in between eutrophic and oligotrophic lakes and hypereutrophic lakes have very high nutrients and plant growth. Lake trophic state is typically determined by a wide variety of natural factors that control nutrient supply, climate, and basin morphometry. A metric commonly used for defining trophic state is the concentration of chlorophyll a (chla), an indicator of algae abundance, in the water column.  Chlorophyll a concentration was `r format(chla_i, digits = 0, nsmall = 0)` ug/L during the sampling, indicating the lake was `r  trophic_i`.
+Lakes are often classified according to their trophic state.  There are four trophic state categories that reflect nutrient availability and plant growth within a lake.  A eutrophic lake has high nutrients and high algal and/or macrophyte plant growth. An oligotrophic lake has low nutrient concentrations and low plant growth. Mesotrophic lakes fall somewhere in between eutrophic and oligotrophic lakes and hypereutrophic lakes have very high nutrients and plant growth. Lake trophic state is typically determined by a wide variety of natural factors that control nutrient supply, climate, and basin morphometry. A metric commonly used for defining trophic state is the concentration of chlorophyll a, an indicator of algae abundance, in the water column.  Chlorophyll a concentration was `r format(chla_i, digits = 0, nsmall = 0)` ug/L during the sampling, indicating the lake was `r  trophic_i`.
   
     
 ```{r trophic_table, echo=FALSE, message=FALSE, warning=FALSE}
@@ -354,9 +354,9 @@ disturbance_i %>%
 
 
 ## 4.  Within-lake Spatial Patterns
-A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the curser over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
+A field sensor was used to measure water temperature, pH, dissolved oxygen, and turbidity near the water surface at all sampling sites.  Data are reported in figures and tables below.  Hover the cursor over any point in the figures to reveal the  siteID corresponding to the adjacent data table.  Alternatively, click on any row in the data table to reveal the location of the sampling site on the map.
 
-Water temperature, DO, pH, and turbidity were highest in the northern portion of the reservoir, near the 153rd Ave road crossing. Elevated water temperature near the road crossing may have stimulated algal metabolism, resulting in higher DO, pH, and turbidity (e.g. algal biomass contributing to turbidity.)
+Water temperature, dissolved oxygen, pH, and turbidity were highest in the northern portion of the reservoir, near the 153rd Ave road crossing. Elevated water temperature near the road crossing may have stimulated algal metabolism, resulting in higher dissolved oxygen, pH, and turbidity (e.g. algal biomass contributing to turbidity.)
 
 ``` {r datatable global options, echo=FALSE}
 
@@ -531,7 +531,7 @@ bscols(widths = c(9,3), leaflet(dodata) %>%
 ## 5. Depth Profiles
 Dissolved oxygen is one of the most important environmental factors affecting aquatic life.  The biological demand for oxygen is often greatest near the sediment where the decomposition of organic matter consumes oxygen through aerobic respiration.  Near the surface of lakes, photosynthesis by phytoplankton produces oxygen, often leading to a general pattern of decreasing oxygen availability with increasing depth.  This pattern can be exacerbated by thermal stratification.  Thermal stratification occurs when lake surface waters are warmed by the sun, causing the water to become less dense and float on top of the deeper, cooler lake water.  Since the deeper layer of water cannot exchange gases with the atmosphere, the dissolved oxygen content of the deep water cannot be replenished from the atmosphere.  As a result, the deep water can become progressively depleted of oxygen as it is consumed by biological activity, sometimes causing dissolved oxygen to become sufficiently scarce to stress oxygen sensitive organisms including some fish and insects.
 
-The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had no evidence of thermal stratification, yet dissolved oxygen was nearly depleted near the lake bottom, indicating strong biological oxygen demand in lake sediment.
+The deepest sampling location in `r lake_name_i` was `r chem_fld_i %>% filter(lake_id == as.numeric(lake_id_i), site_id == index_site) %>% select(site_depth) %>% distinct() %>% pull()` m deep.  In relatively shallow lakes like `r lake_name_i`, wind induced mixing of the water column is often sufficient to prevent thermal stratification.  `r lake_name_i` had no evidence of thermal stratification, yet dissolved oxygen was near the lake bottom was half that at the lake surface, indicating strong biological oxygen demand in lake sediment.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
