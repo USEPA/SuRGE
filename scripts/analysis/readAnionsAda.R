@@ -232,36 +232,36 @@ get_ada_data22 <- function(path, datasheet) {
                   ~ as.numeric(date_analyzed - date_collected),
                   .names = "{col}__date_analyzed")) %>%
     rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
-    filter(str_count(sampleid) == 5)# %>% # retain only rows where sampleid is exactly 5 char long
-  #   select(sampleid, labdup, everything(),
-  #          -date_collected, -date_analyzed) %>% # reorder columns for the following mutate()
-  #   mutate(across(ends_with("/L"), # create new flag column if analyte not detected
-  #                 ~ if_else(str_detect(., "ND"), "<", NA_character_),
-  #                 .names = "{col}_flag")) %>%
-  #   mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
-  #                 ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),2], .))) %>% # note this is base::ifelse
-  #   mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
-  #   mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
-  #   mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
-  #   mutate(across(!ends_with(c("flag", "labdup", "sampleid", "analyzed")), # remove 'BQL', 'RPD' & other junk from data fields
-  #                 ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
-  #   mutate(across(!ends_with(c("flag", "labdup", "sampleid", "analyzed")), # make extracted data numeric
-  #                 ~ as.numeric(.))) %>%
-  #   mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
-  #   mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
-  #   mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
-  #   mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
-  #   mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
-  #   rename(lake_id = sampleid) %>% # enforce project formatting.  See Wiki
-  #   mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
-  #   # For 2022, SITE ID as follows: lakeid 184:3, lakeid 166:6, lakeid 146:4, lakeid 190:8
-  #   mutate(site_id = case_when( # add site_id
-  #     lake_id == "146" ~ "4",
-  #     lake_id == "166" ~ "6", 
-  #     lake_id == "184" ~ "3", 
-  #     lake_id == "190" ~ "8", 
-  #     TRUE ~ "")) # blank if no match, but this will only occur if lake_id is missing/wrong
-
+    filter(str_count(sampleid) == 5) %>% # retain only rows where sampleid is exactly 5 char long
+    select(sampleid, labdup, everything(),
+           -date_collected, -date_analyzed) %>% # reorder columns for the following mutate()
+    mutate(across(ends_with("/L"), # create new flag column if analyte not detected
+                  ~ if_else(str_detect(., "ND"), "<", NA_character_),
+                  .names = "{col}_flag")) %>%
+    mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
+                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),2], .))) %>% # note this is base::ifelse
+    mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
+    mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
+    mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
+    mutate(across(!ends_with(c("flag", "labdup", "sampleid", "analyzed")), # remove 'BQL', 'RPD' & other junk from data fields
+                  ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
+    mutate(across(!ends_with(c("flag", "labdup", "sampleid", "analyzed")), # make extracted data numeric
+                  ~ as.numeric(.))) %>%
+    mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
+    mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
+    mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
+    mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
+    mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
+    rename(lake_id = sampleid) %>% # enforce project formatting.  See Wiki
+    mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
+    # For 2022, SITE ID as follows: lakeid 184:3, lakeid 166:6, lakeid 146:4, lakeid 190:8
+    mutate(site_id = case_when( # add site_id
+      lake_id == "146" ~ "4",
+      lake_id == "166" ~ "6",
+      lake_id == "184" ~ "3",
+      lake_id == "190" ~ "8",
+      TRUE ~ "")) # blank if no match, but this will only occur if lake_id is missing/wrong
+      
   return(maintable)
   
 }
@@ -299,20 +299,18 @@ dup_agg22 <- function(data) {
 }
 
 
-# #  COMMENTING OUT 2022 DATA UNTIL DATA FILE QUESTION HAS BEEN RESOLVED
-# #  SEE EMAIL TO KATIE BUCKLER ON 7/20/2022 
-# cin.ada.path <- paste0(userPath, 
-#                        "data/chemistry/anions_ada_daniels/ADA/2022/")
-# 
-# # apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
-# anions146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_anions.xls") 
-# # %>%
-# #   conv_units(filename = "EPAGPA076_146_190_anions.xls") %>%
-# #   dup_agg22 # aggregate lab duplicates (optional)
-# 
-# anions184166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_166_anions.xls") %>%
-#   conv_units(filename = "EPAGPA076_184_166_anions.xls") %>%
-#   dup_agg22 # aggregate lab duplicates (optional)
+
+cin.ada.path <- paste0(userPath,
+                       "data/chemistry/anions_ada_daniels/ADA/2022/")
+
+# apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
+anions146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_anions.xls") %>%
+  conv_units(filename = "EPAGPA076_146_190_anions.xls") %>%
+  dup_agg22 # aggregate lab duplicates (optional)
+
+anions184166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_166_anions.xls") %>%
+  conv_units(filename = "EPAGPA076_184_166_anions.xls") %>%
+  dup_agg22 # aggregate lab duplicates (optional)
 
 
 ### JOIN DATA OBJECTS------------------------------------------------------------
