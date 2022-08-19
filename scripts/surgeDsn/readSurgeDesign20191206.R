@@ -41,7 +41,7 @@ surgeDsn22_23 %>% print(n=Inf)
 # plus oversample sites
 surgeDsnSampled <- surgeDsn.sf %>%
   # remove site deemed unsampleable
-  filter(!eval_status_code %in% c("LD", "PI", "TR"))
+  filter(!eval_status_code %in% c("LD", "PI", "TR")) 
 
 surgeDsnSampled %>% print(n=Inf)
 
@@ -62,15 +62,15 @@ st_write(obj = surgeDsnSampled,
 
 # Quick look at what remains to be sampled
 surgeDsnSampled %>% 
-  filter(sample_year >= 2022 | is.na(sample_year)) %>% # only those remaining
-  {table(.$lab)} # only 15 for CIN
+  filter(sample_year == 2023 | is.na(sample_year)) %>% # only those remaining
+  {table(.$lab)} # only 3 for CIN, 5 ADA, 3 DOE, 5 NAR
 
 
 # CIN sampled in 2021
 surgeDsnSampled %>% 
   filter(sample_year == 2021, lab == "CIN")
 
-# should be 114 sites total (108 for SuRGE plus 6 extra from R10 2018)
+# should be 113 sites total (108 for SuRGE plus 5 extra from R10 2018)
 addmargins(table(surgeDsnSampled$lab)) # yes
 
 
