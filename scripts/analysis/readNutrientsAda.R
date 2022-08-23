@@ -573,35 +573,63 @@ dup_agg22 <- function(data) {
 
 
 # apply get_ada_data22 and dup_agg22 functions to each excel file
-no2no3nh4.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
+no2no3nh4.146190184166.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
   dup_agg22 %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-tntp.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
+tntp.146190184166.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
   mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
   dup_agg22 %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-op146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_oP.xls") %>%
+op.146190.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA076_146_190_oP.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_oP.xls") %>%
   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
   dup_agg22 %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-op166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_166_oP.xls") %>%
+op.166.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA076_166_oP.xls") %>%
   conv_units(filename = "EPAGPA076_166_oP.xls") %>%
   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
   dup_agg22  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-op184.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_oP.xls") %>%
+op.184.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA076_184_oP.xls") %>%
   conv_units(filename = "EPAGPA076_184_oP.xls") %>%
   mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
   dup_agg22  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
+
+no2no3nh4.136100206.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
+  conv_units(filename = "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
+  mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
+  dup_agg22  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
+
+tntp.136100206.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA081_136_100_206_TN,TP.xls") %>%
+  conv_units(filename = "EPAGPA081_136_100_206_TN,TP.xls") %>%
+  mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
+  dup_agg22  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
+
+op.136100206.22 <- 
+  get_ada_data22(cin.ada.path, "EPAGPA081_136_100_206_oP.xls") %>%
+  conv_units(filename = "EPAGPA081_136_100_206_oP.xls") %>%
+  mutate(sample_filter = "filtered") %>% # filtered or unfiltered, based on file name
+  dup_agg22  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
+
+
 
 
 # JOIN ALL DATA OBJECTS------------------------------------------------------------
@@ -609,8 +637,10 @@ op184.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_oP.xls") %>%
 # Join all of the data objects
 ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
                       ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3),
-                      ada22 = list(no2no3nh4.22, tntp.22, op146190.22, 
-                                   op166.22, op184.22)) %>% 
+                      ada22 = list(no2no3nh4.146190184166.22, tntp.146190184166.22, 
+                                   op.146190.22, op.166.22, op.184.22, 
+                                   no2no3nh4.136100206.22, 
+                                   tntp.136100206.22, op.136100206.22)) %>% 
    map_depth(2, ~select(., -sample_filter)) %>%
    map_depth(1, function(x) reduce(x, left_join)) %>%
    reduce(full_join) %>%

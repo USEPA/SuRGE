@@ -289,25 +289,39 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/oc_ada_masi/ADA/2022/")
 
 # apply get_ada_data22, conv_units, & dup_agg22 to excel files from Ada 2022
-oc146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
+oc.146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
   conv_units(filename = "EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
   dup_agg22 %>% # aggregate lab duplicates (optional)
   flag_agg
 
-oc166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_166_NPOCNPDOC.xlsx") %>%
+oc.166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_166_NPOCNPDOC.xlsx") %>%
   conv_units(filename = "EPAGPA076_166_NPOCNPDOC.xlsx") %>%
   dup_agg22 %>% # aggregate lab duplicates (optional)
   flag_agg
 
-oc184.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_NPOCNPDOC.xlsx") %>%
+oc.184.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_NPOCNPDOC.xlsx") %>%
   conv_units(filename = "EPAGPA076_184_NPOCNPDOC.xlsx") %>%
   dup_agg22 %>% # aggregate lab duplicates (optional)
   flag_agg
 
+oc.136100.22 <- get_ada_data22(cin.ada.path, "EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
+  conv_units(filename = "EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
+  dup_agg22 %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+oc.206.22 <- get_ada_data22(cin.ada.path, "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
+  conv_units(filename = "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
+  dup_agg22 %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+
+
+
 # JOIN DATA OBJECTS-------------------------------------------------------------
 # Join all of the data objects
 ada.oc <- list(jea = list(jea1), key = list(key1), ove = list(ove1), 
-               ada.22 = list(oc146190.22, oc166.22, oc184.22)) %>% 
+               ada.22 = list(oc.146190.22, oc.166.22, oc.184.22, 
+                             oc.136100.22, oc.206.22)) %>% 
   map_depth(1, function(x) reduce(x, left_join)) %>%
   reduce(full_join) %>%
   arrange(lake_id) %>%

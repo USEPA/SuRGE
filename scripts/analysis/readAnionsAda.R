@@ -304,20 +304,28 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/anions_ada_daniels/ADA/2022/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
-anions146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_anions.xls") %>%
+anions.146190.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_146_190_anions.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_anions.xls") %>%
   dup_agg22 # aggregate lab duplicates (optional)
 
-anions184166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_166_anions.xls") %>%
+anions.184166.22 <- get_ada_data22(cin.ada.path, "EPAGPA076_184_166_anions.xls") %>%
   conv_units(filename = "EPAGPA076_184_166_anions.xls") %>%
   dup_agg22 # aggregate lab duplicates (optional)
+
+anions.136100206.22 <- get_ada_data22(cin.ada.path, "EPAGPA081_136_100_206_anions.xls") %>%
+  conv_units(filename = "EPAGPA081_136_100_206_anions.xls") %>%
+  dup_agg22 # aggregate lab duplicates (optional)
+
+
 
 
 ### JOIN DATA OBJECTS------------------------------------------------------------
 
 # Join all of the data objects
 ada.anions <- list(jea = list(jea1), key = list(key1), 
-                   ove = list(ove1)) %>% 
+                   ove = list(ove1), 
+                   ada.22 = list(anions.146190.22, anions.184166.22, 
+                                 anions.136100206.22)) %>% 
   map_depth(1, function(x) reduce(x, left_join)) %>% 
   reduce(full_join) %>% 
   select(-starts_with("no"), -starts_with("op")) %>% # remove no2, no3, and op
