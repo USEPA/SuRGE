@@ -8,12 +8,12 @@
 
 # READ DATA -----------------
 # List of .txt files containing data 
-txtFiles <- list.files(paste0(userPath,"data/NAR"), 
-                       pattern=c("gga|micro"), recursive = TRUE) # per B.3.5.1, files should contain 'gga' or 'micro'
+txtFiles <- list.files(paste0(userPath,"data/ADA"), 
+                       pattern=c("gga|micro"), recursive = TRUE) # per B.3.5.2, files should contain 'gga' or 'micro'
 
 # Directories contain _s, _l, and _b files that don't contain data of interest.
 # Strip these files out.
-txtFiles <- txtFiles[grepl(pattern = "_f", x = txtFiles) & # grab only lgr files with data we need
+txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr files with data we need )should be _f, but allowing -f)
                        !grepl(pattern = "zip", x = txtFiles) & # exclude .zip files
                        !grepl(pattern = "Needs to be organized", x = txtFiles)] # temp file to be deleted
 
@@ -25,7 +25,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
     # I think this will work for all UGGA files.  The colClasses argument skips the final 71 columns of data.
     # this is needed because one analyzer produces empty columns, while the other doesn't.  This will throw
     # warning message for smaller file, but that is ok.
-  gga.i <- read.table(paste("../../../data/NAR/", 
+  gga.i <- read.table(paste("../../../data/ADA/", 
                             txtFiles[i], sep=""),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info
@@ -47,7 +47,7 @@ if (grepl(pattern = "micro", x = txtFiles[i])) {
                             txtFiles[i]),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info
-                      colClasses = c(rep("character", 2), rep("numeric", 31)), 
+                      #colClasses = c(rep("character", 2), rep("numeric", 31)),  # needed to comment out for DOE
                       as.is=TRUE, # Prevent conversion to factor
                       header=TRUE, # Import column names
                       fill=TRUE) %>%
@@ -100,15 +100,15 @@ ggsave("output/figures/co2profile.tiff")
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lakeId == "066") %>%
+plotCh4 <- gga %>% filter(lakeId == "190") %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
-  ggtitle("064")
+  ggtitle("190")
 ggplotly(plotCh4)  
   
-plotCo2 <- gga %>% filter(lakeId == "066") %>%
+plotCo2 <- gga %>% filter(lakeId == "190") %>%
   ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
-  ggtitle("148")
+  ggtitle("190")
 ggplotly(plotCo2)  
 

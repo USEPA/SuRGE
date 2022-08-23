@@ -1,0 +1,58 @@
+---
+title: "Design files for CH4-002, Arkabutla Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Large, 30km2 lake.  Lake design includes 20 sites and 5 sections.  Be sure to use oversample sites (if needed) within each section!
+
+
+**Pilla Notes**  
+•	There are no bridges on the main lake, only on the tributaries flowing into the lake.  
+•	There are no shallow spots that would cause a boat to run aground except near the shore. There are, however, a large area of standing flooded timber on the east end of the lake, which is also typically the most shallow area of the lake. Gas traps should be able to be deployed at any location except very nearshore shallow areas.  
+•	There is no aquatic vegetation in the lake that would inhibit boat operation.  
+•	There are no dredging operations scheduled for this summer.  
+•	The lake level should be around “recreation pool” which is elevation 220.0 ft above sea level. That is the ideal level, but this is a flood control lake, so levels vary depending on recent rainfall and the need to hold back floodwaters downstream.  
+•	The lake is relatively small with a large drainage basin, so a decent rain can make the lake level rise quickly. Conversely, by opening the gates of the outlet structure, we can drop the lake level relatively quickly also. Water levels can be monitored prior sampling if needed (http://arkabutla.lakesonline.com/Level/
+
+
+**Notes from local contact**  
+We have one outlet structure, which is the southern most area circled and labeled as “dam”. Because we are a flood control reservoir, the discharge rates vary depending on recent rainfall amounts, time of year, and current lake levels. Typically, in the summer months once rainfall is less frequent, our discharge rates are much lower (somewhere between 500-1,000 CFS). We are currently 10 feet above our recreation pool, therefore, discharges may be greater than normal until we bring the lake level down. So to answer your question, discharge rates vary, but you can get daily discharge rates by calling our office each day. The more northern area circled and labeled as “dam” is an overflow spillway, and does not have any flow unless lake levels exceed 18 feet above recreation pool. There are 8 boat ramps around the lake, and all should be accessible at the time of year that you will be sampling. I have attached a digital brochure of the lake, so based on the map, you should be able to locate the recreation areas with boat ramps. Areas marked as shallow areas will be approximately 5-10 ft deep at recreation pool, and most boats will have no trouble accessing these areas. There is an area of the lake farther to the south (not shown on the map below) around Coldwater Point, that has flooded, standing timber. It is not inaccessible, but caution may be needed to avoid collision with underwater timbers and obstructions. If you need anything else, don’t hesitate to reach out to me.
+
+
+
+## Index Site
+U-10 should be the deepest site at ~20 feet.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/DOE/CH4-002/002_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/DOE/CH4-002/002_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/DOE/CH4-002/ch4_002Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```
