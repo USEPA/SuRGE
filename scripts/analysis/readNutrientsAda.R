@@ -273,7 +273,8 @@ key2 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,
    conv_units("EPAGPA061SS#7784,AE2.6,Forshay,8-17-21,TN,TP,GPKR.xls") %>%
    mutate(site_id = "7") %>% # add site_id, U-07
    mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
-   dup_agg21 # aggregate lab duplicates (optional)
+   dup_agg21 %>% # aggregate lab duplicates (optional)
+   flag_agg # merge flag columns
 
 key3 <- get_ada_data21(cin.ada.path, "EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
    conv_units("EPAGPA061SS#7784AE2.6Forshay,8-17-21NO3+NO2NH4NO2NO3GPMS.xlsx") %>%
@@ -495,9 +496,9 @@ get_ada_data22 <- function(path, datasheet) {
     rename_with(~paste0(analyte_names), .cols = starts_with("data")) %>% # rename using analyte names
     rename_with(~paste0(analyte_names, "_date_analyzed"), .cols = starts_with("date_a")) %>% # rename using analyte names
     mutate(across(ends_with("analyzed"), # compute holding time of analytes
-                  ~ as.numeric(as.Date(., format = "%m/%d/%Y") - as.Date(date_collected, format = "%m/%d/%Y")))) %>%
-    rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
-    filter(str_count(sampleid) == 5) %>% # retain only rows where sampleid is exactly 5 char long
+                  ~ as.numeric(as.Date(., format = "%m/%d/%Y") - as.Date(date_collected, format = "%m/%d/%Y"))))  %>%
+  rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
+  filter(str_count(sampleid) == 5) %>% # retain only rows where sampleid is exactly 5 char long
     select(sampleid, labdup, everything(), -date_collected) %>% # reorder columns for the following mutate()
     mutate(across(ends_with("/L"), # create new flag column if analyte not detected
                   ~ if_else(str_detect(., "ND"), "ND", ""),
@@ -523,18 +524,19 @@ get_ada_data22 <- function(path, datasheet) {
     # For 2022, SITE ID as follows: lakeid 184:3, lakeid 166:6, lakeid 146:4, lakeid 190:8
     mutate(site_id = case_when( # add site_id
       lake_id == "146" ~ "4",
-      lake_id == "166" ~ "6", 
-      lake_id == "184" ~ "3", 
-      lake_id == "190" ~ "8", 
+      lake_id == "166" ~ "6",
+      lake_id == "184" ~ "3",
+      lake_id == "190" ~ "8",
+      lake_id == "136" ~ "13",
+      lake_id == "100" ~ "11",
+      lake_id == "206" ~ "2",
       TRUE ~ "")) # blank if no match, but this will only occur if lake_id is missing/wrong
 
   return(maintable)
 
 }
 
-# 1. Read in root path for 2022 chemistry data analyzed in ADA.
-cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/nutrients/ADA/2022/")
+
 
 dup_agg22 <- function(data) {
   
@@ -570,10 +572,12 @@ dup_agg22 <- function(data) {
   
 }
   
-
+# Read in root path for 2022 chemistry data analyzed in ADA.
+cin.ada.path <- paste0(userPath, 
+                       "data/chemistry/nutrients/ADA/2022/")
 
 # apply get_ada_data22 and dup_agg22 functions to each excel file
-no2no3nh4.146190184166.22 <- 
+no2no3nh4.146190184166.22 <-
   get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   mutate(sample_filter = "unfiltered") %>% # filtered or unfiltered, based on file name
@@ -637,10 +641,11 @@ op.136100206.22 <-
 # Join all of the data objects
 ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
                       ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3),
-                      ada22 = list(no2no3nh4.146190184166.22, tntp.146190184166.22, 
-                                   op.146190.22, op.166.22, op.184.22, 
-                                   no2no3nh4.136100206.22, 
-                                   tntp.136100206.22, op.136100206.22)) %>% 
+                      ada22 = list(op.146190.22, op.166.22, op.184.22, 
+                                   op.136100206.22,
+                                   no2no3nh4.146190184166.22,
+                                   no2no3nh4.136100206.22, tntp.146190184166.22,
+                                   tntp.136100206.22)) %>% 
    map_depth(2, ~select(., -sample_filter)) %>%
    map_depth(1, function(x) reduce(x, left_join)) %>%
    reduce(full_join) %>%
