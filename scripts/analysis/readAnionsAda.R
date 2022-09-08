@@ -97,6 +97,13 @@ conv_units <- function(data, filename) {
            no2_flag = contains("Nitrite") & ends_with("flag"),
            no3_flag = contains("Nitrate") & ends_with("flag"),
            op_flag = contains("Phos") & ends_with("flag"),
+           f_bql = contains("Fluo") & ends_with("bql"),
+           cl_bql = contains("Chlo") & ends_with("bql"),
+           br_bql = contains("Brom") & ends_with("bql"),
+           so4_bql = contains("Sulf") & ends_with("bql"),
+           no2_bql = contains("Nitrite") & ends_with("bql"),
+           no3_bql = contains("Nitrate") & ends_with("bql"),
+           op_bql = contains("Phos") & ends_with("bql"),
            f_qual = contains("Fluo") & ends_with("analyzed"),
            cl_qual = contains("Chlo") & ends_with("analyzed"), 
            br_qual = contains("Brom") & ends_with("analyzed"),
@@ -161,10 +168,10 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/anions_ada_daniels/ADA/CH4_147_Lake Jean Neustadt/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Jean Neustadt excel file
-jea1 <- get_ada_data21(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4BrFNO3NO2oPGPKR.xls") %>%
-  conv_units(filename = "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4BrFNO3NO2oPGPKR.xls") %>%
+jea1 <- get_ada_data(cin.ada.path, "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4BrFNO3NO2oPGPKR.xls") %>%
   mutate(site_id = "1") %>% # add site_id
-  dup_agg21 # aggregate lab duplicates (optional)
+  conv_units(filename = "EPAGPA054SS7773AE2.6Neustadt7-14-2021ClSO4BrFNO3NO2oPGPKR.xls") %>%
+  dup_agg # aggregate lab duplicates (optional)
 
 
 # create path for Keystone Lake
@@ -173,10 +180,10 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/anions_ada_daniels/ADA/CH4_148_Keystone Lake/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Keystone Lake excel file
-key1 <- get_ada_data21(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4BrFNO3NO2GPKR.xls") %>%
-  conv_units(filename = "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4BrFNO3NO2GPKR.xls") %>%
+key1 <- get_ada_data(cin.ada.path, "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4BrFNO3NO2GPKR.xls") %>%
   mutate(site_id = "7") %>% # add site_id
-  dup_agg21 # aggregate lab duplicates (optional)
+  conv_units(filename = "EPAGPA061SS7784AE2.6Keystone8-17-2021ClSO4BrFNO3NO2GPKR.xls") %>%
+  dup_agg # aggregate lab duplicates (optional)
 
 
 # create path for Lake Overholser
@@ -184,10 +191,10 @@ cin.ada.path <- paste0(userPath,
                        "data/chemistry/anions_ada_daniels/ADA/CH4_167_Lake Overholser/")
 
 # apply get_ada_data21, conv_units, & dup_agg21 to Lake Overholser excel file
-ove1 <- get_ada_data21(cin.ada.path, "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrFNO3NO2.xls") %>%
-  conv_units(filename = "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrFNO3NO2.xls") %>%
+ove1 <- get_ada_data(cin.ada.path, "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrFNO3NO2.xls") %>%
   mutate(site_id = "6") %>% # add site_id
-  dup_agg21 # aggregate lab duplicates (optional)
+  conv_units(filename = "EPAGPA059SS7777AE2.6Overh7-27-2021ClSO4BrFNO3NO2.xls") %>%
+  dup_agg # aggregate lab duplicates (optional)
 
 
 
