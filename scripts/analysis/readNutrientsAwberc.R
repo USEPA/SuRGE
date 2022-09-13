@@ -209,7 +209,6 @@ dup_agg <- function(data) {
 
   # aggregate dups and convert analyte_flags to numeric (for summarize operations)
   
-  ############################PICK UP HERE, FLAGS ARE GIVINE ME A HEADACHE
   e <- data %>%
     mutate(analyte_flag = case_when(
       analyte_flag ==  "nd" ~ 0,
