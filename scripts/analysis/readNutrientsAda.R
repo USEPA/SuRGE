@@ -1,15 +1,11 @@
 # NUTRIENTS ANALYZED IN ADA GENERAL PARAMETERS LABORATORY
 
-# FIRST SECTION READS IN NUTRIENT DATA FROM SAMPLES COLLECTED BY ADA IN 2021---
-# AND ANALYZED IN ADA LABORATORY.  FORMAT OF 2021 DATA REPORTS ARE UNIQUE TO
-# 2021
-
-# Function to extract data from Ada excel files
+# FUNCTIONS TO EXTRACT DATA FROM ADA EXCEL FILES--------------------------------
 
 get_ada_data <- function(path, datasheet) { 
- 
-   # for 2020 data (and 2022 onward), as field_sample_id is in different format
-   
+  
+  # for 2020 data (and 2022 onward), as field_sample_id is in different format
+  
   # toptable contains analyte names and MDL values
   
   toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
@@ -29,11 +25,11 @@ get_ada_data <- function(path, datasheet) {
     column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames 
     mutate(MDL = str_replace(MDL, "\\**", "")) %>% # remove asterisks from MDL 
     mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
-
+  
   analyte_names <- row.names(toptable) # pass analyte names to maintable, below
-
-   # maintable_1: combine toptable with results, make uppercase, flag lab dups
-
+  
+  # maintable_1: combine toptable with results, make uppercase, flag lab dups
+  
   maintable_1 <- read_excel(paste0(path, datasheet), # get the results
                             sheet = "Data", 
                             range = "A14:N500") %>% # up to 492 rows
@@ -42,83 +38,79 @@ get_ada_data <- function(path, datasheet) {
     mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase 
     mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), 
                             "LAB DUP", "")) # flag the dups
-   
-   # maintable_2: select columns, rename remaining columns, 
-    # calculate hold times
   
-   maintable_2 <- maintable_1 %>%
-     select(field_sample_id, labdup, starts_with("dat")) %>% # 
-     rename_with(~paste0(analyte_names), 
-                 .cols = starts_with("data")) %>% # rename w/ analyte names
-     rename_with(~paste0(analyte_names, "_date_analyzed"), 
-                 .cols = starts_with("date_a")) %>% # rename w/ analyte names
-     mutate(across(ends_with("analyzed"), # select the latest date in range
-                   ~ word(., -1) %>% 
-                     as.Date(., tryFormats = c("%m/%d/%Y", "%Y-%m-%d")))) %>%
-     mutate(across(ends_with("analyzed"), # compute holding time
-                   ~ as.numeric(as.Date(., tryFormats = c("%m/%d/%Y", 
-                                                          "%Y-%m-%d")) - 
-                                  as.Date(date_collected, 
-                                          format = "%m/%d/%Y")))) 
+  # maintable_2: select columns, rename remaining columns, 
+  # calculate hold times
   
-
-   # maintable_3: remove extra rows, create ND flag and apply MDL value, 
-   # create L (i.e., BQL) flag
-   temp2 <<- maintable_2
-   maintable_3 <- maintable_2 %>%
-     mutate(field_sample_id = # clean-up sampleid field
-              str_remove_all(field_sample_id, "\\(|\\)|\\s")) %>% 
-     filter(str_starts(field_sample_id, 
-                       "TN\\d|DN\\d")|  # retain if ID starts with TN or DN, 
-            str_count(field_sample_id) == 5) %>% # and retain if length = 5
-     select(field_sample_id, labdup, everything(), 
-            -date_collected) %>% # reorder columns to mutate()
-     mutate(across(ends_with("/L"), # create new flag if analyte not detected
-                   ~ if_else(str_detect(., "ND"), "ND", ""),
-                   .names = "{col}_flag")) %>%
-     mutate(across(ends_with("/L"), # replace ND with MDL value from toptable
-                   ~ ifelse(str_detect(., "ND"), 
-                            toptable[paste(cur_column()),2], .))) %>% 
-     mutate(across(ends_with("/L"), # create new flag column for qual limit
-                   ~ if_else(str_detect(., "BQL"), "L", ""),
-                   .names = "{col}_bql")) 
-   
-   # maintable_4: remove extra characters, make numeric, parse sample IDs,  
-   # format lake IDs, determine if hold time violated
-
-   maintable_4 <- maintable_3 %>%
-     mutate(field_sample_id = str_remove_all(
-       field_sample_id, "TN|or|DN")) %>% # clean-up data
-     mutate(across(!ends_with(c("flag", "analyzed", "bql", 
-                                "labdup", "field_sample_id")), 
-                   ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>% 
-     mutate(across(!ends_with(c("flag", "analyzed","bql", # clean-up data
-                                "labdup", "field_sample_id")), 
-                   ~ as.numeric(.))) %>% # make extracted data numeric
-     mutate(sample_depth = str_sub( # get sample depth 
-       str_remove_all(field_sample_id, "\\d"), 1, 1)) %>% 
-     mutate(sample_type = str_sub( # get sample type 
-       str_remove_all(field_sample_id, "\\d"), 2, 2)) %>% 
-     mutate(lake_id = as.character( # match chemCoc format
-       str_remove_all(field_sample_id, "\\D"))) %>% 
-     mutate(sample_depth = str_replace_all(sample_depth, 
-                                           c("D" = "deep", 
-                                             "S" = "shallow", 
-                                             "N" = "blank"))) %>%
-     mutate(sample_type = str_replace_all(sample_type, 
-                                          c("B" = "blank", 
-                                            "U" =  "unknown", 
-                                            "D" =  "duplicate"))) %>%
-     mutate(across(ends_with("analyzed"), # replace if hold time violated
-                   ~ ifelse(.>28, "H", ""))) %>%
-     select(-field_sample_id) # no longer needed
-   
-  temp1 <<- maintable_1
-   temp2 <<- maintable_2
-   temp3 <<- maintable_3
+  maintable_2 <- maintable_1 %>%
+    select(field_sample_id, labdup, starts_with("dat")) %>% # 
+    rename_with(~paste0(analyte_names), 
+                .cols = starts_with("data")) %>% # rename w/ analyte names
+    rename_with(~paste0(analyte_names, "_date_analyzed"), 
+                .cols = starts_with("date_a")) %>% # rename w/ analyte names
+    mutate(across(ends_with("analyzed"), # select the latest date in range
+                  ~ word(., -1) %>% 
+                    as.Date(., tryFormats = c("%m/%d/%Y", "%Y-%m-%d")))) %>%
+    mutate(across(ends_with("analyzed"), # compute holding time
+                  ~ as.numeric(as.Date(., tryFormats = c("%m/%d/%Y", 
+                                                         "%Y-%m-%d")) - 
+                                 as.Date(date_collected, 
+                                         format = "%m/%d/%Y")))) 
+  
+  
+  # maintable_3: remove extra rows, create ND flag and apply MDL value, 
+  # create L (i.e., BQL) flag
+  
+  maintable_3 <- maintable_2 %>%
+    mutate(field_sample_id = # clean-up sampleid field
+             str_remove_all(field_sample_id, "\\(|\\)|\\s")) %>% 
+    filter(str_starts(field_sample_id, 
+                      "TN\\d|DN\\d")|  # retain if ID starts with TN or DN, 
+             str_count(field_sample_id) == 5) %>% # and retain if length = 5
+    select(field_sample_id, labdup, everything(), 
+           -date_collected) %>% # reorder columns to mutate()
+    mutate(across(ends_with("/L"), # create new flag if analyte not detected
+                  ~ if_else(str_detect(., "ND"), "ND", ""),
+                  .names = "{col}_flag")) %>%
+    mutate(across(ends_with("/L"), # replace ND with MDL value from toptable
+                  ~ ifelse(str_detect(., "ND"), 
+                           toptable[paste(cur_column()),2], .))) %>% 
+    mutate(across(ends_with("/L"), # create new flag column for qual limit
+                  ~ if_else(str_detect(., "BQL"), "L", ""),
+                  .names = "{col}_bql")) 
+  
+  # maintable_4: remove extra characters, make numeric, parse sample IDs,  
+  # format lake IDs, determine if hold time violated
+  
+  maintable_4 <- maintable_3 %>%
+    mutate(field_sample_id = str_remove_all(
+      field_sample_id, "TN|or|DN")) %>% # clean-up data
+    mutate(across(!ends_with(c("flag", "analyzed", "bql", 
+                               "labdup", "field_sample_id")), 
+                  ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>% 
+    mutate(across(!ends_with(c("flag", "analyzed","bql", # clean-up data
+                               "labdup", "field_sample_id")), 
+                  ~ as.numeric(.))) %>% # make extracted data numeric
+    mutate(sample_depth = str_sub( # get sample depth 
+      str_remove_all(field_sample_id, "\\d"), 1, 1)) %>% 
+    mutate(sample_type = str_sub( # get sample type 
+      str_remove_all(field_sample_id, "\\d"), 2, 2)) %>% 
+    mutate(lake_id = parse_number(field_sample_id) %>% # get lake id
+             as.character())  %>% # match chemCoc format
+    mutate(sample_depth = str_replace_all(sample_depth, 
+                                          c("D" = "deep", 
+                                            "S" = "shallow", 
+                                            "N" = "blank"))) %>%
+    mutate(sample_type = str_replace_all(sample_type, 
+                                         c("B" = "blank", 
+                                           "U" =  "unknown", 
+                                           "D" =  "duplicate"))) %>%
+    mutate(across(ends_with("analyzed"), # check if hold time violated
+                  ~ ifelse(.>28, "H", ""))) %>%
+    select(-field_sample_id) # no longer needed
   
   return(maintable_4)
-
+  
 }
 
 # Function to convert units, rename columns, and add units columns
@@ -229,10 +221,10 @@ conv_units <- function(data, filename) {
 # Function to aggregate the lab duplicates
 
 dup_agg <- function(data) {
-   
-   # first, convert all _flag columns to a numeric for summarize operations;
-   # Must be performed in case lab dup has a different flag than the sample.
-   
+  
+  # first, convert all _flag columns to a numeric for summarize operations;
+  # Must be performed in case lab dup has a different flag than the sample.
+  
   data <- data %>% 
     mutate(across(ends_with(c("flag", "bql", "qual")), 
                   ~ ifelse(str_detect(., "ND|L|H"), 1, 0))) 
@@ -251,26 +243,27 @@ dup_agg <- function(data) {
     summarize(across(!ends_with(c("site_id","labdup", "type", "depth", 
                                   "filter", "units")), 
                      ~ mean(., na.rm = TRUE))) 
-
+  
   # rejoin data 
   
-   e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% 
-     mutate(across(4:last_col(), # convert NaN to NA
-                   ~ ifelse(is.nan(.), NA, .))) %>% # must use 'ifelse' here 
-     select(order(colnames(.))) %>% # alphabetize column names
-     select(lake_id, site_id, sample_depth, sample_type, 
-            sample_filter, labdup, everything()) %>% # put 'sampleid' first
-     mutate(across(ends_with("flag"), # convert all _flag values back to text
-                   ~ if_else(.<1, "", "ND"))) %>% 
-     mutate(across(ends_with("bql"), # convert all _flag values back to text
-                   ~ if_else(.<1, "", "L"))) %>% 
-     mutate(across(ends_with("qual"), # convert all _flag values back to text
-                   ~ if_else(.<1, "", "H"))) %>% 
-     filter(labdup != "LAB DUP") %>% # remove the lab dup
-     select(-labdup) # remove labdup column. JB 12/7/2021
-   
-   return(e)
-   
+  e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% 
+    mutate(across(4:last_col(), # convert NaN to NA
+                  ~ ifelse(is.nan(.), NA, .))) %>% # must use 'ifelse' here 
+    select(order(colnames(.))) %>% # alphabetize column names
+    select(lake_id, site_id, sample_depth, sample_type, 
+           sample_filter, labdup, everything()) %>% # put 'sampleid' first
+    mutate(across(ends_with("flag"), # convert all _flag values back to text
+                  ~ if_else(.<1, "", "ND"))) %>% 
+    mutate(across(ends_with("bql"), # convert all _flag values back to text
+                  ~ if_else(.<1, "", "L"))) %>% 
+    mutate(across(ends_with("qual"), # convert all _flag values back to text
+                  ~ if_else(.<1, "", "H"))) %>% 
+    filter(labdup != "LAB DUP") %>% # remove the lab dup
+    select(-labdup) %>% # remove labdup column. JB 12/7/2021
+    ungroup()
+  
+  return(e)
+  
 }
 
 # Function to aggregate all flags into a single column
@@ -305,18 +298,24 @@ flag_agg <- function(data) { # merge the flag columns for each analyte
     f <- f %>%
       unite("op_flags", op_flag, op_bql, op_qual, sep = " ") 
   
+  # If a sample and lab dup both have a flag (ND or L), retain only the L flag
+  f <- f %>% 
+    mutate(across(ends_with("flags"),
+                  ~ if_else(str_detect(., "ND L"), "L", .)))
   
   return(f)
   
 }
 
+# 2021 NUTRIENT SAMPLES---------------------------------------------------------
+
+# ANALYZED IN ADA LABORATORY.  FORMAT OF 2021 DATA REPORTS ARE UNIQUE TO
+# 2021, but the functions above can be used across all years.
 
 # create path for Lake Jean Neustadt
 
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_147_Lake Jean Neustadt/")
-
-# apply get_ada_data and dup_agg functions to Lake Jean Neustadt
 
 jea1 <- get_ada_data(cin.ada.path, 
                      "EPAGPA054,SS#7773,AE2.6,Forshay,7-14-21,oP,GPKR.xls") %>%
@@ -344,13 +343,10 @@ jea3 <- get_ada_data(cin.ada.path,
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns
 
-
 # create path for Keystone Lake
 
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_148_Keystone Lake/")
-
-# apply get_ada_data and dup_agg functions to each spreadsheet for Keystone Lake 
 
 key1 <- get_ada_data(cin.ada.path, 
                      "EPAGPA061,SS#7784,AE2.6,Forshay,8-17-21,oP,GPKR.xls") %>%
@@ -381,8 +377,6 @@ key3 <- get_ada_data(cin.ada.path,
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/CH4_167_Lake Overholser/")
 
-# apply get_ada_data and dup_agg functions for Lake Overholser
-
 ove1 <- get_ada_data(cin.ada.path, 
                      "EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
   conv_units("EPAGPA059,SS#7777,AE2.6,Forshay,7-27-21,oP,GPKR.xls") %>%
@@ -411,27 +405,29 @@ ove3 <- get_ada_data(cin.ada.path,
   flag_agg # merge flag columns
 
 # 2020 NUTRIENT SAMPLES-----------------------------------------------------------
+
 # Nutrient samples for the 2020 SuRGE field season were held in Cincinnati,
 # then shipped to ADA in May 2021 for analysis.  The reports are formatted
-# differently than the 2021 data reports.  We anticipate that the 2020 format
-# will be used in 2022 and 2023.  Here we modify the functions defined above
-# to accomodate format for 2020, 2022, and 2023.
-
+# differently than the 2021 data reports, but we have added an additional 
+# function below to handle this data format. 
 
 # 1. Read in root path for 2020 chemistry data analyzed in ADA.
+
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/2020cinSentToAda/")
 
 # 2. Read in files containing unique sample IDs.
+
 tot.id <- read_excel(paste0(cin.ada.path, "totalNutrientSampleIds.xlsx"))
 diss.id <- read_excel(paste0(cin.ada.path, "dissolvedNutrientSampleIds.xlsx"))
 id <- rbind(tot.id, diss.id) %>% select(lake_id, site_id) %>% distinct() %>%
   mutate(lake_id = as.numeric(lake_id) %>% as.character(),
          # extract number from site_id, convert to char to match other data
-         site_id = as.character(gsub(".*?([0-9]+).*", "\\1", site_id)))
+         site_id = as.character(abs(parse_number(site_id))))
 
 # 3. Read data
-# op
+
+# OP
 
 lmp1 <- get_ada_data(cin.ada.path, 
                      "EPAGPA053SS#7759AE2.6ForshayLakeMethaneProject7-6-20oPRev1GPKR.xls") %>%
@@ -460,13 +456,10 @@ find_t_rows <- function(path, datasheet) {
     dplyr::transmute(sample_filter = str_sub(
       field_sample_id, 1, 1)) %>% # keep only first letter 
     mutate(sample_filter = str_replace_all(
-      sample_filter, c("D" =  "filtered", "T" = "nonfiltered")))
+      sample_filter, c("D" =  "filtered", "T" = "unfiltered")))
 
   return(rows)
     
-  
-  find_t_rows(cin.ada.path, 
-              "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls")
 }
 
 lmp2 <- get_ada_data(cin.ada.path, 
@@ -477,11 +470,12 @@ lmp2 <- get_ada_data(cin.ada.path,
   mutate(find_t_rows( #  apply function to get sample_filter
     cin.ada.path, 
     "EPAGPA053SS#7759,AE2.6,Forshay,LakeMethaneProject,7-6-20,TNTP,GPKR.xls")) %>% 
-  filter(sample_filter == "nonfiltered") %>% # keep only nonfiltered TN TP samples
+  filter(sample_filter == "unfiltered") %>% # keep only nonfiltered TN TP samples
   dup_agg %>% # aggregate the lab duplicates (optional)
   flag_agg # merge flag columns
 
 # NO2, NO3, NO2+NO3, NH4
+
 lmp3 <- get_ada_data(cin.ada.path, 
                      "EPAGPA053SS#7759ForshayLakeMethaneProject7-6-2020NO3+NO2NH4GPMS.xls") %>%
   conv_units(filename = 
@@ -497,106 +491,10 @@ lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id)))
 
 
 
-# 2022 NUTRIENT SAMPLES-----------------------------------------------------------
+# 2022 NUTRIENT SAMPLES---------------------------------------------------------
 
-get_ada_data22 <- function(path, datasheet) { 
-  
-  # toptable contains analyte names and MDL values
-  toptable <- read_excel(paste0(path, datasheet), # get MDL & analyte names
-                         sheet = "Data", range = "C8:N50", col_names = FALSE) %>% # up to 492 rows
-    row_to_names(row_number = 1, remove_row = FALSE) %>% # column names = first row of data
-    clean_names(case = "upper_camel") %>% # keep case consistent
-    filter(Analytes %in% c("Analytes", "Unit", "MDL"), ignore.case=TRUE) %>% # # remove unneeded rows
-    pivot_longer(cols = -Analytes, names_to = "variable")  %>% # transpose the tibble
-    pivot_wider(names_from = Analytes, values_from = value) %>% # transpose the tibble
-    select(-variable) %>% # no longer needed
-    janitor::remove_empty("rows") %>% # remove empty rows
-    filter(str_detect(Analytes, "nalytes") == FALSE) %>% # if necessary, removes superfluous row
-    mutate(Analytes = str_c(Analytes, Unit)) %>% # concatenate analyte and unit, so unit is retained
-    column_to_rownames(var = "Analytes") %>% # simpler to work w/ rownames in next chunk of code
-    mutate(MDL = str_replace(MDL, "\\**", "")) %>% # remove asterisks from MDL value
-    mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
-  
-  analyte_names <- row.names(toptable) # pass analyte names to maintable, below
-
-
-  #'maintable' combines 'toptable' with results
-  maintable <- read_excel(paste0(path, datasheet), # get the results
-                          sheet = "Data", range = "A14:N500", na = "-") %>% # up to 492 rows
-    janitor::remove_empty("rows") %>% # remove empty rows
-    janitor::clean_names() %>%
-    mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase since Ada isn't consistent
-    mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), "LAB DUP", "")) %>% # flag the dups
-    select(field_sample_id, labdup, starts_with("dat")) %>% # remove unneeded columns
-    rename_with(~paste0(analyte_names), .cols = starts_with("data")) %>% # rename using analyte names
-    rename_with(~paste0(analyte_names, "_date_analyzed"), .cols = starts_with("date_a")) %>% # rename using analyte names
-    mutate(across(ends_with("analyzed"), # compute holding time of analytes
-                  ~ as.numeric(as.Date(., format = "%m/%d/%Y") - as.Date(date_collected, format = "%m/%d/%Y"))))  %>%
-  rename(sampleid = field_sample_id) %>% # temporary rename; changes later during text parsing
-  filter(str_count(sampleid) == 5) %>% # retain only rows where sampleid is exactly 5 char long
-    select(sampleid, labdup, everything(), -date_collected) %>% # reorder columns for the following mutate()
-    mutate(across(ends_with("/L"), # create new flag column if analyte not detected
-                  ~ if_else(str_detect(., "ND"), "ND", ""),
-                  .names = "{col}_flag")) %>%
-    mutate(across(ends_with("/L"), # replace ND with the MDL value from toptable
-                  ~ ifelse(str_detect(., "ND"), toptable[paste(cur_column()),2], .))) %>% # note this is base::ifelse
-    mutate(sampleid = str_replace_all(sampleid, "(TN or DN)","")) %>% # clean-up sampleid field
-    mutate(sampleid = str_replace_all(sampleid, "\\(\\)","")) %>% # clean-up sampleid field
-    mutate(sampleid = str_replace_all(sampleid, " ", "")) %>% # remove any blank spaces inside string
-    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # remove 'BQL', 'RPD' & other junk from data fields
-                  ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
-    mutate(across(!ends_with(c("flag", "labdup", "sampleid")), # make extracted data numeric
-                  ~ as.numeric(.))) %>%
-    mutate(sample_depth = str_sub(sampleid, 4, 4)) %>% # get sample depth from sampleid
-    mutate(sample_type = str_sub(sampleid, 5, 5)) %>% # get sample type from sampleid
-    mutate(sampleid = str_sub(sampleid, 1, 3)) %>% # make sampleid 3-digit numeric lake id only
-    mutate(sample_depth = str_replace_all(sample_depth, c("D" = "deep", "S" = "shallow", "N" = "blank"))) %>%
-    mutate(sample_type = str_replace_all(sample_type, c("B" = "blank", "U" =  "unknown", "D" =  "duplicate"))) %>%
-    rename(lake_id = sampleid) %>% # change name to match chemCoc
-    mutate(lake_id = as.character(as.numeric(lake_id))) %>% # consistent format for lake_id
-    mutate(across(ends_with("analyzed"), # replace no. days w/ "H" if holding time violated
-                  ~ ifelse(.>28, "H", ""))) %>%
-    # For 2022, SITE ID as follows: lakeid 184:3, lakeid 166:6, lakeid 146:4, lakeid 190:8
-
-  return(maintable)
-
-}
-
-
-
-dup_agg22 <- function(data) {
-  
-  # Note: identical to dup_agg21 function (as of 19 Jul 2022)
-  
-  # first, convert all _flag columns to a numeric for summarize operations;
-  # Must be performed in the event that a lab dup has a different flag than the sample.
-  
-  data <- data %>% 
-    mutate(across(ends_with("flag"), 
-                  ~ ifelse(str_detect(., "ND"), 1, 0))) 
-  
-  # carve out the _flag and _units columns so they can be re-joined later
-  c <- data %>% select(ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")))
-  
-  d <- data %>%
-    dplyr::group_by(lake_id, sample_depth, sample_type) %>%
-    # '!' to exclude columns we don't want to aggregate
-    summarize(across(!ends_with(c("id","labdup", "type", "depth", "filter", "units", "qual")), 
-                     ~ mean(., na.rm = TRUE))) 
-  
-  e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% # rejoin the data
-    mutate(across(3:last_col(), # convert NaN to NA
-                  ~ ifelse(is.nan(.), NA, .))) %>% # must use ifelse here (not if_else)
-    select(order(colnames(.))) %>% # alphabetize column names
-    select(lake_id, site_id, sample_depth, sample_type, sample_filter, labdup, everything()) %>% # put 'sampleid' first
-    mutate(across(ends_with("flag"), # convert all _flag values back to text
-                  ~ if_else(.<1, "", "ND"))) %>% 
-    filter(labdup != "LAB DUP") %>% # remove the lab dup
-    select(-labdup) # remove labdup column. 
-  
-  return(e)
-  
-}
+# The 2022 Excel files contain multiple lakes in each file. site_id can be 
+# assigned using the following function:
 
 site_id_22 <- function(data) { 
   
@@ -609,74 +507,74 @@ site_id_22 <- function(data) {
     lake_id == "136" ~ "13",
     lake_id == "100" ~ "11",
     lake_id == "206" ~ "2",
-    TRUE ~ "")) # blank if no match, but this will only occur if lake_id is missing/wrong
+    TRUE ~ "")) # blank if no match; this will only occur if lake_id is missing
   
   return(data)
   
 }
 
 # Read in root path for 2022 chemistry data analyzed in ADA.
+
 cin.ada.path <- paste0(userPath, 
                        "data/chemistry/nutrients/ADA/2022/")
 
-# apply get_ada_data22 and dup_agg22 functions to each excel file
-no2no3nh4.146190184166.22 <-
-  get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
+no2no3nh4_2022_146_190_184_166 <-
+  get_ada_data(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   site_id_22 %>% # add site_id for 2022 samples
   mutate(sample_filter = "unfiltered") %>% # no2 no3 nh4 is filtered
-  dup_agg22 %>% # aggregate lab duplicates (optional)
+  dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-tntp.146190184166.22 <- 
-  get_ada_data22(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
+tntp_2022_146_190_184_166 <- 
+  get_ada_data(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
   site_id_22 %>% # add site_id for 2022 samples
   mutate(sample_filter = "unfiltered") %>% # tn tp is unfiltered
-  dup_agg22 %>% # aggregate lab duplicates (optional)
+  dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-op.146190.22 <- 
-  get_ada_data22(cin.ada.path, "EPAGPA076_146_190_oP.xls") %>%
+op_2022_146_190 <- 
+  get_ada_data(cin.ada.path, "EPAGPA076_146_190_oP.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_oP.xls") %>%
   site_id_22 %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
-  dup_agg22 %>% # aggregate lab duplicates (optional)
+  dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-op.166.22 <- 
-  get_ada_data22(cin.ada.path, "EPAGPA076_166_oP.xls") %>%
+op_2022_166 <- 
+  get_ada_data(cin.ada.path, "EPAGPA076_166_oP.xls") %>%
   conv_units(filename = "EPAGPA076_166_oP.xls") %>%
   site_id_22 %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
-  dup_agg22  %>% # aggregate lab duplicates (optional)
+  dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-op.184.22 <- 
-  get_ada_data22(cin.ada.path, "EPAGPA076_184_oP.xls") %>%
+op_2022_184 <- 
+  get_ada_data(cin.ada.path, "EPAGPA076_184_oP.xls") %>%
   conv_units(filename = "EPAGPA076_184_oP.xls") %>%
   site_id_22 %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
-  dup_agg22  %>% # aggregate lab duplicates (optional)
+  dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-no2no3nh4.136100206.22 <- 
-  get_ada_data22(cin.ada.path, "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
+no2no3nh4_2022_136_100_206 <- 
+  get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
   site_id_22 %>% # add site_id for 2022 samples
   mutate(sample_filter = "unfiltered") %>% # # no2 no3 nh4 is filtered
-  dup_agg22  %>% # aggregate lab duplicates (optional)
+  dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-tntp.136100206.22 <- 
-  get_ada_data22(cin.ada.path, "EPAGPA081_136_100_206_TN,TP.xls") %>%
+tntp_2022_136_100_206 <- 
+  get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_TN,TP.xls") %>%
   conv_units(filename = "EPAGPA081_136_100_206_TN,TP.xls") %>%
   site_id_22 %>% # add site_id for 2022 samples
   mutate(sample_filter = "unfiltered") %>% # tn tp is unfiltered
-  dup_agg22  %>% # aggregate lab duplicates (optional)
+  dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
-op.136100206.22 <- 
+op_2022_136_100_206 <- 
   get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_oP.xls") %>%
   conv_units(filename = "EPAGPA081_136_100_206_oP.xls") %>%
   site_id_22 %>% # add site_id for 2022 samples
@@ -690,24 +588,30 @@ op.136100206.22 <-
 # JOIN ALL DATA OBJECTS------------------------------------------------------------
 
 # Join all of the data objects
-ada.nutrients <- list(jea = list(jea1, jea2, jea3), key = list(key1, key2, key3), 
-                      ove = list(ove1, ove2, ove3), lmp = list(lmp1, lmp2, lmp3),
-                      ada22 = list(op.146190.22, op.166.22, op.184.22, 
-                                   op.136100206.22,
-                                   no2no3nh4.146190184166.22,
-                                   no2no3nh4.136100206.22, tntp.146190184166.22,
-                                   tntp.136100206.22)) %>% 
-   map_depth(2, ~select(., -sample_filter)) %>%
-   map_depth(1, function(x) reduce(x, left_join)) %>%
-   reduce(full_join) %>%
-   mutate(site_id = as.numeric(site_id)) %>%
-   arrange(lake_id) %>%
-   ungroup()
-   
+ada.nutrients <- list(jea = list(jea1, jea2, jea3), 
+                      key = list(key1, key2, key3), 
+                      ove = list(ove1, ove2, ove3), 
+                      lmp = list(lmp1, lmp2, lmp3),
+                      ada22_1 = list(no2no3nh4_2022_146_190_184_166, 
+                                     tntp_2022_146_190_184_166, 
+                                     op_2022_146_190, 
+                                     op_2022_184, 
+                                     op_2022_166), 
+                      ada22_2 = list(
+                        op_2022_136_100_206, 
+                        tntp_2022_136_100_206, 
+                        no2no3nh4_2022_136_100_206)) %>% 
+  map_depth(2, ~select(., -sample_filter)) %>%
+  map_depth(1, function(x) reduce(x, left_join)) %>%
+  reduce(full_join) %>%
+  mutate(site_id = as.numeric(site_id)) %>%
+  arrange(lake_id) 
+
 
 
 
 # INSPECT FINAL MERGED DATA OBJECT-------------------------------------------
+
 # Inspect final object for merge errors
 # any duplicate rows for a given set of unique identifiers?  No, good!
 ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
@@ -717,15 +621,23 @@ ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
 # 74 unique combinations of lake_id, site_id, sample_depth, and sample_type
 # in original data.
 list(jea1, jea2, jea3, key1, key2, key3, 
-     ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
-   map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
-   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
-   distinct() %>% # condense to unique observations
-   nrow(.) # 74 unique combinations
+     ove1, ove2, ove3, lmp1, lmp2, lmp3, 
+     op_2022_146_190, 
+     op_2022_166, 
+     op_2022_184, 
+     op_2022_136_100_206, 
+     tntp_2022_146_190_184_166,
+     tntp_2022_136_100_206,
+     no2no3nh4_2022_146_190_184_166,
+     no2no3nh4_2022_136_100_206) %>%
+  map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
+  map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
+  distinct() %>% # condense to unique observations
+  nrow(.) # 74 unique combinations
 
 # 74 unique combinations in merged df.  Everything looks good
 ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
-   distinct() %>% {nrow(.)}
+  distinct() %>% {nrow(.)}
 
 # # Some unneeded code below to help resolved discrepancy between original and
 # # merged data.
