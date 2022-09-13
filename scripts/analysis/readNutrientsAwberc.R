@@ -61,13 +61,10 @@ coc.vector <- coc.list %>%
 
 # SCRIPT TO READ IN WATER CHEM------------------
 
-
-# 1/24/2022 see line 280 for pending database fixes to 16 and 82. 
-
-# data from the following lakes has been reviewed as of 1/7/2022:
+# data from the following lakes has been reviewed as of 9/6/2022:
 # 233, 237, 236, 144, 155, 275, 240, 069_lacustrine, 069_transitional, 070_lacustrine,
 # 070_riverine, 288, 316, 79, 298, 75, 326, 327, 70_transitional, 231, 78, 232,
-# 68, 69_riverine
+# 68, 69_riverine, 16, 82
 
 
 # function reads in data, filters data, and creates all new columns
@@ -76,7 +73,7 @@ get_awberc_data <- function(path, data, sheet) {
   d <- read_excel(paste0(path, data), #
                   sheet = sheet, skip = 1, guess_max = 10000) %>%
   # d <- read_excel(paste0(cin.awberc.path,
-  #                        "2021_ESF-EFWS_NutrientData_Updated11212021_AKB.xlsx"), #
+  #                        "2021_ESF-EFWS_NutrientData_Updated01272022_AKB.xlsx"), #
   #                 sheet = "2021 Data", skip = 1) %>%
     janitor::clean_names() %>% # clean up names for rename and select, below
     janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
@@ -91,7 +88,7 @@ get_awberc_data <- function(path, data, sheet) {
            sample_type = type, 
            rep = rep_number) %>%
     mutate(nutrients_qual = if_else( # determine if holding time exceeded
-      (as.Date(ddate) - as.Date(rdate)) > 28, TRUE, FALSE)) %>% # TRUE = hold time violation
+      (as.Date(ddate) - as.Date(rdate)) > 28, "H", NA_character_)) %>% # TRUE = hold time violation
     mutate(finalConc = ifelse( # correct TP and TN are in tp_tn
       analyte %in% c("TP", "TN"),
       tp_tn,
@@ -155,14 +152,14 @@ get_awberc_data <- function(path, data, sheet) {
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
     mutate(analyte_flag = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 6 ~ "<", 
-      analyte == "no2" & finalConc < 6 ~ "<",
-      analyte == "no2_3" & finalConc < 6 ~ "<",
-      analyte == "op" & finalConc < 3 ~ "<",
-      analyte == "tn" & finalConc < 25 ~ "<",
-      analyte == "tp" & finalConc < 5 ~ "<",
+      analyte == "nh4" & finalConc < 6 ~ "nd", 
+      analyte == "no2" & finalConc < 6 ~ "nd",
+      analyte == "no2_3" & finalConc < 6 ~ "nd",
+      analyte == "op" & finalConc < 3 ~ "nd",
+      analyte == "tn" & finalConc < 25 ~ "nd",
+      analyte == "tp" & finalConc < 5 ~ "nd",
       TRUE ~ "")) %>%
-    mutate(finalConc = case_when( # create the analyte_flag column
+    mutate(finalConc = case_when( # create the finalConc column
       analyte == "nh4" & finalConc < 6 ~ 6, 
       analyte == "no2" & finalConc < 6 ~ 6,
       analyte == "no2_3" & finalConc < 6 ~ 6,
@@ -170,6 +167,15 @@ get_awberc_data <- function(path, data, sheet) {
       analyte == "tn" & finalConc < 25 ~ 25,
       analyte == "tp" & finalConc < 5 ~ 5,
       TRUE ~ finalConc)) %>%
+    # observations above the MDL, but below the lowest non-zero standard are flagged "L"
+    mutate(analyte_flag = case_when( # create L values in the analyte_flag column
+      analyte == "nh4" & finalConc > 6 & finalConc < 20 ~ "L",
+      analyte == "no2" & finalConc > 6 & finalConc < 20 ~ "L",
+      analyte == "no2_3" & finalConc > 6 & finalConc < 20 ~ "L",
+      analyte == "op" & finalConc > 3 & finalConc < 5 ~ "L",
+      analyte == "tn" & finalConc > 6 & finalConc < 30 ~ "L",
+      analyte == "tp" & finalConc > 5 & finalConc < 5 ~ "L", # the MDL and lowest standard is 5
+      TRUE ~ analyte_flag)) %>%
     mutate(units = case_when(
       analyte == "nh4"  ~ "ug_n_l",
       analyte == "no2"  ~ "ug_n_l",
@@ -198,16 +204,21 @@ get_awberc_data <- function(path, data, sheet) {
 }
 
 
-# function aggregates dups, renames/sorts columns, and casts to wide
+# function aggregates lab dups, renames/sorts columns, and casts to wide
 dup_agg <- function(data) { 
 
   # aggregate dups and convert analyte_flags to numeric (for summarize operations)
+  
+  ############################PICK UP HERE, FLAGS ARE GIVINE ME A HEADACHE
   e <- data %>%
-    mutate(analyte_flag = if_else(str_detect(analyte_flag, "<"), 1, 0)) %>% # convert to numeric
+    mutate(analyte_flag = case_when(
+      analyte_flag ==  "nd" ~ 0,
+      analyte_flag == "L" ~ 100,
+      analyte_flag ==  "" ~ NA_real_)) %>% # convert to numeric
     group_by(lake_id, site_id, analyte, sample_depth, 
              sample_type, rep, nutrients_qual, units) %>%
     summarize(value = mean(finalConc, na.rm = TRUE), # group and calculate means
-              analyte_flag = mean(analyte_flag, na.rm = TRUE)) %>%
+              analyte_flag = mean(analyte_flag, na.rm = TRUE)) %>% # any group with NA will return NA
     mutate(sample_type = case_when(
       rep %in% c("B", 2) ~ "duplicate", TRUE ~ sample_type)) %>%
     select(-rep)
@@ -216,7 +227,10 @@ dup_agg <- function(data) {
   f <- e %>%
     pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units, nutrients_qual)) %>% # cast to wide
     mutate(across(contains("flag"), # convert all _flag values back to text (< or blank)
-                  ~ if_else(.<1, NA_character_, "<"))) %>%
+                  ~ case_when(. == 0 ~ "nd",
+                              . > 0 ~ "L",
+                              is.na(.) ~ NA_character_,
+                              is.nan(.) ~ NA_character_))) %>%
     mutate(across(starts_with(c("value", "analyte", "units", "nutrients")), # convert NaN values to NA
                   ~ ifelse(is.nan(.), NA, .))) 
 
@@ -246,6 +260,24 @@ dup_agg <- function(data) {
   
 }
 
+flag_agg <- function(data) { # merge the flag columns for each analyte
+  
+  h <- data %>%
+    # na.rm = TRUE, else NA gets converted to character and is included in new column
+    unite("nh4_flags", nh4_flag, nh4_qual, sep = " ", na.rm = TRUE) %>% 
+    unite("no2_flags", no2_flag, no2_qual, sep = " ", na.rm = TRUE) %>%
+    unite("no2_3_flags", no2_3_flag, no2_3_qual, sep = " ", na.rm = TRUE) %>%
+    unite("op_flags", op_flag, op_qual, sep = " ", na.rm = TRUE) %>%
+    unite("tn_flags", tn_flag, tn_qual, sep = " ", na.rm = TRUE) %>%
+    unite("tp_flags", tp_flag, tp_qual, sep = " ", na.rm = TRUE) %>%
+    # In cases were _flag and _qual were NA, the above returns "".  Convert to NA
+    mutate(across(contains("flags"), # 
+                  ~if_else(. == "", NA_character_, .)))
+    
+    return(h)
+  
+  
+}
 
 cin.awberc.path <- paste0(userPath, 
                        "data/chemistry/nutrients/")
@@ -259,6 +291,7 @@ chem21 %>% distinct(lake_id) %>% print(n=Inf)
 
 chem21 <- dup_agg(chem21) # final object, cast to wide with dups aggregated
 
+chem21 <- flag_agg(chem21)
 
 # Sample inventory----------------------
 # Are all collected samples included?
