@@ -618,7 +618,7 @@ ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
    janitor::get_dupes()
 
 # Did we preserve all combinations of unique identifiers in original data?
-# 74 unique combinations of lake_id, site_id, sample_depth, and sample_type
+# 92 unique combinations of lake_id, site_id, sample_depth, and sample_type
 # in original data.
 list(jea1, jea2, jea3, key1, key2, key3, 
      ove1, ove2, ove3, lmp1, lmp2, lmp3, 
@@ -633,11 +633,26 @@ list(jea1, jea2, jea3, key1, key2, key3,
   map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
   distinct() %>% # condense to unique observations
-  nrow(.) # 74 unique combinations
+  nrow(.) # 92 unique combinations
 
-# 74 unique combinations in merged df.  Everything looks good
+# 92 unique combinations in merged df.  Everything looks good
 ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
   distinct() %>% {nrow(.)}
+
+
+# Inspect flags for any unusual formatting
+ada.nutrients %>% select(contains("flags")) %>% print(n=Inf)
+
+# Inspect units
+unique(ada.nutrients$op_units) # includes NA?  166 and 184 are NA, but good data in excel report?
+unique(ada.nutrients$tn_units) # good
+unique(ada.nutrients$tp_units) # good
+unique(ada.nutrients$nh4_units) # good
+unique(ada.nutrients$no2_3_units) # good
+unique(ada.nutrients$no2_units) # includes NA?
+unique(ada.nutrients$no3_units) # includes NA
+
+ada.nutrients %>% filter(is.na(op_units)) %>% select(lake_id, site_id, contains("op"))
 
 # # Some unneeded code below to help resolved discrepancy between original and
 # # merged data.

@@ -71,10 +71,13 @@ coc.vector <- coc.list %>%
 get_awberc_data <- function(path, data, sheet) { 
   
   d <- read_excel(paste0(path, data), #
-                  sheet = sheet, skip = 1, guess_max = 10000) %>%
+                  sheet = sheet, skip = 1) %>%  # guess_max = 10000
   # d <- read_excel(paste0(cin.awberc.path,
   #                        "2021_ESF-EFWS_NutrientData_Updated01272022_AKB.xlsx"), #
   #                 sheet = "2021 Data", skip = 1) %>%
+  # d <- read_excel(paste0(cin.awberc.path,
+  #                        "2022_ESF-EFWS_NutrientData_Updated08302022_AKB.xlsx"), #
+  #                 sheet = "2022 Data", skip = 1) %>%
     janitor::clean_names() %>% # clean up names for rename and select, below
     janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
     rename(rdate = collection_date_cdate, #rename fields
@@ -93,7 +96,8 @@ get_awberc_data <- function(path, data, sheet) {
       analyte %in% c("TP", "TN"),
       tp_tn,
       finalConc)) %>%  
-    filter(sample_type != "SPK") %>% # exclude matrix spike
+    filter(sample_type != "SPK", # exclude matrix spike
+           sample_type != "CHK") %>% # exclude standard check
     select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual, rep) %>% # keep only needed fields
     mutate(analyte = str_to_lower(analyte)) %>% # make analyte names lowercase
     mutate(analyte = case_when( # change analyte names where necessary
@@ -105,9 +109,9 @@ get_awberc_data <- function(path, data, sheet) {
     # strip character values from site_id, convert to numeric
     mutate(site_id =  as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
     mutate(sample_type = case_when( # recode sample type identifiers
-      grepl("dup", sample_type, ignore.case = TRUE) ~ "duplicate",
+      grepl("dup", sample_type, ignore.case = TRUE) ~ "duplicate", # laboratory duplicate
       grepl("ukn", sample_type, ignore.case = TRUE) ~ "unknown",
-      grepl("blk", sample_type, ignore.case = TRUE) ~ "blank",
+      grepl("blk", sample_type, ignore.case = TRUE) ~ "blank", # field blank
       TRUE ~ sample_type)) %>%
     # sample filtered or unfiltered
     mutate(filter = str_sub(crossid, 1, 1) %>% tolower(.),
@@ -152,12 +156,12 @@ get_awberc_data <- function(path, data, sheet) {
       TRUE ~ lake_id)) %>%
     mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
     mutate(analyte_flag = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 6 ~ "nd", 
-      analyte == "no2" & finalConc < 6 ~ "nd",
-      analyte == "no2_3" & finalConc < 6 ~ "nd",
-      analyte == "op" & finalConc < 3 ~ "nd",
-      analyte == "tn" & finalConc < 25 ~ "nd",
-      analyte == "tp" & finalConc < 5 ~ "nd",
+      analyte == "nh4" & finalConc < 6 ~ "ND", 
+      analyte == "no2" & finalConc < 6 ~ "ND",
+      analyte == "no2_3" & finalConc < 6 ~ "ND",
+      analyte == "op" & finalConc < 3 ~ "ND",
+      analyte == "tn" & finalConc < 25 ~ "ND",
+      analyte == "tp" & finalConc < 5 ~ "ND",
       TRUE ~ "")) %>%
     mutate(finalConc = case_when( # create the finalConc column
       analyte == "nh4" & finalConc < 6 ~ 6, 
@@ -173,7 +177,7 @@ get_awberc_data <- function(path, data, sheet) {
       analyte == "no2" & finalConc > 6 & finalConc < 20 ~ "L",
       analyte == "no2_3" & finalConc > 6 & finalConc < 20 ~ "L",
       analyte == "op" & finalConc > 3 & finalConc < 5 ~ "L",
-      analyte == "tn" & finalConc > 6 & finalConc < 30 ~ "L",
+      analyte == "tn" & finalConc > 25 & finalConc < 30 ~ "L",
       analyte == "tp" & finalConc > 5 & finalConc < 5 ~ "L", # the MDL and lowest standard is 5
       TRUE ~ analyte_flag)) %>%
     mutate(units = case_when(
@@ -190,12 +194,13 @@ get_awberc_data <- function(path, data, sheet) {
     mutate(sample_depth = case_when(
       sample_type == "blank" ~ "blank", # see Wiki lake_id, site_id, and sample_depth formats
       TRUE ~ sample_depth)) %>%
-    mutate(rep = case_when(
+    mutate(rep = as.character(rep), # 2022 data should all be numeric, but convert to chr for consistency with 2021 and code below
+           rep = case_when(
       rep == "A" ~ "1", # convert to number for dup_agg function
       rep == "B" ~ "2",
       TRUE ~ rep)) %>%
     select(-crossid)  %>% # no longer need crossid
-    mutate(site_id = as.numeric(site_id)) # convert to char to match other chem data 
+    mutate(site_id = as.numeric(site_id)) # convert to numeric to match other chem data 
   
     
   return(d)
@@ -211,7 +216,7 @@ dup_agg <- function(data) {
   
   e <- data %>%
     mutate(analyte_flag = case_when(
-      analyte_flag ==  "nd" ~ 0,
+      analyte_flag ==  "ND" ~ 0,
       analyte_flag == "L" ~ 100,
       analyte_flag ==  "" ~ NA_real_)) %>% # convert to numeric
     group_by(lake_id, site_id, analyte, sample_depth, 
@@ -226,7 +231,7 @@ dup_agg <- function(data) {
   f <- e %>%
     pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units, nutrients_qual)) %>% # cast to wide
     mutate(across(contains("flag"), # convert all _flag values back to text (< or blank)
-                  ~ case_when(. == 0 ~ "nd",
+                  ~ case_when(. == 0 ~ "ND",
                               . > 0 ~ "L",
                               is.na(.) ~ NA_character_,
                               is.nan(.) ~ NA_character_))) %>%
@@ -278,6 +283,8 @@ flag_agg <- function(data) { # merge the flag columns for each analyte
   
 }
 
+# READ DATA-----------
+
 cin.awberc.path <- paste0(userPath, 
                        "data/chemistry/nutrients/")
   
@@ -285,12 +292,15 @@ chem21 <- get_awberc_data(cin.awberc.path,
                           "2021_ESF-EFWS_NutrientData_Updated01272022_AKB.xlsx", 
                           "2021 Data") 
 
-chem21 %>% distinct(lake_id) %>% print(n=Inf)
+chem22 <- get_awberc_data(cin.awberc.path, 
+                          "2022_ESF-EFWS_NutrientData_Updated08302022_AKB.xlsx", 
+                          "2022 Data") 
+
+chemCinNutrients <- bind_rows(chem21, chem22) %>%
+  dup_agg(.) %>% # final object, cast to wide with dups aggregated
+  flag_agg(.)
 
 
-chem21 <- dup_agg(chem21) # final object, cast to wide with dups aggregated
-
-chem21 <- flag_agg(chem21)
 
 # Sample inventory----------------------
 # Are all collected samples included?
