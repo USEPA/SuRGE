@@ -222,6 +222,10 @@ conv_units <- function(data, filename) {
 
 dup_agg <- function(data) {
   
+  # filter out any observations where value is NA
+  
+  data <- data %>% filter(!if_any(where(is.numeric), is.na))
+  
   # first, convert all _flag columns to a numeric for summarize operations;
   # Must be performed in case lab dup has a different flag than the sample.
   
