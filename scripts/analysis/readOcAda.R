@@ -526,9 +526,9 @@ oc_2022_206 <- get_ada_data(cin.ada.path, "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
 # JOIN DATA OBJECTS-------------------------------------------------------------
 # Join all of the data objects
 ada.oc <- list(jea = list(jea1), key = list(key1), ove = list(ove1), 
-               ada.22 = list(oc.146190.22, oc.166.22, oc.184.22, 
-                             oc.136100.22, oc.206.22)) %>% 
-  map_depth(1, function(x) reduce(x, left_join)) %>%
+               ada.22 = list(oc_2022_146_190, oc_2022_166, oc_2022_184, 
+                             oc_2022_136_100, oc_2022_206)) %>% 
+  map_depth(1, function(x) reduce(x, bind_rows)) %>% # left_join was only grabbing 146 and 190?
   reduce(full_join) %>%
   arrange(lake_id) %>%
   mutate(site_id = as.numeric(site_id)) %>% # make site id numeric

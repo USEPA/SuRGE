@@ -649,7 +649,7 @@ ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
 ada.nutrients %>% select(contains("flags")) %>% print(n=Inf)
 
 # Inspect units
-unique(ada.nutrients$op_units) # includes NA?  166 and 184 are NA, but good data in excel report?
+unique(ada.nutrients$op_units) # good
 unique(ada.nutrients$tn_units) # good
 unique(ada.nutrients$tp_units) # good
 unique(ada.nutrients$nh4_units) # good
@@ -657,7 +657,9 @@ unique(ada.nutrients$no2_3_units) # good
 unique(ada.nutrients$no2_units) # includes NA?
 unique(ada.nutrients$no3_units) # includes NA
 
-ada.nutrients %>% filter(is.na(op_units)) %>% select(lake_id, site_id, contains("op"))
+# Random inspection
+sample_frac(ada.nutrients, 0.1) %>% select(!contains("units")) %>% print(n=Inf)
+
 
 # # Some unneeded code below to help resolved discrepancy between original and
 # # merged data.
