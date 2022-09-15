@@ -256,12 +256,14 @@ dup_agg <- function(data) {
     select(order(colnames(.))) %>% # alphabetize column names
     select(lake_id, site_id, sample_depth, sample_type, 
            sample_filter, labdup, everything()) %>% # put 'sampleid' first
+    # if both sample and dup had a flag, value = 1. If only one had a flag, 
+    # value = 0.5. In both cases, flag is retained in aggregated observation.
     mutate(across(ends_with("flag"), # convert all _flag values back to text
-                  ~ if_else(.<1, "", "ND"))) %>% 
+                  ~ if_else(.< 0.5, "", "ND"))) %>% 
     mutate(across(ends_with("bql"), # convert all _flag values back to text
-                  ~ if_else(.<1, "", "L"))) %>% 
+                  ~ if_else(.< 0.5, "", "L"))) %>% 
     mutate(across(ends_with("qual"), # convert all _flag values back to text
-                  ~ if_else(.<1, "", "H"))) %>% 
+                  ~ if_else(.< 0.5, "", "H"))) %>% 
     filter(labdup != "LAB DUP") %>% # remove the lab dup
     select(-labdup) %>% # remove labdup column. JB 12/7/2021
     ungroup()
