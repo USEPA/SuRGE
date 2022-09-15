@@ -37,7 +37,7 @@ get_ada_data <- function(path, datasheet) {
     janitor::clean_names() %>%
     mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase 
     mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), 
-                            "LAB DUP", "")) # flag the dups
+                            "LAB DUP", "")) # identify the dups
   
   # maintable_2: select columns, rename remaining columns, 
   # calculate hold times
@@ -227,7 +227,7 @@ dup_agg <- function(data) {
   
   data <- data %>% 
     mutate(across(ends_with(c("flag", "bql", "qual")), 
-                  ~ ifelse(str_detect(., "ND|L|H"), 1, 0))) 
+                  ~ if_else(str_detect(., "ND|L|H"), 1, 0))) 
   
   
   # carve out the _flag and _units columns so they can be re-joined later
@@ -299,11 +299,18 @@ flag_agg <- function(data) { # merge the flag columns for each analyte
       unite("op_flags", op_flag, op_bql, op_qual, sep = " ") 
   
   # If a sample and lab dup both have a flag (ND or L), retain only the L flag
-  f <- f %>% 
+  g <- f %>% 
     mutate(across(ends_with("flags"),
-                  ~ if_else(str_detect(., "ND L"), "L", .)))
+                  ~ if_else(
+                      str_detect(., "ND L"), "L", .)) )
   
-  return(f)
+  # If there are no flags, enter NA in the _flags column
+  h <- g %>%
+    mutate(across(ends_with("flags"),
+                  ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
+             str_squish(.))) # remove any extra white spaces
+        
+  return(h)
   
 }
 
@@ -522,7 +529,7 @@ no2no3nh4_2022_146_190_184_166 <-
   get_ada_data(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   site_id_22 %>% # add site_id for 2022 samples
-  mutate(sample_filter = "unfiltered") %>% # no2 no3 nh4 is filtered
+  mutate(sample_filter = "filtered") %>% # no2 no3 nh4 is filtered
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
@@ -562,7 +569,7 @@ no2no3nh4_2022_136_100_206 <-
   get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
   site_id_22 %>% # add site_id for 2022 samples
-  mutate(sample_filter = "unfiltered") %>% # # no2 no3 nh4 is filtered
+  mutate(sample_filter = "filtered") %>% # # no2 no3 nh4 is filtered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
@@ -594,15 +601,13 @@ ada.nutrients <- list(jea = list(jea1, jea2, jea3),
                       lmp = list(lmp1, lmp2, lmp3),
                       ada22_1 = list(no2no3nh4_2022_146_190_184_166, 
                                      tntp_2022_146_190_184_166, 
-                                     op_2022_146_190, 
-                                     op_2022_184, 
-                                     op_2022_166), 
-                      ada22_2 = list(
-                        op_2022_136_100_206, 
-                        tntp_2022_136_100_206, 
-                        no2no3nh4_2022_136_100_206)) %>% 
-  map_depth(2, ~select(., -sample_filter)) %>%
-  map_depth(1, function(x) reduce(x, left_join)) %>%
+                                     full_join(op_2022_146_190, 
+                                     full_join(op_2022_166, op_2022_184))), 
+                      ada22_2 = list(no2no3nh4_2022_136_100_206,
+                                     tntp_2022_136_100_206,
+                                     op_2022_136_100_206)) %>% 
+  map_depth(2, ~ select(.x, -sample_filter)) %>%
+  map(~ reduce(.x, left_join)) %>%
   reduce(full_join) %>%
   mutate(site_id = as.numeric(site_id)) %>%
   arrange(lake_id) 
