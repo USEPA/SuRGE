@@ -25,22 +25,27 @@ get_daniels <- function(path, sheet){
            #https://stackoverflow.com/questions/35403491/r-regex-extracting-a-string-between-a-dash-and-a-period
            lake_id = gsub("^[^-]*-([^-]+).*", "\\1", sample_id) %>% 
              as.numeric() %>% as.character(),
-           d_anion_analysis_date = as.Date(gsub( " .*$", "", injection_date_time), format = "%m/%d/%Y")) %>%
+           d_anion_analysis_date = as.Date(
+             gsub( " .*$", "", injection_date_time), format = "%m/%d/%Y")) %>%
     mutate(lake_id = case_when(str_detect(sample_id, "LAC") ~ paste0(lake_id, "_lacustrine"),
                                str_detect(sample_id, "TRAN") ~ paste0(lake_id, "_transitional"),
                                str_detect(sample_id, "RIV") ~ paste0(lake_id, "_riverine"),
                                lake_id == "69" ~ "69_riverine",
                                TRUE ~ lake_id)) %>%
     # create the analyte_flag column
-    mutate(f_flag = case_when(is.na(f_mg_l) ~ "<", TRUE ~ NA_character_)) %>% 
-    mutate(cl_flag = case_when(is.na(cl_mg_l) ~ "<", TRUE ~ NA_character_)) %>% 
-    mutate(br_flag = case_when(is.na(br_mg_l) ~ "<", TRUE ~ NA_character_)) %>% 
-    mutate(so4_flag = case_when(is.na(so4_mg_l) ~ "<", TRUE ~ NA_character_)) %>% 
+    mutate(f_flag = case_when(is.na(f_mg_l) ~ "ND", TRUE ~ NA_character_)) %>% 
+    mutate(cl_flag = case_when(is.na(cl_mg_l) ~ "ND", TRUE ~ NA_character_)) %>% 
+    mutate(br_flag = case_when(is.na(br_mg_l) ~ "ND", TRUE ~ NA_character_)) %>% 
+    mutate(so4_flag = case_when(is.na(so4_mg_l) ~ "ND", TRUE ~ NA_character_)) %>% 
     # sub mdl for NA
     mutate(f_mg_l = case_when(is.na(f_mg_l) ~ 0.005, TRUE ~ f_mg_l),
            cl_mg_l = case_when(is.na(cl_mg_l) ~ 0.03, TRUE ~ cl_mg_l),
            br_mg_l = case_when(is.na(br_mg_l) ~ 0.02, TRUE ~ br_mg_l),
-           so4_mg_l = case_when(is.na(so4_mg_l) ~ 0.025, TRUE ~ so4_mg_l))
+           so4_mg_l = case_when(is.na(so4_mg_l) ~ 0.025, TRUE ~ so4_mg_l)) %>%
+    mutate(f_bql = case_when(f_mg_l > 0.005 & f_mg_l < 0.439 ~ "L", NA_character_) %>%
+             cl_bql = case_when(cl_mg_l > 0.03 & cl_mg_l < 0.4597 ~ "L", NA_character_) %>%
+             no2_bql = case_when(br_mg_l > 0.02 & br_mg_l < 0.4638 ~ "L", NA_character_) %>%
+             br_bql = case_when(so4_mg_l > 0.025 & so4_mg_l < 0.423 ~ "L", NA_character_))
 
 # 2. Extract units and analyte names
 analytes.units <- top_table %>% 
@@ -95,7 +100,7 @@ d.anions <- d.anions %>%
          br_qual = NA,
          so4_qual = NA) %>%
   mutate(across(contains("qual"), 
-                ~ if_else((d_anion_analysis_date - sample_col_date) > 28, TRUE, FALSE))) %>%  # TRUE = hold time violation)
+                ~ if_else((d_anion_analysis_date - sample_col_date) > 28, "H", ""))) %>%  # TRUE = hold time violation)
   select(-contains("date"))
     
 
@@ -118,9 +123,10 @@ dup_agg <- function(data) {
            sample_type, lake_id, value) %>% # only keep fields for that analyte
       as.tibble() %>%
       rename(qual = ends_with("qual"), # strip the analyte name from fields
-             units = ends_with("units"), 
+             units = ends_with("units"),
+             bql = ends_with("bql"),
              flag = ends_with("flag")) %>%
-      arrange(qual, flag, value) # ordering the values for the conditional statements below
+      arrange(qual, bql, flag, value) # ordering the values for the conditional statements below
 
       # FILTERING:
       # If all rows are completely identical, use slice_head to keep one of them
@@ -137,6 +143,9 @@ dup_agg <- function(data) {
       {if (slice_head(v)$qual == FALSE) filter(w, qual == FALSE) else w} %>% 
       arrange(qual, flag, value)
       
+  # 9/16/22 NEED ANOTHER STEP HERE TO PROCESS THE L FLAGS, BUT I CAN'T REMEMBER 
+    # EXACTLY HOW THIS FILTERING PROCESS WORKS. NEED TO EXAMINE MORE CLOSELY.
+    # I ALSO SHOULD CONSIDER REPLACING THIS W/ A PURRR MAP SINCE IT'S VERY SLOW.
     y <- x %>% # check  slice_tail(x)$flag. if is.na(flag) == TRUE, keep only flag = NA rows
       {if (is.na(slice_tail(x)$flag) == TRUE) filter(x, is.na(flag) == TRUE) else x}
     
@@ -167,7 +176,8 @@ options(dplyr.summarise.inform = FALSE) # summarize() causes lots of console spa
 
 d.anions.aggregated <- dup_agg(d.anions) 
 
-
+d.anions.aggregated %>%
+  
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
@@ -192,3 +202,4 @@ setdiff(chem.samples.foo %>% filter(analyte_group == "anions",
           select(lake_id, sample_depth, sample_type),
         d.anions[,c("lake_id", "sample_depth", "sample_type")]) %>%
   arrange(lake_id) 
+
