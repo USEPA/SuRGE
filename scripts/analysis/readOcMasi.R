@@ -19,15 +19,22 @@ toc.masi <- read_excel(paste0(userPath,
                              "c_", # squeeze this in between mg_ and l
                              substr(toc_units, start = 4, stop = 4)), # l
          #toc_qual should be TRUE or FALSE
-         toc_qual = case_when(is.na(toc_qual) ~ FALSE, # if NA, then FALSE (no holding time violation)
-                          TRUE ~ TRUE), # if not NA, then TRUE (holding time violation)
+         toc_qual = case_when(is.na(toc_qual) ~ "", 
+                              # if NA, then FALSE (no holding time violation)
+                              TRUE ~ "H"), # if not NA, then TRUE (holding time violation)
          # sample depth for blanks entered as N/A.  Change to 'blank'
          sample_depth = case_when(sample_depth == "N/A" ~ "blank",
                                   TRUE ~ sample_depth),
          lake_id = as.numeric(lake_id) %>% as.character(),
          # extract number from site_id, convert to numeric
          site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
-  select(-lab_id)
+  select(-lab_id) %>%
+  # Unite the flag columns
+  mutate(toc_flag = if_else(toc_flag == "<", "ND", "")) %>%
+  unite("toc_flags", toc_flag, toc_qual, sep = " ", na.rm = TRUE) %>%
+  mutate(toc_flags = if_else( # NA if there are no flags
+    str_detect(toc_flags, "\\w"), toc_flags, NA_character_) %>%
+      str_squish()) # remove any extra white spaces
                 
   
 # check data object
