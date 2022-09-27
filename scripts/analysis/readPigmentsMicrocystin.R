@@ -44,8 +44,15 @@ get_chla_data <- function(path, data, sheet) {
     #   hold_time > 60 ~ "H",
     #   TRUE   ~ "")) %>%
     # No detection limits reported for 2020-2021 chlorophyll data
-    unite("chla_flag", chla_qual, chla_ship, sep = ", ") %>% # merge all flag columns
-    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag)
+    select(lake_id, site_id, sample_type, sample_depth, 
+           chla, chla_qual, chla_ship) %>%
+    unite("chla_flags", chla_qual, chla_ship, sep = " ") # merge all flag columns
+    # This data currently has placeholder flags (as of 9/26/2022)
+    # Until data are available, the following 4 lines are commented out:
+  # %>%
+  #   mutate(chla_flags = if_else( # NA if there are no flags
+  #     str_detect(chla_flags, "\\w"), chla_flags, NA_character_) %>%
+  #       str_squish()) # remove any extra white spaces
   
   return(d)
   
@@ -72,8 +79,18 @@ get_phyco_data <- function(path, data, sheet) {
     #   hold_time > 60 ~ "H",
     #   TRUE   ~ "")) %>%
     # No detection limits reported for 2020-2021 phycocyanin data
-    unite("phycocyanin_flag", phycocyanin_qual, phycocyanin_ship, sep = ", ") %>% # merge all flag columns
-    select(lake_id, site_id, sample_type, sample_depth, phycocyanin, phycocyanin_flag)
+    select(lake_id, site_id, sample_type, sample_depth, 
+           phycocyanin, phycocyanin_qual, phycocyanin_ship) %>%
+    unite("phycocyanin_flags", phycocyanin_qual, 
+          phycocyanin_ship, sep = " ") # merge all flag columns
+  # This data currently has placeholder flags (as of 9/26/2022)
+  # Until data are available, the following 5 lines are commented out:
+  # %>%
+  #   mutate(phycocyanin_flags = if_else( # NA if there are no flags
+  #     str_detect(phycocyanin_flags, "\\w"), 
+  # phycocyanin_flags, NA_character_) %>%
+  #       str_squish()) # remove any extra white spaces
+
   
   return(d)
   
@@ -95,5 +112,5 @@ phycocyanin_20_21 <- get_phyco_data(cin.pig.path,
 pigments_20_21 <- left_join(chla_20_21, phycocyanin_20_21, 
                             by = c("lake_id", "site_id", 
                                    "sample_depth", "sample_type")) %>%
-  select(-chla_flag, -phycocyanin_flag) # exclude these fields for now. 3/29/2022
+  select(-chla_flags, -phycocyanin_flags) # exclude these fields for now. 3/29/2022
 

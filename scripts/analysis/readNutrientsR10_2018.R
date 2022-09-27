@@ -47,7 +47,7 @@ get_awberc_data <- function(path, data, sheet) {
       TRUE ~ crossid)) %>%
     rename(sample_depth = crossid) %>% # rename sample depth column
     mutate(nutrients_qual = if_else( # determine if holding time exceeded
-      (as.Date(ddate) - as.Date(rdate)) > 28, TRUE, FALSE)) %>% # TRUE = hold time violation
+      (as.Date(ddate) - as.Date(rdate)) > 28, "H", "")) %>% # TRUE = hold time violation
     select(lake_id, site_id, sample_depth, sample_type, analyte,
            finalConc, nutrients_qual, rep) %>%
     mutate(sample_type = case_when( # recode sample type identifiers
@@ -71,27 +71,37 @@ get_awberc_data <- function(path, data, sheet) {
       analyte == "tp"  ~ "ug_p_l",
       TRUE ~ ""))  %>%
     mutate(analyte_flag = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 6 ~ "<",
-      analyte == "no2" & finalConc < 8 ~ "<",
-      analyte == "no2_3" & finalConc < 6 ~ "<",
-      analyte == "op" & finalConc < 3 ~ "<",
-      analyte == "tn" & finalConc < 20.9 ~ "<",
-      analyte == "tp" & finalConc < 8 ~ "<",
+      analyte == "nh4" & finalConc < 6 ~ "ND",
+      analyte == "no2" & finalConc < 6 ~ "ND",
+      analyte == "no2_3" & finalConc < 6 ~ "ND",
+      analyte == "op" & finalConc < 3 ~ "ND",
+      analyte == "tn" & finalConc < 25 ~ "ND",
+      analyte == "tp" & finalConc < 5 ~ "ND",
       TRUE ~ "")) %>%
+    mutate(analyte_bql = case_when( # create the analyte_bql column
+      analyte == "nh4" & finalConc < 20 ~ "L",
+      analyte == "no2" & finalConc < 20 ~ "L",
+      analyte == "no2_3" & finalConc < 20 ~ "L",
+      analyte == "op" & finalConc < 5 ~ "L",
+      analyte == "tn" & finalConc < 30 ~ "L",
+      analyte == "tp" & finalConc < 5 ~ "L",
+      TRUE ~ "")) %>%
+    # if analyte_flag is ND, remove the analyte_bql L flag
+    mutate(analyte_bql = if_else(analyte_flag == "ND", "", analyte_bql)) %>%
     mutate(finalConc = case_when( #
       analyte == "nh4" & finalConc < 6 ~ 6,
-      analyte == "no2" & finalConc < 8 ~ 8,
+      analyte == "no2" & finalConc < 6 ~ 6,
       analyte == "no2_3" & finalConc < 6 ~ 6,
       analyte == "op" & finalConc < 3 ~ 3,
-      analyte == "tn" & finalConc < 20.9 ~ 8,
-      analyte == "tp" & finalConc < 8 ~ 8,
+      analyte == "tn" & finalConc < 25 ~ 25,
+      analyte == "tp" & finalConc < 5 ~ 5,
       TRUE ~ finalConc)) %>%
-    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))  # remove non-numeric chars
-
-    # mutate(sample_type = case_when(
-    #   sample_type == "duplicate" ~ "unknown",
-    #   TRUE ~ sample_type)) %>%
-
+    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) # remove non-numeric chars
+  
+  # mutate(sample_type = case_when(
+  #   sample_type == "duplicate" ~ "unknown",
+  #   TRUE ~ sample_type)) %>%
+  
   return(d)
   
   
@@ -103,28 +113,42 @@ dup_agg <- function(data) {
   
   # aggregate dups and convert analyte_flags to numeric (for summarize operations)
   e <- data %>%
-    mutate(analyte_flag = if_else(str_detect(analyte_flag, "<"), 1, 0)) %>% # convert to numeric
-    mutate(sample_type = case_when(sample_type == "duplicate" ~ "unknown",
-                                   TRUE ~ sample_type)) %>%
+    mutate(analyte_flag = if_else(
+      str_detect(analyte_flag, "ND"), 1, 0)) %>% # convert to numeric
+    mutate(analyte_bql = if_else(
+      str_detect(analyte_bql, "L"), 1, 0)) %>% # convert to numeric   
+    mutate(sample_type = case_when(
+      sample_type == "duplicate" ~ "unknown",
+      TRUE ~ sample_type)) %>%
     group_by(lake_id, site_id, analyte, sample_depth, 
              sample_type, rep, nutrients_qual, units) %>%
     summarize(value = mean(finalConc, na.rm = TRUE), # group and calculate means
-              analyte_flag = mean(analyte_flag, na.rm = TRUE)) %>%
+              analyte_flag = mean(analyte_flag, na.rm = TRUE), 
+              analyte_bql = mean(analyte_bql, na.rm = TRUE)) %>%
     mutate(sample_type = case_when(
       rep == "2" ~ "duplicate", TRUE ~ sample_type)) 
   
   # cast to wide, convert analyte flags to text, and convert any NaN to NA
   f <- e %>%
-    pivot_wider(names_from = analyte, values_from = c(value, analyte_flag, units, nutrients_qual)) %>% # cast to wide
-    mutate(across(contains("flag"), # convert all _flag values back to text (< or blank)
-                  ~ if_else(. < 1, NA_character_, "<"))) %>%
-    mutate(across(starts_with(c("value", "analyte", "units", "nutrients")), # convert NaN values to NA
-                  ~ ifelse(is.nan(.), NA, .))) 
+    pivot_wider(names_from = analyte, 
+                values_from = c(value, analyte_flag, analyte_bql,  
+                                units, nutrients_qual)) %>% # cast to wide
+    mutate(across(
+      contains("flag"), # convert all _flag values back to text (< or blank)
+      ~ if_else(. < 1, "", "ND"))) %>%
+    mutate(across(
+      contains("bql"), # convert all _flag values back to text (< or blank)
+      ~ if_else(. < 1, "", "L"))) %>%
+    mutate(across(
+      starts_with(c("value", "analyte", "units", "nutrients")), 
+      # convert NaN values to NA
+      ~ ifelse(is.nan(.), NA, .))) 
   
   # rename functions to rename flag, units, and value columns
   flagnamer <- function(data) {str_c(str_remove(data, "analyte_flag_"), "_flag")}
   unitnamer <- function(data) {str_c(str_remove(data, "units_"), "_units")}
   qualnamer <- function(data) {str_c(str_remove(data, "nutrients_qual_"), "_qual")}
+  bqlnamer <- function(data) {str_c(str_remove(data, "analyte_bql_"), "_bql")}
   valunamer <- function(data) {str_remove(data, "value_")}
   
   # apply rename functions to column names, then reorder columns
@@ -132,6 +156,7 @@ dup_agg <- function(data) {
     rename_with(flagnamer, .cols = contains("flag")) %>%
     rename_with(unitnamer, .cols = contains("units")) %>%
     rename_with(qualnamer, .cols = contains("qual")) %>% 
+    rename_with(bqlnamer, .cols = contains("bql")) %>% 
     rename_with(valunamer, .cols = contains("value")) %>%
     # mutate(duplicate = case_when(
     #   duplicate == 2 ~ "duplicate",
@@ -158,5 +183,23 @@ chem18 <- get_awberc_data(cin.awberc.path,
 chem18 %>% distinct(lake_id)
 
 
-chem18 <- dup_agg(chem18) # final object, cast to wide with dups aggregated
+# final object, cast to wide with dups aggregated
+chem18 <- dup_agg(chem18) %>%
+  # combine all of the flag columns
+  unite("nh4_flags", nh4_flag, nh4_bql, nh4_qual, sep = " ") %>%
+  unite("no2_flags", no2_flag, no2_bql, no2_qual, sep = " ") %>%
+  unite("no2_3_flags", no2_3_flag, no2_3_bql, no2_3_qual, sep = " ") %>%
+  unite("op_flags", op_flag, op_bql, op_qual, sep = " ") %>%
+  unite("tp_flags", tp_flag, tp_bql, tp_qual, sep = " ") %>%
+  unite("tn_flags", tn_flag, tn_bql, tn_qual, sep = " ") %>%
+  # if a sample and dup have both L and ND flags, retain only the L flag
+  mutate(across(ends_with("flags"),
+                ~ if_else(
+                  str_detect(., "ND L"), "L", .))) %>%
+  # replace any blank _flags with NA
+  mutate(across(ends_with("flags"),
+                ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
+                  str_squish(.))) # remove any extra white spaces
+  
+
 

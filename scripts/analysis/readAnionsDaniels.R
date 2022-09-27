@@ -42,11 +42,11 @@ get_daniels <- function(path, sheet){
            cl_mg_l = case_when(is.na(cl_mg_l) ~ 0.03, TRUE ~ cl_mg_l),
            br_mg_l = case_when(is.na(br_mg_l) ~ 0.02, TRUE ~ br_mg_l),
            so4_mg_l = case_when(is.na(so4_mg_l) ~ 0.025, TRUE ~ so4_mg_l)) %>%
-    mutate(f_bql = case_when(f_mg_l > 0.005 & f_mg_l < 0.439 ~ "L", NA_character_) %>%
-             cl_bql = case_when(cl_mg_l > 0.03 & cl_mg_l < 0.4597 ~ "L", NA_character_) %>%
-             no2_bql = case_when(br_mg_l > 0.02 & br_mg_l < 0.4638 ~ "L", NA_character_) %>%
-             br_bql = case_when(so4_mg_l > 0.025 & so4_mg_l < 0.423 ~ "L", NA_character_))
-
+    mutate(f_bql = case_when(f_mg_l > 0.005 & f_mg_l < 0.439 ~ "L", TRUE ~ NA_character_),
+             cl_bql = case_when(cl_mg_l > 0.03 & cl_mg_l < 0.4597 ~ "L",TRUE ~ NA_character_),
+             no2_bql = case_when(br_mg_l > 0.02 & br_mg_l < 0.4638 ~ "L",TRUE ~ NA_character_),
+             br_bql = case_when(so4_mg_l > 0.025 & so4_mg_l < 0.423 ~ "L", TRUE ~ NA_character_))
+  
 # 2. Extract units and analyte names
 analytes.units <- top_table %>% 
   select(contains("_l")) %>% 

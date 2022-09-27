@@ -102,14 +102,18 @@ get_results_data <- function(path, data, sheet) {
     mutate(filter_hold_time = collection_date - extraction_date) %>% # get hold time
     mutate(extract_hold_time = analysis_date - extraction_date) %>% # get hold time
     mutate(chla_qual = case_when( # qual flag if either hold time exceeded
-      filter_hold_time > 60 ~ "1",
-      extract_hold_time > 300 ~ "1",
+      filter_hold_time > 60 ~ "H",
+      extract_hold_time > 300 ~ "H",
       TRUE   ~ "")) %>%
     mutate(chla_flag = case_when( # flag if conc is below detection limit 
-      extract_conc < 9 ~ "<",
+      extract_conc < 9 ~ "ND",
       TRUE   ~ "")) %>%
     select(lake_id, site_id, sample_type, sample_depth, chla, extract_conc, 
-           chla_flag, chla_qual)
+           chla_flag, chla_qual) %>%
+    unite("chla_flags", c(chla_flag, chla_qual), sep = " ", na.rm = TRUE) %>%
+    mutate(chla_flags = if_else( # NA if there are no flags
+      str_detect(chla_flags, "\\w"), chla_flags, NA_character_) %>%
+        str_squish()) # remove any extra white spaces
   
   return(e)
   
@@ -191,12 +195,16 @@ get_bsa_data <- function(path, data, sheet) {
       sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
     mutate(chla_qual = case_when( # qual flag if either hold time exceeded
-      extract_hold_time > 330 ~ "1",
+      extract_hold_time > 330 ~ "H",
       TRUE   ~ "")) %>%
     mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
     mutate(chla_flag = "") %>% # assume all are above mdl (data unavailable)
     mutate(chla_units = "ug_l") %>%
-    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag, chla_qual, chla_units)
+    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag, chla_qual, chla_units) %>%
+    unite("chla_flags", c(chla_flag, chla_qual), sep = " ", na.rm = TRUE) %>%
+    mutate(chla_flags = if_else( # NA if there are no flags
+      str_detect(chla_flags, "\\w"), chla_flags, NA_character_) %>%
+        str_squish()) # remove any extra white spaces
 
   return(f)
 
