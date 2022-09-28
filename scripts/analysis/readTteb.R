@@ -48,8 +48,14 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>%
                 ~ na_if(., 9999999999999990.000))) %>%
   # create 'flag' columns for every analyte to flag observations < det. limit
   mutate(across(al:zn, # nice code Joe!
-                ~ if_else(. < 0 , "<", NA_character_), # bd reported as -detection limit
+                ~ if_else(. < 0 , "ND", ""), # bd reported as -detection limit
                 .names = "{col}_flag")) %>%
+  # create 'bql' columns to flag observations < reporting limit. 
+  mutate(across(al:zn, # nice code Joe!
+                ~ if_else(. < 0 , "L", ""), 
+                # 9/28/2022 we'll probably need to list every analyte here
+                # Also, do we need a _qual column?
+                .names = "{col}_bql")) %>%
   # create 'units' columns. Most units in mg/L 
   mutate(across(al:zn, # 
                 ~ "mg_l", 
@@ -177,7 +183,20 @@ tteb.all <- tteb.all %>%
          tteb.toc_flag = toc_flag,
          tteb.doc = doc,
          tteb.doc_units = doc_units,
-         tteb.doc_flag = doc_flag) 
+         tteb.doc_flag = doc_flag) %>%
+  # Unite all of the _flag, _qual, and _bql columns
+  unite("tteb.toc_flags", toc_flag, toc_bql)  %>%
+  unite("tteb.doc_flags", doc_flag, doc_bql)  %>%
+  unite("ni_flags", ni_flag, ni_bql)  %>%
+  unite("s_flags", s_flag, s_bql)  %>%
+  # etc, add all of the analytes. There's probably not a quicker way to do this
+  # without creating a separate vector of analyte names.
+  # Can try the following: tteb %>% select(-lab_id, -sampid, -comment) %>% 
+  # colnames() %>% word(sep = "_") %>% unique() 
+  # But with unite(), I don't think this works
+  mutate(across(ends_with("flags"),   # replace any blank _flags with NA
+                ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
+                  str_squish(.))) # remove any extra white spaces
 
 janitor::get_dupes(tteb.all %>% select(lake_id, site_id, sample_type, sample_depth))
 
