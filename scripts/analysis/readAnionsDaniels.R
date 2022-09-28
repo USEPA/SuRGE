@@ -54,9 +54,9 @@ get_daniels <- function(path, sheet){
                              TRUE ~ ""),
            cl_bql = case_when(cl_mg_l > 0.03 & cl_mg_l < 0.4597 ~ "L",
                               TRUE ~ ""),
-           so4_bql = case_when(br_mg_l > 0.02 & br_mg_l < 0.4638 ~ "L",
+           br_bql = case_when(br_mg_l > 0.02 & br_mg_l < 0.4638 ~ "L",
                                TRUE ~ ""),
-           br_bql = case_when(so4_mg_l > 0.025 & so4_mg_l < 0.423 ~ "L", 
+           so4_bql = case_when(so4_mg_l > 0.025 & so4_mg_l < 0.423 ~ "L", 
                               TRUE ~ ""))
   
   # 2. Extract units and analyte names
@@ -81,8 +81,7 @@ get_daniels <- function(path, sheet){
     cbind(., analytes.units) %>% # add units to data.
     mutate(site_id = as.numeric(site_id)) %>% # make site id numeric
     select(-sample_id, -injection_date_time) %>%
-    as_tibble()
-  
+    as_tibble() 
   top_table
 }
 
@@ -130,23 +129,45 @@ dup_agg <- function(data) {
     map(~ .x %>% select(analyte, site_id, sample_depth, 
                         sample_type, lake_id, 
                         value, starts_with(paste0(.x$analyte))) %>%
-          # if all rows are identical in all values, keep only one row
+          # if all rows are identical, keep only one row
           distinct() %>%
           # if the _qual column is blank (i.e., no hold violation), 
           # keep only that row. str_sort() finds the lowest _qual value, 
           # which is passed to filter(). "" (blank) is lower than "H".
           filter(if_all(ends_with("qual"), ~ . == str_sort(.)[1])) %>%
-          # Do the same with the ND flag (i.e., keep only unflagged rows)
+          # Do the same with the ND flag; i.e., if there are both ND flags 
+          # and no-flag observations, keep only the no-flag rows. 
           filter(if_all(ends_with("flag"), ~ . == str_sort(.)[1])) %>%
-          # group any remaining rows and find mean of the analyte measurement
-          group_by(across(!value)) %>%
-          summarize(value = mean(value, na.rm = TRUE)))
-          
-          # 9/27/2022 Almost done. Continue with line 182 (bind the rows)
-          
-          
+          # group any remaining rows and find mean of analyte measurement
+          group_by(across(!value)) %>% # group by all except value
+          summarize(value = mean(value, na.rm = TRUE)) %>%
+          ungroup() %>%
+          unite("flags", # unite all of the flag columns
+                ends_with(c("flag", "qual", "bql")), sep = " ") %>%
+          rename(units = ends_with("units")))
+        
+  e <- d %>% reduce(full_join) %>%
+    pivot_wider(names_from = analyte,  # pivot to wide
+                values_from = c(value, units, flags),
+                names_glue = "{analyte}_{.value}") %>%
+    rename_with(~str_remove(., "_value"), 
+                .cols = contains("value")) %>%
+    mutate(across(ends_with("flags"), # make empty _flags = NA
+                  ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
+                    str_squish(.))) # remove any extra white spaces
+    
+  return(e)
   
-  return(d)
+        # %>%
+        #   rename("{.$analyte}_flags" := flags)) # glue:: syntax renaming
+        
+    # d %>% reduce(full_join, 
+                    # by = c("analyte", "lake_id", "site_id", 
+                    #        "sample_depth", "sample_type"))
+    # pivot_wider(names_from = analyte, # pivot to wide
+    #             values_from = value,
+    #             names_glue = "{analyte}_{.value}") %>%
+    # rename_with(~str_remove(., "_value"), .cols = contains("value"))
 
   #   
   #     # FILTERING:
@@ -195,8 +216,6 @@ options(dplyr.summarise.inform = FALSE) # summarize() causes lots of console spa
 
 d.anions.aggregated <- dup_agg(d.anions) 
 
-d.anions.aggregated %>%
-  
 
 # Sample Inventory Audit.-#-#-##-#-##-#-##-#-##-#-##-#-#
 
