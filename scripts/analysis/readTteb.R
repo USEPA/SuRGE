@@ -66,7 +66,12 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>%
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, everything()) # put these columns first
 
-
+# This might not work
+tteb_analytes <- tteb %>% 
+  select(-lab_id, -sampid, -comment) %>% 
+  colnames() %>% 
+  word(sep = "_") %>% 
+  unique() 
 
 # 2. READ CHAIN OF CUSTODY----------------
 # Read in chain on custody data for SuRGE samples submitted to TTEB
@@ -127,7 +132,9 @@ tteb.all <- tteb.all %>%
                          TRUE ~ NA_real_),
          doc_units = "mg_c_l",
          doc_flag = case_when(analyte == "doc" ~ toc_flag,
-                              TRUE ~ NA_character_)) %>%
+                              TRUE ~ ""),
+         doc_bql = case_when(analyte == "doc" ~ toc_bql,
+                              TRUE ~ "")) %>%
   mutate(toc = case_when(analyte == "doc" ~ NA_real_,
                          TRUE ~ toc))
 
@@ -163,8 +170,10 @@ tteb.all <- tteb.all %>%
       x %>% select(lake_id, site_id, sample_depth, sample_type, contains("toc")) # select toc stuff
     } else if (unique(x$analyte == "metals")) { # if contains metals
       x %>% select(lake_id, site_id, sample_depth, sample_type, 
-                   ni, ni_flag, ni_units, # if ni in matches, also grabs units (i.e. doc_units)
-                   s, s_flag, s_units, # if s in matches, grabs too many variable
+                   ni, ni_flag, 
+                   ni_bql, ni_units, # if ni in matches, also grabs units (i.e. doc_units)
+                   s, s_flag, 
+                   s_bql, s_units, # if s in matches, grabs too many variable
                    matches("(al|as|ba|be|ca|cd|cr|cu|fe|k|li|mg|mn|na|p|pb|sb|si|sn|sr|v|zn)")) # select metals stuff
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type
@@ -178,22 +187,34 @@ tteb.all <- tteb.all %>%
   mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # remove non numeric chars
   # rename the toc and doc fields to enable a clean join with other objects containing
   # TOC data (i.e. oc.ada, masi.toc). DOC data (ada.oc). See mergeChemistry.R
-  rename(tteb.toc = toc, # rename these fields for the full_join in the merge script
-         tteb.toc_units = toc_units, 
-         tteb.toc_flag = toc_flag,
-         tteb.doc = doc,
-         tteb.doc_units = doc_units,
-         tteb.doc_flag = doc_flag) %>%
   # Unite all of the _flag, _qual, and _bql columns
-  unite("tteb.toc_flags", toc_flag, toc_bql)  %>%
-  unite("tteb.doc_flags", doc_flag, doc_bql)  %>%
-  unite("ni_flags", ni_flag, ni_bql)  %>%
-  unite("s_flags", s_flag, s_bql)  %>%
-  # etc, add all of the analytes. There's probably not a quicker way to do this
-  # without creating a separate vector of analyte names.
-  # Can try the following: tteb %>% select(-lab_id, -sampid, -comment) %>% 
-  # colnames() %>% word(sep = "_") %>% unique() 
-  # But with unite(), I don't think this works
+  # This is ugly. It would be great to do simplify this with a rowwise 
+  # operation, but I can't figure out a way to do it. 
+  unite("tteb.toc_flags", toc_flag, toc_bql, sep = "_")  %>%
+  unite("tteb.doc_flags", doc_flag, doc_bql, sep = "_")  %>%
+  unite("al_flags", al_flag, al_bql, sep = "_")  %>%
+  unite("as_flags", as_flag, as_bql, sep = "_")  %>%
+  unite("ba_flags", ba_flag, ba_bql, sep = "_")  %>%
+  unite("be_flags", be_flag, be_bql, sep = "_")  %>%
+  unite("ca_flags", ca_flag, ca_bql, sep = "_")  %>%
+  unite("cd_flags", cd_flag, cd_bql, sep = "_")  %>%
+  unite("cr_flags", cr_flag, cr_bql, sep = "_")  %>%
+  unite("cu_flags", cu_flag, cu_bql, sep = "_")  %>%
+  unite("fe_flags", fe_flag, fe_bql, sep = "_")  %>%
+  unite("li_flags", li_flag, li_bql, sep = "_")  %>%
+  unite("mg_flags", mg_flag, mg_bql, sep = "_")  %>%
+  unite("mn_flags", mn_flag, mn_bql, sep = "_")  %>%
+  unite("na_flags", na_flag, na_bql, sep = "_")  %>%
+  unite("ni_flags", ni_flag, ni_bql, sep = "_")  %>%
+  unite("p_flags", p_flag, p_bql, sep = "_")  %>%
+  unite("pb_flags", pb_flag, pb_bql, sep = "_")  %>%
+  unite("s_flags", s_flag, s_bql, sep = "_")  %>%
+  unite("sb_flags", sb_flag, sb_bql, sep = "_")  %>%
+  unite("si_flags", si_flag, si_bql, sep = "_")  %>%
+  unite("sn_flags", sn_flag, sn_bql, sep = "_")  %>%
+  unite("sr_flags", sr_flag, sr_bql, sep = "_")  %>%
+  unite("v_flags", v_flag, v_bql, sep = "_")  %>%
+  unite("zn_flags", zn_flag, zn_bql)  %>%
   mutate(across(ends_with("flags"),   # replace any blank _flags with NA
                 ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
                   str_squish(.))) # remove any extra white spaces
