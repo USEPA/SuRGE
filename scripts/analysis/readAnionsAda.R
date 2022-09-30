@@ -402,3 +402,26 @@ ada.anions <- list(jea = list(jea1), key = list(key1),
   select(-starts_with("no"), -starts_with("op")) %>% # remove no2, no3, and op
   arrange(lake_id) 
 
+
+### SAMPLE INVENTORY------------------------------------------------------------
+# ADA anion samples collected, per master sample list (chemSampleList.R)
+ada.anions.collected <- chem.samples.foo %>% 
+  filter(lab == "ADA",
+         analyte_group == "anions") %>%
+  select(lake_id, sample_type, sample_depth, analyte)
+  
+
+# ADA anion samples analyzed
+ada.anions.analyzed <- ada.anions %>% 
+  select(lake_id, sample_type, sample_depth, br, cl, f, so4) %>%
+  pivot_longer(cols = !c(lake_id, sample_type, sample_depth),
+               names_to = "analyte") %>%
+  select(-value)
+
+# Are all collected ADA anion samples in ADA data?
+# [9/30/2022] lake_id 3 and 11.  Waiting for Katie to upload data
+setdiff(ada.anions.collected, ada.anions.analyzed) %>% print(n=Inf)
+
+# Are all analyzed ADA anion samples in list of ADA collected samples?
+# yes
+setdiff(ada.anions.analyzed, ada.anions.collected) %>% print(n=Inf)

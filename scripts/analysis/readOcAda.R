@@ -351,3 +351,27 @@ ada.oc <- list(
   mutate(site_id = as.numeric(site_id)) %>% # make site id numeric
   ungroup()
 
+
+# SAMPLE INVENTORY------------------------------------------------------------
+# ADA OC samples collected, per master sample list (chemSampleList.R)
+ada.oc.collected <- chem.samples.foo %>% 
+  filter(lab == "ADA", # all 2021 nutrients stored and analyzed at ADA
+         analyte_group == "organics") %>%
+  select(lake_id, sample_type, sample_depth, analyte)
+
+
+# ADA OC samples analyzed
+ada.oc.analyzed <- ada.oc %>% 
+  select(lake_id, sample_type, sample_depth, doc, toc) %>%
+  pivot_longer(cols = !c(lake_id, sample_type, sample_depth),
+               names_to = "analyte") %>%
+  select(-value)
+
+# Are all ADA collected OC in ADA data?
+# [9/30/2022] lake_id 3 and 11.  Waiting for Katie to upload data
+setdiff(ada.oc.collected, ada.oc.analyzed) %>% print(n=Inf)
+
+# Are all nutrient samples analyzed at ADA in list of samples sent to ADA?
+# yes
+setdiff(ada.oc.analyzed, ada.oc.collected) %>% print(n=Inf)
+

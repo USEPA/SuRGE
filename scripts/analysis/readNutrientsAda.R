@@ -660,30 +660,31 @@ unique(ada.nutrients$tn_units) # good
 unique(ada.nutrients$tp_units) # good
 unique(ada.nutrients$nh4_units) # good
 unique(ada.nutrients$no2_3_units) # good
-unique(ada.nutrients$no2_units) # includes NA?
-unique(ada.nutrients$no3_units) # includes NA
+unique(ada.nutrients$no2_units) # includes NA, OK
+unique(ada.nutrients$no3_units) # includes NA, OK
 
-# Random inspection
-sample_frac(ada.nutrients, 0.1) %>% select(!contains("units")) %>% print(n=Inf)
+# SAMPLE INVENTORY------------------------------------------------------------
+# ADA nutrient samples collected, per master sample list (chemSampleList.R)
+nutrient.collected.analyzed.ada <- chem.samples.foo %>% 
+  filter(sample_year == 2020 | lab == "ADA", # all 2021 nutrients stored and analyzed at ADA
+         analyte_group == "nutrients") %>%
+  select(lake_id, sample_type, sample_depth, analyte)
 
 
-# # Some unneeded code below to help resolved discrepancy between original and
-# # merged data.
-# 
-# # concatenate unique identifiers in merged data into one column
-# merged.obs <- ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
-#    distinct() %>%
-#    unite("unique", everything()) # concatenate unique identifiers into string
-# 
-# # concatenate unique identifiers in original data into one column
-# original.obs <- list(jea1, jea2, jea3, key1, key2, key3, 
-#                      ove1, ove2, ove3, lmp1, lmp2, lmp3) %>%
-#    map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
-#    map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
-#    distinct() %>% # pull our unique observations
-#    unite("unique", everything()) # concatenate unique identifiers into string
-# 
-# # Which original data observation is missing from the merged data
-# original.obs %>% filter(!(original.obs$unique %in% merged.obs$unique))
+# ADA nutrient samples analyzed
+ada.nutrient.analyzed <- ada.nutrients %>% 
+  select(lake_id, sample_type, sample_depth, op, tn, tp, nh4, no2, no2_3) %>%
+  pivot_longer(cols = !c(lake_id, sample_type, sample_depth),
+               names_to = "analyte") %>%
+  select(-value)
+
+# Are all collected samples that were sent to ADA in ADA data?
+# [9/30/2022] lake_id 3 and 11.  Waiting for Katie to upload data
+setdiff(nutrient.collected.analyzed.ada, ada.nutrient.analyzed) %>% print(n=Inf)
+
+# Are all nutrient samples analyzed at ADA in list of samples sent to ADA?
+# yes
+setdiff(ada.nutrient.analyzed, nutrient.collected.analyzed.ada) %>% print(n=Inf)
+
 
 
