@@ -83,15 +83,14 @@ ttebCoc <- read_excel(paste0(userPath,
   clean_names(.) %>%
   mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))
 
-janitor::get_dupes(ttebCoc, lab_id) # no duplicates
+janitor::get_dupes(ttebCoc, lab_id) # [9/30/22 lab_id == NA for a few sites.  Leah tracking down true value.
 
 
 # 3. REVIEW CHAIN OF CUSTODY-------------
 
 # Compare list of submitted samples to comprehensive sample list
 # print rows in ttebSampleIds not in chem.samples.
-# [July. 14, 2022] No extra samples, all good 
-# Need to update master sample list for 2022
+# [September 30, 2022] extra samples because master sample list hasn't been updated for 2022
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
@@ -142,6 +141,7 @@ tteb.all <- tteb.all %>%
 
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
+# 9/30/2022 no 2022 data available yet, so all 2022 samples show up in this list
 # missing 5 samples, but four of them were due to instrument failure.
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
