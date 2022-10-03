@@ -29,8 +29,8 @@ tteb.SURGE2021 <- read_excel(paste0(userPath,
                                 "data/chemistry/tteb/SURGE_2021_06_30_2022_update.xlsx"))
 
 metals_names <- c("al", "as", "ba", "be", "ca", "cd", "cr", "cu", "fe", "k",  "li", 
-  "mg", "mn", "na", "ni", "pb", "sb", "sr", "v", "zn")
-nonmetals_names <- c("toc", "doc", "s", "p", "si", "sn")
+  "mg", "mn", "na", "ni", "pb", "sb", "sn", "sr", "v", "zn")
+nonmetals_names <- c("toc", "doc", "s", "p", "si")
 analyte_names <- c(metals_names, nonmetals_names)
 
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>% 
@@ -59,7 +59,6 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>%
   mutate(across(ends_with(metals_names), 
                 ~ if_else(. < 0.5 & . > 0 , "L", ""), 
                 # 9/28/2022 we'll probably need to list every analyte here
-                # Also, do we need a _qual column?
                 .names = "{col}_bql")) %>%
   mutate(across(ends_with(nonmetals_names), 
                 ~ if_else(. < 1 & . > 0, "L", ""), 

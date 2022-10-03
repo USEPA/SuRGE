@@ -27,7 +27,7 @@ get_ada_data <- function(path, datasheet) {
     mutate(MDL = as.numeric(MDL)) # covert MDL values to numeric
   
   analyte_names <- row.names(toptable) # pass analyte names to maintable, below
-  
+
   # maintable_1: combine toptable with results, make uppercase, flag lab dups
   
   maintable_1 <- read_excel(paste0(path, datasheet), # get the results
@@ -108,7 +108,7 @@ get_ada_data <- function(path, datasheet) {
     mutate(across(ends_with("analyzed"), # check if hold time violated
                   ~ ifelse(.>28, "H", ""))) %>%
     select(-field_sample_id) # no longer needed
-  
+
   return(maintable_4)
   
 }
@@ -520,6 +520,8 @@ site_id_22 <- function(data) {
     lake_id == "136" ~ "13",
     lake_id == "100" ~ "11",
     lake_id == "206" ~ "2",
+    lake_id == "11" ~ "3",
+    lake_id == "3" ~ "20",
     TRUE ~ "")) # blank if no match; this will only occur if lake_id is missing
   
   return(data)
@@ -595,7 +597,34 @@ op_2022_136_100_206 <-
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
+no2no3nh4_2022_011_003 <- 
+  get_ada_data(cin.ada.path, "EPAGPA081_011_003_NO3+NO2NH4.xlsx") %>%
+  conv_units(filename = "EPAGPA081_011_003_NO3+NO2NH4.xlsx") %>%
+  site_id_22 %>% # add site_id for 2022 samples
+  mutate(sample_filter = "filtered") %>% # # no2 no3 nh4 is filtered
+  dup_agg  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
 
+tntp_2022_011_003 <- 
+  get_ada_data(cin.ada.path, "EPAGPA081_011_003_TN,TP.xls") %>%
+  # Extra steps to deal with the Dissolved N & P columns;
+  # consider making this a function if it occurs in other Excel files
+  rename(TP_analyzed = contains("Dissolved Nitrogen") & 
+           ends_with("analyzed")) %>%
+  select(!contains("issolved")) %>%
+  conv_units(filename = "EPAGPA081_011_003_TN,TP.xls") %>%
+  site_id_22 %>% # add site_id for 2022 samples
+  mutate(sample_filter = "unfiltered") %>% # tn tp is unfiltered
+  dup_agg  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
+
+op_2022_011_003 <- 
+  get_ada_data(cin.ada.path, "EPAGPA081_011_003_oP.xls") %>%
+  conv_units(filename = "EPAGPA081_011_003_oP.xls") %>%
+  site_id_22 %>% # add site_id for 2022 samples
+  mutate(sample_filter = "filtered") %>% # op is filtered
+  dup_agg  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
 
 
 # JOIN ALL DATA OBJECTS------------------------------------------------------------
@@ -611,14 +640,15 @@ ada.nutrients <- list(jea = list(jea1, jea2, jea3),
                                      full_join(op_2022_166, op_2022_184))), 
                       ada22_2 = list(no2no3nh4_2022_136_100_206,
                                      tntp_2022_136_100_206,
-                                     op_2022_136_100_206)) %>% 
+                                     op_2022_136_100_206), 
+                      ada22_3 = list(no2no3nh4_2022_011_003, 
+                                     tntp_2022_011_003, 
+                                     op_2022_011_003)) %>% 
   map_depth(2, ~ select(.x, -sample_filter)) %>%
   map(~ reduce(.x, left_join)) %>%
   reduce(full_join) %>%
   mutate(site_id = as.numeric(site_id)) %>%
   arrange(lake_id) 
-
-
 
 
 # INSPECT FINAL MERGED DATA OBJECT-------------------------------------------
@@ -637,10 +667,13 @@ list(jea1, jea2, jea3, key1, key2, key3,
      op_2022_166, 
      op_2022_184, 
      op_2022_136_100_206, 
+     op_2022_011_003,
      tntp_2022_146_190_184_166,
      tntp_2022_136_100_206,
+     tntp_2022_011_003,
      no2no3nh4_2022_146_190_184_166,
-     no2no3nh4_2022_136_100_206) %>%
+     no2no3nh4_2022_136_100_206, 
+     no2no3nh4_2022_011_003) %>%
   map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
   distinct() %>% # condense to unique observations

@@ -356,6 +356,8 @@ site_id_22 <- function(data) {
       lake_id == "136" ~ "13",
       lake_id == "100" ~ "11",
       lake_id == "206" ~ "2",
+      lake_id == "11" ~ "3",
+      lake_id == "3" ~ "20",
       TRUE ~ "")) # blank if no match; will only occur if lake_id is missing
   
   return(data)
@@ -386,6 +388,13 @@ anions_2022_136_100_206 <-
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
+anions_2022_011_003 <- 
+  get_ada_data(cin.ada.path, "EPAGPA081_011_003_anions.xls") %>%
+  conv_units(filename = "EPAGPA081_011_003_anions.xls") %>%
+  site_id_22 %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
 
 
 
@@ -394,9 +403,10 @@ anions_2022_136_100_206 <-
 # Join all of the data objects
 ada.anions <- list(jea = list(jea1), key = list(key1), 
                    ove = list(ove1), 
-                   ada.22 = list(anions_2022_146_190), 
-                   ada_22 = list(anions_2022_184_166), 
-                      ada_22 = list(anions_2022_136_100_206)) %>% 
+                   ada_22_1 = list(anions_2022_146_190), 
+                   ada_22_2 = list(anions_2022_184_166), 
+                   ada_22_3 = list(anions_2022_136_100_206), 
+                   ada_22_4 = list(anions_2022_011_003)) %>% 
   map(~ reduce(.x, left_join)) %>% 
   reduce(full_join) %>% 
   select(-starts_with("no"), -starts_with("op")) %>% # remove no2, no3, and op
@@ -425,3 +435,4 @@ setdiff(ada.anions.collected, ada.anions.analyzed) %>% print(n=Inf)
 # Are all analyzed ADA anion samples in list of ADA collected samples?
 # yes
 setdiff(ada.anions.analyzed, ada.anions.collected) %>% print(n=Inf)
+

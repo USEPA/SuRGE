@@ -288,6 +288,8 @@ site_id_22 <- function(data) {
       lake_id == "136" ~ "13",
       lake_id == "100" ~ "11",
       lake_id == "206" ~ "2",
+      lake_id == "11" ~ "3",
+      lake_id == "3" ~ "20",
       TRUE ~ "")) # blank if no match; this will only occur if lake_id is missing
   
   return(data)
@@ -332,6 +334,15 @@ oc_2022_206 <-
   conv_units(filename = "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
+
+oc_2022_011_003 <- 
+  get_ada_data(cin.ada.path, "EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
+  site_id_22 %>% # add site_id for 2022 samples
+  conv_units(filename = "EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+
 
 
 # JOIN DATA OBJECTS-------------------------------------------------------------
