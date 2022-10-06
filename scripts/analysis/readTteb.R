@@ -28,10 +28,17 @@ tteb.BEAULIEU <- read_excel(paste0(userPath,
 tteb.SURGE2021 <- read_excel(paste0(userPath, 
                                 "data/chemistry/tteb/SURGE_2021_06_30_2022_update.xlsx"))
 
-metals_names <- c("al", "as", "ba", "be", "ca", "cd", "cr", "cu", "fe", "k",  "li", 
-  "mg", "mn", "na", "ni", "pb", "sb", "sn", "sr", "v", "zn")
-nonmetals_names <- c("toc", "doc", "s", "p", "si")
-analyte_names <- c(metals_names, nonmetals_names)
+# Vectors of analyte names, grouped by reporting limit
+
+analytes_0.05 <- c("f", "cl", "no2", "br", "no3", "po4")
+analytes_0.5 <- c("al", "as", "ba", "be", "ca", "cd", "cr", "cu", "fe", "k",  "li", 
+               "mg", "mn", "na", "ni", "pb", "sb", "sr", "v", "zn", "so4") 
+analytes_1 <-c("toc", "doc")
+analytes_2 <- "sn"
+analytes_4 <- "si"
+analytes_20 <- c("s", "p")
+analyte_names <- c(analytes_0.05, analytes_0.5, 
+                   analytes_1, analytes_2, analytes_4, analytes_20)
 
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>% 
   janitor::clean_names() %>%
@@ -56,12 +63,15 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>%
                 ~ if_else(. < 0 , "ND", ""), # bd reported as -detection limit
                 .names = "{col}_flag")) %>%
   # create 'bql' columns to flag observations < reporting limit. 
-  mutate(across(ends_with(metals_names), 
-                ~ if_else(. < 0.5 & . > 0 , "L", ""), 
-                # 9/28/2022 we'll probably need to list every analyte here
-                .names = "{col}_bql")) %>%
-  mutate(across(ends_with(nonmetals_names), 
-                ~ if_else(. < 1 & . > 0, "L", ""), 
+  mutate(across(contains(analyte_names) & !ends_with(c("flag", "sampid")), 
+                ~ case_when(
+                  cur_column() %in% analytes_0.05 & . < 0.05 & . > 0 ~ "L",
+                  cur_column() %in% analytes_0.5 & . < 0.5 & . > 0 ~ "L", 
+                  cur_column() %in% analytes_1 & . < 1 & . > 0 ~ "L",
+                  cur_column() %in% analytes_2 & . < 2 & . > 0 ~ "L", 
+                  cur_column() %in% analytes_4 & . < 4 & . > 0 ~ "L", 
+                  cur_column() %in% analytes_20 & . < 20 & . > 0  ~ "L", 
+                  TRUE ~ ""),
                 .names = "{col}_bql")) %>%
   # create 'units' columns. Most units in mg/L 
   mutate(across(ends_with(analyte_names), # 
@@ -193,8 +203,7 @@ tteb.all <- tteb.all %>%
   # rename the toc and doc fields to enable a clean join with other objects containing
   # TOC data (i.e. oc.ada, masi.toc). DOC data (ada.oc). See mergeChemistry.R
   # Unite all of the _flag, _qual, and _bql columns
-  # This is ugly. It would be great to do simplify this with a rowwise 
-  # operation, but I can't figure out a way to do it. 
+  # I haven't figured out a way to simplify the following code...
   unite("tteb.toc_flags", toc_flag, toc_bql, sep = " ")  %>%
   unite("tteb.doc_flags", doc_flag, doc_bql, sep = " ")  %>%
   unite("al_flags", al_flag, al_bql, sep = " ")  %>%
@@ -206,6 +215,7 @@ tteb.all <- tteb.all %>%
   unite("cr_flags", cr_flag, cr_bql, sep = " ")  %>%
   unite("cu_flags", cu_flag, cu_bql, sep = " ")  %>%
   unite("fe_flags", fe_flag, fe_bql, sep = " ")  %>%
+  unite("k_flags", k_flag, k_bql, sep = " ")  %>%
   unite("li_flags", li_flag, li_bql, sep = " ")  %>%
   unite("mg_flags", mg_flag, mg_bql, sep = " ")  %>%
   unite("mn_flags", mn_flag, mn_bql, sep = " ")  %>%
