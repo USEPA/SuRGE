@@ -124,9 +124,9 @@ ggsave(filename="output/figures/surgeMainSitesByLab.tiff",
 ggplot() +
   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.5) +
-  geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3) + # see dsgn.R
+  geom_sf(data = filter(dsn, !is.na(sample_year), !grepl(pattern = c("253|331|302|308|999"), site_id)), size = 2) + # see dsgn.R. remove extra R10 sites.  See wiki
   scale_fill_manual("Ecoregion", values = cols) +
-  ggtitle("SuRGE Sample Sites") +
+  #ggtitle("SuRGE Sample Sites") +
 theme_bw() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -140,8 +140,8 @@ theme_bw() +
         panel.border = element_blank(),
         plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
         legend.position = c(1.08, .5), # move legend to immediate right of plot  
-        legend.text = element_text(size = 6),
-        legend.title = element_text(size = 6),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8),
         legend.key.size = unit(0.5, "cm")) 
 
 
