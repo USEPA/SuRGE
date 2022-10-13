@@ -8,7 +8,8 @@
 
 # READ DATA -----------------
 # List of .txt files containing data 
-txtFiles <- list.files(paste0(userPath,"data/ADA"), 
+
+txtFiles <- list.files(paste0(userPath,"data/CIN"), 
                        pattern=c("gga|micro"), recursive = TRUE) # per B.3.5.2, files should contain 'gga' or 'micro'
 
 # Directories contain _s, _l, and _b files that don't contain data of interest.
@@ -25,7 +26,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
     # I think this will work for all UGGA files.  The colClasses argument skips the final 71 columns of data.
     # this is needed because one analyzer produces empty columns, while the other doesn't.  This will throw
     # warning message for smaller file, but that is ok.
-  gga.i <- read.table(paste("../../../data/ADA/", 
+  gga.i <- read.table(paste("../../../data/CIN/", 
                             txtFiles[i], sep=""),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info
@@ -43,7 +44,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
 # MGGA FORMAT
 if (grepl(pattern = "micro", x = txtFiles[i])) { 
   # slightly different colClasses values.
-  gga.i <- read.table(paste0(userPath,"data/ADA/", 
+  gga.i <- read.table(paste0(userPath,"data/CIN/", 
                             txtFiles[i]),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info

@@ -24,8 +24,10 @@ lake.list.chem <- lake.list %>% # see readSurgeLakes.R
 
 # 2. filter comprehensive lake list to lakes that have been sampled
 lake.list.chem <- lake.list.chem %>% 
-  filter(sample_year <= 2021, # lakes sampled in or before 2021
-         !grepl(c("PI|LD|TR"), sample_year)) # exclude inacessible lakes (may not be necessary)
+  filter(sample_year <= 2022, # lakes sampled in or before 2022
+         !grepl(c("PI|LD|TR"), sample_year), # exclude inaccessible lakes (may not be necessary)
+         !(lake_id == "250" & visit == 1), # chem samples from 250 visit 1 were lost
+         !(lake_id == "281" & visit == 1)) # chem samples from 281 visit 1 were lost
 
 # 3. qa.qc lakes had blanks and dups collected. This must be reflected in final
 # df of collected samples.  Read list of qa.qc lakes.
@@ -35,13 +37,13 @@ qa.qc <- readxl::read_excel(paste0(userPath,
   mutate(qa_qc = 1) # column indicating qa.qc samples collected
 
 # merge qa.qc with lake.list.chem
-nrow(lake.list.chem) # 68
+nrow(lake.list.chem) # 99
 lake.list.chem <- left_join(lake.list.chem, qa.qc) # keep all 
-nrow(lake.list.chem) # 68
+nrow(lake.list.chem) # 199
 
 # 4. create vectors of analyte groups.
 nutrients <- c("nh4", "no2_3", "no2", "tn", "tp", "op")
-anions <- c("fluoride", "cl", "br", "so4")
+anions <- c("f", "cl", "br", "so4")
 organics <- c("doc", "toc")
 metals <- c("al", "as", "ba", "be", "ca",  
             "cd", "cr", "cu", "fe",
@@ -63,21 +65,27 @@ qa.qc.samples <- expand.grid(lake_id = lake.list.chem %>% # lake_id for all samp
                                          metals, algae.nar), # no qa.qc for algae.gb analytes
                              sample_depth = "shallow", # qa.qc only collected from shallow depth
                              stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
-  mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank")) %>% # blank depth = blank
+  mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank"), # blank depth = blank
+         visit = case_when(lake_id == 281 ~ 2, # qa.qc collected from 281 on visit == 2
+                           TRUE ~ 1)) %>% # all others collectec on visit == 1
   arrange(lake_id)
 
 # 6. create df of samples collected from all lakes
 # 2018 (R10) and 2020 sampling (CIN, RTP, R10) did not include doc, anions, 
 # taxonomy, physiology.  Adjust for this below.
-unknown.samples <- expand.grid(lake_id = lake.list.chem$lake_id, # lake_id for all sampled lakes
+
+# lake_id for all sampled lakes.
+unknown.samples <- expand.grid(lake_id = lake.list.chem$lake_id, 
                                sample_type = "unknown", # unknowns collected at all lakes
                                analyte = c(nutrients, anions, organics, 
                                            metals, algae.nar, algae.gb),
                                sample_depth = c("shallow", "deep"),
+                               visit = 1, 
                                stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
   # algal indicator samples not collected at depth.  Filter out
   filter(!(sample_depth == "deep" & analyte %in% c(algae.nar, algae.gb))) %>%
   arrange(lake_id)
+
 
 # 7. Combine df of qa.qc and df of unknowns.  Merge 'lab' and 'sample_year' fields
 # from lake.list.
@@ -146,5 +154,5 @@ wpl <- chem.samples.foo %>% filter(lake_id == "308") %>%
   mutate(sample_type = "blank", sample_depth = "blank")  
 
 # Bind these dfs to main df
-chem.samples.foo <- rbind(chem.samples.foo, lgr, wpl)
+chem.samples.foo <- rbind(chem.samples.foo, lgr, wpl) %>% as_tibble()
                                      

@@ -6,5 +6,11 @@ lake.list <- readxl::read_excel(paste0(userPath,
   dplyr::rename(lake_id = site_id) %>%
   dplyr::rename(nla_id = site_id_2) %>%
   mutate(lake_id = substr(lake_id, 5, 8) %>% # extract numeric part of lake_id
-           as.numeric()) #convert lake_id to numeric
+           as.numeric(), #convert lake_id to numeric
+         visit = 1) # all lakes except 250 and 281 were only visited once.  250/281 handled below
 
+# Add visit 2 for 250 and 281
+lake.list <- lake.list %>% 
+  filter(lake_id == 250 | lake_id == 281) %>% # pull out rows for 250 and 281
+  mutate(visit = 2) %>% # change visit to vist == 2
+  bind_rows(lake.list) # add two new rows to original df
