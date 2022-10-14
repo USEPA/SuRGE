@@ -1,6 +1,7 @@
 .Rhistory
 *.Rproj
 .Rproj.user
+.RData
 
 # too big for github
 inputData/lMorpho

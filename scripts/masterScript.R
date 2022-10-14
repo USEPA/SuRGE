@@ -7,9 +7,11 @@ source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 source("scripts/analysis/readSurgeLakes.R") # read in survey design file
 source("scripts/analysis/chemSampleList.R") # creates chem.samples.foo, an inventory of all collected chem sample
 
-
-# Read field sheets and chemistry
+# Read field sheets and merge sample dates
 source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
+source("scripts/analysis/sampleDates.R") # df of lake_id, visit, and sample_date [10/14/22 - this object might not be needed]
+
+# Read chemistry
 source("scripts/analysis/readAnionsAda.R") # read ADA lab anions.  ada.anions
 source("scripts/analysis/readAnionsDaniels.R") # read Kit Daniels anions. d.anions
 source("scripts/analysis/readNutrientsAda.R") # read nutrients ran in ADA lab. ada.nutrients

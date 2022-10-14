@@ -8,7 +8,7 @@ nar.samples <- read_excel(paste0(userPath,
                                  "narSampleReceiptList.xlsx"))
 
 # Were all samples received expected?  Compare list of received samples to 
-# those expected [3/29/2022]
+# those expected [10/14/2022]
 setdiff(nar.samples[c("lake_id", "analyte", "sample_type")],
         chem.samples.foo[c("lake_id", "analyte", "sample_type")]) %>% print(n=Inf)
 
@@ -67,6 +67,7 @@ get_phyco_data <- function(path, data, sheet) {
     mutate(units = "ug_l") %>% # to match naming conventions
     
     # PLACEHOLDERS until data available 
+    # See https://github.com/jhollist/surge_algal/issues
     mutate(phycocyanin_qual = "H") %>% # qual (holding time) flag
     mutate(phycocyanin_ship = "S") %>% # shipping flag 
     

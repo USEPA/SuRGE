@@ -39,7 +39,7 @@ qa.qc <- readxl::read_excel(paste0(userPath,
 # merge qa.qc with lake.list.chem
 nrow(lake.list.chem) # 99
 lake.list.chem <- left_join(lake.list.chem, qa.qc) # keep all 
-nrow(lake.list.chem) # 199
+nrow(lake.list.chem) # 99
 
 # 4. create vectors of analyte groups.
 nutrients <- c("nh4", "no2_3", "no2", "tn", "tp", "op")
@@ -67,7 +67,7 @@ qa.qc.samples <- expand.grid(lake_id = lake.list.chem %>% # lake_id for all samp
                              stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
   mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank"), # blank depth = blank
          visit = case_when(lake_id == 281 ~ 2, # qa.qc collected from 281 on visit == 2
-                           TRUE ~ 1)) %>% # all others collectec on visit == 1
+                           TRUE ~ 1)) %>% # all others collected on visit == 1
   arrange(lake_id)
 
 # 6. create df of samples collected from all lakes

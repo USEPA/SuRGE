@@ -93,13 +93,6 @@
       "Repository": "CRAN",
       "Hash": "e652f23d8b1807cc975c51410d05b72f"
     },
-    "RgoogleMaps": {
-      "Package": "RgoogleMaps",
-      "Version": "1.4.5.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "bffdcd07380ea0a95228588f8aa93734"
-    },
     "USAboundaries": {
       "Package": "USAboundaries",
       "Version": "0.3.1",
@@ -141,13 +134,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "543776ae6848fde2f48ff3816d0628bc"
-    },
-    "bitops": {
-      "Package": "bitops",
-      "Version": "1.0-7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b7d8d8ee39869c18d8846a184dd8a1af"
     },
     "brew": {
       "Package": "brew",
@@ -413,13 +399,6 @@
       "Repository": "CRAN",
       "Hash": "22149e0e0ea1cb4725b15d05ee6ed01f"
     },
-    "ggmap": {
-      "Package": "ggmap",
-      "Version": "3.0.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "d3a9b5042c577ee6d4ec7b18352098ea"
-    },
     "ggplot2": {
       "Package": "ggplot2",
       "Version": "3.3.0",
@@ -468,13 +447,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "e3f662e125e9fdffd1ee4e94baea3451"
-    },
-    "hexbin": {
-      "Package": "hexbin",
-      "Version": "1.27.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "e48c58b786b0a0481cea91032bc71441"
     },
     "highr": {
       "Package": "highr",
@@ -772,10 +744,10 @@
     },
     "plotly": {
       "Package": "plotly",
-      "Version": "4.9.0",
+      "Version": "4.10.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "286590ead74fada39b8dc0b47e118b0b"
+      "Hash": "fbb11e44d057996ca5fe40d959cacfb0"
     },
     "plyr": {
       "Package": "plyr",
@@ -896,26 +868,12 @@
       "Repository": "CRAN",
       "Hash": "bb5996d0bd962d214a11140d77589917"
     },
-    "rgdal": {
-      "Package": "rgdal",
-      "Version": "1.5-28",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "0f625c5c628af2955aef2c561413ee30"
-    },
     "rgeos": {
       "Package": "rgeos",
       "Version": "0.5-2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "dc2f6aa3dcc81a47fee312acd9afa2b0"
-    },
-    "rjson": {
-      "Package": "rjson",
-      "Version": "0.2.20",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "7d597f982ee6263716b6a2f28efd29fa"
     },
     "rlang": {
       "Package": "rlang",
