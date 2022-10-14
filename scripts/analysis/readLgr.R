@@ -9,7 +9,7 @@
 # READ DATA -----------------
 # List of .txt files containing data 
 
-txtFiles <- list.files(paste0(userPath,"data/CIN"), 
+txtFiles <- list.files(paste0(userPath,"data/NAR"), 
                        pattern=c("gga|micro"), recursive = TRUE) # per B.3.5.2, files should contain 'gga' or 'micro'
 
 # Directories contain _s, _l, and _b files that don't contain data of interest.
@@ -26,7 +26,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
     # I think this will work for all UGGA files.  The colClasses argument skips the final 71 columns of data.
     # this is needed because one analyzer produces empty columns, while the other doesn't.  This will throw
     # warning message for smaller file, but that is ok.
-  gga.i <- read.table(paste("../../../data/CIN/", 
+  gga.i <- read.table(paste("../../../data/NAR/", 
                             txtFiles[i], sep=""),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info
@@ -101,13 +101,13 @@ ggsave("output/figures/co2profile.tiff")
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lakeId == "190") %>%
+plotCh4 <- gga %>% filter(lakeId == "066") %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
   ggtitle("190")
 ggplotly(plotCh4)  
   
-plotCo2 <- gga %>% filter(lakeId == "190") %>%
+plotCo2 <- gga %>% filter(lakeId == "066") %>%
   ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   ggtitle("190")
