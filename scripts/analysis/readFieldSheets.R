@@ -82,7 +82,12 @@ get_data_sheet <- function(paths){
 }
 
 # 3. Read 'data' tab of surgeData files.
-fld_sheet <- get_data_sheet(paths = paths)
+fld_sheet <- get_data_sheet(paths = paths) %>%
+  mutate(visit = if_else(lake_id %in% c("281", "250") & 
+                           between(trap_deply_date, 
+                                   as.Date("2022-08-15"), 
+                                   as.Date("2022-09-15")),
+                         2, 1, missing = 1))
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
 get_dg_sheet <- function(paths){

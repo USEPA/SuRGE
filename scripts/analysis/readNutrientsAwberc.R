@@ -91,14 +91,19 @@ get_awberc_data <- function(path, data, sheet) {
            sample_type = type, 
            rep = rep_number) %>%
     mutate(nutrients_qual = if_else( # determine if holding time exceeded
-      (as.Date(ddate) - as.Date(rdate)) > 28, "H", NA_character_)) %>% # TRUE = hold time violation
+      (as.Date(ddate) - as.Date(rdate)) > 28, "H", NA_character_)) %>% # TRUE = hold time violation 
+    mutate(visit = if_else(lake_id %in% c("281", "250") & 
+                             between(rdate, 
+                                     as.Date("2022-08-15"), 
+                                     as.Date("2022-09-15")),
+                           2, 1, missing = 1)) %>%
     mutate(finalConc = ifelse( # correct TP and TN are in tp_tn
       analyte %in% c("TP", "TN"),
       tp_tn,
       finalConc)) %>%  
     filter(sample_type != "SPK", # exclude matrix spike
            sample_type != "CHK") %>% # exclude standard check
-    select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual, rep) %>% # keep only needed fields
+    select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual, rep, visit) %>% # keep only needed fields
     mutate(analyte = str_to_lower(analyte)) %>% # make analyte names lowercase
     mutate(analyte = case_when( # change analyte names where necessary
       analyte == "trp" ~ "op",
@@ -220,7 +225,7 @@ dup_agg <- function(data) {
       analyte_flag == "L" ~ 100,
       analyte_flag ==  "" ~ NA_real_)) %>% # convert to numeric
     group_by(lake_id, site_id, analyte, sample_depth, 
-             sample_type, rep, nutrients_qual, units) %>%
+             sample_type, rep, nutrients_qual, units, visit) %>%
     summarize(value = mean(finalConc, na.rm = TRUE), # group and calculate means
               analyte_flag = mean(analyte_flag, na.rm = TRUE)) %>% # any group with NA will return NA
     mutate(sample_type = case_when(
