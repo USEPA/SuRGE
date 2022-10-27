@@ -91,7 +91,8 @@ get_awberc_data <- function(path, data, sheet) {
            sample_type = type, 
            rep = rep_number) %>%
     mutate(nutrients_qual = if_else( # determine if holding time exceeded
-      (as.Date(ddate) - as.Date(rdate)) > 28, "H", NA_character_)) %>% # TRUE = hold time violation 
+      (as.Date(ddate) - as.Date(rdate)) > 28, 
+      "H", NA_character_)) %>% # TRUE = hold time violation 
     mutate(visit = if_else(lake_id %in% c("281", "250") & 
                              between(rdate, 
                                      as.Date("2022-08-15"), 
@@ -103,7 +104,8 @@ get_awberc_data <- function(path, data, sheet) {
       finalConc)) %>%  
     filter(sample_type != "SPK", # exclude matrix spike
            sample_type != "CHK") %>% # exclude standard check
-    select(lake_id, site_id, crossid, sample_type, analyte, finalConc, nutrients_qual, rep, visit) %>% # keep only needed fields
+    select(lake_id, site_id, crossid, sample_type, analyte, 
+           finalConc, nutrients_qual, rep, visit) %>% # keep only needed fields
     mutate(analyte = str_to_lower(analyte)) %>% # make analyte names lowercase
     mutate(analyte = case_when( # change analyte names where necessary
       analyte == "trp" ~ "op",

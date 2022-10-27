@@ -39,7 +39,6 @@ paths <- paste0(userPath,  "data/", labs)
 #    mylist.data[[i]] <- data.i
 #  }
 
-
 # 2. Function for reading 'data' tab of surgeData files.
 
 get_data_sheet <- function(paths){
@@ -55,30 +54,30 @@ get_data_sheet <- function(paths){
     # remove empty dataframes.  Pegasus put empty Excel files in each lake
     # folder at begining of season.  These files will be populated eventually,
     # but are causing issues with code below
-    purrr::discard(~ nrow(.x) == 0) %>% 
+    purrr::discard(~ nrow(.x) == 0) #%>% 
     # format data
-    map(., function(x){
-      janitor::clean_names(x) %>%
-        # format lake_id and site_id.  See Wiki
-        mutate(lake_id = as.character(lake_id) %>%
-                 tolower(.) %>% # i.e. Lacustrine -> lacustrine
-                 str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
-                 str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
-               site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
-               long = case_when(long > 0 ~ long * -1, # longitude should be negative
-                                TRUE ~ long),
-                across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
-        # Format date and time objects
-        mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
-               across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
-               trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
-                                                 format = "%Y-%m-%d%H:%M:%S",
-                                                 tz = "UTC"),
-               chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
-                                                  format = "%Y-%m-%d%H:%M:%S",
-                                                  tz = "UTC"))
-    }) %>%
-    map_dfr(., identity) # rbinds into one df
+    # map(., function(x){
+    #   janitor::clean_names(x) %>%
+    #     # format lake_id and site_id.  See Wiki
+    #     mutate(lake_id = as.character(lake_id) %>%
+    #              tolower(.) %>% # i.e. Lacustrine -> lacustrine
+    #              str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
+    #              str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
+    #            site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
+    #            long = case_when(long > 0 ~ long * -1, # longitude should be negative
+    #                             TRUE ~ long),
+    #            across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
+    #     # Format date and time objects
+    #     mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+    #            across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
+    #            trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+    #                                              format = "%Y-%m-%d%H:%M:%S",
+    #                                              tz = "UTC"),
+    #            chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
+    #                                               format = "%Y-%m-%d%H:%M:%S",
+    #                                               tz = "UTC"))
+    # }) %>%
+    # map_dfr(., identity) # rbinds into one df
 }
 
 # 3. Read 'data' tab of surgeData files.
@@ -98,7 +97,7 @@ get_dg_sheet <- function(paths){
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     
     # map will read each file in fs_path list generated above
-    purrr::map(~read_excel(., skip = 1, sheet = "dissolved.gas", 
+    purrr::map(~ read_excel(., skip = 1, sheet = "dissolved.gas", 
                            na = c("NA", "", "N/A", "n/a"))) %>%
     # remove empty dataframes.  Pegasus put empty Excel files in each lake
     # folder at begining of season.  These files will be populated eventually,
@@ -122,11 +121,29 @@ dg_sheet <- get_dg_sheet(paths = paths)
 
 dg_sheet %>% print(n=Inf)
 
-dg_sheet %>% filter(is.na(atm_pressure) | is.na(air_temperature) | is.na(water_vol) | is.na(air_vol)) %>%
+dg_sheet %>% filter(is.na(atm_pressure) | is.na(air_temperature) | 
+                      is.na(water_vol) | is.na(air_vol)) %>%
   distinct(lake_id) %>% print(n=Inf)
 
+# Create vector of exetainers from Lakes 250 & 281 for 2022 2nd visit
+visit2 <- c("SG220986", "SG220987", "SG220988", "SG220991", "SG220992", 
+            "SG220993", "SG220997", "SG220998", "SG220999", "SG220994", 
+            "SG220995", "SG220996", "SG220659", "SG220660", "SG220661", 
+            "SG220653", "SG220654", "SG220655", "SG220972", "SG220973", 
+            "SG220974", "SG220975", "SG220976", "SG220977", "SG220983", 
+            "SG220984", "SG220985", "SG220981", "SG220982", "SG220978", 
+            "SG220979", "SG220980", "SG220989", "SG220990", "SG221076", 
+            "SG221084", "SG221082", "SG220941", "SG220942", "SG220943", 
+            "SG220669", "SG220670", "SG220671", "SG220666", "SG220667", 
+            "SG220668", "SG220944", "SG220945", "SG220946", "SG220938", 
+            "SG220939", "SG220940", "SG220947","SG220948")
 
+# Modify dg_sheet: add visit column based on exetainer numbers
 
+dg_sheet <- dg_sheet %>%
+  mutate(visit = case_when(
+    dg_extn %in% visit2 ~ 2, 
+    TRUE ~ 1))
 
 # right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
 
@@ -141,12 +158,13 @@ dim(trap.air.extList) #1036,9
 dim(dg.extList) #364,3
 
 extList <- full_join(trap.air.extList, dg.extList) %>% 
-  pivot_longer(!c(lake_id, site_id, trap_deply_date), names_to = "extn") %>% # pivot to longer
+  pivot_longer(!c(lake_id, site_id, trap_deply_date), 
+               names_to = "extn") %>% # pivot to longer
   mutate(extn = case_when(grepl("trap", extn) ~ "trap",
                           grepl("air", extn) ~ "air",
                           grepl("dg", extn) ~ "dg",
                           TRUE ~ "poo")) %>%
-        filter(!is.na(value)) %>%
+  filter(!is.na(value)) %>%
   distinct() #1375
 
 
@@ -163,7 +181,8 @@ extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 
 extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
   select(lake_id) %>%
   distinct(.) # 38 lakes
-  
+
+
 
 # #################################################################
 # ######CODE BELOW NOT YET UPDATED FOR SURGE#######################

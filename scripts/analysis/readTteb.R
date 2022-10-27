@@ -43,7 +43,7 @@ analyte_names <- c(analytes_0.05, analytes_0.5,
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
-  select(-colldate, -studyid, -tn, -flag) %>% # remove unneeded columns
+  select(-studyid, -tn, -flag) %>% # remove unneeded columns
   rename(lab_id = labid,
          toc = toc_comb) %>%
   
@@ -138,6 +138,13 @@ nrow(tteb.all) # 347 records [7/20/2022]
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
 tteb.all <- tteb.all %>%
+  # Add the visit field
+  mutate(visit = if_else(lake_id %in% c("281", "250") & 
+                           between(colldate, 
+                                   as.Date("2022-08-15"), 
+                                   as.Date("2022-09-15")),
+                         2, 1, missing = 1)) %>% 
+  select(-colldate) %>% # Colldate no longer needed
   mutate(doc = case_when(analyte == "doc" ~ toc,
                          TRUE ~ NA_real_),
          doc_units = "mg_c_l",
@@ -176,11 +183,11 @@ tteb.all <- tteb.all %>%
   group_split(analyte) %>% # split by analyte
   map(., function(x) 
     if (unique(x$analyte == "doc")) { # if contains doc
-      x %>% select(lake_id, site_id, sample_depth, sample_type, contains("doc")) # select doc stuff
+      x %>% select(lake_id, site_id, sample_depth, sample_type, visit, contains("doc")) # select doc stuff
     } else if (unique(x$analyte == "toc")) { # if contains toc
-      x %>% select(lake_id, site_id, sample_depth, sample_type, contains("toc")) # select toc stuff
+      x %>% select(lake_id, site_id, sample_depth, sample_type, visit, contains("toc")) # select toc stuff
     } else if (unique(x$analyte == "metals")) { # if contains metals
-      x %>% select(lake_id, site_id, sample_depth, sample_type, 
+      x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
                    ni, ni_flag, 
                    ni_bql, ni_units, # if ni in matches, also grabs units (i.e. doc_units)
                    s, s_flag, 
