@@ -54,30 +54,30 @@ get_data_sheet <- function(paths){
     # remove empty dataframes.  Pegasus put empty Excel files in each lake
     # folder at begining of season.  These files will be populated eventually,
     # but are causing issues with code below
-    purrr::discard(~ nrow(.x) == 0) #%>% 
+    purrr::discard(~ nrow(.x) == 0) %>% 
     # format data
-    # map(., function(x){
-    #   janitor::clean_names(x) %>%
-    #     # format lake_id and site_id.  See Wiki
-    #     mutate(lake_id = as.character(lake_id) %>%
-    #              tolower(.) %>% # i.e. Lacustrine -> lacustrine
-    #              str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
-    #              str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
-    #            site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
-    #            long = case_when(long > 0 ~ long * -1, # longitude should be negative
-    #                             TRUE ~ long),
-    #            across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
-    #     # Format date and time objects
-    #     mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
-    #            across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
-    #            trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
-    #                                              format = "%Y-%m-%d%H:%M:%S",
-    #                                              tz = "UTC"),
-    #            chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
-    #                                               format = "%Y-%m-%d%H:%M:%S",
-    #                                               tz = "UTC"))
-    # }) %>%
-    # map_dfr(., identity) # rbinds into one df
+    map(., function(x){
+      janitor::clean_names(x) %>%
+        # format lake_id and site_id.  See Wiki
+        mutate(lake_id = as.character(lake_id) %>%
+                 tolower(.) %>% # i.e. Lacustrine -> lacustrine
+                 str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
+                 str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
+               site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
+               long = case_when(long > 0 ~ long * -1, # longitude should be negative
+                                TRUE ~ long),
+               across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
+        # Format date and time objects
+        mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+               across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
+               trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                                 format = "%Y-%m-%d%H:%M:%S",
+                                                 tz = "UTC"),
+               chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
+                                                  format = "%Y-%m-%d%H:%M:%S",
+                                                  tz = "UTC"))
+    }) %>%
+    map_dfr(., identity) # rbinds into one df
 }
 
 # 3. Read 'data' tab of surgeData files.

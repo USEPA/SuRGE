@@ -304,9 +304,8 @@ chem22 <- get_awberc_data(cin.awberc.path,
                           "2022 Data") 
 
 chemCinNutrients <- bind_rows(chem21, chem22) %>%
-  dup_agg(.) %>% # final object, cast to wide with dups aggregated
-  flag_agg(.)
-
+  dup_agg() %>% # final object, cast to wide with dups aggregated
+  flag_agg()
 
 
 # Sample inventory----------------------

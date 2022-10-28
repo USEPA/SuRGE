@@ -42,7 +42,9 @@ list(ada.anions, d.anions, ada.nutrients, chem21, chem18,
 # are the unique IDs formatted identically across the dfs? yes
 list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
-  map(., function(x) select(x, lake_id, site_id, sample_depth, sample_type) %>% str(.))
+  map(., function(x) select(
+    x, lake_id, site_id, sample_depth, sample_type) %>% 
+      str(.))
 
 
 # Merge objects----
@@ -54,23 +56,27 @@ list(ada.anions, d.anions, ada.nutrients, chem21, chem18,
 # that, we can join together the nutrient, anion, chlorophyll....objects.
 
 # merge objects one at a time to check duplicates
-nutrients1 <- chem21 %>%
-  full_join(chem18) 
-janitor::get_dupes(select(nutrients1, lake_id, site_id, sample_depth, sample_type)) 
+nutrients1 <- chemCinNutrients %>%
+  full_join(chem18)
+janitor::get_dupes(
+  select(nutrients1, lake_id, site_id, sample_depth, sample_type, visit)) 
 
 nutrients2 <- nutrients1 %>%
   full_join(ada.nutrients)
-janitor::get_dupes(select(nutrients2, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(nutrients2, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dupes
 
 anions <- ada.anions %>%
   full_join(d.anions.aggregated)
-janitor::get_dupes(select(anions, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(anions, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
 
 oc <- ada.oc %>%
   full_join(toc.masi)
-janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(oc, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
 
 pigments <- chl18 %>%
@@ -79,20 +85,24 @@ janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type))
 
 metal.pig <- tteb.all %>%
   full_join(pigments)
-janitor::get_dupes(select(metal.pig, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(metal.pig, lake_id, site_id, sample_depth, sample_type, visit)) 
 
 metal.pig.oc <- metal.pig %>%
   full_join(oc)
-janitor::get_dupes(select(metal.pig.oc, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(metal.pig.oc, lake_id, site_id, sample_depth, sample_type, visit)) 
 
 
 metal.pig.oc.anions <- metal.pig.oc %>%
   full_join(anions)
-janitor::get_dupes(select(metal.pig.oc.anions, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(metal.pig.oc.anions, lake_id, site_id, sample_depth, sample_type, visit)) 
 
 chemistry_all <- nutrients2 %>%
   full_join(metal.pig.oc.anions)
-janitor::get_dupes(select(chemistry_all, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(chemistry_all, lake_id, site_id, sample_depth, sample_type, visit)) 
 
 
 
@@ -127,9 +137,10 @@ chemistry_all <- chemistry_all %>%
     TRUE ~ doc_units)) %>%
   select(-contains("tteb"))
 
-janitor::get_dupes(select(chemistry_all, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(
+  select(chemistry_all, lake_id, site_id, sample_depth, sample_type, visit)) 
 
 # arrange columns
 chemistry_all <- chemistry_all %>%
-  relocate(lake_id, site_id, sample_depth, sample_type, shipping_notes, #ID plus rando column
+  relocate(lake_id, site_id, sample_depth, sample_type, visit, shipping_notes, 
            sort(colnames(.))) # others arranged alphabetically

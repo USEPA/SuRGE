@@ -410,6 +410,7 @@ ada.anions <- list(jea = list(jea1), key = list(key1),
   map(~ reduce(.x, left_join)) %>% 
   reduce(full_join) %>% 
   select(-starts_with("no"), -starts_with("op")) %>% # remove no2, no3, and op
+  mutate(site_id = as.numeric(site_id)) %>%
   arrange(lake_id) 
 
 
