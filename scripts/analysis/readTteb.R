@@ -263,7 +263,6 @@ tteb.all <- tteb.all %>%
 # tteb.all <- bind_cols(tteb.all, tteb_flags) %>%
 #   select(-ends_with(c("flag", "bql"))) %>%
 
-temp <- tteb.all
 # 8 CLEAN UP FINAL OBJECT, STEP 2
 tteb.all <- tteb.all %>%
   mutate(across(ends_with("flags"),

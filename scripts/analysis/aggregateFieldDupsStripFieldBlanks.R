@@ -59,11 +59,12 @@
 # Generalize to function----------------
 clean_chem <- function(data) {
   data %>% 
-    rename(no23 = no2_3, no23_flag = no2_3_flag) %>% # temporarily rename the columns w/ 2 underscores
-    mutate(across(contains("flag"), ~ # convert all NA flags to "no value" if corresponding analyte is NA
+    rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores
+    # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC
+    mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
                     ifelse(is.na(get(word(paste(cur_column(), .), sep = "_"))) == TRUE, 
                            "no value", .))) %>%
-    group_by(lake_id, site_id, sample_depth) %>%
+    group_by(lake_id, site_id, sample_depth, visit) %>%
     filter(!(sample_type == "blank")) %>% 
     # site_id is numeric, but ignored below because it is a grouping variable.
     mutate(across(where(is.numeric), mean, na.rm = TRUE),
@@ -79,7 +80,7 @@ clean_chem <- function(data) {
                   ~ ifelse(any(str_detect(., "_") == TRUE), first(str_sort(.)), # if any group has units ("_" detected), use same units  
                                   .))) %>% # if no units in group, no change (i.e., NA)
     filter(!(sample_type == "duplicate")) %>% # now we can remove dups
-    rename(no2_3 = no23, no2_3_flag = no23_flag) %>% # changes columns back to original names in wiki
+    rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
     select(-sample_type) %>% # no longer need sample_type (all unknowns)
     ungroup() %>% # remove grouping
     mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
