@@ -208,9 +208,10 @@ tteb.all <- tteb.all %>%
   mutate(site_id = as.numeric(
     gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # remove non numeric chars
   # rename the toc and doc fields to enable a clean join with other objects containing
-  # TOC data (i.e. oc.ada, masi.toc). DOC data (ada.oc). See mergeChemistry.R
-  # Unite all of the _flag, _qual, and _bql columns
-  # I haven't figured out a way to simplify the following code...
+  rename(tteb.toc = toc, 
+         tteb.doc = doc, 
+         tteb.toc_units = toc_units, 
+         tteb.doc_units = doc_units) %>%
   unite("tteb.toc_flags", toc_flag, toc_bql, sep = " ")  %>%
   unite("tteb.doc_flags", doc_flag, doc_bql, sep = " ")  %>%
   unite("al_flags", al_flag, al_bql, sep = " ")  %>%

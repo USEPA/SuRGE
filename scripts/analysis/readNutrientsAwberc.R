@@ -71,7 +71,7 @@ coc.vector <- coc.list %>%
 get_awberc_data <- function(path, data, sheet) { 
   
   d <- read_excel(paste0(path, data), #
-                  sheet = sheet, skip = 1) %>%  # guess_max = 10000
+                  sheet = sheet, skip = 1, guess_max = 5000) %>%  # guess_max = 10000
   # d <- read_excel(paste0(cin.awberc.path,
   #                        "2021_ESF-EFWS_NutrientData_Updated01272022_AKB.xlsx"), #
   #                 sheet = "2021 Data", skip = 1) %>%
@@ -90,143 +90,143 @@ get_awberc_data <- function(path, data, sheet) {
            site_id = long_id_subid,
            sample_type = type, 
            rep = rep_number) %>%
-    mutate(nutrients_qual = if_else( # determine if holding time exceeded
-      (as.Date(ddate) - as.Date(rdate)) > 28, 
-      "H", NA_character_)) %>% # TRUE = hold time violation 
-    mutate(visit = if_else(lake_id %in% c("281", "250") & 
-                             between(rdate, 
-                                     as.Date("2022-08-15"), 
-                                     as.Date("2022-09-15")),
-                           2, 1, missing = 1)) %>%
-    mutate(finalConc = ifelse( # correct TP and TN are in tp_tn
-      analyte %in% c("TP", "TN"),
-      tp_tn,
-      finalConc)) %>%  
-    filter(sample_type != "SPK", # exclude matrix spike
-           sample_type != "CHK") %>% # exclude standard check
-    select(lake_id, site_id, crossid, sample_type, analyte, 
-           finalConc, nutrients_qual, rep, visit) %>% # keep only needed fields
-    mutate(analyte = str_to_lower(analyte)) %>% # make analyte names lowercase
-    mutate(analyte = case_when( # change analyte names where necessary
-      analyte == "trp" ~ "op",
-      analyte == "tnh4" ~ "nh4",
-      analyte == "tno2" ~ "no2",
-      analyte == "tno2-3" ~ "no2_3",
-      TRUE   ~ analyte)) %>%
-    # strip character values from site_id, convert to numeric
-    mutate(site_id =  as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
-    mutate(sample_type = case_when( # recode sample type identifiers
-      grepl("dup", sample_type, ignore.case = TRUE) ~ "duplicate", # laboratory duplicate
-      grepl("ukn", sample_type, ignore.case = TRUE) ~ "unknown",
-      grepl("blk", sample_type, ignore.case = TRUE) ~ "blank", # field blank
-      TRUE ~ sample_type)) %>%
-    # sample filtered or unfiltered
-    mutate(filter = str_sub(crossid, 1, 1) %>% tolower(.),
-           filter = case_when(
-             filter == "d" ~ "filtered",
-             filter == "t" ~ "unfiltered",
-             TRUE ~ filter)) %>%
-    # define sample depth
-      mutate(sample_depth = str_sub(crossid, 3, nchar(crossid)),
-             sample_depth = case_when(
-               grepl("d", sample_depth, ignore.case = TRUE) ~ "deep",
-               grepl("s", sample_depth, ignore.case = TRUE) ~ "shallow",
-               TRUE ~ sample_depth)) %>%
-    # filtered sample has really high NH4 (59.3), but unfiltered from same depth
-    # has much lower (3.94).  Replacing suspicious value with lower value
-    mutate(finalConc = replace(finalConc,
-                               lake_id == "070 River" & sample_depth == "shallow" & 
-                                 analyte == "nh4" & filter == "filtered", 
-                               3.94)) %>%
-    mutate() %>%
-    # strip out unneeded analyses
-    # exclude filtered samples run for totals
-    filter(!(analyte %in% c("tp", "tn") & filter == "filtered")) %>%
-    # exclude unfiltered samples run for inorganics
-    filter(!(analyte %in% c("nh4", "op", "no2_3", "no2") & filter == "unfiltered")) %>%
-    filter(!(analyte == "turea")) %>% # exclude urea
-    #filter(grepl(pattern = c("CH4|069|070"), lake_id)) %>% # Filter SuRGE data
-    filter(lake_id %in% coc.vector) %>% # Filter SuRGE data, see above
-    mutate(lake_id = str_remove(lake_id, "CH4-")) %>% # standardize lake IDs
-    mutate(lake_id = case_when( # # standardize lake ID sub-component names
-      str_detect(lake_id, "LAC") ~ str_replace(lake_id, " LAC", "_lacustrine"),
-      str_detect(lake_id, "River") ~ str_replace(lake_id, " River", "_riverine"),
-      str_detect(lake_id, "Trans") ~ str_replace(lake_id, " Trans", "_transitional"),
-      lake_id == "70" ~ "70_transitional",
-      lake_id == "69" ~ "69_riverine",
-      TRUE ~ lake_id)) %>%
-    mutate(lake_id = case_when(
-      str_detect(lake_id, "070") ~ str_replace(lake_id, "070", "70"), # need to replace 070 with 70
-      str_detect(lake_id, "069") ~ str_replace(lake_id, "069", "69"), # need to replace 069 with 69
-      str_detect(lake_id, "016") ~ str_replace(lake_id, "016", "16"), # need to replace 016 with 16
-      str_detect(lake_id, "082") ~ str_replace(lake_id, "082", "82"), # need to replace 082 with 82
-      TRUE ~ lake_id)) %>%
-    mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
-    mutate(analyte_flag = case_when( # create the analyte_flag column
-      analyte == "nh4" & finalConc < 6 ~ "ND", 
-      analyte == "no2" & finalConc < 6 ~ "ND",
-      analyte == "no2_3" & finalConc < 6 ~ "ND",
-      analyte == "op" & finalConc < 3 ~ "ND",
-      analyte == "tn" & finalConc < 25 ~ "ND",
-      analyte == "tp" & finalConc < 5 ~ "ND",
-      TRUE ~ "")) %>%
-    mutate(finalConc = case_when( # create the finalConc column
-      analyte == "nh4" & finalConc < 6 ~ 6, 
-      analyte == "no2" & finalConc < 6 ~ 6,
-      analyte == "no2_3" & finalConc < 6 ~ 6,
-      analyte == "op" & finalConc < 3 ~ 3,
-      analyte == "tn" & finalConc < 25 ~ 25,
-      analyte == "tp" & finalConc < 5 ~ 5,
-      TRUE ~ finalConc)) %>%
-    # observations above the MDL, but below the lowest non-zero standard are flagged "L"
-    mutate(analyte_flag = case_when( # create L values in the analyte_flag column
-      analyte == "nh4" & finalConc > 6 & finalConc < 20 ~ "L",
-      analyte == "no2" & finalConc > 6 & finalConc < 20 ~ "L",
-      analyte == "no2_3" & finalConc > 6 & finalConc < 20 ~ "L",
-      analyte == "op" & finalConc > 3 & finalConc < 5 ~ "L",
-      analyte == "tn" & finalConc > 25 & finalConc < 30 ~ "L",
-      analyte == "tp" & finalConc > 5 & finalConc < 5 ~ "L", # the MDL and lowest standard is 5
-      TRUE ~ analyte_flag)) %>%
-    mutate(units = case_when(
-      analyte == "nh4"  ~ "ug_n_l",
-      analyte == "no2"  ~ "ug_n_l",
-      analyte == "no2_3"  ~ "ug_n_l",
-      analyte == "op"  ~ "ug_p_l",
-      analyte == "tn"  ~ "ug_n_l",
-      analyte == "tp"  ~ "ug_p_l",
-      TRUE ~ "")) %>%
-    mutate(sample_type = case_when(
-      sample_type == "duplicate" ~ "unknown",
-      TRUE ~ sample_type)) %>%
-    mutate(sample_depth = case_when(
-      sample_type == "blank" ~ "blank", # see Wiki lake_id, site_id, and sample_depth formats
-      TRUE ~ sample_depth)) %>%
-    mutate(rep = as.character(rep), # 2022 data should all be numeric, but convert to chr for consistency with 2021 and code below
-           rep = case_when(
-      rep == "A" ~ "1", # convert to number for dup_agg function
-      rep == "B" ~ "2",
-      TRUE ~ rep)) %>%
-    select(-crossid)  %>% # no longer need crossid
-    mutate(site_id = as.numeric(site_id)) # convert to numeric to match other chem data 
-  
-    
+  mutate(nutrients_qual = if_else( # determine if holding time exceeded
+    (as.Date(ddate, format = "%Y%m%d") - as.Date(rdate, format = "%m/%d/%Y")) > 28,
+    "H", NA_character_)) %>% # TRUE = hold time violation
+  mutate(visit = if_else(lake_id %in% c("281", "250") &
+                           between(rdate,
+                                   as.Date("2022-08-15"),
+                                   as.Date("2022-09-15")),
+                         2, 1, missing = 1)) %>%
+  mutate(finalConc = ifelse( # correct TP and TN are in tp_tn
+    analyte %in% c("TP", "TN"),
+    tp_tn,
+    finalConc)) %>%
+  filter(sample_type != "SPK", # exclude matrix spike
+         sample_type != "CHK") %>% # exclude standard check
+  select(lake_id, site_id, crossid, sample_type, analyte,
+         finalConc, nutrients_qual, rep, visit) %>% # keep only needed fields
+  mutate(analyte = str_to_lower(analyte)) %>% # make analyte names lowercase
+  mutate(analyte = case_when( # change analyte names where necessary
+    analyte == "trp" ~ "op",
+    analyte == "tnh4" ~ "nh4",
+    analyte == "tno2" ~ "no2",
+    analyte == "tno2-3" ~ "no2_3",
+    TRUE   ~ analyte)) %>%
+  # strip character values from site_id, convert to numeric
+  mutate(site_id =  as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
+  mutate(sample_type = case_when( # recode sample type identifiers
+    grepl("dup", sample_type, ignore.case = TRUE) ~ "duplicate", # laboratory duplicate
+    grepl("ukn", sample_type, ignore.case = TRUE) ~ "unknown",
+    grepl("blk", sample_type, ignore.case = TRUE) ~ "blank", # field blank
+    TRUE ~ sample_type)) %>%
+  # sample filtered or unfiltered
+  mutate(filter = str_sub(crossid, 1, 1) %>% tolower(.),
+         filter = case_when(
+           filter == "d" ~ "filtered",
+           filter == "t" ~ "unfiltered",
+           TRUE ~ filter)) %>%
+  # define sample depth
+    mutate(sample_depth = str_sub(crossid, 3, nchar(crossid)),
+           sample_depth = case_when(
+             grepl("d", sample_depth, ignore.case = TRUE) ~ "deep",
+             grepl("s", sample_depth, ignore.case = TRUE) ~ "shallow",
+             TRUE ~ sample_depth)) %>%
+  # filtered sample has really high NH4 (59.3), but unfiltered from same depth
+  # has much lower (3.94).  Replacing suspicious value with lower value
+  mutate(finalConc = replace(finalConc,
+                             lake_id == "070 River" & sample_depth == "shallow" &
+                               analyte == "nh4" & filter == "filtered",
+                             3.94)) %>%
+  mutate() %>%
+  # strip out unneeded analyses
+  # exclude filtered samples run for totals
+  filter(!(analyte %in% c("tp", "tn") & filter == "filtered")) %>%
+  # exclude unfiltered samples run for inorganics
+  filter(!(analyte %in% c("nh4", "op", "no2_3", "no2") & filter == "unfiltered")) %>%
+  filter(!(analyte == "turea")) %>% # exclude urea
+  #filter(grepl(pattern = c("CH4|069|070"), lake_id)) %>% # Filter SuRGE data
+  filter(lake_id %in% coc.vector) %>% # Filter SuRGE data, see above
+  mutate(lake_id = str_remove(lake_id, "CH4-")) %>% # standardize lake IDs
+  mutate(lake_id = case_when( # # standardize lake ID sub-component names
+    str_detect(lake_id, "LAC") ~ str_replace(lake_id, " LAC", "_lacustrine"),
+    str_detect(lake_id, "River") ~ str_replace(lake_id, " River", "_riverine"),
+    str_detect(lake_id, "Trans") ~ str_replace(lake_id, " Trans", "_transitional"),
+    lake_id == "70" ~ "70_transitional",
+    lake_id == "69" ~ "69_riverine",
+    TRUE ~ lake_id)) %>%
+  mutate(lake_id = case_when(
+    str_detect(lake_id, "070") ~ str_replace(lake_id, "070", "70"), # need to replace 070 with 70
+    str_detect(lake_id, "069") ~ str_replace(lake_id, "069", "69"), # need to replace 069 with 69
+    str_detect(lake_id, "016") ~ str_replace(lake_id, "016", "16"), # need to replace 016 with 16
+    str_detect(lake_id, "082") ~ str_replace(lake_id, "082", "82"), # need to replace 082 with 82
+    TRUE ~ lake_id)) %>%
+  mutate(finalConc = as.numeric(finalConc)) %>% # make analyte values numeric
+  mutate(analyte_flag = case_when( # create the analyte_flag column
+    analyte == "nh4" & finalConc < 6 ~ "ND",
+    analyte == "no2" & finalConc < 6 ~ "ND",
+    analyte == "no2_3" & finalConc < 6 ~ "ND",
+    analyte == "op" & finalConc < 3 ~ "ND",
+    analyte == "tn" & finalConc < 25 ~ "ND",
+    analyte == "tp" & finalConc < 5 ~ "ND",
+    TRUE ~ "")) %>%
+  mutate(finalConc = case_when( # create the finalConc column
+    analyte == "nh4" & finalConc < 6 ~ 6,
+    analyte == "no2" & finalConc < 6 ~ 6,
+    analyte == "no2_3" & finalConc < 6 ~ 6,
+    analyte == "op" & finalConc < 3 ~ 3,
+    analyte == "tn" & finalConc < 25 ~ 25,
+    analyte == "tp" & finalConc < 5 ~ 5,
+    TRUE ~ finalConc)) %>%
+  # observations above the MDL, but below the lowest non-zero standard are flagged "L"
+  mutate(analyte_flag = case_when( # create L values in the analyte_flag column
+    analyte == "nh4" & finalConc > 6 & finalConc < 20 ~ "L",
+    analyte == "no2" & finalConc > 6 & finalConc < 20 ~ "L",
+    analyte == "no2_3" & finalConc > 6 & finalConc < 20 ~ "L",
+    analyte == "op" & finalConc > 3 & finalConc < 5 ~ "L",
+    analyte == "tn" & finalConc > 25 & finalConc < 30 ~ "L",
+    analyte == "tp" & finalConc > 5 & finalConc < 5 ~ "L", # the MDL and lowest standard is 5
+    TRUE ~ analyte_flag)) %>%
+  mutate(units = case_when(
+    analyte == "nh4"  ~ "ug_n_l",
+    analyte == "no2"  ~ "ug_n_l",
+    analyte == "no2_3"  ~ "ug_n_l",
+    analyte == "op"  ~ "ug_p_l",
+    analyte == "tn"  ~ "ug_n_l",
+    analyte == "tp"  ~ "ug_p_l",
+    TRUE ~ "")) %>%
+  mutate(sample_type = case_when(
+    sample_type == "duplicate" ~ "unknown",
+    TRUE ~ sample_type)) %>%
+  mutate(sample_depth = case_when(
+    sample_type == "blank" ~ "blank", # see Wiki lake_id, site_id, and sample_depth formats
+    TRUE ~ sample_depth)) %>%
+  mutate(rep = as.character(rep), # 2022 data should all be numeric, but convert to chr for consistency with 2021 and code below
+         rep = case_when(
+    rep == "A" ~ "1", # convert to number for dup_agg function
+    rep == "B" ~ "2",
+    TRUE ~ rep)) %>%
+  select(-crossid)  %>% # no longer need crossid
+  mutate(site_id = as.numeric(site_id)) # convert to numeric to match other chem data
+
+
   return(d)
-  
-  
+
+
 }
 
 
 # function aggregates lab dups, renames/sorts columns, and casts to wide
-dup_agg <- function(data) { 
+dup_agg <- function(data) {
 
   # aggregate dups and convert analyte_flags to numeric (for summarize operations)
-  
+
   e <- data %>%
     mutate(analyte_flag = case_when(
       analyte_flag ==  "ND" ~ 0,
       analyte_flag == "L" ~ 100,
       analyte_flag ==  "" ~ NA_real_)) %>% # convert to numeric
-    group_by(lake_id, site_id, analyte, sample_depth, 
+    group_by(lake_id, site_id, analyte, sample_depth,
              sample_type, rep, nutrients_qual, units, visit) %>%
     summarize(value = mean(finalConc, na.rm = TRUE), # group and calculate means
               analyte_flag = mean(analyte_flag, na.rm = TRUE)) %>% # any group with NA will return NA
@@ -243,7 +243,7 @@ dup_agg <- function(data) {
                               is.na(.) ~ NA_character_,
                               is.nan(.) ~ NA_character_))) %>%
     mutate(across(starts_with(c("value", "analyte", "units", "nutrients")), # convert NaN values to NA
-                  ~ ifelse(is.nan(.), NA, .))) 
+                  ~ ifelse(is.nan(.), NA, .)))
 
   # rename functions to rename flag, units, and value columns
   flagnamer <- function(data) {str_c(str_remove(data, "analyte_flag_"), "_flag")}
@@ -255,7 +255,7 @@ dup_agg <- function(data) {
   g <- f %>%
     rename_with(flagnamer, .cols = contains("flag")) %>%
     rename_with(unitnamer, .cols = contains("units")) %>%
-    rename_with(qualnamer, .cols = contains("qual")) %>% 
+    rename_with(qualnamer, .cols = contains("qual")) %>%
     rename_with(valunamer, .cols = contains("value")) %>%
     # mutate(duplicate = case_when(
     #   duplicate == 2 ~ "duplicate",
@@ -265,7 +265,7 @@ dup_agg <- function(data) {
     select(lake_id, site_id, sample_depth, sample_type, everything()) %>%
     ungroup() %>%
     select(-rep)
-    
+
   return(g)
 
   

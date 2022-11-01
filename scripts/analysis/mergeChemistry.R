@@ -8,27 +8,27 @@ localName <- if (grepl("JBEAULIE", userPath)) {
   "Joe/"} 
 
 
-# Can source scripts that generate data objects here, or run them from masterScript.R
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
-# data object name: ada.anions
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
-# data object name: d.anions, d anions.aggregated
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
-# data object name: ada.nutrients
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results
-# data object name: chem21
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsR10_2018.R")) # read AWBERC nutrients for 2018 R10
-# data object name: chem18
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcAda.R")) # read ADA TOC/DOC data
-# data object name: ada.oc
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcMasi.R")) # read 2020 TOC run at MASI lab
-# data object name: toc.masi
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
-# data object name: tteb.all
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
-# data object name: chl18
-source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # 2020+ chloro/phyco
-# data object name: pigments_20_21
+# # Can source scripts that generate data objects here, or run them from masterScript.R
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
+# # data object name: ada.anions
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
+# # data object name: d.anions, d anions.aggregated
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
+# # data object name: ada.nutrients
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results
+# # data object name: chem21
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsR10_2018.R")) # read AWBERC nutrients for 2018 R10
+# # data object name: chem18
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcAda.R")) # read ADA TOC/DOC data
+# # data object name: ada.oc
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcMasi.R")) # read 2020 TOC run at MASI lab
+# # data object name: toc.masi
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
+# # data object name: tteb.all
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
+# # data object name: chl18
+# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # 2020+ chloro/phyco
+# # data object name: pigments_20_21
 
 
 # Inspect objects----
@@ -55,36 +55,49 @@ list(ada.anions, d.anions, ada.nutrients, chem21, chem18,
 # anion object should be joined, all chlorophyll should be joined, etc.  After 
 # that, we can join together the nutrient, anion, chlorophyll....objects.
 
+# The visit column must be present for joins to work properly, as some of the
+# data objects contain this column already. In joins where neither object 
+# contains the visit column, visit = 1 for all observations. In joins where
+# one object has the visit column, use ifelse to replace NAs with visit = 1.
+
 # merge objects one at a time to check duplicates
 nutrients1 <- chemCinNutrients %>%
-  full_join(chem18)
+  full_join(chem18) %>%
+  mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
+    is.na(visit), 1, visit)))
 janitor::get_dupes(
   select(nutrients1, lake_id, site_id, sample_depth, sample_type, visit)) 
 
 nutrients2 <- nutrients1 %>%
-  full_join(ada.nutrients)
+  full_join(ada.nutrients) %>%
+  mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
+    is.na(visit), 1, visit)))
 janitor::get_dupes(
   select(nutrients2, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dupes
 
 anions <- ada.anions %>%
-  full_join(d.anions.aggregated)
+  full_join(d.anions.aggregated) %>%
+  mutate(visit = 1) 
 janitor::get_dupes(
   select(anions, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
 
 oc <- ada.oc %>%
-  full_join(toc.masi)
+  full_join(toc.masi) %>%
+  mutate(visit = 1)
 janitor::get_dupes(
   select(oc, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
 
 pigments <- chl18 %>%
-  full_join(pigments_20_21)
+  full_join(pigments_20_21) %>%
+  mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
+    is.na(visit), 1, visit)))
 janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type)) 
 
 metal.pig <- tteb.all %>%
-  full_join(pigments)
+  full_join(pigments) 
 janitor::get_dupes(
   select(metal.pig, lake_id, site_id, sample_depth, sample_type, visit)) 
 
@@ -106,7 +119,6 @@ janitor::get_dupes(
 
 
 
-
 # The tteb.all object contains metals, DOC, and TOC data.  To prevent erroneous duplicates
 # when joining tteb.all with other objects containing TOC data, we appended "tteb."
 # to TOC and DOC column names in tteb.all (see readTteb.R).  Any samples where TOC/DOC was run
@@ -120,18 +132,18 @@ chemistry_all <- chemistry_all %>%
   mutate(toc = case_when(
     is.na(toc) & !is.na(tteb.toc) ~ tteb.toc,
     TRUE ~ toc)) %>%
-  mutate(toc_flag = case_when(
-    is.na(toc_flag) & !is.na(tteb.toc_flag) ~ tteb.toc_flag,
-    TRUE ~ toc_flag)) %>%
+  mutate(toc_flags = case_when(
+    is.na(toc_flags) & !is.na(tteb.toc_flags) ~ tteb.toc_flags,
+    TRUE ~ toc_flags)) %>%
   mutate(toc_units = case_when(
     is.na(toc_units) & !is.na(tteb.toc_units) ~ "mg_c_l",
     TRUE ~ toc_units)) %>%
   mutate(doc = case_when(
     is.na(doc) & !is.na(tteb.doc) ~ tteb.doc,
     TRUE ~ doc)) %>%
-  mutate(doc_flag = case_when(
-    is.na(doc_flag) & !is.na(tteb.doc_flag) ~ tteb.doc_flag,
-    TRUE ~ doc_flag)) %>%
+  mutate(doc_flags = case_when(
+    is.na(doc_flags) & !is.na(tteb.doc_flags) ~ tteb.doc_flags,
+    TRUE ~ doc_flags)) %>%
   mutate(doc_units = case_when(
     is.na(doc_units) & !is.na(tteb.doc_units) ~ "mg_c_l",
     TRUE ~ doc_units)) %>%
