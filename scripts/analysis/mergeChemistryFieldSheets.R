@@ -17,29 +17,11 @@ fld_sheet_no_depth <- fld_sheet %>%
          -contains("check"),
          -contains("_s"), # shallow sonde
          -contains("_d"), # deep sonde
-         lake_id, site_id, lat, long, 
+         lake_id, site_id, visit, lat, long, 
          site_depth, # character, 'shallow' 'deep'
          trap_deply_date) %>% # keep this to indicate sample_year
   rename(sample_date = trap_deply_date)
-  
 
-
-# pull out sonde data, pivot to long, then back to wider
-fld_sheet_sonde <- fld_sheet %>% 
-  select(-eval_status,
-         -contains("trap"),
-         -contains("chamb"),
-         -contains("air"),
-         -contains("check"),
-         -lat, -long, -site_depth) %>%
-  mutate(across(everything(), ~as.character(.x))) %>%
-  mutate(
-    sample_depth = case_when(
-      if_any(contains("_s"), ~ . > 2) ~ "shallow", 
-      if_any(contains("_d"), ~ . > 2) ~ "deep", 
-      TRUE                          ~ "cfjdfskskdfjfdskjf"
-    ))
-  
   
 # pull out sonde data, pivot to long, then back to wider
 fld_sheet_sonde <- fld_sheet %>% 
@@ -50,7 +32,7 @@ fld_sheet_sonde <- fld_sheet %>%
          -contains("check"),
          -lat, -long, -site_depth) %>%
   mutate(across(everything(), ~as.character(.x))) %>% # all columns must be same class
-  pivot_longer(!(c(lake_id, site_id))) %>%
+  pivot_longer(!(c(lake_id, site_id, visit))) %>%
   # move depth info from column names into separate columns
   mutate(sample_depth = case_when(
     grepl("_s$", name) ~ "shallow", # values that end with _s (i.e. sample_depth_s)
@@ -61,12 +43,18 @@ fld_sheet_sonde <- fld_sheet %>%
     grepl("_d_comment", name) ~ "deep", # get shallow comment
     TRUE ~ NA_character_),
     # remove sample depth info from column names
-    name = case_when(grepl("_s$", name) ~ gsub("_s$", "", name), # Remove _s from end of value
-                     grepl("s_flag", name) ~ gsub("s_flag", "flag", name), # Remove _s from _s_flag
-                     grepl("s_comment", name) ~ gsub("s_comment", "comment", name), # Remove _s from _s_comment
-                     grepl("_d$", name) ~ gsub("_d$", "", name), # Remove _d from end of value
-                     grepl("d_flag", name) ~ gsub("d_flag", "flag", name), # Remove _d from _d_flag
-                     grepl("d_comment", name) ~ gsub("d_comment", "comment", name)), # Remove _d from _d_comment
+    name = case_when(grepl("_s$", name) 
+                     ~ gsub("_s$", "", name), # Remove _s from end of value
+                     grepl("s_flag", name) 
+                     ~ gsub("s_flag", "flag", name), # Remove _s from _s_flag
+                     grepl("s_comment", name) 
+                     ~ gsub("s_comment", "comment", name), # Remove _s from _s_comment
+                     grepl("_d$", name) 
+                     ~ gsub("_d$", "", name), # Remove _d from end of value
+                     grepl("d_flag", name) 
+                     ~ gsub("d_flag", "flag", name), # Remove _d from _d_flag
+                     grepl("d_comment", name) 
+                     ~ gsub("d_comment", "comment", name)), # Remove _d from _d_comment
     #sample_depth is 'shallow' or 'deep'.  The actual depth of sample collection will be 'sample_depth_m'
     name = replace(name, name == "sample_depth", "sample_depth_m")) 
 
@@ -74,10 +62,13 @@ fld_sheet_sonde <- fld_sheet %>%
 fld_sheet_sonde <- fld_sheet_sonde %>% 
   pivot_wider(names_from = name, values_from = value) %>%
   # convert numeric back to numeric
-  mutate(across(.cols = c(site_id, sample_depth_m, temp, do_mg, sp_cond, ph, chl, turb), ~as.numeric(.x))) %>%
+  mutate(across(.cols = c(site_id, sample_depth_m, temp, 
+                          do_mg, sp_cond, ph, chl, turb), 
+                ~ as.numeric(.x))) %>%
   # sort sonde parameters alphabetically
   select(sort(tidyselect::peek_vars())) %>%
-  relocate(lake_id, site_id, sample_depth, sample_depth_m) # put identifiers first
+  relocate(lake_id, site_id, 
+           sample_depth, sample_depth_m) # put identifiers first
 
 
 

@@ -49,17 +49,23 @@ get_data_sheet <- function(paths){
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     # .[12] %>%
     # map will read each file in fs_path list generated above
-    purrr::map(~read_excel(., skip = 1, sheet = "data", 
-                           na = c("NA", "", "N/A", "n/a"))) %>%
+    # imap passes the element name (here, the filename) to the function
+    purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
+                           na = c("NA", "", "N/A", "n/a")) %>%
+                  # Assign the filename to the visit column for now
+                 mutate(visit = .y)) %>%
     # remove empty dataframes.  Pegasus put empty Excel files in each lake
-    # folder at begining of season.  These files will be populated eventually,
+    # folder at beginning of season.  These files will be populated eventually,
     # but are causing issues with code below
     purrr::discard(~ nrow(.x) == 0) %>% 
     # format data
-    map(., function(x){
+    map(., function(x) { 
       janitor::clean_names(x) %>%
-        # format lake_id and site_id.  See Wiki
-        mutate(lake_id = as.character(lake_id) %>%
+        # Assign value to visit based on the Excel filename
+        mutate(visit = if_else(str_detect(visit, "visit2"),
+                               "2", "1", missing = "1"), 
+               # format lake_id and site_id.  See Wiki
+               lake_id = as.character(lake_id) %>%
                  tolower(.) %>% # i.e. Lacustrine -> lacustrine
                  str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
                  str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
@@ -81,12 +87,7 @@ get_data_sheet <- function(paths){
 }
 
 # 3. Read 'data' tab of surgeData files.
-fld_sheet <- get_data_sheet(paths = paths) %>%
-  mutate(visit = if_else(lake_id %in% c("281", "250") & 
-                           between(trap_deply_date, 
-                                   as.Date("2022-08-15"), 
-                                   as.Date("2022-09-15")),
-                         2, 1, missing = 1))
+fld_sheet <- get_data_sheet(paths = paths) 
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
 get_dg_sheet <- function(paths){
