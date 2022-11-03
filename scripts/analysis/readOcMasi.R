@@ -1,7 +1,7 @@
 # TOC/DOC-------------------
 # During the 2020 field season, several batches of TOC samples were sent to MASI 
 # contract laboratory for analysis.  The first handful of batches contained a 
-# TOC vial per sample.  At the request of MASI, subsequent batches contained 
+# single TOC vial per sample.  At the request of MASI, subsequent batches contained 
 # two vials per sample.  No DOC analysis was conducted in 2020.
 
 # See the repo Wiki page for information on toc_qual and toc_flag.

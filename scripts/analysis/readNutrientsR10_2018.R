@@ -16,7 +16,7 @@ get_awberc_data <- function(path, data, sheet) {
   
   laketable <- data.frame( # create df of lake & site ids to convert values
     lake_id = c("LVR", "SFR", "LGR", "MMR", "PLR", "WPL", "SFP", "BKL"),
-    surgename = c("253", "239", "263", "308", "331", "302", "323", "999"),
+    surgename = c("253", "331", "302", "323", "239", "308", "263", "999"),
     site_id = c("SU05", "U22", "U10", "U04", "SU03", "U01", "U06", "U10"), 
     stringsAsFactors = FALSE)
   
@@ -201,5 +201,32 @@ chem18 <- dup_agg(chem18) %>%
                 ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
                   str_squish(.))) # remove any extra white spaces
   
+# SAMPLE INVENTORY----------------------
+# Are all collected samples included?
+
+# Samples collected
+chem.inventory.expected <- chem.samples.foo %>% # see chemSampleList.R, 
+  filter(lab == "R10", # See readNutrientsAda.R for R10 2020 nutrient data
+         sample_year == 2018,
+         analyte_group == "nutrients") %>% 
+  select(-sample_year, -lab, -analyte_group, -visit)
+
+
+# Samples analyzed  
+chem.inventory.analyzed <- chem18 %>% select(-site_id, -matches(c("flag|qual|units"))) %>%
+  pivot_longer(!c(lake_id, sample_depth, sample_type), names_to = "analyte") %>%
+  select(-value)
+
+# all analyzed samples in collected list?
+# These blanks are highlighted because the sample_depth is "shallow"
+# this needs to be changed to "blank".  See issue #65
+setdiff(chem.inventory.analyzed, chem.inventory.expected) %>% print(n=Inf)
+
+
+# all collected samples in analyzed list?
+# these blanks are pulled up because sample_depth is coded incorrectly in
+# chem18 (see above and issue #65)
+setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
+  arrange(analyte, lake_id) %>% print(n=Inf)
 
 

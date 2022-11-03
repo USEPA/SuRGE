@@ -430,7 +430,7 @@ ada.anions.analyzed <- ada.anions %>%
   select(-value)
 
 # Are all collected ADA anion samples in ADA data?
-# [9/30/2022] lake_id 3 and 11.  Waiting for Katie to upload data
+# yes
 setdiff(ada.anions.collected, ada.anions.analyzed) %>% print(n=Inf)
 
 # Are all analyzed ADA anion samples in list of ADA collected samples?

@@ -90,7 +90,8 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>%
 ttebCoc <- read_excel(paste0(userPath, 
                              "data/chemistry/tteb/ttebSampleIds.xlsx")) %>%
   clean_names(.) %>%
-  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)))
+  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
+         analyte = tolower(analyte))
 
 janitor::get_dupes(ttebCoc, lab_id) # [9/30/22 lab_id == NA for a few sites.  Leah tracking down true value.
 
@@ -99,29 +100,36 @@ janitor::get_dupes(ttebCoc, lab_id) # [9/30/22 lab_id == NA for a few sites.  Le
 
 # Compare list of submitted samples to comprehensive sample list
 # print rows in ttebSampleIds not in chem.samples.
-# [September 30, 2022] extra samples because master sample list hasn't been updated for 2022
+# All samples that were submitted for analysis were expected. Good. [11/3/2022]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
-          filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
+          filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
-                 !(sample_year == 2020 & analyte_group == "organics"))  %>% # 2020 doc/toc sent to MASI
-          mutate(analyte = replace(analyte, analyte_group == "metals", "metals")) %>%
+                 !(lab == "ADA" & analyte_group == "anions"), # ADA does own anions
+                 !(sample_year == 2020 & analyte_group == "organics"), # 2020 doc/toc sent to MASI
+                 !(sample_year <= 2021 & analyte_group == "anions")) %>% # 2020 anions run by Daniels 
+          mutate(analyte = case_when(analyte_group == "metals" ~ "metals",
+                                     analyte_group == "anions" ~ "anions",
+                                     TRUE ~ analyte)) %>%
           distinct() %>%
           select(lake_id, sample_depth, sample_type, analyte)) %>%
   arrange(lake_id)
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
-# All samples accounted for
+# 65-deep-anions.  Two shallow samples sent.  TTEB sample submission
+# forms differentiate deep and shallow, but ttebSampleId.xlsx lists
+# both as shallow.  Need to consult with Leah.
 setdiff(chem.samples.foo %>% 
-          filter(analyte_group %in% c("organics", "metals"), #tteb does organics and metals
-                 #sample_year >= 2020, # no 2018 samples sent to TTEB
+          filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
-                 !(sample_year == 2020 & analyte_group == "organics"))  %>% # 2020 doc/toc sent to MASI
-          mutate(analyte = replace(analyte, # convert long list of metals into "metals"
-                                   analyte_group == "metals", 
-                                   "metals")) %>%
-          distinct() %>% # remove duplicate "metals"
+                 !(lab == "ADA" & analyte_group == "anions"), # ADA does own anions
+                 !(sample_year == 2020 & analyte_group == "organics"), # 2020 doc/toc sent to MASI
+                 !(sample_year <= 2021 & analyte_group == "anions")) %>% # 2020 anions run by Daniels 
+          mutate(analyte = case_when(analyte_group == "metals" ~ "metals",
+                                     analyte_group == "anions" ~ "anions",
+                                     TRUE ~ analyte)) %>%
+          distinct() %>%
           select(lake_id, sample_depth, sample_type, analyte),
         ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")]) %>%
   arrange(lake_id)

@@ -138,6 +138,10 @@ chem.samples.foo <- chem.samples %>%
   filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla")) %>%
   # no DOC blank collected at 275
   filter(!(lake_id == "275" & sample_type == "blank" & analyte == "doc")) %>%
+  # no DOC blank collected at 64
+  filter(!(lake_id == "64" & sample_type == "blank" & analyte == "doc")) %>%
+  # no DOC blank collected at 65
+  filter(!(lake_id == "65" & sample_type == "blank" & analyte == "doc")) %>%
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          

@@ -659,7 +659,7 @@ ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
    janitor::get_dupes()
 
 # Did we preserve all combinations of unique identifiers in original data?
-# 92 unique combinations of lake_id, site_id, sample_depth, and sample_type
+# 98 unique combinations of lake_id, site_id, sample_depth, and sample_type
 # in original data.
 list(jea1, jea2, jea3, key1, key2, key3, 
      ove1, ove2, ove3, lmp1, lmp2, lmp3, 
@@ -677,9 +677,9 @@ list(jea1, jea2, jea3, key1, key2, key3,
   map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
   distinct() %>% # condense to unique observations
-  nrow(.) # 92 unique combinations
+  nrow(.) # 98 unique combinations
 
-# 92 unique combinations in merged df.  Everything looks good
+# 98 unique combinations in merged df.  Everything looks good
 ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
   distinct() %>% {nrow(.)}
 
@@ -699,7 +699,7 @@ unique(ada.nutrients$no3_units) # includes NA, OK
 # SAMPLE INVENTORY------------------------------------------------------------
 # ADA nutrient samples collected, per master sample list (chemSampleList.R)
 nutrient.collected.analyzed.ada <- chem.samples.foo %>% 
-  filter(sample_year == 2020 | lab == "ADA", # all 2021 nutrients stored and analyzed at ADA
+  filter(sample_year == 2020 | lab == "ADA", # all 2020 nutrients stored and analyzed at ADA
          analyte_group == "nutrients") %>%
   select(lake_id, sample_type, sample_depth, analyte)
 

@@ -356,7 +356,8 @@ ada.oc <- list(
   oc_2022_166, 
   oc_2022_184,
   oc_2022_136_100, 
-  oc_2022_206) %>% 
+  oc_2022_206,
+  oc_2022_011_003) %>% 
   reduce(full_join) %>%
   arrange(lake_id) %>%
   mutate(site_id = as.numeric(site_id)) %>% # make site id numeric
@@ -379,7 +380,7 @@ ada.oc.analyzed <- ada.oc %>%
   select(-value)
 
 # Are all ADA collected OC in ADA data?
-# [9/30/2022] lake_id 3 and 11.  Waiting for Katie to upload data
+# yes
 setdiff(ada.oc.collected, ada.oc.analyzed) %>% print(n=Inf)
 
 # Are all nutrient samples analyzed at ADA in list of samples sent to ADA?

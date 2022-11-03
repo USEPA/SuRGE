@@ -97,7 +97,8 @@ get_results_data <- function(path, data, sheet) {
       sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
     rename(chla = chl_a_jh) %>% # see Wiki for naming conventions
-    mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
+    mutate(sample_depth = case_when(sample_type == "blank" ~ "blank",
+                                    TRUE ~ "shallow")) %>% # all samples were collected near a-w interface
     mutate(extract_conc = (5 * chla) / extract_volume_l) %>% # extracted concentration
     mutate(filter_hold_time = collection_date - extraction_date) %>% # get hold time
     mutate(extract_hold_time = analysis_date - extraction_date) %>% # get hold time
@@ -197,7 +198,8 @@ get_bsa_data <- function(path, data, sheet) {
     mutate(chla_qual = case_when( # qual flag if either hold time exceeded
       extract_hold_time > 330 ~ "H",
       TRUE   ~ "")) %>%
-    mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
+    mutate(sample_depth = case_when(sample_type == "blank" ~ "blank",
+                                    TRUE ~ "shallow")) %>% # all samples were collected near a-w interface
     mutate(chla_flag = "") %>% # assume all are above mdl (data unavailable)
     mutate(chla_units = "ug_l") %>%
     select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag, chla_qual, chla_units) %>%
@@ -220,7 +222,35 @@ chl18.bsa <- get_bsa_data(chl.bsa.path,
                                   "OUTPUT - VOLUMETRIC")
 
 # COMBINE AWBERC AND BSA DATA---------
-# both have 8 identically formatted columns, good
+# both have 7 identically formatted columns, good
 dim(chl18.awberc)
 dim(chl18.bsa)
 chl18 <- rbind(chl18.awberc, chl18.bsa)
+
+
+
+# SAMPLE INVENTORY------------------------
+# REGION 10 chl samples collected, per master sample list (chemSampleList.R)
+r10.chl.collected <- chem.samples.foo %>% 
+  filter(lab == "R10", # R10
+         sample_year == 2018,
+         analyte == "chla") %>%
+  select(lake_id, sample_type, sample_depth)
+
+
+# R10 chl samples analyzed
+r10.chl.analyzed <- chl18 %>% 
+  select(lake_id, sample_type, sample_depth)
+
+# Are all R10 2018 collected chl in R10 chl data?
+# yes
+setdiff(r10.chl.collected, r10.chl.analyzed) %>% print(n=Inf)
+
+# Are all nutrient samples analyzed at ADA in list of samples sent to ADA?
+# yes
+setdiff(ada.oc.analyzed, ada.oc.collected) %>% print(n=Inf)
+
+
+
+
+

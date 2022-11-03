@@ -2,24 +2,7 @@
 # at Narragansett laboratory.
 
 
-# Read list of samples received by NAR.
-nar.samples <- read_excel(paste0(userPath,
-                                 "data/sampleTrackingSheets//NAR algal indicator//",
-                                 "narSampleReceiptList.xlsx"))
 
-# Were all samples received expected?  Compare list of received samples to 
-# those expected [10/14/2022]
-setdiff(nar.samples[c("lake_id", "analyte", "sample_type")],
-        chem.samples.foo[c("lake_id", "analyte", "sample_type")]) %>% print(n=Inf)
-
-
-# Have all NAR algae samples in comprehensive sample list been delivered to NAR?
-# Missing lake 204 samples.  Confirmed missing by NAR.  Samples cannot be located 
-setdiff(chem.samples.foo %>% filter(analyte_group == "algae.nar", 
-                                    sample_year != 2018) %>% # 2018 R10 not sent to NAR
-          select(lake_id, analyte, sample_type),
-        nar.samples[c("lake_id", "analyte", "sample_type")]) %>%
-  arrange(lake_id) %>% print(n=Inf)
 
 # Jeff Hollister: the values are the concentration in the sample 
 # (i.e. filter volume has been accounted for)
@@ -134,4 +117,53 @@ pigments_20_21 <- left_join(chla_20_21, phycocyanin_20_21,
 
 
 
+# SAMPLE INVENTORY------------------------
+# Read list of samples received by NAR.
+nar.samples <- read_excel(paste0(userPath,
+                                 "data/sampleTrackingSheets//NAR algal indicator//",
+                                 "narSampleReceiptList.xlsx"))
+
+# Were all samples received expected?  Compare list of received samples to 
+# those expected. YES. [10/14/2022]
+setdiff(nar.samples[c("lake_id", "analyte", "sample_type")],
+        chem.samples.foo[c("lake_id", "analyte", "sample_type")]) %>% print(n=Inf)
+
+
+# Have all NAR algae samples in comprehensive sample list been delivered to NAR?
+# Missing lake 204 samples.  Confirmed missing by NAR.  Sample found on lab floor
+# and framed in Jeff's office! 
+setdiff(chem.samples.foo %>% filter(analyte_group == "algae.nar", 
+                                    sample_year != 2018) %>% # 2018 R10 not sent to NAR
+          select(lake_id, analyte, sample_type),
+        nar.samples[c("lake_id", "analyte", "sample_type")]) %>%
+  arrange(lake_id) %>% print(n=Inf)
+
+
+# Now lets make sure that all samples were analyzed
+# 20_21 pigment samples analyzed
+pigments_analyzed <- pigments_20_21 %>%
+  pivot_longer(cols = c(chla, phycocyanin),
+                names_to = "analyte",
+              values_to = "concentration") %>%
+  select(lake_id, sample_type, sample_depth, visit, analyte)
+
+pigments_collected <- chem.samples.foo %>% 
+  filter(analyte %in% c("phycocyanin", "chla"),
+         sample_year != 2018, # 2018 R10 not sent to NAR
+          sample_year < 2022, # 11/3/2022, no 2022 data available yet
+         sample_type != "blank") %>% # NAR not sure how to handle blanks.  Active issue in hollister's repo
+  select(lake_id, sample_type, sample_depth, visit, analyte)
+
+# Have all collected NAR pigment samples been analyzed?
+# 204 was known to be lost, see above
+# 288 was cofirmed received, but not in data file?
+# 316 was confirmed received, but not in data file?
+# See issue #6 at https://github.com/jhollist/surge_algal/issues/6
+setdiff(pigments_collected, pigments_analyzed) %>% print(n=Inf)
+
+# Are all pigment samples samples analyzed at NAR in list of samples sent to NAR?
+# 148 shallow unknown.  Filter tore, no replacement available.  No sample
+# shipped to NAR.  This shows up as sample because chla value was populated
+# with NA during join with phyco.  ALL GOOD!
+setdiff(pigments_analyzed, pigments_collected) %>% print(n=Inf)
 

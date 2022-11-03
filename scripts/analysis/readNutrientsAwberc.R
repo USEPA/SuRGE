@@ -308,11 +308,11 @@ chemCinNutrients <- bind_rows(chem21, chem22) %>%
   flag_agg()
 
 
-# Sample inventory----------------------
+# SAMPLE INVENTORY----------------------
 # Are all collected samples included?
 
 # Samples collected
-chem21.inventory.expected <- chem.samples.foo %>% # see chemSampleList.R, [6/17/22] no 2022 lakes included yet
+chem.inventory.expected <- chem.samples.foo %>% # see chemSampleList.R, [11/03/22] few 2022 nutrient data available
   filter(lab != "R10", # see readNutrientsR10_2018.R for 2018 R10 samples
          # See readNutrientsAda.R for R10 2020 nutrient data
          lab != "ADA", # Ada analyzed their own. readNutrientsAda.R  
@@ -322,18 +322,18 @@ chem21.inventory.expected <- chem.samples.foo %>% # see chemSampleList.R, [6/17/
   
   
 # Samples analyzed  
-chem21.inventory.analyzed <- chem21 %>% select(-site_id, -matches(c("flag|qual|units"))) %>%
-  pivot_longer(!c(lake_id, sample_depth, sample_type), names_to = "analyte") %>%
+chem.inventory.analyzed <- chemCinNutrients %>% select(-site_id, -matches(c("flag|qual|units"))) %>%
+  pivot_longer(!c(lake_id, sample_depth, sample_type, visit), names_to = "analyte") %>%
   select(-value)
 
 # all analyzed samples in collected list?
 # yes
-setdiff(chem21.inventory.analyzed, chem21.inventory.expected) %>% print(n=Inf)
+setdiff(chem.inventory.analyzed, chem.inventory.expected) %>% print(n=Inf)
 
 
 # all collected samples in analyzed list?
-setdiff(chem21.inventory.expected, chem21.inventory.analyzed) %>% 
+setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
   arrange(analyte, lake_id) %>% print(n=Inf)
-# all accounted for!
+# missing many, but waiting on updated data file from Pegasus
 
 
