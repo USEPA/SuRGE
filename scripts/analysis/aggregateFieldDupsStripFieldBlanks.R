@@ -59,6 +59,8 @@
 # Generalize to function----------------
 clean_chem <- function(data) {
   data %>% 
+    # Make visit as.character to match field sheet visit column
+    mutate(visit = as.character(visit)) %>%
     rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores
     # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC
     mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
