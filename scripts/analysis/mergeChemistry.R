@@ -1,11 +1,11 @@
 
 
 # Bring in chemistry data objects----
-
-localName <- if (grepl("JBEAULIE", userPath)) {
-  "Jake/"
-} else if (grepl("JCOR", userPath, ignore.case = TRUE)) {
-  "Joe/"} 
+# 
+# localName <- if (grepl("JBEAULIE", userPath)) {
+#   "Jake/"
+# } else if (grepl("JCOR", userPath, ignore.case = TRUE)) {
+#   "Joe/"} 
 
 
 # # Can source scripts that generate data objects here, or run them from masterScript.R
@@ -34,22 +34,30 @@ localName <- if (grepl("JBEAULIE", userPath)) {
 # Inspect objects----
 
 # inspect object to merge
-# each df contains 10 - 175 observations [7/20/2022]
-list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
+## each df contains 10 - 175 observations [11/04/2022]
+list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
   map_dfc(., nrow)
 
-# are the unique IDs formatted identically across the dfs? yes
-list(ada.anions, d.anions, ada.nutrients, chem21, chem18, 
+# are the unique IDs formatted identically across the dfs?
+## All have lake_id, site_id, sample_depth, sample_type
+list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
   map(., function(x) select(
     x, lake_id, site_id, sample_depth, sample_type) %>% 
       str(.))
+## which ones have a visit field?
+### chemCinNutrients, tteb.all, pigments_20_21
+list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
+     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
+  map_lgl(., function(x) x %>% {"visit" %in% names(.)})
 
 
 # Merge objects----
 # All observations are uniquely identified by a combination of lake_id, site_id,
-# sample_depth, and sample_type.  Objects must be joined in proper order to avoid
+# sample_depth, and sample_type.  Lakes 281 and 250 were samples twice, therefore
+# objects containing data from both trips (chemCinNutrients, tteb.all, pigments_20_21)
+# also have a visit column.  Objects must be joined in proper order to avoid
 # unexpected duplicates.  Best to merge objects that share names other than
 # the unique identifiers.  For example, all nutrient objects should be joined, all
 # anion object should be joined, all chlorophyll should be joined, etc.  After 
@@ -61,10 +69,15 @@ list(ada.anions, d.anions, ada.nutrients, chem21, chem18,
 # one object has the visit column, use ifelse to replace NAs with visit = 1.
 
 # merge objects one at a time to check duplicates
+# When merging objects containing the same analytes, rbind should give
+# same result as join.  Either way, the nrow of the joined object should
+# be equal to the sum of the row of the original objects.
 nutrients1 <- chemCinNutrients %>%
   full_join(chem18) %>%
   mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
     is.na(visit), 1, visit)))
+# check for unexpected behavior
+nrow(chemCinNutrients) + nrow(chem18) == nrow(nutrients1) # TRUE!, good
 janitor::get_dupes(
   select(nutrients1, lake_id, site_id, sample_depth, sample_type, visit)) 
 
@@ -72,6 +85,8 @@ nutrients2 <- nutrients1 %>%
   full_join(ada.nutrients) %>%
   mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
     is.na(visit), 1, visit)))
+# check for unexpected behavior
+nrow(nutrients1) + nrow(ada.nutrients) == nrow(nutrients2) # TRUE, good!
 janitor::get_dupes(
   select(nutrients2, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dupes
@@ -79,6 +94,8 @@ janitor::get_dupes(
 anions <- ada.anions %>%
   full_join(d.anions.aggregated) %>%
   mutate(visit = 1) 
+# check for unexpected behavior
+nrow(ada.anions) + nrow(d.anions.aggregated) == nrow(anions) # TRUE, good!
 janitor::get_dupes(
   select(anions, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
@@ -86,6 +103,8 @@ janitor::get_dupes(
 oc <- ada.oc %>%
   full_join(toc.masi) %>%
   mutate(visit = 1)
+# check for unexpected behavior
+nrow(ada.oc) + nrow(toc.masi) == nrow(oc) # TRUE, good!
 janitor::get_dupes(
   select(oc, lake_id, site_id, sample_depth, sample_type)) 
 # no dupes
@@ -94,29 +113,41 @@ pigments <- chl18 %>%
   full_join(pigments_20_21) %>%
   mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
     is.na(visit), 1, visit)))
-janitor::get_dupes(select(oc, lake_id, site_id, sample_depth, sample_type)) 
+# check for unexpected behavior
+nrow(chl18) + nrow(pigments_20_21) == nrow(pigments) # TRUE, good!
+janitor::get_dupes(select(pigments, lake_id, site_id, sample_depth, sample_type)) 
 
+
+# When joining objects containing different analytes, the nrow of the
+# joined object can't be easily predicted, but can't contain duplicates
+# of the joining variables.
 metal.pig <- tteb.all %>%
   full_join(pigments) 
+# check for unexpected behavior
 janitor::get_dupes(
   select(metal.pig, lake_id, site_id, sample_depth, sample_type, visit)) 
+# no dups
 
 metal.pig.oc <- metal.pig %>%
   full_join(oc)
+# check for unexpected behavior
 janitor::get_dupes(
   select(metal.pig.oc, lake_id, site_id, sample_depth, sample_type, visit)) 
-
+# no dups
 
 metal.pig.oc.anions <- metal.pig.oc %>%
   full_join(anions)
+# check for unexpected behavior
 janitor::get_dupes(
   select(metal.pig.oc.anions, lake_id, site_id, sample_depth, sample_type, visit)) 
+# no dups
 
 chemistry_all <- nutrients2 %>%
   full_join(metal.pig.oc.anions)
+# check for unexpected behavior
 janitor::get_dupes(
   select(chemistry_all, lake_id, site_id, sample_depth, sample_type, visit)) 
-
+# no dups
 
 
 # The tteb.all object contains metals, DOC, and TOC data.  To prevent erroneous duplicates

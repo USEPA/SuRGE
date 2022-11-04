@@ -59,15 +59,15 @@
 # Generalize to function----------------
 clean_chem <- function(data) {
   data %>% 
-    # Make visit as.character to match field sheet visit column
-    mutate(visit = as.character(visit)) %>%
-    rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores
-    # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC
+    # # Make visit as.character to match field sheet visit column
+    # mutate(visit = as.character(visit)) %>%
+    rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores.
+    # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC ? 11/4/2022, no tteb.foo flags in df? -JB
     mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
                     ifelse(is.na(get(word(paste(cur_column(), .), sep = "_"))) == TRUE, 
                            "no value", .))) %>%
     group_by(lake_id, site_id, sample_depth, visit) %>%
-    filter(!(sample_type == "blank")) %>% 
+    filter(!(sample_type == "blank")) %>% # remove blanks
     # site_id is numeric, but ignored below because it is a grouping variable.
     mutate(across(where(is.numeric), mean, na.rm = TRUE),
            across(contains("flag"), 
@@ -91,8 +91,8 @@ clean_chem <- function(data) {
 } 
 
 chemistry <- clean_chem(chemistry_all)
-dim(chemistry_all) # 209, 134 [7/20/2022]
-dim(chemistry) # 153, 133 [7/20/2022], good fewer rows, but one fewer column (-sample_type)
+dim(chemistry_all) # 230, 122 [11/4/2022]
+dim(chemistry) # 169, 121 [11/4/2022], good fewer rows, but one fewer column (-sample_type)
 
 names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
 

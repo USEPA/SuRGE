@@ -43,6 +43,7 @@ get_awberc_data <- function(path, data, sheet) {
       finalConc)) %>%
     filter(sample_type != "SPK") %>% # exclude matrix spike 
     mutate(crossid = case_when( # convert sample depths (all 2018 is shallow)
+      grepl("BLK", sample_type, ignore.case = TRUE) ~ "blank", # report "blank" depth for blanks
       crossid == 0.1 ~ "shallow",
       TRUE ~ crossid)) %>%
     rename(sample_depth = crossid) %>% # rename sample depth column
@@ -218,14 +219,12 @@ chem.inventory.analyzed <- chem18 %>% select(-site_id, -matches(c("flag|qual|uni
   select(-value)
 
 # all analyzed samples in collected list?
-# These blanks are highlighted because the sample_depth is "shallow"
-# this needs to be changed to "blank".  See issue #65
+# yes
 setdiff(chem.inventory.analyzed, chem.inventory.expected) %>% print(n=Inf)
 
 
 # all collected samples in analyzed list?
-# these blanks are pulled up because sample_depth is coded incorrectly in
-# chem18 (see above and issue #65)
+# yes
 setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
   arrange(analyte, lake_id) %>% print(n=Inf)
 

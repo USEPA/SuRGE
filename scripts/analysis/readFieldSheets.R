@@ -63,7 +63,7 @@ get_data_sheet <- function(paths){
       janitor::clean_names(x) %>%
         # Assign value to visit based on the Excel filename
         mutate(visit = if_else(str_detect(visit, "visit2"),
-                               "2", "1", missing = "1"), 
+                               2, 1, missing = 1), 
                # format lake_id and site_id.  See Wiki
                lake_id = as.character(lake_id) %>%
                  tolower(.) %>% # i.e. Lacustrine -> lacustrine

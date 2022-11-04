@@ -36,7 +36,7 @@ get_chla_data <- function(path, data, sheet) {
                            2, 1, missing = 1)) %>%
 
     select(lake_id, site_id, sample_type, sample_depth, visit,
-           chla, chla_qual, chla_ship) %>%
+           chla, chla_units, chla_qual, chla_ship) %>%
     unite("chla_flags", chla_qual, chla_ship, sep = " ") # merge all flag columns
     # This data currently has placeholder flags (as of 9/26/2022)
     # Until data are available, the following 4 lines are commented out:
@@ -80,7 +80,7 @@ get_phyco_data <- function(path, data, sheet) {
                            2, 1, missing = 1)) %>%
     
     select(lake_id, site_id, sample_type, sample_depth, visit, 
-           phycocyanin, phycocyanin_qual, phycocyanin_ship) %>%
+           phycocyanin, phycocyanin_qual, phycocyanin_units, phycocyanin_ship) %>%
     unite("phycocyanin_flags", phycocyanin_qual, 
           phycocyanin_ship, sep = " ") # merge all flag columns
   # This data currently has placeholder flags (as of 9/26/2022)
