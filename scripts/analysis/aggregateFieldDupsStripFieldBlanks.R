@@ -70,16 +70,27 @@ clean_chem <- function(data) {
     filter(!(sample_type == "blank")) %>% # remove blanks
     # site_id is numeric, but ignored below because it is a grouping variable.
     mutate(across(where(is.numeric), mean, na.rm = TRUE),
-           across(contains("flag"), 
-                  ~ ifelse(any(is.na(.) == TRUE), NA, # if any _flag values are NA, then NA
-                           ifelse(any(. == "<"), "<",  # if any _flag values are <, then <
-                                  "no value"))), # any remaining cases = "no value" (i.e., corresponding analytes are NA)
-           across(contains("qual"),
-                  ~ ifelse(all(. == TRUE), TRUE, # if all _qual values are TRUE, the TRUE
-                           ifelse(all(. == FALSE), FALSE, # if both qual fields are F, then F
-                                  FALSE))),  # if T and F, report F
+           
+           
+           # across(contains("flag"), 
+           #        ~ ifelse(any(is.na(.) == TRUE), NA, # if any _flag values are NA, then NA
+           #                 ifelse(any(. == "<"), "<",  # if any _flag values are <, then <
+           #                        "no value"))), # any remaining cases = "no value" (i.e., corresponding analytes are NA)
+           
+           # I'm not sure if this works, and it took 6 minutes to run:
+           across(contains("flag"),
+                  ~ case_when(
+                    all(.) == "ND" ~ "ND",
+                    all(.) == "L" ~ "L",
+                    all(.) == "H" ~ "H",
+                    all(.) == "ND H" ~ "ND H",
+                    all(.) == "L H" ~ "L H",
+                    TRUE ~ NA_character_)),
+
+           
            across(contains("units"),
-                  ~ ifelse(any(str_detect(., "_") == TRUE), first(str_sort(.)), # if any group has units ("_" detected), use same units  
+                  ~ ifelse(any(str_detect(., "_") == TRUE), 
+                           first(str_sort(.)), # if any group has units ("_" detected), use same units  
                                   .))) %>% # if no units in group, no change (i.e., NA)
     filter(!(sample_type == "duplicate")) %>% # now we can remove dups
     rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
