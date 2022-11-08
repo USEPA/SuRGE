@@ -59,8 +59,6 @@
 # Generalize to function----------------
 clean_chem <- function(data) {
   data %>% 
-    # # Make visit as.character to match field sheet visit column
-    # mutate(visit = as.character(visit)) %>%
     rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores.
     # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC ? 11/4/2022, no tteb.foo flags in df? -JB
     mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
@@ -77,16 +75,23 @@ clean_chem <- function(data) {
            #                 ifelse(any(. == "<"), "<",  # if any _flag values are <, then <
            #                        "no value"))), # any remaining cases = "no value" (i.e., corresponding analytes are NA)
            
-           # I'm not sure if this works, and it took 6 minutes to run:
+           # This takes nearly 4 minutes to run!
+           # Check if any flags are present across grouped analytes;
+           # If every analyte has a flag, keep it. Otherwise, NA.
            across(contains("flag"),
-                  ~ case_when(
-                    all(.) == "ND" ~ "ND",
-                    all(.) == "L" ~ "L",
-                    all(.) == "H" ~ "H",
+                 ~ case_when(
+                   # If all are "ND H" or "L H", then use that
                     all(.) == "ND H" ~ "ND H",
                     all(.) == "L H" ~ "L H",
+                    # If the above do not apply, check if all have 
+                    # "ND" flags. If so: "ND"
+                    all(str_detect(., "ND")) ~ "ND",
+                    # Then, check for "L" flags
+                    all(str_detect(., "L")) ~ "L",
+                    # Last, check for "H" flags
+                    all(str_detect(., "H")) ~ "H",
+                    # All other combinations should result in NA
                     TRUE ~ NA_character_)),
-
            
            across(contains("units"),
                   ~ ifelse(any(str_detect(., "_") == TRUE), 
