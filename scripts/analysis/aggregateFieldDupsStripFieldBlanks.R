@@ -80,16 +80,18 @@ clean_chem <- function(data) {
            # If every analyte has a flag, keep it. Otherwise, NA.
            across(contains("flag"),
                  ~ case_when(
-                   # If all are "ND H" or "L H", then use that
-                    all(.) == "ND H" ~ "ND H",
-                    all(.) == "L H" ~ "L H",
-                    # If the above do not apply, check if all have 
-                    # "ND" flags. If so: "ND"
+                   # Check for all combinations of flags
+                    all(.) == "ND H S" ~ "ND H S",
+                    all(.) == "L H S" ~ "L H S",
+                    all(str_detect(., "ND.*H")) ~ "ND H",
+                    all(str_detect(., "L.*H")) ~ "L H",
+                    all(str_detect(., "ND.*S")) ~ "ND S",
+                    all(str_detect(., "L.*S")) ~ "L S",
+                    all(str_detect(., "H.*S")) ~ "H S",
                     all(str_detect(., "ND")) ~ "ND",
-                    # Then, check for "L" flags
                     all(str_detect(., "L")) ~ "L",
-                    # Last, check for "H" flags
                     all(str_detect(., "H")) ~ "H",
+                    all(str_detect(., "S")) ~ "S",
                     # All other combinations should result in NA
                     TRUE ~ NA_character_)),
            
