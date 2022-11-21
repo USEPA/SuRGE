@@ -161,7 +161,9 @@ tteb.all <- tteb.all %>%
          doc_bql = case_when(analyte == "doc" ~ toc_bql,
                               TRUE ~ "")) %>%
   mutate(toc = case_when(analyte == "doc" ~ NA_real_,
-                         TRUE ~ toc))
+                         TRUE ~ toc)) %>%
+  # Remove shipping_notes; they're added in mergeChemistry.R
+  select(-shipping_notes) 
 
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?

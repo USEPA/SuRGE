@@ -183,7 +183,28 @@ chemistry_all <- chemistry_all %>%
 janitor::get_dupes(
   select(chemistry_all, lake_id, site_id, sample_depth, sample_type, visit)) 
 
-# arrange columns
+# Add shipping flags----
+
+# Read in shipping notes data
+shipping_data <-
+  read_excel(
+    paste0(
+      userPath, 
+      "data/sampleTrackingSheets/conditionOfSamplesWhenReceivedInCincinnati.xlsx"))
+
+# Add the shipping notes to chemistry_all and add "S" flags as needed
+chemistry_all <- 
+chemistry_all %>%
+  left_join(shipping_data, by = "lake_id") %>% # join to get shipping notes
+  mutate(across(
+    contains("flag"), # mutate all flag columns for a given lake
+    ~ case_when(
+      is.na(shipping_notes) ~ ., # if no shipping notes, flags do not change
+      is.na(.) ~ "S", # if there are shipping notes but no flags, add "S" flag
+      TRUE ~ str_c(., "S", sep = " ")))) # Otherwise add "S" to existing flags
+
+# Arrange columns----
+
 chemistry_all <- chemistry_all %>%
   relocate(lake_id, site_id, sample_depth, sample_type, visit, shipping_notes, 
            sort(colnames(.))) # others arranged alphabetically
