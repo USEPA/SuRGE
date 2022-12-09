@@ -80,8 +80,9 @@ unknown.samples <- expand.grid(lake_id = lake.list.chem$lake_id,
                                analyte = c(nutrients, anions, organics, 
                                            metals, algae.nar, algae.gb),
                                sample_depth = c("shallow", "deep"),
-                               visit = 1, 
                                stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
+  mutate(visit = case_when(lake_id %in% c("250", "281") ~ 2, # visit == 1 samples were lost, only visit == 2 submitted
+                           TRUE ~ 1)) %>% # all other sites are visit == 1
   # algal indicator samples not collected at depth.  Filter out
   filter(!(sample_depth == "deep" & analyte %in% c(algae.nar, algae.gb))) %>%
   arrange(lake_id)

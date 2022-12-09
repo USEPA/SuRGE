@@ -28,6 +28,7 @@ source("scripts/analysis/readPigmentsMicrocystin.R") # 2020+ chloro/phyco
 
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects
+source("scripts/analysis/cincinnatiShippingNotes.R") # adding S flag
 source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates
 #source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
 

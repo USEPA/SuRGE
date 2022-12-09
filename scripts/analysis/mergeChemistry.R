@@ -34,7 +34,7 @@
 # Inspect objects----
 
 # inspect object to merge
-## each df contains 10 - 175 observations [11/04/2022]
+## each df contains 10 - 175 observations [12/08/2022]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
   map_dfc(., nrow)
@@ -55,13 +55,15 @@ list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18,
 
 # Merge objects----
 # All observations are uniquely identified by a combination of lake_id, site_id,
-# sample_depth, and sample_type.  Lakes 281 and 250 were samples twice, therefore
-# objects containing data from both trips (chemCinNutrients, tteb.all, pigments_20_21)
-# also have a visit column.  Objects must be joined in proper order to avoid
-# unexpected duplicates.  Best to merge objects that share names other than
-# the unique identifiers.  For example, all nutrient objects should be joined, all
-# anion object should be joined, all chlorophyll should be joined, etc.  After 
-# that, we can join together the nutrient, anion, chlorophyll....objects.
+# sample_depth, and sample_type.  Lakes 281 and 250 were sampled twice, therefore
+# objects containing data from either of those lakes (chemCinNutrients, tteb.all, 
+# pigments_20_21) must have a visit column. This visit column will be propagated
+# into the final merged data object.
+# Objects must be joined in proper order to avoid unexpected duplicates.  Best to 
+# merge objects that share names other than the unique identifiers.  For example, 
+# all nutrient objects should be joined, all anion object should be joined, all 
+# chlorophyll should be joined, etc.  After that, we can join together the nutrient, 
+# anion, chlorophyll....objects.
 
 # The visit column must be present for joins to work properly, as some of the
 # data objects contain this column already. In joins where neither object 
@@ -78,8 +80,9 @@ nutrients1 <- chemCinNutrients %>%
     is.na(visit), 1, visit)))
 # check for unexpected behavior
 nrow(chemCinNutrients) + nrow(chem18) == nrow(nutrients1) # TRUE!, good
-janitor::get_dupes(
+janitor::get_dupes( 
   select(nutrients1, lake_id, site_id, sample_depth, sample_type, visit)) 
+# no dups
 
 nutrients2 <- nutrients1 %>%
   full_join(ada.nutrients) %>%
@@ -93,7 +96,7 @@ janitor::get_dupes(
 
 anions <- ada.anions %>%
   full_join(d.anions.aggregated) %>%
-  mutate(visit = 1) 
+  mutate(visit = 1) # only two lakes with visit == 2 are not in these files
 # check for unexpected behavior
 nrow(ada.anions) + nrow(d.anions.aggregated) == nrow(anions) # TRUE, good!
 janitor::get_dupes(
@@ -102,7 +105,7 @@ janitor::get_dupes(
 
 oc <- ada.oc %>%
   full_join(toc.masi) %>%
-  mutate(visit = 1)
+  mutate(visit = 1) # only two lakes with visit == 2 are not in these files
 # check for unexpected behavior
 nrow(ada.oc) + nrow(toc.masi) == nrow(oc) # TRUE, good!
 janitor::get_dupes(
@@ -119,8 +122,8 @@ janitor::get_dupes(select(pigments, lake_id, site_id, sample_depth, sample_type)
 
 
 # When joining objects containing different analytes, the nrow of the
-# joined object can't be easily predicted, but can't contain duplicates
-# of the joining variables.
+# joined object can't be easily predicted, but the objects to be joined can't 
+# contain duplicates of the joining variables.
 metal.pig <- tteb.all %>%
   full_join(pigments) 
 # check for unexpected behavior
@@ -183,28 +186,8 @@ chemistry_all <- chemistry_all %>%
 janitor::get_dupes(
   select(chemistry_all, lake_id, site_id, sample_depth, sample_type, visit)) 
 
-# Add shipping flags----
-
-# Read in shipping notes data
-shipping_data <-
-  read_excel(
-    paste0(
-      userPath, 
-      "data/sampleTrackingSheets/conditionOfSamplesWhenReceivedInCincinnati.xlsx"))
-
-# Add the shipping notes to chemistry_all and add "S" flags as needed
-chemistry_all <- 
-chemistry_all %>%
-  left_join(shipping_data, by = "lake_id") %>% # join to get shipping notes
-  mutate(across(
-    contains("flag"), # mutate all flag columns for a given lake
-    ~ case_when(
-      is.na(shipping_notes) ~ ., # if no shipping notes, flags do not change
-      is.na(.) ~ "S", # if there are shipping notes but no flags, add "S" flag
-      TRUE ~ str_c(., "S", sep = " ")))) # Otherwise add "S" to existing flags
 
 # Arrange columns----
-
 chemistry_all <- chemistry_all %>%
-  relocate(lake_id, site_id, sample_depth, sample_type, visit, shipping_notes, 
+  relocate(lake_id, site_id, sample_depth, sample_type, visit, 
            sort(colnames(.))) # others arranged alphabetically

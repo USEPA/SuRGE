@@ -307,7 +307,11 @@ chem22_oct <- get_awberc_data(cin.awberc.path,
                        "2022_ESF-EFWS_NutrientData_Updated10302022_AKB.xlsx", 
                        "2022 Data") 
 
-chemCinNutrients <- bind_rows(chem21, chem22_aug, chem22_oct) %>%
+chem22 <- get_awberc_data(cin.awberc.path, 
+                          "2022_ESF-EFWS_NutrientData_Updated11292022_AKB.xlsx", 
+                          "2022 Data") 
+
+chemCinNutrients <- bind_rows(chem21, chem22) %>%
   dup_agg() %>% # final object, cast to wide with dups aggregated
   flag_agg()
 
@@ -338,6 +342,13 @@ setdiff(chem.inventory.analyzed, chem.inventory.expected) %>% print(n=Inf)
 # all collected samples in analyzed list?
 setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
   arrange(analyte, lake_id) %>% print(n=Inf)
-# missing many, but waiting on updated data file from Pegasus
 
+# all collected samples in analyzed list? A more condensed view
+setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
+  select(lake_id, visit, analyte) %>%
+  table()
 
+# [12/8/2022]
+# missing samples from lakes 76 and 77 (see NUTRIENTS COC 2022-06-27 LJ.xls)
+# and 65/281/250 (see NUTRIENTS COC 2022-10-05 LJ.xls).  I asked Pegasus to look
+# into this on 12/8/2022.
