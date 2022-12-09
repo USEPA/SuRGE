@@ -43,7 +43,7 @@ analyte_names <- c(analytes_0.05, analytes_0.5,
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
-  select(-studyid, -tn, -flag) %>% # remove unneeded columns
+  select(-studyid, -tn) %>% # remove unneeded columns
   rename(lab_id = labid,
          toc = toc_comb) %>%
   
@@ -62,8 +62,14 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>%
   mutate(across(ends_with(analyte_names), # nice code Joe!
                 ~ if_else(. < 0 , "ND", ""), # bd reported as -detection limit
                 .names = "{col}_flag")) %>%
+  # create 'qual' for hold time violations
+  mutate(across(ends_with(analyte_names), 
+                ~ if_else("H" %in% flag, "H", ""),
+                .names = "{col}_qual")) %>%
+  # we shouldn't need the original "flag" field now 
+  select(-flag) %>%
   # create 'bql' columns to flag observations < reporting limit. 
-  mutate(across(contains(analyte_names) & !ends_with(c("flag", "sampid")), 
+  mutate(across(contains(analyte_names) & !ends_with(c("flag", "qual", "sampid")), 
                 ~ case_when(
                   cur_column() %in% analytes_0.05 & . < 0.05 & . > 0 ~ "L",
                   cur_column() %in% analytes_0.5 & . < 0.5 & . > 0 ~ "L", 
@@ -74,7 +80,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>%
                   TRUE ~ ""),
                 .names = "{col}_bql")) %>%
   # create 'units' columns. Most units in mg/L 
-  mutate(across(ends_with(analyte_names), # 
+  mutate(across(ends_with(analyte_names) & !contains("qual"), # 
                 ~ "mg_l", 
                 .names = "{col}_units")) %>%
   mutate(toc_units = "mg_c_l") %>% # TOC is the exception
@@ -158,6 +164,8 @@ tteb.all <- tteb.all %>%
          doc_units = "mg_c_l",
          doc_flag = case_when(analyte == "doc" ~ toc_flag,
                               TRUE ~ ""),
+         doc_qual = case_when(analyte == "doc" ~ toc_qual,
+                              TRUE ~ ""),
          doc_bql = case_when(analyte == "doc" ~ toc_bql,
                               TRUE ~ "")) %>%
   mutate(toc = case_when(analyte == "doc" ~ NA_real_,
@@ -217,62 +225,38 @@ tteb.all <- tteb.all %>%
   select(-analyte, -sampid) %>%
   mutate(site_id = as.numeric(
     gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # remove non numeric chars
-  # rename the toc and doc fields to enable a clean join with other objects containing
+  # rename the toc and doc fields to enable a clean join with other objects 
   rename(tteb.toc = toc, 
          tteb.doc = doc, 
          tteb.toc_units = toc_units, 
          tteb.doc_units = doc_units) %>%
-  unite("tteb.toc_flags", toc_flag, toc_bql, sep = " ")  %>%
-  unite("tteb.doc_flags", doc_flag, doc_bql, sep = " ")  %>%
-  unite("al_flags", al_flag, al_bql, sep = " ")  %>%
-  unite("as_flags", as_flag, as_bql, sep = " ")  %>%
-  unite("ba_flags", ba_flag, ba_bql, sep = " ")  %>%
-  unite("be_flags", be_flag, be_bql, sep = " ")  %>%
-  unite("ca_flags", ca_flag, ca_bql, sep = " ")  %>%
-  unite("cd_flags", cd_flag, cd_bql, sep = " ")  %>%
-  unite("cr_flags", cr_flag, cr_bql, sep = " ")  %>%
-  unite("cu_flags", cu_flag, cu_bql, sep = " ")  %>%
-  unite("fe_flags", fe_flag, fe_bql, sep = " ")  %>%
-  unite("k_flags", k_flag, k_bql, sep = " ")  %>%
-  unite("li_flags", li_flag, li_bql, sep = " ")  %>%
-  unite("mg_flags", mg_flag, mg_bql, sep = " ")  %>%
-  unite("mn_flags", mn_flag, mn_bql, sep = " ")  %>%
-  unite("na_flags", na_flag, na_bql, sep = " ")  %>%
-  unite("ni_flags", ni_flag, ni_bql, sep = " ")  %>%
-  unite("p_flags", p_flag, p_bql, sep = " ")  %>%
-  unite("pb_flags", pb_flag, pb_bql, sep = " ")  %>%
-  unite("s_flags", s_flag, s_bql, sep = " ")  %>%
-  unite("sb_flags", sb_flag, sb_bql, sep = " ")  %>%
-  unite("si_flags", si_flag, si_bql, sep = " ")  %>%
-  unite("sn_flags", sn_flag, sn_bql, sep = " ")  %>%
-  unite("sr_flags", sr_flag, sr_bql, sep = " ")  %>%
-  unite("v_flags", v_flag, v_bql, sep = " ")  %>%
-  unite("zn_flags", zn_flag, zn_bql, sep = " ")
+  unite("tteb.toc_flags", toc_flag, toc_bql, toc_qual,sep = " ")  %>%
+  unite("tteb.doc_flags", doc_flag, doc_bql, doc_qual, sep = " ")  %>%
+  unite("al_flags", al_flag, al_bql, al_qual, sep = " ")  %>%
+  unite("as_flags", as_flag, as_bql, as_qual,sep = " ")  %>%
+  unite("ba_flags", ba_flag, ba_bql, ba_qual,sep = " ")  %>%
+  unite("be_flags", be_flag, be_bql, be_qual,sep = " ")  %>%
+  unite("ca_flags", ca_flag, ca_bql, ca_qual, sep = " ")  %>%
+  unite("cd_flags", cd_flag, cd_bql, cd_qual, sep = " ")  %>%
+  unite("cr_flags", cr_flag, cr_bql, cr_qual, sep = " ")  %>%
+  unite("cu_flags", cu_flag, cu_bql, cu_qual,sep = " ")  %>%
+  unite("fe_flags", fe_flag, fe_bql, fe_qual,sep = " ")  %>%
+  unite("k_flags", k_flag, k_bql, k_qual, sep = " ")  %>%
+  unite("li_flags", li_flag, li_bql,li_qual, sep = " ")  %>%
+  unite("mg_flags", mg_flag, mg_bql, mg_qual,sep = " ")  %>%
+  unite("mn_flags", mn_flag, mn_bql, mn_qual, sep = " ")  %>%
+  unite("na_flags", na_flag, na_bql,  na_qual,sep = " ")  %>%
+  unite("ni_flags", ni_flag, ni_bql, ni_qual,sep = " ")  %>%
+  unite("p_flags", p_flag, p_bql, p_qual, sep = " ")  %>%
+  unite("pb_flags", pb_flag, pb_bql, pb_qual, sep = " ")  %>%
+  unite("s_flags", s_flag, s_bql, s_qual, sep = " ")  %>%
+  unite("sb_flags", sb_flag, sb_bql, sb_qual, sep = " ")  %>%
+  unite("si_flags", si_flag, si_bql, si_qual, sep = " ")  %>%
+  unite("sn_flags", sn_flag, sn_bql, sn_qual, sep = " ")  %>%
+  unite("sr_flags", sr_flag, sr_bql, sr_qual, sep = " ")  %>%
+  unite("v_flags", v_flag, v_bql, v_qual, sep = " ")  %>%
+  unite("zn_flags", zn_flag, zn_bql, zn_qual, sep = " ")
 
-
-# Tried to create a better way to unite columns, but it created more problems 
-# than it solved. 
-# uniter <- function(data, analyte) {
-#   
-#   a <- data %>% 
-#     as_tibble() %>%
-#     select(starts_with(analyte)) %>%
-#     select(contains(c("flag", "bql"))) %>%
-#     # replace_na(list("BANANAS")) %>%
-#     # rowwise() %>%
-#    unite(newcolumn, everything(), sep = " ") %>%
-#     select("{analyte}_flags" := newcolumn) %>%
-#     replace_na(list(""))
-#     # 
-# }
-# 
-# # map the uniter function to each analyte name and return a tibble
-# tteb_flags <- analyte_names %>%
-#   map(~ uniter(tteb.all, .x)) %>% bind_cols()
-
-# bind these tibbles to tteb.all
-# tteb.all <- bind_cols(tteb.all, tteb_flags) %>%
-#   select(-ends_with(c("flag", "bql"))) %>%
 
 # 8 CLEAN UP FINAL OBJECT, STEP 2
 tteb.all <- tteb.all %>%
