@@ -299,13 +299,6 @@ chem21 <- get_awberc_data(cin.awberc.path,
                           "2021_ESF-EFWS_NutrientData_Updated01272022_AKB.xlsx", 
                           "2021 Data") 
 
-chem22_aug <- get_awberc_data(cin.awberc.path, 
-                          "2022_ESF-EFWS_NutrientData_Updated08302022_AKB.xlsx", 
-                          "2022 Data") 
-
-chem22_oct <- get_awberc_data(cin.awberc.path, 
-                       "2022_ESF-EFWS_NutrientData_Updated10302022_AKB.xlsx", 
-                       "2022 Data") 
 
 chem22 <- get_awberc_data(cin.awberc.path, 
                           "2022_ESF-EFWS_NutrientData_Updated11292022_AKB.xlsx", 
