@@ -8,26 +8,35 @@
 
 # READ DATA -----------------
 # List of .txt files containing data 
-
-txtFiles <- list.files(paste0(userPath,"data/NAR"), 
-                       pattern=c("gga|micro"), recursive = TRUE) # per B.3.5.2, files should contain 'gga' or 'micro'
+labs <- c("CIN", "RTP", "NAR", "USGS", "ADA", "R10") # data directory for each lab
+txtFiles <- character(0) # vector to catch file names
+for (i in 1:length(labs)) {
+  txtFiles.i <- list.files(paste0(userPath,"data/", labs[i]), 
+                           pattern=c("gga|micro"), # per B.3.5.2, files should contain 'gga' or 'micro'
+                           recursive = TRUE)
+  # append new file paths to txtFiles
+  txtFiles <- c(txtFiles, 
+                paste0("data/", labs[i], "/", txtFiles.i)) # add "data/lab" to file paths 
+}
 
 # Directories contain _s, _l, and _b files that don't contain data of interest.
 # Strip these files out.
 txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr files with data we need )should be _f, but allowing -f)
                        !grepl(pattern = "zip", x = txtFiles) & # exclude .zip files
-                       !grepl(pattern = "Needs to be organized", x = txtFiles)] # temp file to be deleted
+                       !grepl(pattern = "Needs to be organized", x = txtFiles) & # temp file to be deleted
+                       !grepl(pattern = "MGGA Archive and Calibration", x= txtFiles) &
+                       !grepl(pattern = "2022 field season", x= txtFiles)] # CIN folder that will be deleted
 
 ggaList <- list()  # Empty list to hold results
 
+tic()
 for (i in 1:length(txtFiles)) {  # loop to read and format each file
-  
+  print(i)
   if (grepl(pattern = "gga", x = txtFiles[i])) { 
     # I think this will work for all UGGA files.  The colClasses argument skips the final 71 columns of data.
     # this is needed because one analyzer produces empty columns, while the other doesn't.  This will throw
     # warning message for smaller file, but that is ok.
-  gga.i <- read.table(paste("../../../data/NAR/", 
-                            txtFiles[i], sep=""),
+  gga.i <- read.table(paste(userPath, txtFiles[i], sep=""),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info
                       colClasses = c("character", rep("numeric", 25), rep("character", 2)),
@@ -44,8 +53,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
 # MGGA FORMAT
 if (grepl(pattern = "micro", x = txtFiles[i])) { 
   # slightly different colClasses values.
-  gga.i <- read.table(paste0(userPath,"data/CIN/", 
-                            txtFiles[i]),
+  gga.i <- read.table(paste0(userPath, txtFiles[i]),
                       sep=",",  # comma separate
                       skip=1,  # Skip first line of file.  Header info
                       #colClasses = c(rep("character", 2), rep("numeric", 31)),  # needed to comment out for DOE
@@ -75,7 +83,8 @@ if (grepl(pattern = "micro", x = txtFiles[i])) {
   gga.i <- select(gga.i, lab, lakeId, RDate, RDateTime, CH4._ppm, CO2._ppm, GasT_C)  # select columns of interest
   
   ggaList[[i]] <- gga.i  # dump in list
-}  # End of loop, < 1 minute
+}  # End of loop
+toc()
 
 # Merge files
 gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
@@ -101,13 +110,13 @@ ggsave("output/figures/co2profile.tiff")
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lakeId == "066") %>%
+plotCh4 <- gga %>% filter(lakeId == "045", CH4._ppm > 0) %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
   ggtitle("190")
 ggplotly(plotCh4)  
   
-plotCo2 <- gga %>% filter(lakeId == "066") %>%
+plotCo2 <- gga %>% filter(lakeId == "045") %>%
   ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   ggtitle("190")
