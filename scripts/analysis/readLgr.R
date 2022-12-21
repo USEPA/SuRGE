@@ -36,36 +36,37 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
     # I think this will work for all UGGA files.  The colClasses argument skips the final 71 columns of data.
     # this is needed because one analyzer produces empty columns, while the other doesn't.  This will throw
     # warning message for smaller file, but that is ok.
-  gga.i <- read.table(paste(userPath, txtFiles[i], sep=""),
+    gga.i <- read.table(paste(userPath, txtFiles[i], sep=""),
                       sep=",",  # comma separate
+                      quote="\"",
                       skip=1,  # Skip first line of file.  Header info
-                      colClasses = c("character", rep("numeric", 25), rep("character", 2)),
+                      # colClasses = c("character", rep("numeric", 25), rep("character", 2)),
                       as.is=TRUE, # Prevent conversion to factor
                       header=TRUE, # Import column names
                       fill=TRUE) %>% # Needed to deal with empty cells in last column
-  mutate(lab = sub("\\/.*", "", txtFiles[i]), # assign data to particular field crew
-         # extract lakeId 
-         # this works for most, but not R10 2018 lakes sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i])
-         lakeId = strsplit(txtFiles[i], "_")[[1]][2]) # split into list, grab second element
-}
- 
-
-# MGGA FORMAT
-if (grepl(pattern = "micro", x = txtFiles[i])) { 
-  # slightly different colClasses values.
-  gga.i <- read.table(paste0(userPath, txtFiles[i]),
-                      sep=",",  # comma separate
-                      skip=1,  # Skip first line of file.  Header info
-                      #colClasses = c(rep("character", 2), rep("numeric", 31)),  # needed to comment out for DOE
-                      as.is=TRUE, # Prevent conversion to factor
-                      header=TRUE, # Import column names
-                      fill=TRUE) %>%
-    mutate(lab = sub("\\/.*", "", txtFiles[i]), # assign data to particular field crew
-           lakeId = sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]))  # extract lakeId
-}
-
+      mutate(lab = sub("\\/.*", "", txtFiles[i]), # assign data to particular field crew
+             # extract lake_id 
+             # this works for most, but not R10 2018 lakes sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i])
+             lake_id = strsplit(txtFiles[i], "_")[[1]][2]) # split into list, grab second element
+  }
+  
+  
+  # MGGA FORMAT
+  if (grepl(pattern = "micro", x = txtFiles[i])) { 
+    # slightly different colClasses values.
+    gga.i <- read.table(paste0(userPath, txtFiles[i]),
+                        sep=",",  # comma separate
+                        skip=1,  # Skip first line of file.  Header info
+                        #colClasses = c(rep("character", 2), rep("numeric", 31)),  # needed to comment out for DOE
+                        as.is=TRUE, # Prevent conversion to factor
+                        header=TRUE, # Import column names
+                        fill=TRUE) %>%
+      mutate(lab = sub("\\/.*", "", txtFiles[i]), # assign data to particular field crew
+             lake_id = sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]))  # extract lake_id
+  }
+  
   # FORMAT DATA
-# gga.i <- gga.i[1:(which(gga.i$Time == "-----BEGIN PGP MESSAGE-----") - 1), ]  # Remove PGP message
+  # gga.i <- gga.i[1:(which(gga.i$Time == "-----BEGIN PGP MESSAGE-----") - 1), ]  # Remove PGP message
   gga.i$Time <- gsub("^\\s+|\\s+$", "", gga.i$Time)  #  Strip white spaces
   gga.i$Date <- substr(gga.i$Time, start=1, stop=10)  # Extract date
   gga.i$Second <- round(  # extract second, round to integer
@@ -80,7 +81,7 @@ if (grepl(pattern = "micro", x = txtFiles[i])) {
                                 tz = "UTC")  # POSIXct
   gga.i$RDate <- as.Date(gga.i$Date, format = "%m/%d/%Y")  # format as R Date oject
   names(gga.i)[grep("ppm", names(gga.i))] = gsub("^X.", "", names(gga.i)[grep("X", names(gga.i))]) # replace "X." with ""
-  gga.i <- select(gga.i, lab, lakeId, RDate, RDateTime, CH4._ppm, CO2._ppm, GasT_C)  # select columns of interest
+  gga.i <- select(gga.i, lab, lake_id, RDate, RDateTime, CH4._ppm, CO2._ppm, GasT_C)  # select columns of interest
   
   ggaList[[i]] <- gga.i  # dump in list
 }  # End of loop
@@ -96,27 +97,27 @@ gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
 # BASIC PLOTS-----------------
 ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) + 
-  facet_wrap(~lab + lakeId, scales = "free", 
+  facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
  
 ggsave("output/figures/ch4profile.tiff")
 
 ggplot(gga, aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
-  facet_wrap(~lab + lakeId, scales = "free", 
+  facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
 
 ggsave("output/figures/co2profile.tiff")
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lakeId == "045", CH4._ppm > 0) %>%
+plotCh4 <- gga %>% filter(lake_id == "045", CH4._ppm > 0) %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
   ggtitle("045")
 ggplotly(plotCh4)  
   
-plotCo2 <- gga %>% filter(lakeId == "010") %>%
+plotCo2 <- gga %>% filter(lake_id == "010") %>%
   ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   ggtitle("045")
