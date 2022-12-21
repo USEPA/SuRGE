@@ -113,12 +113,12 @@ ggsave("output/figures/co2profile.tiff")
 plotCh4 <- gga %>% filter(lakeId == "045", CH4._ppm > 0) %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
-  ggtitle("190")
+  ggtitle("045")
 ggplotly(plotCh4)  
   
-plotCo2 <- gga %>% filter(lakeId == "045") %>%
+plotCo2 <- gga %>% filter(lakeId == "010") %>%
   ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
-  ggtitle("190")
+  ggtitle("045")
 ggplotly(plotCo2)  
 

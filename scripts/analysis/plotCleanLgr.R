@@ -9,37 +9,48 @@ gga <- filter(gga, !is.na(RDateTime))  # strip out missing RDateTime.  They comp
 
 
 #2.  LOOP TO ASSIGN LAKE NAME, SITEID, AND DEPLY TIME TO LGR OBSERVATIONS.
-# Many rows in eqAreaData have NA for chmDeplyDtTm.  For example, at all oversample
+# Many rows in fld_sheet have NA for chamb_deply_date_time.  For example, at all oversample
 # sites where chambers were not deployed.  We want to remove these rows, or the missing
 # values complicate the loop.
 
-missingChmDeplyDtTm <- is.na(eqAreaData$chmDeplyDtTm) # logical for missing chamber deployment times
+missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logical for missing chamber deployment times
 
-for (i in 1:length(eqAreaData[!missingChmDeplyDtTm, "chmDeplyDtTm"])) {  # exclude rows with no deployment time
-  chmDeplyDtTm.i <- eqAreaData[!missingChmDeplyDtTm, "chmDeplyDtTm"][i] # exclude rows with no deployment time, select ith observation
-  Lake_Name.i <- eqAreaData[!missingChmDeplyDtTm, "Lake_Name"][i] # exclude rows with no deployment time, select ith observation
-  siteID.i <- eqAreaData[!missingChmDeplyDtTm, "siteID"][i]  # exclude rows with no deployment time, select ith observation
-
+for (i in 1:sum(!missing_chamb_deply_date_time)) {  # for each deployment date_time
+  # grab data from ith deployment
+  data.i <- fld_sheet %>% 
+    filter(!missing_chamb_deply_date_time) %>% # exclude rows with no deployment time, select ith observation
+    slice(i) %>% # grab ith row 
+    select(lake_id, site_id, chamb_deply_date_time) %>% # grab deployment date and time
+    as.data.frame() # tibble messes with base R comparisons and subsetting below
+  
   # Create logical indicator to indicate time window corresponding to
-  # the ith lake and siteID.  Add 1 minute to deployment and retrieval time to expand
-  # x-axis range during plotting.
-  logicalIndicator.i <- gga$RDateTime > (chmDeplyDtTm.i - 60) & # 1 min < field notes
-    gga$RDateTime < (chmDeplyDtTm.i + (6*60))# 6 min > field notes.  Retr time not recorded, assume 5 min after deployment
+  # the ith lake_id and site_id.  Subtract 1 minute from deployment time.  Assume
+  # retrieval time is 5 minutes after deployment, add an extra minute to be conservative.
+  # The 1 minute padding to beginning and end of expected deployment will expand 
+  # x-axis range during plotting to ensure the time window capture the full time series.
+  logicalIndicator.i <- gga$RDateTime > (data.i$chamb_deply_date_time.i - 60) & # 1 min < field notes
+    gga$RDateTime < (data.i$chamb_deply_date_time.i + (6*60)) # 6 min > field notes.  Retr time not recorded, assume 5 min after deployment
 
-  gga[logicalIndicator.i, "Lake_Name"] = Lake_Name.i # Set Lake_Name
-  gga[logicalIndicator.i, "siteID"] = siteID.i # Set siteID 
-  gga[logicalIndicator.i, "co2DeplyDtTm"] = chmDeplyDtTm.i # Set chamber deployment time 
-  gga[logicalIndicator.i, "co2RetDtTm"] = chmDeplyDtTm.i + (60*5) # Set chamber deployment time 
-  gga[logicalIndicator.i, "ch4DeplyDtTm"] = chmDeplyDtTm.i # Set chamber deployment time 
-  gga[logicalIndicator.i, "ch4RetDtTm"] = chmDeplyDtTm.i + (60*5) # Set chamber deployment time   
+  # use logical indicator to associate site_id, retrieval time, and deployment time with
+  # relevant gga time series.  Note that deployment and retrieval times are broken out by
+  # gas (CO2 vs CH4).  This allows different values for each gas if needed.
+  
+  # gga[logicalIndicator.i, "lake_id"] = Lake_Name.i # Set Lake_Name.  This is already coded into gga.
+  gga[logicalIndicator.i, "site_id"] = data.i$site_id # Set siteID 
+  gga[logicalIndicator.i, "co2chamb_deply_date_time"] = data.i$chamb_deply_date_time # Set chamber deployment time 
+  gga[logicalIndicator.i, "co2chamb_retr_date_time"] = data.i$chamb_deply_date_time + (60*5) # Set chamber deployment time 
+  gga[logicalIndicator.i, "ch4chamb_deply_date_time"] = data.i$chamb_deply_date_time # Set chamber deployment time 
+  gga[logicalIndicator.i, "ch4chamb_retr_date_time"] = data.i$chamb_deply_date_time + (60*5) # Set chamber deployment time   
 }
 
 # POSIXct class was stripped during the loop.  Put it back in here.
-gga[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] <- 
-lapply(gga[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")], 
-       as.POSIXct, origin = "1970-01-01 00:00:00", tz= "UTC")  # set tz!
+# Umm, I don't think this is necessary.  str(gga) indicates these field retained POSIXct class.
+# gga[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] <- 
+# lapply(gga[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")], 
+#        as.POSIXct, origin = "1970-01-01 00:00:00", tz= "UTC")  # set tz!
 
 #3. RECORD ADJUSTMENTS TO TIME SERIES PLOTS
+# this is based on manual inspection of each plot
               # Lake_Name,       siteID,     co2DeplyDtTm,            co2RetDtTm,          ch4DeplyDtTm,        ch4RetDtTm
 # This order is critical!
 adjData <- {c("Acton Lake", "U-04", "2016-05-31 11:38:00", "2016-05-31 11:43:00", "2016-05-31 11:38:00", "2016-05-31 11:39:20",
