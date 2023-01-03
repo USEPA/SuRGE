@@ -538,20 +538,26 @@ adjData <- {c("Acton Lake", "U-04", "2016-05-31 11:38:00", "2016-05-31 11:43:00"
 }
 
 # Coerce to data.frame  
-adjDataDf <- data.frame(Lake_Name = adjData[seq(1,length(adjData), 6)],
-                             siteID = adjData[seq(2,length(adjData), 6)],
-                             co2DeplyDtTm = adjData[seq(3,length(adjData), 6)],
-                             co2RetDtTm = adjData[seq(4,length(adjData), 6)],
-                             ch4DeplyDtTm = adjData[seq(5,length(adjData), 6)],
-                             ch4RetDtTm = adjData[seq(6,length(adjData), 6)],
-                        stringsAsFactors = FALSE)
+adjDataDf <- matrix(adjData, ncol = 6, byrow = TRUE) %>%
+  as.data.frame(stringsAsFactors = FALSE)
 
-# Convert date/time data from character to POSIXct
-adjDataDf[, c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] <- 
-  lapply(adjDataDf[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")], 
-    as.POSIXct, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")  # set tz!
+colnames(adjDataDf) <- c("Lake_Name", "siteID", "co2DeplyDtTm", 
+                           "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")
+
+adjDataDf <- adjDataDf %>%
+  mutate(across(co2DeplyDtTm:ch4RetDtTm,
+         ~ as.POSIXct(., format = "%Y-%m-%d %H:%M:%S", tz = "UTC")))
+
+# replaced with code above. 3 jan 2023
+# # Convert date/time data from character to POSIXct
+# adjDataDf[, c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] <- 
+#   lapply(adjDataDf[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")], 
+#     as.POSIXct, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")  # set tz!
 
 #4. UPDATE DEPLOYMENT AND RETRIEVAL TIMES BASED ON FIXES ABOVE (SEE POINT 3)
+
+#  this loop adds the columns co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, 
+# ch4RetDtTm, Lake_Name, siteID       
   
   for (i in 1:with(adjDataDf, length(unique(paste(siteID, Lake_Name))))) { # for each unique site x lake combination
     lake.i <- adjDataDf$Lake_Name[i]  # extract ith lake
