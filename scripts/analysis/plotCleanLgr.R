@@ -15,6 +15,18 @@ gga <- filter(gga, !is.na(RDateTime))  # strip out missing RDateTime.  They comp
 
 missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logical for missing chamber deployment times
 
+# NEW 1/4/2023 IN WORK--not sure if this is correct result?
+gga_new <- gga %>%
+  # Make lake_id same class as fld_sheet lake_id
+  mutate(lake_id = as.character(as.numeric(lake_id))) %>%
+  # Join with fld_sheet to get site_id and de
+  left_join(fld_sheet %>% 
+                       filter(!missing_chamb_deply_date_time) %>%
+                       select(lake_id, site_id, chamb_deply_date_time), 
+                     by = "lake_id") %>%
+  filter(RDateTime > (chamb_deply_date_time - 60) & 
+           RDateTime < (chamb_deply_date_time + 6 * 60))
+
 for (i in 1:sum(!missing_chamb_deply_date_time)) {  # for each deployment date_time
   # grab data from ith deployment
   data.i <- fld_sheet %>% 
@@ -541,14 +553,15 @@ adjData <- {c("Acton Lake", "U-04", "2016-05-31 11:38:00", "2016-05-31 11:43:00"
 adjDataDf <- matrix(adjData, ncol = 6, byrow = TRUE) %>%
   as.data.frame(stringsAsFactors = FALSE)
 
+# Add column names
 colnames(adjDataDf) <- c("Lake_Name", "siteID", "co2DeplyDtTm", 
                            "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")
 
+# Convert date/time data from character to POSIXct
 adjDataDf <- adjDataDf %>%
   mutate(across(co2DeplyDtTm:ch4RetDtTm,
          ~ as.POSIXct(., format = "%Y-%m-%d %H:%M:%S", tz = "UTC")))
 
-# replaced with code above. 3 jan 2023
 # # Convert date/time data from character to POSIXct
 # adjDataDf[, c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] <- 
 #   lapply(adjDataDf[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")], 
@@ -557,7 +570,7 @@ adjDataDf <- adjDataDf %>%
 #4. UPDATE DEPLOYMENT AND RETRIEVAL TIMES BASED ON FIXES ABOVE (SEE POINT 3)
 
 #  this loop adds the columns co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, 
-# ch4RetDtTm, Lake_Name, siteID       
+# ch4RetDtTm, Lake_Name, siteID from adjDataDf to the object gga     
   
   for (i in 1:with(adjDataDf, length(unique(paste(siteID, Lake_Name))))) { # for each unique site x lake combination
     lake.i <- adjDataDf$Lake_Name[i]  # extract ith lake
