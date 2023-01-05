@@ -15,11 +15,12 @@ gga <- filter(gga, !is.na(RDateTime))  # strip out missing RDateTime.  They comp
 
 missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logical for missing chamber deployment times
 
-# NEW 1/4/2023 IN WORK--not sure if this is correct result?
-gga_new <- gga %>%
+# NEW 1/4/2023 IN WORK--not sure if this is correct result? 
+# Replaces the for loop below
+gga_2 <- gga %>%
   # Make lake_id same class as fld_sheet lake_id
   mutate(lake_id = as.character(as.numeric(lake_id))) %>%
-  # Join with fld_sheet to get site_id and de
+  # Join with fld_sheet to get site_id and chamb_deply_date_time
   left_join(fld_sheet %>% 
                        filter(!missing_chamb_deply_date_time) %>%
                        select(lake_id, site_id, chamb_deply_date_time), 
@@ -549,7 +550,7 @@ adjData <- {c("Acton Lake", "U-04", "2016-05-31 11:38:00", "2016-05-31 11:43:00"
             "Acton Lake Oct", "U-04", "2017-10-04 15:26:00", "2017-10-04 15:29:00", "2017-10-04 15:26:20", "2017-10-04 15:27:30")
 }
 
-# Coerce to data.frame  
+# Coerce to matrix, then to data.frame  
 adjDataDf <- matrix(adjData, ncol = 6, byrow = TRUE) %>%
   as.data.frame(stringsAsFactors = FALSE)
 
@@ -558,9 +559,13 @@ colnames(adjDataDf) <- c("Lake_Name", "siteID", "co2DeplyDtTm",
                            "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")
 
 # Convert date/time data from character to POSIXct
+# Replaces the 4 lines of code (w/ lapply) below
 adjDataDf <- adjDataDf %>%
   mutate(across(co2DeplyDtTm:ch4RetDtTm,
-         ~ as.POSIXct(., format = "%Y-%m-%d %H:%M:%S", tz = "UTC")))
+         ~ as.POSIXct(., format = "%Y-%m-%d %H:%M:%S", tz = "UTC"))) %>%
+  # Make site_id same format as gga
+  mutate(siteID = str_extract(siteID, "\\d+") %>% 
+           as.numeric()) 
 
 # # Convert date/time data from character to POSIXct
 # adjDataDf[, c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] <- 
@@ -568,6 +573,15 @@ adjDataDf <- adjDataDf %>%
 #     as.POSIXct, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")  # set tz!
 
 #4. UPDATE DEPLOYMENT AND RETRIEVAL TIMES BASED ON FIXES ABOVE (SEE POINT 3)
+
+# NEW 1/5/2023 IN WORK--not sure if this is correct result? 
+# Replaces the for loop below
+gga_3 <- gga_2 %>%
+  # Join with adjDataDf 
+  left_join(adjDataDf, 
+            by = c("site_id" = "siteID")) %>%
+  filter(chamb_deply_date_time > ( min(c(co2DeplyDtTm, ch4DeplyDtTm)) - 60) & 
+           chamb_deply_date_time < ( max(c(co2RetDtTm, ch4RetDtTm)) + 60))
 
 #  this loop adds the columns co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, 
 # ch4RetDtTm, Lake_Name, siteID from adjDataDf to the object gga     
@@ -606,7 +620,6 @@ adjDataDf <- adjDataDf %>%
     gga[logicalIndicator.i, c("Lake_Name", "siteID", "co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] =
       data.i[, c("Lake_Name", "siteID", "co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")]
 }
-
 
 
 
