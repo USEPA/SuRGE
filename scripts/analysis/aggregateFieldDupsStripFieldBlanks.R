@@ -109,8 +109,8 @@ clean_chem <- function(data) {
 } 
 
 chemistry <- clean_chem(chemistry_all)
-dim(chemistry_all) # 230, 122 [12/9/2022]
-dim(chemistry) # 169, 121 [12/9/2022], good fewer rows, but one fewer column (-sample_type)
+dim(chemistry_all) # 278, 122 [1/5/2023]
+dim(chemistry) # 199, 121 [1/5/2023], good fewer rows, but one fewer column (-sample_type)
 
 names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
 

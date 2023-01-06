@@ -37,19 +37,28 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
     # this is needed because one analyzer produces empty columns, while the other doesn't.  This will throw
     # warning message for smaller file, but that is ok.
     gga.i <- read.table(paste(userPath, txtFiles[i], sep=""),
-                      sep=",",  # comma separate
-                      quote="\"",
-                      skip=1,  # Skip first line of file.  Header info
-                      # colClasses = c("character", rep("numeric", 25), rep("character", 2)),
-                      as.is=TRUE, # Prevent conversion to factor
-                      header=TRUE, # Import column names
-                      fill=TRUE) %>% # Needed to deal with empty cells in last column
-      mutate(lab = sub("\\/.*", "", txtFiles[i]), # assign data to particular field crew
+                        sep=",",  # comma separate
+                        quote="\"",
+                        skip=1,  # Skip first line of file.  Header info
+                        # colClasses = c("character", rep("numeric", 25), rep("character", 2)),
+                        as.is=TRUE, # Prevent conversion to factor
+                        header=TRUE, # Import column names
+                        fill=TRUE) %>% # Needed to deal with empty cells in last column
+      # assign data to particular field crew
+      mutate(lab = str_split(txtFiles[i], "/")[[1]][2], # extract 2nd element from 1st list element 
              # extract lake_id 
-             # this works for most, but not R10 2018 lakes sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i])
-             lake_id = strsplit(txtFiles[i], "_")[[1]][2]) # split into list, grab second element
+             # sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]) works for most, but not R10 2018 lakes.  below is more general 
+             # case_when accomodates the inclusion of lacustrine, transitional, and riverine where needed.
+             # code also forces lake_id to be character
+             lake_id = case_when(grepl("lacustrine", txtFiles[i]) ~ 
+                                   paste0(as.numeric(strsplit(txtFiles[i], "_")[[1]][2]), "_lacustrine"),
+                                 grepl("transitional", txtFiles[i]) ~ 
+                                   paste0(as.numeric(strsplit(txtFiles[i], "_")[[1]][2]), "_transitional"),
+                                 grepl("riverine", txtFiles[i]) ~ 
+                                   paste0(as.numeric(strsplit(txtFiles[i], "_")[[1]][2]), "_riverine"),
+                                 TRUE ~ as.character(as.numeric(strsplit(txtFiles[i], "_")[[1]][2])))
+      )
   }
-  
   
   # MGGA FORMAT
   if (grepl(pattern = "micro", x = txtFiles[i])) { 
@@ -61,8 +70,20 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
                         as.is=TRUE, # Prevent conversion to factor
                         header=TRUE, # Import column names
                         fill=TRUE) %>%
-      mutate(lab = sub("\\/.*", "", txtFiles[i]), # assign data to particular field crew
-             lake_id = sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]))  # extract lake_id
+      # assign data to particular field crew
+      mutate(lab = str_split(txtFiles[i], "/")[[1]][2], # extract 2nd element from 1st list element 
+             # extract lake_id 
+             # sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]) works for most, but not R10 2018 lakes.  below is more general 
+             # case_when accomodates the inclusion of lacustrine, transitional, and riverine where needed.
+             # code also forces lake_id to be character
+             lake_id = case_when(grepl("lacustrine", txtFiles[i]) ~ 
+                                   paste0(as.numeric(strsplit(txtFiles[i], "_")[[1]][2]), "_lacustrine"),
+                                 grepl("transitional", txtFiles[i]) ~ 
+                                   paste0(as.numeric(strsplit(txtFiles[i], "_")[[1]][2]), "_transitional"),
+                                 grepl("riverine", txtFiles[i]) ~ 
+                                   paste0(as.numeric(strsplit(txtFiles[i], "_")[[1]][2]), "_riverine"),
+                                 TRUE ~ as.character(as.numeric(strsplit(txtFiles[i], "_")[[1]][2])))
+      )
   }
   
   # FORMAT DATA

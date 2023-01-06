@@ -9,6 +9,7 @@ library(spsurvey) # lake design
 library(leaflet) # for lake design printables
 library(mapview) # for lake design printables
 library(tictoc) # timing operations
+library(gridExtra) # grid.arrange() for multiple panels per page on .pdf
 
 library(conflicted)
 conflicted::conflict_scout()

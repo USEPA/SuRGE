@@ -42,12 +42,12 @@ paths <- paste0(userPath,  "data/", labs)
 # 2. Function for reading 'data' tab of surgeData files.
 
 get_data_sheet <- function(paths){
-  #d <-  
+  # d <-  
   fs::dir_ls(path = paths, # see above
              regexp = 'surgeData', # file names containing this pattern
              recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
-    # .[12] %>%
+    # .[11] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 

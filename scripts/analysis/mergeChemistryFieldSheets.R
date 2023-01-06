@@ -75,9 +75,9 @@ fld_sheet_sonde <- fld_sheet_sonde %>%
 
 # Now merge in non depth specific fields from fld_sheets
 fld_sheet_sonde1 <- full_join(fld_sheet_sonde, fld_sheet_no_depth)
-dim(fld_sheet_sonde) # 2958, 25 [11/4/2022]
-dim(fld_sheet_no_depth) #1479, 7 [11/4/2022]
-dim(fld_sheet_sonde1) #2958, 29 good [11/4/2022]
+dim(fld_sheet_sonde) # 2956, 25 [1/5/2023]
+dim(fld_sheet_no_depth) #147, 8 [1/5/2023]
+dim(fld_sheet_sonde1) #2956, 29 good [1/5/2023]
 
 # Will merge on common names: lake_id and site_id
 names(chemistry)[names(chemistry) %in% names(fld_sheet_sonde1)] #lake_id, site_id, sample_depth, visit
@@ -86,25 +86,26 @@ class(chemistry$lake_id) == class(fld_sheet_sonde1$lake_id) # TRUE
 class(chemistry$site_id) == class(fld_sheet_sonde1$site_id) # TRUE
 
 # Check dimensions
-dim(chemistry) # 169, 121 [11/4/2022]
-dim(fld_sheet_sonde1) # 2958, 29 [11/4/2022]
+dim(chemistry) # 199, 121 [1/5/2023]
+dim(fld_sheet_sonde1) # 2956, 29 [1/5/2023]
 
 # Check for correspondence among unique identifiers
-# 7 lakes in chemistry, but not in field sheets.  These are all
-# R10 lakes from 2018.  As of 11/4/2022, these field sheets
-# haven't been read in yet.
+# 12 lakes in chemistry, but not in field sheets.  Some of these are
+# R10 lakes from 2018.  As of 1/5/2023, these field sheets
+# haven't been read in yet.  Others are 2023 lakes where chem
+# data are available, but field sheets haven't been populated yet.
 chemistry %>% filter(!(lake_id %in% fld_sheet_sonde1$lake_id)) %>%
   select(lake_id) %>% distinct() %>% print(n=Inf)
 
 
 # any lakes in fld_sheets, but not in chemistry? 
-# A bunch of 2022 lakes for which we don't have any data yet
+# Some 2022 lakes for which we don't have any data yet
 fld_sheet_sonde1 %>% filter(!(lake_id %in% chemistry$lake_id)) %>%
   select(lake_id) %>% distinct() %>% print(n=Inf)
 
 chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
   relocate(lake_id, site_id, lat, long, sample_date, site_depth, sample_depth, sample_depth_m)
-dim(chem_fld) # 2984, 146 [11/4/2022]
+dim(chem_fld) # 2990, 146 [1/5/2023]
 
 # write to disk for reference in lake reports
 save(chem_fld, file = "output/chem_fld.RDATA")
