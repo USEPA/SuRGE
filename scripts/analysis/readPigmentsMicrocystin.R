@@ -102,14 +102,14 @@ cin.pig.path <- paste0(userPath,
                        "data/algalIndicators/pigments/")
 
 
-chla_20_21 <- get_chla_data(cin.pig.path,
+chla_20_21_22 <- get_chla_data(cin.pig.path,
                                "surge_chla_all_2020_2021.csv") 
 
-phycocyanin_20_21 <- get_phyco_data(cin.pig.path,
+phycocyanin_20_21_22 <- get_phyco_data(cin.pig.path,
                             "surge_phyco_all_2020_2021.csv")
 
 
-pigments_20_21 <- left_join(chla_20_21, phycocyanin_20_21, 
+pigments_20_21_22 <- left_join(chla_20_21_22, phycocyanin_20_21_22, 
                             by = c("lake_id", "site_id", 
                                    "sample_depth", "sample_type", "visit")) %>%
   select(-chla_flags, -phycocyanin_flags) # exclude these fields for now. 3/29/2022
@@ -141,7 +141,7 @@ setdiff(chem.samples.foo %>% filter(analyte_group == "algae.nar",
 
 # Now lets make sure that all samples were analyzed
 # 20_21 pigment samples analyzed
-pigments_analyzed <- pigments_20_21 %>%
+pigments_analyzed <- pigments_20_21_22 %>%
   pivot_longer(cols = c(chla, phycocyanin),
                 names_to = "analyte",
               values_to = "concentration") %>%
@@ -150,7 +150,7 @@ pigments_analyzed <- pigments_20_21 %>%
 pigments_collected <- chem.samples.foo %>% 
   filter(analyte %in% c("phycocyanin", "chla"),
          sample_year != 2018, # 2018 R10 not sent to NAR
-          sample_year < 2022, # 11/3/2022, no 2022 data available yet
+          sample_year < 2023, #
          sample_type != "blank") %>% # NAR not sure how to handle blanks.  Active issue in hollister's repo
   select(lake_id, sample_type, sample_depth, visit, analyte)
 

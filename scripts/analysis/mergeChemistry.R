@@ -28,7 +28,7 @@
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
 # # data object name: chl18
 # source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # 2020+ chloro/phyco
-# # data object name: pigments_20_21
+# # data object name: pigments_20_21_22
 
 
 # Inspect objects----
@@ -36,20 +36,20 @@
 # inspect object to merge
 ## each df contains 10 - 175 observations [12/08/2022]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
   map_dfc(., nrow)
 
 # are the unique IDs formatted identically across the dfs?
 ## All have lake_id, site_id, sample_depth, sample_type
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
   map(., function(x) select(
     x, lake_id, site_id, sample_depth, sample_type) %>% 
       str(.))
 ## which ones have a visit field?
-### chemCinNutrients, tteb.all, pigments_20_21
+### chemCinNutrients, tteb.all, pigments_20_21_22
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
   map_lgl(., function(x) x %>% {"visit" %in% names(.)})
 
 
@@ -57,7 +57,7 @@ list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18,
 # All observations are uniquely identified by a combination of lake_id, site_id,
 # sample_depth, and sample_type.  Lakes 281 and 250 were sampled twice, therefore
 # objects containing data from either of those lakes (chemCinNutrients, tteb.all, 
-# pigments_20_21) must have a visit column. This visit column will be propagated
+# pigments_20_21_22) must have a visit column. This visit column will be propagated
 # into the final merged data object.
 # Objects must be joined in proper order to avoid unexpected duplicates.  Best to 
 # merge objects that share names other than the unique identifiers.  For example, 
@@ -113,11 +113,11 @@ janitor::get_dupes(
 # no dupes
 
 pigments <- chl18 %>%
-  full_join(pigments_20_21) %>%
+  full_join(pigments_20_21_22) %>%
   mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
     is.na(visit), 1, visit)))
 # check for unexpected behavior
-nrow(chl18) + nrow(pigments_20_21) == nrow(pigments) # TRUE, good!
+nrow(chl18) + nrow(pigments_20_21_22) == nrow(pigments) # TRUE, good!
 janitor::get_dupes(select(pigments, lake_id, site_id, sample_depth, sample_type)) 
 
 
