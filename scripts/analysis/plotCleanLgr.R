@@ -8,90 +8,95 @@ filter(gga, is.na(RDateTime))
 gga <- filter(gga, !is.na(RDateTime)) # strip out missing RDateTime which complicate functions below.
 
 
-#2.  LOOP TO ASSIGN LAKE NAME, SITEID, AND DEPLY TIME TO LGR OBSERVATIONS.
+#2.  ASSIGN site_id, AND chamb_deply_date_time TO LGR OBSERVATIONS.------------------------
 # Many rows in fld_sheet have NA for chamb_deply_date_time.  For example, at all oversample
 # sites where chambers were not deployed.  We want to remove these rows, or the missing
 # values complicate the loop.
 
 missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logical for missing chamber deployment times
 
-# NEW 1/4/2023 IN WORK--not sure if this is correct result? 
-# Replaces the for loop below.  
 # Join with fld_sheet to get site_id and chamb_deply_date_time
 # This join duplicates the time series for each station within
 # each lake
-gga <- gga %>%
+gga_2 <- gga %>%
   left_join(fld_sheet %>% 
                        filter(!missing_chamb_deply_date_time) %>%
                        select(lake_id, site_id, chamb_deply_date_time), 
                      by = "lake_id")
 
-# # DEPRECATED
-# # FOR LOOP REPLACED WITH CODE ABOVE
-# for (i in 1:sum(!missing_chamb_deply_date_time)) {  # for each deployment date_time
-#   # grab data from ith deployment
-#   data.i <- fld_sheet %>% 
-#     filter(!missing_chamb_deply_date_time) %>% # exclude rows with no deployment time, select ith observation
-#     slice(i) %>% # grab ith row 
-#     select(lake_id, site_id, chamb_deply_date_time) %>% # grab deployment date and time
-#     as.data.frame() # tibble messes with base R comparisons and subsetting below
-#   
-#   # Create logical indicator to indicate time window corresponding to
-#   # the ith lake_id and site_id.  Subtract 1 minute from deployment time.  Assume
-#   # retrieval time is 5 minutes after deployment, add an extra minute to be conservative.
-#   # The 1 minute padding to beginning and end of expected deployment will expand 
-#   # x-axis range during plotting to ensure the time window capture the full time series.
-#   logicalIndicator.i <- gga$RDateTime > (data.i$chamb_deply_date_time.i - 60) & # 1 min < field notes
-#     gga$RDateTime < (data.i$chamb_deply_date_time.i + (6*60)) # 6 min > field notes.  Retr time not recorded, assume 5 min after deployment
-# 
-#   # use logical indicator to associate site_id, retrieval time, and deployment time with
-#   # relevant gga time series.  Note that deployment and retrieval times are broken out by
-#   # gas (CO2 vs CH4).  This allows different values for each gas if needed.
-#   
-#   # gga[logicalIndicator.i, "lake_id"] = Lake_Name.i # Set Lake_Name.  This is already coded into gga.
-#   gga[logicalIndicator.i, "site_id"] = data.i$site_id # Set siteID 
-#   gga[logicalIndicator.i, "co2chamb_deply_date_time"] = data.i$chamb_deply_date_time # Set chamber deployment time 
-#   gga[logicalIndicator.i, "co2chamb_retr_date_time"] = data.i$chamb_deply_date_time + (60*5) # Set chamber deployment time 
-#   gga[logicalIndicator.i, "ch4chamb_deply_date_time"] = data.i$chamb_deply_date_time # Set chamber deployment time 
-#   gga[logicalIndicator.i, "ch4chamb_retr_date_time"] = data.i$chamb_deply_date_time + (60*5) # Set chamber deployment time   
-# }
-# 
-# # POSIXct class was stripped during the loop.  Put it back in here.
-# # Umm, I don't think this is necessary.  str(gga) indicates these field retained POSIXct class.
-# # gga[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] <- 
-# # lapply(gga[ , c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")], 
-# #        as.POSIXct, origin = "1970-01-01 00:00:00", tz= "UTC")  # set tz!
+#3. ADD CO2 AND CH4 RETRIEVAL AND DEPLOYMENT TIMES
+# We may want to model different portions of the time series for CO2 and CH4.
+# Here we create fields to hold retrieval and deployment times for each gas.
+gga_2 <- gga_2 %>% 
+  # mutate ensures that all records have deployment and retrieval times for CO2 and CH4
+  # assume deployment time recorded in field is correct, will inspect/modify below.
+  mutate(co2DeplyDtTm = chamb_deply_date_time , 
+         co2RetDtTm =  chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+         ch4DeplyDtTm = chamb_deply_date_time,
+         ch4RetDtTm = chamb_deply_date_time + (60*5))
+
 
 #3. RECORD ADJUSTMENTS TO TIME SERIES PLOTS-------------
-# this is based on manual inspection of each plot.  Must have at least one entry below
-# for code to run
-              # lake_id,       site_id,     co2DeplyDtTm,            co2RetDtTm,          ch4DeplyDtTm,        ch4RetDtTm
-# This order is critical!
-adjData <- {c("55", 5, "2022-06-01 09:01:15", "2022-06-01 09:06:30", "2022-06-01 09:01:15", "2022-06-01 09:06:30")
-  }
+# COMPLETE 3.1, 3.2, AND 3.3.  REPEAT UNTIL ALL PLOTS HAVE BEEN REVIEWED.
+#3.1  Manually inspect each plot and record best deployment and retrieval times
+# in lab specific Excel file.  
 
-# Coerce to matrix, then to data.frame  
-adjDataDf <- matrix(adjData, ncol = 6, byrow = TRUE) %>%
-  as.data.frame(stringsAsFactors = FALSE)
+# specify which lake and site to inspect
+lake_id.i <- "54"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- 1 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
-# Add column names
-colnames(adjDataDf) <- c("lake_id", "site_id", "co2DeplyDtTm", 
-                           "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")
+plotCh4 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+ggplotly(plotCh4)  
 
-# Convert date/time data from character to POSIXct
-adjDataDf <- adjDataDf %>%
-  mutate(across(co2DeplyDtTm:ch4RetDtTm,
-         ~ as.POSIXct(., format = "%Y-%m-%d %H:%M:%S", tz = "UTC")),
-         site_id = as.numeric(site_id)) # match gga format
+plotCo2 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+ggplotly(plotCo2)
 
+#3.2  Read in refined deployment and retrieval data from Excel files.
+# use .xls.  Can read file into R while file is open in Excel, which is convenient.
+# list of files containing deployment and retrieval data.
+sdjDataList <- paste0("../../../data/", 
+                      c("ADA/chamberAdjustmentsAda.xls", "CIN/chamberAdjustmentsCIN.xls", 
+                        "RTP/chamberAdjustmentsRTP.xls", "R10/chamberAdjustmentsR10.xls", 
+                        "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls",
+                        "NAR/chamberAdjustmentsNAR.xls"))
+# Read data
+adjData <- map_df(sdjDataList, readxl::read_xls, sheet = "DATA",
+                            col_types = c("text", "numeric", rep("date", 4), rep("text", 4))) #lake_id is character
+str(adjData)
 
-#4. UPDATE DEPLOYMENT AND RETRIEVAL TIMES BASED ON FIXES ABOVE (SEE POINT 3)----------------
-
-# NEW 1/5/2023 IN WORK-- Replaces the for loop below
-# adds co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, ch4RetDtTm from adjDataDf to the gga data
-gga_2 <- gga %>% #gga
-  # Join with adjDataDf 
-  left_join(adjDataDf) %>%
+#3.3. update deployment and retrieval times based on fixes above (see 3.1 and 3.2)
+gga_2 <- gga_2 %>% 
+  # remove co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, and ch4RetDtTm.  They will be replaced with
+  # data from adjData or derived from chamb_deply_date_time
+  select(-contains("DtTm")) %>%
+  # Remove these columns if present.  Won't be present first time through, but
+  # will in subsequent iterations.  Will be replaced with data from adjData.
+  # This won't throw error if specified columns are absent.
+  select_if(!names(.) %in% c("co2Notes", "ch4Notes", "co2Status", "ch4Status")) %>%
+  # Join with adjDataDf.
+  left_join(., adjData) %>%
   # mutate ensures that all records have deployment and retrieval times for CO2 and CH4
   mutate(co2DeplyDtTm = case_when(is.na(co2DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
                             TRUE ~ co2DeplyDtTm), # if not na, then use data supplied from adjDataDf
@@ -100,65 +105,35 @@ gga_2 <- gga %>% #gga
          ch4DeplyDtTm = case_when(is.na(ch4DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
                                   TRUE ~ ch4DeplyDtTm), # if not na, then use data supplied from adjDataDf
          ch4RetDtTm = case_when(is.na(ch4RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
-                                TRUE ~ ch4RetDtTm)) %>% # if not na, then use data supplied from adjDataDf
-  group_by(lake_id, site_id) %>%
+                                TRUE ~ ch4RetDtTm))  # if not na, then use data supplied from adjDataDf
+
+# GO BACK TO STEP 3.1 TO REVIEW TIME SERIES AFTER INCORPORATING NEW DEPLOYMENT AND RETRIEVAL TIMES
+# IF SATISFIED WITH PROFILES, MOVE ON TO STEP 4.
+
+
+#4. PREPARE DATA TO PLOT ALL TIME SERIES----------------
+# Trim data to only those we plan to model, plus 60 second buffer on either side
+# of modeling window.
+gga_3 <- gga_2 %>%
+  group_by(lake_id, site_id) %>% # for each lake and site....
   filter(RDateTime > (min(c(co2DeplyDtTm, ch4DeplyDtTm)) - 60) & 
            RDateTime < (max(c(co2RetDtTm, ch4RetDtTm)) + 60)) %>%
   ungroup()
 
-# #  DEPRECATED
-# #  this loop adds the columns co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, 
-# # ch4RetDtTm, Lake_Name, siteID from adjDataDf to the object gga     
-#   
-#   for (i in 1:with(adjDataDf, length(unique(paste(siteID, Lake_Name))))) { # for each unique site x lake combination
-#     lake.i <- adjDataDf$Lake_Name[i]  # extract ith lake
-#     site.i <- adjDataDf$siteID[i]  # extract ith site
-#     data.i <- adjDataDf[i, ]  # extract data.i
-#     
-#     #Calculate earliest and latest observation we need for this lake x site.  Simply min/max deply time.
-#     #This will make sure x-axis range is good for time series plots.
-#     #Use do.call the concentate "c" the df (which is actually a list) to a vector that
-#     #can be fed to min, while preserving the POSIXct attribute.
-#     #Need to set na.rm=TRUE in min function to ignore NA deploy/retr times for
-#     #chambers with CH4 ebullition.
-#     #http://stackoverflow.com/questions/15659783/why-does-unlist-kill-dates-in-r
-#     #Unfortunately, this changes tz, which must be manually reset to UTC
-#     start.time.i <- min(do.call("c", data.i[, c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")]), na.rm = TRUE)
-#     end.time.i <- max(do.call("c", data.i[, c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")]), na.rm = TRUE)
-#     attr(start.time.i, "tzone") <- "UTC"  # reset time zone!
-#     attr(end.time.i, "tzone") <- "UTC"  # reset time zone!
-#     
-#     #Delete original CO2 and CH4 deployment / retrieval times from gga file.  These will be replaced with 
-#     #updated values.
-#     gga[gga$Lake_Name == lake.i &  !is.na(gga$Lake_Name) & gga$siteID == site.i & !is.na(gga$siteID), 
-#         c("co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] = NA
-#     
-#     #Logical indicator indicator block of gga data that should be updated
-#     #The extra minute and begining and end extend x-axis range for plotting,
-#     #which is good for picking time range for modeling diffusion.
-#     logicalIndicator.i <- gga$RDateTime > (start.time.i - 60) & # 1 min < deployment
-#       gga$RDateTime < (end.time.i + 60) # 1 min > retrieval
-#     
-#     # Replace original time stamps with updated numbers
-#     # POSIXct and time zone preserved through this step.  Wow!
-#     gga[logicalIndicator.i, c("Lake_Name", "siteID", "co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")] =
-#       data.i[, c("Lake_Name", "siteID", "co2DeplyDtTm", "co2RetDtTm", "ch4DeplyDtTm", "ch4RetDtTm")]
-# }
-
 
 
 #5.  PLOT CO2 AND CH4 PROFILES FOR INSPECTION---------------
-
+# Plot all profiles on a single .pdf
 pdf("output/figures/ggaProfile.pdf", paper = "a4r") # landscape orientation
 tic()
-for (i in 1:with(gga_2[!is.na(gga_2$lake_id), ], # this eliminates observations without a Lake_Name (LGR data when chamber not deployed)
+for (i in 1:with(gga_3[!is.na(gga_3$lake_id), ], # this eliminates observations without a Lake_Name (LGR data when chamber not deployed)
                  length(unique(paste(site_id, lake_id))))) {  # each combination of site and lake
   print(i)
-  site.lake.i <- with(gga_2[!is.na(gga_2$lake_id), ],  # extract unique lake x site combination
+  site.lake.i <- with(gga_3[!is.na(gga_3$lake_id), ],  # extract unique lake x site combination
                       unique(paste(site_id, lake_id)))[i]
   site.i <- gsub(" .*$", "", site.lake.i)  # extract site.  regex allows for siteIDs of different lengths (i.e. S-01, SU-01)
   lake.i <- substr(site.lake.i, start = nchar(site.i) + 2, stop = nchar(site.lake.i)) # extract lake name
-  data.i <- filter(gga_2, lake_id == lake.i, site_id == site.i) %>%  # Pull out GGA data chunk
+  data.i <- filter(gga_3, lake_id == lake.i, site_id == site.i) %>%  # Pull out GGA data chunk
     select(-GasT_C) # No need to plot gas temperature
   RDate.i <- unique(data.i$RDate)  # for panel title
 

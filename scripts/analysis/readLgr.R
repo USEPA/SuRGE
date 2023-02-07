@@ -8,7 +8,7 @@
 
 # READ DATA -----------------
 # List of .txt files containing data 
-labs <- c("CIN", "RTP", "NAR", "USGS", "ADA", "R10") # data directory for each lab
+labs <- c("CIN", "RTP", "NAR", "USGS", "ADA", "R10", "DOE") # data directory for each lab
 txtFiles <- character(0) # vector to catch file names
 for (i in 1:length(labs)) {
   txtFiles.i <- list.files(paste0(userPath,"data/", labs[i]), 
@@ -29,7 +29,7 @@ txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr
 
 ggaList <- list()  # Empty list to hold results
 
-tic()
+tic() # 50 seconds 2/6/2023
 for (i in 1:length(txtFiles)) {  # loop to read and format each file
   print(i)
   if (grepl(pattern = "gga", x = txtFiles[i])) { 
@@ -113,7 +113,8 @@ gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
   filter(CH4._ppm < 500) # filter out clearly erroneous values
 
 
-
+# write to disk
+save(gga, file = "output/gga.RData")
 
 # BASIC PLOTS-----------------
 ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +
@@ -121,14 +122,14 @@ ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +
   facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
  
-ggsave("output/figures/ch4profile.tiff")
+# ggsave("output/figures/ch4profile.tiff")
 
 ggplot(gga, aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
 
-ggsave("output/figures/co2profile.tiff")
+# ggsave("output/figures/co2profile.tiff")
 
 
 # Try an interactive version for each lake

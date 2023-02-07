@@ -1,7 +1,7 @@
 # source scripts in order
 
 source("scripts/masterLibrary.R") # Read in renv controlled library
-source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
+# source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 
 # Analysis
 source("scripts/analysis/readSurgeLakes.R") # read in survey design file
