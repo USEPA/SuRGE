@@ -1,7 +1,7 @@
 # source scripts in order
 
 source("scripts/masterLibrary.R") # Read in renv controlled library
-# source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
+source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 
 # Analysis
 source("scripts/analysis/readSurgeLakes.R") # read in survey design file
@@ -9,6 +9,7 @@ source("scripts/analysis/chemSampleList.R") # creates chem.samples.foo, an inven
 
 # Read field sheets and merge sample dates
 source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
+source("scripts/analysis/chamberVolume.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
 source("scripts/analysis/sampleDates.R") # df of lake_id, visit, and sample_date [10/14/22 - this object might not be needed]
 
 # Read chemistry
@@ -41,8 +42,9 @@ source("scripts/analysis/rapidReport.R")
 
 
 # Diffusive emission rates
-#source("scripts/analysis/readLgr.R")
-#source("scripts/analysis/plotClean.R") # define deployment/retrieval times for chambers
+source("scripts/analysis/readLgr.R") # read raw LGR data
+source("scripts/analysis/plotClean.R") # define deployment/retrieval times for chambers
+source("scripts/analysis/calculateEmissions.R") # diffusive emission rates
 
 # Random
 #source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 

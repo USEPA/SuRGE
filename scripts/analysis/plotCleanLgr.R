@@ -6,6 +6,7 @@
 ## OBJECTS.  THIS CAN BE DONE BY RUNNING ALL SCRIPTS IN THE ORDER
 ## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 3 LINES:
 # source("scripts/masterLibrary.R") # Read in renv controlled library
+# source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 # source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
 # source("scripts/analysis/readLgr.R") # read raw LGR data
 
