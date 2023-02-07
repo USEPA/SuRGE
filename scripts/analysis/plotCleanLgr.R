@@ -1,6 +1,18 @@
 # THIS SCRIPT WILL BE USED TO PLOT AND CLEAN LGR DATA IN PREPARATION
 # FOR CALCULATION OF DIFFUSIVE EMISSION RATE
 
+#####################################################
+## TO RUN THE CODE BELOW, YOU MUST FIRST GENERATE THE gga AND fld_sheet DATA 
+## OBJECTS.  THIS CAN BE DONE BY RUNNING ALL SCRIPTS IN THE ORDER
+## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 3 LINES:
+# source("scripts/masterLibrary.R") # Read in renv controlled library
+# source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
+# source("scripts/analysis/readLgr.R") # read raw LGR data
+
+
+
+
+
 #1. INSPECT INSTANCES OF NA IN GGA------------
 # Time/date stamp first
 filter(gga, is.na(RDateTime))

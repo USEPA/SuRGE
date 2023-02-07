@@ -113,9 +113,6 @@ gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
   filter(CH4._ppm < 500) # filter out clearly erroneous values
 
 
-# write to disk
-save(gga, file = "output/gga.RData")
-
 # BASIC PLOTS-----------------
 ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) + 
