@@ -74,7 +74,9 @@ get_phyco_data <- function(path, data, sheet) {
                                      as.Date("2022-09-15")),
                            2, 1, missing = 1)) %>%
     select(lake_id, site_id, sample_type, sample_depth, visit, 
-           phycocyanin, phycocyanin_units, phyco_flag) 
+           phycocyanin, phycocyanin_units, phyco_flag) %>%
+    # variable names must be same for aggregateFieldDupsStripFieldBlanks.R
+    rename(phycocyanin_flag = phyco_flag)
     
     # unite("phycocyanin_flags", phycocyanin_qual, 
     #       phycocyanin_ship, sep = " ") %>% # merge all flag columns:
