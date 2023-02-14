@@ -43,7 +43,7 @@ source("scripts/analysis/rapidReport.R")
 
 # Diffusive emission rates
 source("scripts/analysis/readLgr.R") # read raw LGR data
-source("scripts/analysis/plotClean.R") # define deployment/retrieval times for chambers
+source("scripts/analysis/plotCleanLgr.R") # define deployment/retrieval times for chambers
 source("scripts/analysis/calculateEmissions.R") # diffusive emission rates
 
 # Random

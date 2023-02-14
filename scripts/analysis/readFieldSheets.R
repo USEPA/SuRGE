@@ -64,6 +64,9 @@ get_data_sheet <- function(paths){
         # Assign value to visit based on the Excel filename
         mutate(visit = if_else(str_detect(visit, "visit2"),
                                2, 1, missing = 1), 
+               # Make empty columns numeric, if necessary
+               lat = as.numeric(lat),
+               long = as.numeric(long), 
                # format lake_id and site_id.  See Wiki
                lake_id = as.character(lake_id) %>%
                  tolower(.) %>% # i.e. Lacustrine -> lacustrine
