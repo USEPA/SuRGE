@@ -7,6 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
+
 # LIBRARY --------------------------------------------------------------------
 
 library(tidyverse)
@@ -15,6 +16,7 @@ library(janitor) # format dataframe names
 library(scales) # for ggplot2 datetime formatting 
 library(spsurvey) # lake design
 library(tictoc) # timing operations
+library(plotly)
 library(conflicted)
 conflicted::conflict_scout()
 conflict_prefer("select", "dplyr") # select() will call dplyr::select()
@@ -25,22 +27,17 @@ conflict_prefer("rename", "dplyr") # filter() will call dplyr::rename()
 
 # LOAD AND ORGANIZE DATA -----------------------------------------------------
 
-# Set User path
-userPath <- paste0(
-  Sys.getenv("USERPROFILE"), 
-  "/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
-
-# Read in field sheets data 
-source(paste0(userPath,
-              "rProjects/Joe/SuRGE/scripts/analysis/readFieldSheets.R"))
+# Set User path for the sourced scripts
+source("../scripts/setUserPath.R")
 
 # read in survey design file
-source(paste0(userPath, 
-              "rProjects/Joe/SuRGE/scripts/analysis/readSurgeLakes.R"))
+source("../scripts/analysis/readSurgeLakes.R")
+
+# Read in field sheets data 
+source("../scripts/analysis/readFieldSheets.R")
 
 # read raw LGR data
-source(paste0(userPath, 
-              "rProjects/Joe/SuRGE/scripts/analysis/readLgr.R"))
+source("../scripts/analysis/readLgr.R")
 
 filter(gga, is.na(RDateTime))
 gga <- filter(gga, !is.na(RDateTime)) # strip out missing RDateTime
@@ -63,7 +60,7 @@ gga_2 <- gga_2 %>%
   # mutate ensures that all records have deployment and retrieval times
   # for CO2 and CH4. assume deployment time recorded in field is correct,
   # will inspect/modify below.
-  mutate(co2DeplyDtTm = chamb_deply_date_time ,
+  mutate(co2DeplyDtTm = chamb_deply_date_time,
          # assume retrieval 5 minutes after deployment
          co2RetDtTm =  chamb_deply_date_time + (60*5),
          ch4DeplyDtTm = chamb_deply_date_time,
@@ -133,7 +130,7 @@ get_adjusted_data <- function(x) {
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Hello"),
+  titlePanel("GGA Profiles"),
   
   sidebarLayout(
     # user inputs (lake, site, and data type)
@@ -152,11 +149,11 @@ ui <- fluidPage(
                  actionButton("go", "GO!"), 
                  width = 2),
     # Plot output, side-by-side
-    mainPanel("Plots incoming!",
+    mainPanel("Plots will be displayed below:",
               fluidRow(
                 splitLayout(cellWidths = c("50%", "50%"), 
-                            plotOutput("plot_ch4"), 
-                            plotOutput("plot_co2")),
+                            plotlyOutput("plot_ch4"), 
+                            plotlyOutput("plot_co2")),
                 width = 12
               )
     )
@@ -168,22 +165,28 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
+  # Wrap inside the action button. Render plots when user pushes button.
   observeEvent(input$go, {
-  
+    
+    # User input determines which data is used
     if (input$data == "updated")
       gga_data <- get_adjusted_data(gga_2) 
     else
       gga_data <- gga_2
+    
+    # Set the lake and site id according to user input
     lake_id.i = input$lake
     site_id.i = input$site  
     
+    # Create data object for use with both plots
     plots <- gga_data %>% 
       filter(lake_id == lake_id.i, 
              site_id == site_id.i, 
              RDateTime > ch4DeplyDtTm - 60, # start 1 min before deploy
              RDateTime < ch4RetDtTm + 60) # extend plot 1 min post deploy  
     
-    output$plot_ch4 <- renderPlot({
+    # CH4 plot
+    output$plot_ch4 <- renderPlotly({
       
       plot_ch4 <- plots %>% 
         filter(CH4._ppm > 0) %>%
@@ -191,13 +194,18 @@ server <- function(input, output) {
         geom_point() +
         geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
         geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
-        scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
-        ggtitle(paste("CH4: lake_id = ", lake_id.i, "site_id = ", site_id.i))
-      plot_ch4
-
+        scale_x_datetime(date_labels = ("%m/%d %H:%M"))
+      # Render with plotly
+      ggplotly(plot_ch4) %>% 
+        plotly::layout(title = list(
+          text = paste(
+            "CH4: lake_id = ", lake_id.i, "site_id = ", site_id.i), 
+          y = 0, font = list(size = 14)),
+          xaxis=list(title = ""))
     })
     
-    output$plot_co2 <- renderPlot({
+    # CO2 plot
+    output$plot_co2 <- renderPlotly({
       
       plot_co2 <- plots %>%
         filter(CO2._ppm > 0) %>%
@@ -205,9 +213,15 @@ server <- function(input, output) {
         geom_point() +
         geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
         geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
-        scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
-        ggtitle(paste("CO2: lake_id = ", lake_id.i, "site_id = ", site_id.i))
-      plot_co2
+        scale_x_datetime(date_labels = ("%m/%d %H:%M"))
+      # Render with plotly
+      ggplotly(plot_co2) %>% 
+        plotly::layout(title = list(
+          text = paste(
+          "CO2: lake_id = ", lake_id.i, "site_id = ", site_id.i), 
+          y = 0, font =  list(size = 14)),
+          xaxis=list(title = "")
+          )
       
     })
   })
