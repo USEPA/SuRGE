@@ -64,9 +64,6 @@ get_data_sheet <- function(paths){
         # Assign value to visit based on the Excel filename
         mutate(visit = if_else(str_detect(visit, "visit2"),
                                2, 1, missing = 1), 
-               # Make empty columns numeric, if necessary
-               lat = as.numeric(lat),
-               long = as.numeric(long), 
                # format lake_id and site_id.  See Wiki
                lake_id = as.character(lake_id) %>%
                  tolower(.) %>% # i.e. Lacustrine -> lacustrine
@@ -75,6 +72,9 @@ get_data_sheet <- function(paths){
                site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
                long = case_when(long > 0 ~ long * -1, # longitude should be negative
                                 TRUE ~ long),
+               # Empty columns cause data-class conflicts; make classes identical
+               across(contains(c("lat", "long")), ~ as.numeric(.)),
+               across(contains(c("trap_extn")), ~ as.character(.)),
                across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
         # Format date and time objects
         mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
