@@ -16,7 +16,7 @@ temp <- rep(NA, n)
 
 # Dataframe to hold results
 OUT <- data.frame(site_id = temp, lake_id = temp,
-                  ch4.diff.max=temp, #Sarah added on 6/14/17; making histogram of max ch4 levels measured by LGR
+                  ch4.diff.max=temp, #Sarah added on 6/14/17; making histogram of max ch4 levels measured by LGR.  can be deleted
                   ch4.lm.slope = temp, ch4.lm.drate.mg.h = temp, ch4.lm.aic = temp, ch4.lm.r2 = temp, ch4.lm.pval = temp,
                   ch4.ex.aic = temp, ch4.ex.r2 = temp, ch4.ex.slope = temp, ch4.ex.drate.mg.h = temp, ch4.ex.k=temp, 
                   co2.lm.slope = temp, co2.lm.drate.mg.h = temp, co2.lm.aic = temp, co2.lm.r2 = temp, co2.lm.pval = temp,
@@ -100,7 +100,7 @@ for (i in 1:n) {  # For each unique site
   cmax.co2 <- data.i.co2$CO2._ppm[max(which(!is.na(data.i.co2$CO2._ppm)))]  # cmax = final CO2
   c.initial.co2 <- data.i.co2$CO2._ppm[min(which(!is.na(data.i.co2$CO2._ppm)))]  # initial CO2   
   exp.co2.i <-try(nlsLM(CO2._ppm~cmax-(cmax-b)*exp(-k*as.numeric(elapTime)),
-                        data = data.i.co2, start=list(cmax=505, b= 400, k=0.004)),
+                        data = data.i.co2, start=list(cmax=cmax.co2, b=cmax.co2-c.initial.co2, k=0.004)),
                   silent=TRUE) 
   # Ex r2
   rss.ch4.i <- if(class(exp.ch4.i) == "try-error") NA else sum(residuals(exp.ch4.i)^2)
