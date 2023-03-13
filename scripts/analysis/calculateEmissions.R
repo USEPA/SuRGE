@@ -9,7 +9,6 @@
 # STEP 3: MERGE WITH eqAreaData
 
 
-
 # STEP 1: LINEAR AND NONLINEAR REGRESSION
 n <- length(unique(paste(gga_3$lake_id, gga_3$site_id)))
 temp <- rep(NA, n)
@@ -17,14 +16,20 @@ temp <- rep(NA, n)
 # Dataframe to hold results
 OUT <- data.frame(site_id = temp, lake_id = temp,
                   ch4.diff.max=temp, #Sarah added on 6/14/17; making histogram of max ch4 levels measured by LGR.  can be deleted
-                  ch4.lm.slope = temp, ch4.lm.drate.mg.h = temp, ch4.lm.aic = temp, ch4.lm.r2 = temp, ch4.lm.pval = temp,
-                  ch4.ex.aic = temp, ch4.ex.r2 = temp, ch4.ex.slope = temp, ch4.ex.drate.mg.h = temp, ch4.ex.k=temp, 
-                  co2.lm.slope = temp, co2.lm.drate.mg.h = temp, co2.lm.aic = temp, co2.lm.r2 = temp, co2.lm.pval = temp,
-                  co2.ex.aic = temp, co2.ex.r2 = temp, co2.ex.slope = temp, co2.ex.k = temp, co2.ex.drate.mg.h = temp)
+                  ch4.lm.slope = temp, ch4.lm.drate.mg.h = temp, 
+                  ch4.lm.aic = temp, ch4.lm.r2 = temp, ch4.lm.pval = temp,
+                  ch4.ex.aic = temp, ch4.ex.r2 = temp, ch4.ex.slope = temp, 
+                  ch4.ex.drate.mg.h = temp, ch4.ex.k=temp, 
+                  co2.lm.slope = temp, co2.lm.drate.mg.h = temp, 
+                  co2.lm.aic = temp, co2.lm.r2 = temp, co2.lm.pval = temp,
+                  co2.ex.aic = temp, co2.ex.r2 = temp, co2.ex.slope = temp, 
+                  co2.ex.k = temp, co2.ex.drate.mg.h = temp)
 
 
 pdf("output/figures/curveFits.pdf")
+
 start.time <- Sys.time()
+
 for (i in 1:n) {  # For each unique site
   site.lake.i <- unique(paste(gga_3$site_id, gga_3$lake_id))[i]
   site.i <- stringr::word(site.lake.i, 1) %>% as.numeric() # extract characters before space.  site_id is numeric.
@@ -55,7 +60,7 @@ for (i in 1:n) {  # For each unique site
                        lake_id == lake.i)  %>% 
     # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
     mutate(elapTime = RDateTime - RDateTime[1], # Calculate elapsed time (seconds). 
-           chmVol.L = chmVol.L.i[1,1]) %>%  # subscripting needed to remove name
+           chmVol.L = chmVol.L.i[1]) %>%  # subscripting needed to remove name
     select(lake_id, site_id, CO2._ppm, elapTime, GasT_C, chmVol.L)  # Pull out data of interest
   
   # Are there data available to run the model?
@@ -157,8 +162,10 @@ for (i in 1:n) {  # For each unique site
   # Plots
   # CH4 first
   ch4.ex.pred <- try(  
-    data.frame(ch4.pred = predict(exp.ch4.i, newdata = data.i.ch4), # pred values from exponential model
-               elapTime = data.i.ch4$elapTime),
+    data.frame(
+      ch4.pred = predict(
+        exp.ch4.i,newdata = data.i.ch4), # pred values from exponential model
+      elapTime = data.i.ch4$elapTime),
     silent = TRUE)
   
   ch4.title <- paste(OUT[i, "site"], # plot title
@@ -176,6 +183,7 @@ for (i in 1:n) {  # For each unique site
                      "lm.rate=",
                      round(OUT[i, "ch4.lm.drate.mg.h"], 2),
                      sep=" ")
+  
   p.ch4 <- ggplot(data.i.ch4, aes(as.numeric(elapTime), CH4._ppm)) + 
     geom_point() +
     xlab("Seconds") +
@@ -188,9 +196,10 @@ for (i in 1:n) {  # For each unique site
   
   # CO2 models
   co2.ex.pred <- try(
-    data.frame(co2.pred = predict(exp.co2.i, newdata = data.i.co2),  # pred data from exp model
+    data.frame(co2.pred = predict(
+      exp.co2.i, newdata = data.i.co2),  # pred data from exp model
                elapTime = data.i.co2$elapTime),
-    silent=TRUE)
+    silent = TRUE)
   
   co2.title <- paste(OUT[i, "site"], # plot title
                      OUT[i, "lake_id"],
@@ -207,13 +216,16 @@ for (i in 1:n) {  # For each unique site
                      "lm.rate=",
                      round(OUT[i, "co2.lm.drate.mg.h"], 2),
                      sep=" ")
+  
   p.co2 <- ggplot(data.i.co2, aes(as.numeric(elapTime), CO2._ppm)) + 
     geom_point() +
     xlab("Seconds") +
     ggtitle(co2.title) +
     stat_smooth(method = "lm", se=FALSE)
   if (class(exp.co2.i) == "try-error") p.co2 else  # if exp model worked, add exp line
-    p.co2 <- p.co2 + geom_line(data=co2.ex.pred, aes(as.numeric(elapTime), co2.pred), color = "red")
+    p.co2 <- p.co2 + geom_line(data=co2.ex.pred, 
+                               aes(as.numeric(elapTime), co2.pred), 
+                               color = "red")
   print(p.co2)
 }  
 dev.off()
@@ -235,8 +247,10 @@ OUT <- mutate(OUT,
               ch4.drate.mg.h.best = ifelse(ch4.best.model == "linear",
                                            ch4.lm.drate.mg.h, ch4.ex.drate.mg.h)) 
 # Inspect r2.
-plot(with(OUT,ifelse(co2.best.model == "linear", co2.lm.r2, co2.ex.r2)))  # CO2: some low ones to investigate
-plot(with(OUT,ifelse(ch4.best.model == "linear", ch4.lm.r2, ch4.ex.r2)))  # CH4:  some low ones to investigate
+plot(with(OUT,ifelse(co2.best.model == "linear", 
+                     co2.lm.r2, co2.ex.r2)))  # CO2: some low ones to investigate
+plot(with(OUT,ifelse(ch4.best.model == "linear", 
+                     ch4.lm.r2, ch4.ex.r2)))  # CH4:  some low ones to investigate
 
 # If r2 of best model < 0.9, then set to NA
 OUT <- mutate(OUT, 
