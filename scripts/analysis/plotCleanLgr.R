@@ -55,8 +55,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "54"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- 1 # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "275"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- 2 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
@@ -95,8 +95,10 @@ sdjDataList <- paste0("../../../data/",
                         "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls",
                         "NAR/chamberAdjustmentsNAR.xls"))
 # Read data
-adjData <- map_df(sdjDataList, readxl::read_xls, sheet = "DATA",
-                            col_types = c("text", "numeric", rep("date", 4), rep("text", 4))) #lake_id is character
+adjData <- map_df(sdjDataList, readxl::read_xls, range ="DATA!A1:J100", 
+                            col_types = c("text", "numeric", 
+                                          rep("date", 4), 
+                                          rep("text", 4))) #lake_id is character
 str(adjData)
 
 #3.3. update deployment and retrieval times based on fixes above (see 3.1 and 3.2)

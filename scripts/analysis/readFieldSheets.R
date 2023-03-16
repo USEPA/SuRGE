@@ -74,7 +74,9 @@ get_data_sheet <- function(paths){
                                 TRUE ~ long),
                # Empty columns cause data-class conflicts; make classes identical
                across(contains(c("lat", "long")), ~ as.numeric(.)),
-               across(contains(c("trap_extn")), ~ as.character(.)),
+               across(contains("comment"), ~ as.character(.)),
+               across(contains("flag"), ~ as.character(.)),
+               across(contains("extn"), ~ as.character(.)),
                across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
         # Format date and time objects
         mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date

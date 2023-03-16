@@ -228,7 +228,7 @@ for (i in 1:n) {  # For each unique site
                                color = "red")
   print(p.co2)
 }  
-dev.off()
+ dev.off()
 start.time;Sys.time() 
 
 
