@@ -10,11 +10,11 @@
 
 
 # STEP 1: LINEAR AND NONLINEAR REGRESSION
-n <- length(unique(paste(gga_3$lake_id, gga_3$site_id)))
+n <- length(unique(paste(gga_3$lake_id, gga_3$site_id, gga_3$visit)))
 temp <- rep(NA, n)
 
 # Dataframe to hold results
-OUT <- data.frame(site_id = temp, lake_id = temp,
+OUT <- data.frame(site_id = temp, lake_id = temp, visit = temp, 
                   ch4.diff.max=temp, #Sarah added on 6/14/17; making histogram of max ch4 levels measured by LGR.  can be deleted
                   ch4.lm.slope = temp, ch4.lm.drate.mg.h = temp, 
                   ch4.lm.aic = temp, ch4.lm.r2 = temp, ch4.lm.pval = temp,
@@ -28,31 +28,32 @@ OUT <- data.frame(site_id = temp, lake_id = temp,
 
 pdf("output/figures/curveFits.pdf")
 
-# NOTE JWC 2023MAR17 LOOP WORKS W/ SUBSET: DOE, RTP, USGS, NAR, ADA (w/ warnings)
-# NOTE JWC 2023MAR17 LOOP FAILS W/ SUBSET: R10, CIN
-
 start.time <- Sys.time()
 
 for (i in 1:n) {  # For each unique site
-  site.lake.i <- unique(paste(gga_3$site_id, gga_3$lake_id))[i]
-  site.i <- stringr::word(site.lake.i, 1) %>% as.numeric() # extract characters before space.  site_id is numeric.
-  lake.i <- stringr::word(site.lake.i, 2) # extract characters after space. lake_id is character  
+  site.lake.visit.i <- unique(paste(gga_3$site_id, gga_3$lake_id, gga_3$visit))[i]
+  site.i <- stringr::word(site.lake.visit.i, 1) %>% as.numeric() # extract characters before space.  site_id is numeric.
+  lake.i <- stringr::word(site.lake.visit.i, 2) # extract characters after space. lake_id is character  
+  visit.i <- stringr::word(site.lake.visit.i, 3) # extract characters after space. lake_id is character  
   OUT[i,"site_id"] <- site.i
   OUT[i,"lake_id"] <- lake.i
+  OUT[i, "visit"] <- visit.i
   
   # Need chamber volume.  SEE chamberVolume.R IN PROGRESS [2/7/2023]
-  chmVol.L.i <- fld_sheet %>% filter(site_id == site.i, lake_id == lake.i) %>% 
+  chmVol.L.i <- fld_sheet %>% filter(site_id == site.i, 
+                                     lake_id == lake.i, visit == visit.i) %>% 
     select(chmVol.L) %>% pull()   
   
   data.i.ch4 <- filter(gga_3,  # extract data
                        RDateTime >= ch4DeplyDtTm, # based on diff start time
                        RDateTime <= ch4RetDtTm, # based on diff end time
                        site_id == site.i,
-                       lake_id == lake.i)  %>%
+                       lake_id == lake.i, 
+                       visit == visit.i)  %>%
     # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
     mutate(elapTime = RDateTime - RDateTime[1], # Calculate elapsed time (seconds).
            chmVol.L = chmVol.L.i) %>%
-    select(lake_id, site_id, CH4._ppm, elapTime, GasT_C, chmVol.L)  # Pull out data of interest
+    select(lake_id, site_id, visit, CH4._ppm, elapTime, GasT_C, chmVol.L)  # Pull out data of interest
 
   OUT[i, "ch4.diff.max"] <- max(data.i.ch4$CH4._ppm, na.rm=TRUE) # maximum CH4 mixing ratio measured during the chamber deployment time
 
@@ -60,11 +61,12 @@ for (i in 1:n) {  # For each unique site
                        RDateTime >= co2DeplyDtTm, # based on diff start time
                        RDateTime <= co2RetDtTm, # based on diff end time
                        site_id == site.i,
-                       lake_id == lake.i)  %>%
+                       lake_id == lake.i, 
+                       visit == visit.i)  %>%
     # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
     mutate(elapTime = RDateTime - RDateTime[1], # Calculate elapsed time (seconds).
            chmVol.L = chmVol.L.i[1]) %>%  # subscripting needed to remove name
-    select(lake_id, site_id, CO2._ppm, elapTime, GasT_C, chmVol.L)  # Pull out data of interest
+    select(lake_id, site_id, visit, CO2._ppm, elapTime, GasT_C, chmVol.L)  # Pull out data of interest
 
   # Are there data available to run the model?
   co2.indicator <- length(data.i.co2$CO2._ppm) == 0
@@ -173,6 +175,7 @@ for (i in 1:n) {  # For each unique site
 
   ch4.title <- paste(OUT[i, "site"], # plot title
                      OUT[i, "lake_id"],
+                     OUT[i, "visit"],
                      "ex.r2=",
                      round(OUT[i, "ch4.ex.r2"], 2),
                      "ex.AIC=",
@@ -206,6 +209,7 @@ for (i in 1:n) {  # For each unique site
 
   co2.title <- paste(OUT[i, "site"], # plot title
                      OUT[i, "lake_id"],
+                     OUT[i, "visit"],
                      "ex.r2=",
                      round(OUT[i, "co2.ex.r2"], 2),
                      "ex.AIC=",

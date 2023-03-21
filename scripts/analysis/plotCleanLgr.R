@@ -34,7 +34,7 @@ missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logica
 gga_2 <- gga %>%
   left_join(fld_sheet %>% 
                        filter(!missing_chamb_deply_date_time) %>%
-                       select(lake_id, site_id, chamb_deply_date_time), 
+                       select(lake_id, site_id, visit, chamb_deply_date_time), 
                      by = "lake_id")
 
 #3. ADD CO2 AND CH4 RETRIEVAL AND DEPLOYMENT TIMES
@@ -130,7 +130,7 @@ gga_2 <- gga_2 %>%
 # Trim data to only those we plan to model, plus 60 second buffer on either side
 # of modeling window.
 gga_3 <- gga_2 %>%
-  group_by(lake_id, site_id) %>% # for each lake and site....
+  group_by(lake_id, site_id, visit) %>% # for each lake and site....
   filter(RDateTime > (min(c(co2DeplyDtTm, ch4DeplyDtTm)) - 60) & 
            RDateTime < (max(c(co2RetDtTm, ch4RetDtTm)) + 60)) %>%
   ungroup()
