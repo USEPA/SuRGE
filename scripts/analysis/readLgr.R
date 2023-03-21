@@ -21,11 +21,12 @@ for (i in 1:length(labs)) {
 
 # Directories contain _s, _l, and _b files that don't contain data of interest.
 # Strip these files out.
-txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr files with data we need )should be _f, but allowing -f)
+txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr files with data we need; should be _f, but allowing -f)
                        !grepl(pattern = "zip", x = txtFiles) & # exclude .zip files
                        !grepl(pattern = "Needs to be organized", x = txtFiles) & # temp file to be deleted
                        !grepl(pattern = "MGGA Archive and Calibration", x= txtFiles) &
-                       !grepl(pattern = "2022 field season", x= txtFiles)] # CIN folder that will be deleted
+                       !grepl(pattern = "2022 field season", x= txtFiles) & # CIN folder that will be deleted
+                       !grepl(pattern = "SuRGE chamber data calculations SAJ", x= txtFiles)] # Scott's folder
 
 ggaList <- list()  # Empty list to hold results
 
@@ -111,6 +112,11 @@ toc()
 # Merge files
 gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
   filter(CH4._ppm < 500) # filter out clearly erroneous values
+
+# FIX DATES------
+# summer 2021 MGGA internal battery died, causing date to default to 2001-12-31
+# IN PROGRESS
+
 
 
 # BASIC PLOTS-----------------
