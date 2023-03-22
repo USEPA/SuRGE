@@ -261,18 +261,32 @@ plot(with(OUT,ifelse(ch4.best.model == "linear",
 
 # If r2 of best model < 0.9, then set to NA
 OUT <- mutate(OUT, 
-              co2.drate.mg.h.best = ifelse((co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9, # if ex is best, but r2<0.9
-                                                NA, # then NA
-                                           ifelse((co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9, # if lm is best, but r2<0.9
-                                                  NA, # the NA
-                                                  co2.drate.mg.h.best)), # otherwise assume value defined above
-                                                  
-              ch4.drate.mg.h.best = ifelse((ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9, # if ex is best, but r2<0.9
-                                           NA, # then NA
-                                           ifelse((ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9, # if lm is best, but r2<0.9
-                                                  NA, # the NA
-                                                  ch4.drate.mg.h.best))) # otherwise assume value defined above
-
+              co2.drate.mg.h.best = case_when(
+                (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ NA_real_,
+                (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ NA_real_,
+                TRUE ~ co2.drate.mg.h.best),
+              
+              # 
+              #               co2.drate.mg.h.best = ifelse((co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & 
+              #                                              co2.lm.r2 < 0.9, # if ex is best, but r2<0.9
+              #                                                 NA, # then NA
+              #                                            ifelse((co2.ex.aic < co2.lm.aic) & 
+              #                                                     co2.ex.r2 < 0.9, # if lm is best, but r2<0.9
+              #                                                   NA, # the NA
+              #                                                   co2.drate.mg.h.best)), # otherwise assume value defined above
+              #         
+              ch4.drate.mg.h.best = case_when(
+                (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ NA_real_, 
+                (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ NA_real_,
+                TRUE ~ ch4.drate.mg.h.best))
+              
+              #                                    
+              # ch4.drate.mg.h.best = ifelse((ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9, # if ex is best, but r2<0.9
+              #                              NA, # then NA
+              #                              ifelse((ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9, # if lm is best, but r2<0.9
+              #                                     NA, # the NA
+              #                                     ch4.drate.mg.h.best))) # otherwise assume value defined above
+              # 
 
 # NOTE JWC 2023MAR17 Plots don't work (no xlim values)
 
@@ -286,7 +300,6 @@ plot(with(OUT[!is.na(OUT$ch4.drate.mg.h.best),],
 # STEP 3: MERGE DIFFUSION RATES WITH eqAreaData
 # First, strip NA from OUT
 
-# NOTE JWC 2023MAR17 Some variable names below are incorrect(Lake_Name, siteID)
 
 OUT <- filter(OUT, !is.na(Lake_Name)) # Just one NA slipped in
 eqAreaData <- merge(eqAreaData, OUT, by.x = c("Lake_Name", "siteID"), 
