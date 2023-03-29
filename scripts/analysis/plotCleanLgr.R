@@ -4,7 +4,7 @@
 #####################################################
 ## TO RUN THE CODE BELOW, YOU MUST FIRST GENERATE THE gga AND fld_sheet DATA 
 ## OBJECTS.  THIS CAN BE DONE BY RUNNING ALL SCRIPTS IN THE ORDER
-## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 3 LINES:
+## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 4 LINES:
 # source("scripts/masterLibrary.R") # Read in renv controlled library
 # source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 # source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
@@ -88,17 +88,34 @@ ggplotly(plotCo2)
 
 #3.2  Read in refined deployment and retrieval data from Excel files.
 # use .xls.  Can read file into R while file is open in Excel, which is convenient.
+
 # list of files containing deployment and retrieval data.
-sdjDataList <- paste0("../../../data/", 
+adjDataList <- paste0("../../../data/", 
                       c("ADA/chamberAdjustmentsAda.xls", "CIN/chamberAdjustmentsCIN.xls", 
                         "RTP/chamberAdjustmentsRTP.xls", "R10/chamberAdjustmentsR10.xls", 
                         "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls",
                         "NAR/chamberAdjustmentsNAR.xls"))
-# Read data
-adjData <- map_df(sdjDataList, readxl::read_xls, range ="DATA!A1:J100", 
-                            col_types = c("text", "numeric", 
-                                          rep("date", 4), 
-                                          rep("text", 4))) #lake_id is character
+# Read data, but not CIN
+adjData <- map_df(adjDataList[!grepl(pattern = "CIN", adjDataList)], # exclude CIN, different formatting
+                  readxl::read_xls, 
+                  range =cell_cols("DATA!A:J"), # columns A:J
+                  col_types = c("text", "numeric", 
+                                rep("date", 4), 
+                                rep("text", 4))) %>% #lake_id is character
+  janitor::remove_empty("rows") # remove rows that contain only NA
+
+# Read CIN data.  date and time fields contain tenths of a second that confuse read_xls
+adjDataCIN <- map_df(adjDataList[grepl(pattern = "CIN", adjDataList)], # only CIN, different formatting than others
+                  readxl::read_xls, 
+                  range =cell_cols("DATA!A:J"), # columns A:J
+                  col_types = c("text", "numeric", 
+                                rep("text", 8))) %>% # date.time fields must be read as character
+  janitor::remove_empty("rows") %>% # remove rows that contain only NA
+  mutate(across(contains("DtTm"), ~as.POSIXct(., "%m/%d/%Y %H:%M:%S", tz="UTC")))
+
+# Combine CIN and other data
+adjData <- rbind(adjData, adjDataCIN)
+
 str(adjData)
 
 #3.3. update deployment and retrieval times based on fixes above (see 3.1 and 3.2)

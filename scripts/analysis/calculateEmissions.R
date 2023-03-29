@@ -10,7 +10,22 @@
 
 
 # STEP 1: LINEAR AND NONLINEAR REGRESSION
-n <- length(unique(paste(gga_3$lake_id, gga_3$site_id, gga_3$visit)))
+# for practice, only consider sites with co2Status or ch4Status == done
+good.data <- adjData %>% filter(co2Status == "done" | ch4Status == "done") %>%
+  select(lake_id, site_id, contains("status"))
+
+# filter down to lake and sites with good data
+gga_4 <- gga_3 %>% filter(paste0(lake_id, site_id) %in% paste0(good.data$lake_id, good.data$site_id)) %>%
+  left_join(., good.data %>% select(lake_id, site_id, ch4Status, co2Status))
+
+# substitute NA for profiles that are "in progress"
+gga_4 <- gga_4 %>% mutate(CO2._ppm = case_when(co2Status == "done" ~ CO2._ppm,
+                                               TRUE ~ NA_real_),
+                          CH4._ppm = case_when(ch4Status == "done" ~ CH4._ppm,
+                                               TRUE ~ NA_real_))
+
+
+n <- length(unique(paste(gga_4$lake_id, gga_4$site_id, gga_4$visit)))
 temp <- rep(NA, n)
 
 # Dataframe to hold results
@@ -31,7 +46,7 @@ pdf("output/figures/curveFits.pdf")
 start.time <- Sys.time()
 
 for (i in 1:n) {  # For each unique site
-  site.lake.visit.i <- unique(paste(gga_3$site_id, gga_3$lake_id, gga_3$visit))[i]
+  site.lake.visit.i <- unique(paste(gga_4$site_id, gga_4$lake_id, gga_4$visit))[i]
   site.i <- stringr::word(site.lake.visit.i, 1) %>% as.numeric() # extract characters before space.  site_id is numeric.
   lake.i <- stringr::word(site.lake.visit.i, 2) # extract characters after space. lake_id is character  
   visit.i <- stringr::word(site.lake.visit.i, 3) # extract characters after space. lake_id is character  
@@ -44,7 +59,7 @@ for (i in 1:n) {  # For each unique site
                                      lake_id == lake.i, visit == visit.i) %>% 
     select(chmVol.L) %>% pull()   
   
-  data.i.ch4 <- filter(gga_3,  # extract data
+  data.i.ch4 <- filter(gga_4,  # extract data
                        RDateTime >= ch4DeplyDtTm, # based on diff start time
                        RDateTime <= ch4RetDtTm, # based on diff end time
                        site_id == site.i,
@@ -57,7 +72,7 @@ for (i in 1:n) {  # For each unique site
 
   OUT[i, "ch4.diff.max"] <- max(data.i.ch4$CH4._ppm, na.rm=TRUE) # maximum CH4 mixing ratio measured during the chamber deployment time
 
-  data.i.co2 <- filter(gga_3,  # extract data
+  data.i.co2 <- filter(gga_4,  # extract data
                        RDateTime >= co2DeplyDtTm, # based on diff start time
                        RDateTime <= co2RetDtTm, # based on diff end time
                        site_id == site.i,
