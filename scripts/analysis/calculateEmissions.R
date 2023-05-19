@@ -84,8 +84,8 @@ for (i in 1:n) {  # For each unique site
     select(lake_id, site_id, visit, CO2._ppm, elapTime, GasT_C, chmVol.L)  # Pull out data of interest
 
   # Are there data available to run the model?
-  co2.indicator <- length(data.i.co2$CO2._ppm) == 0
-  ch4.indicator <- length(data.i.ch4$CH4._ppm) == 0
+  co2.indicator <- length(data.i.co2$CO2._ppm) == 0 | all(is.na(data.i.co2$CO2._ppm))
+  ch4.indicator <- length(data.i.ch4$CH4._ppm) == 0 | all(is.na(data.i.ch4$CH4._ppm))
 
   # Data needed for emission rate calcs.  Same #'s for CO2 and CH4.  Arbitrarily pulled from CO2.
   temp.i <- if (co2.indicator) mean(data.i.ch4$GasT_C, na.rm = TRUE) else (mean(data.i.co2$GasT_C, na.rm = TRUE))  # GGA measured temp

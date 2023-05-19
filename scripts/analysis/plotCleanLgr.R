@@ -55,8 +55,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "275"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- 2 # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "167"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- 13 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
