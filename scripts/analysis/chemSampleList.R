@@ -24,8 +24,8 @@ lake.list.chem <- lake.list %>% # see readSurgeLakes.R
 
 # 2. filter comprehensive lake list to lakes that have been sampled
 lake.list.chem <- lake.list.chem %>% 
-  filter(sample_year <= 2022, # lakes sampled in or before 2022
-         !grepl(c("PI|LD|TR"), sample_year), # exclude inaccessible lakes (may not be necessary)
+  filter(sample_year <= 2022,
+    !grepl(c("PI|LD|TR"), sample_year), # exclude inaccessible lakes (may not be necessary)
          !(lake_id == "250" & visit == 1), # chem samples from 250 visit 1 were lost
          !(lake_id == "281" & visit == 1)) # chem samples from 281 visit 1 were lost
 

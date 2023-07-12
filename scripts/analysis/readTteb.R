@@ -21,13 +21,13 @@
 
 tteb.BEAULIEU <- read_excel(paste0(userPath, 
                                    "data/chemistry/tteb/BEAULIEU_06_30_2022_update.xlsx")) 
-# all records in SURGE are in SURGE2021
-# tteb.SURGE <- read_excel(paste0(userPath, 
-#                                 "data/chemistry/tteb/SURGE_03_09_2022_update.xlsx"))
 
+# SuRGE only data
 tteb.SURGE2021 <- read_excel(paste0(userPath, 
                                 "data/chemistry/tteb/SURGE_2021_06_30_2022_update.xlsx"))
 
+tteb.SURGE2022 <- read_excel(paste0(userPath, 
+                                    "data/chemistry/tteb/SURGE_2022_03_30_2023_update.xlsx"))
 # Vectors of analyte names, grouped by reporting limit
 
 analytes_0.05 <- c("f", "cl", "no2", "br", "no3", "po4")
@@ -40,7 +40,7 @@ analytes_20 <- c("s", "p")
 analyte_names <- c(analytes_0.05, analytes_0.5, 
                    analytes_1, analytes_2, analytes_4, analytes_20)
 
-tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021) %>% 
+tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
   select(-studyid, -tn) %>% # remove unneeded columns
@@ -97,16 +97,18 @@ ttebCoc <- read_excel(paste0(userPath,
                              "data/chemistry/tteb/ttebSampleIds.xlsx")) %>%
   clean_names(.) %>%
   mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
-         analyte = tolower(analyte))
+         analyte = tolower(analyte)) %>%
+  # this sample lost in lab.  See See 2/21/2023 email from Maily Pham
+  filter(!(lake_id == "240" & sample_type == "unknown" & analyte == "doc" & sample_depth == "deep"))
 
-janitor::get_dupes(ttebCoc, lab_id) # [9/30/22 lab_id == NA for a few sites.  Leah tracking down true value.
-
+unique(ttebCoc$lake_id) # looks good
 
 # 3. REVIEW CHAIN OF CUSTODY-------------
 
 # Compare list of submitted samples to comprehensive sample list
-# print rows in ttebSampleIds not in chem.samples.
-# All samples that were submitted for analysis were expected. Good. [11/3/2022]
+# print rows of submitted samples (ttebSampleIds) that are not in theoretical
+# list of all samples to be generated.
+# All samples that were submitted for analysis were expected. Good. [7/12/2023]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
@@ -123,9 +125,12 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
+
 # 65-deep-anions.  Two shallow samples sent.  TTEB sample submission
 # forms differentiate deep and shallow, but ttebSampleId.xlsx lists
 # both as shallow.  Need to consult with Leah.
+
+# [7/12/2023] - contains 2023 samples not yet collected and/or entered in CoC
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
@@ -147,7 +152,7 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 347 records [7/20/2022] 
+nrow(tteb.all) # 554 records [7/12/2023] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -175,21 +180,29 @@ tteb.all <- tteb.all %>%
 
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
-# 9/30/2022 no 2022 data available yet, so all 2022 samples show up in this list
+# 9/30/2022 no 2022 data available yet, so all 2022 samples show up in this list.
 # missing 5 samples, but four of them were due to instrument failure.
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
+
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
 # many instrument failures including mechanical arm failures and injection errors. 
 # After many attempts to rerun the samples over these several days, the sample was 
-# depleted and we were unable to reanalyze the samples. "203642, 203643, and 203644 
-# will not have results as there were instrument failures with that run and after 
-# several attempts it looks like they ran out of sample."
+# depleted and we were unable to reanalyze the samples. [203606]
 
-# After filtering those lost to instrument failure, only missing one sample 203165
-# Waiting for update from Maily. [7/20/2022]
+# per Maily, 6/29/2022: "203642, 203643, and 203644 will not have results as 
+# there were instrument failures with that run and after several attempts it 
+# looks like they ran out of sample."
+
+# per Maily, 2/21/2023: [203165] "Both analysts who had been running TOC at the time both 
+# stated they could not find that sample in their records. As Sonia said, they 
+# were able to find samples before and after that number, but that single sample 
+# still appears to be missing and no record of it was on the instrument logs as 
+# being run. We apologize for the inconvenience, but it is a MIA sample it appears."  
+
+
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
-  filter(!(lab_id %in% c(203606, 203642:203645))) %>% # instrument failure
-  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb07202022.txt"), row.names = FALSE)
+  filter(!(lab_id %in% c(203606, 203165, 203642:203644))) %>% # instrument failure
+  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb072122023.txt"), row.names = FALSE)
 
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
