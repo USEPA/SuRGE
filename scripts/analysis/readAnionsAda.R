@@ -339,62 +339,76 @@ ove1 <-
 
 
 
-### ANIONS ADA 2022 ------------------------------------------------------------
+### ANIONS ADA 2022-23 --------------------------------------------------------
 
 
-# The 2022 Excel files contain multiple lakes in each file. site_id can be 
+# Excel files may contain multiple lakes in each file. site_id can be 
 # assigned using the following function:
 
-site_id_22 <- function(data) { 
+site_id_number <- function(data) { 
   
   data <- data %>%
     mutate(site_id = case_when( # add site_id
+      lake_id == "3" ~ "20",
+      lake_id == "4" ~ "3",
+      lake_id == "11" ~ "3",
+      lake_id == "99" ~ "16",
+      lake_id == "100" ~ "11",
+      lake_id == "136" ~ "13",
       lake_id == "146" ~ "4",
       lake_id == "166" ~ "6",
       lake_id == "184" ~ "3",
       lake_id == "190" ~ "8",
-      lake_id == "136" ~ "13",
-      lake_id == "100" ~ "11",
       lake_id == "206" ~ "2",
-      lake_id == "11" ~ "3",
-      lake_id == "3" ~ "20",
       TRUE ~ "")) # blank if no match; will only occur if lake_id is missing
   
   return(data)
   
 }
 
+# Read in root path for anion data analyzed in ADA.
+
 cin.ada.path <- paste0(userPath,
-                       "data/chemistry/anions_ada_daniels/ADA/2022/")
+                       "data/chemistry/anions_ada_daniels/ADA/")
+
+# 2022 anion data
 
 anions_2022_146_190 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_146_190_anions.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_146_190_anions.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_anions.xls") %>%
-  site_id_22 %>%
+  site_id_number %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 anions_2022_184_166 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_184_166_anions.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_184_166_anions.xls") %>%
   conv_units(filename = "EPAGPA076_184_166_anions.xls") %>%
-  site_id_22 %>%
+  site_id_number %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 anions_2022_136_100_206 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_anions.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_136_100_206_anions.xls") %>%
   conv_units(filename = "EPAGPA081_136_100_206_anions.xls") %>%
-  site_id_22 %>%
+  site_id_number %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 anions_2022_011_003 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_011_003_anions.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_011_003_anions.xls") %>%
   conv_units(filename = "EPAGPA081_011_003_anions.xls") %>%
-  site_id_22 %>%
+  site_id_number %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
+# 2022 anion data
+
+anions_2023_099_004 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_anions.xlsx") %>%
+  conv_units(filename = "EPAGPA100_099_004_anions.xlsx") %>%
+  site_id_number %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
 
 
 

@@ -504,124 +504,159 @@ lapply(list(lmp1, lmp2, lmp3), function(x) any(is.na(x$site_id)))
 
 
 
-# 2022 NUTRIENT SAMPLES---------------------------------------------------------
+# 2022-2023 NUTRIENT SAMPLES---------------------------------------------------
 
-# The 2022 Excel files contain multiple lakes in each file. site_id can be 
+# Excel files may contain multiple lakes in each file. site_id can be 
 # assigned using the following function:
 
-site_id_22 <- function(data) { 
+site_id_number <- function(data) { 
   
   data <- data %>%
-  mutate(site_id = case_when( # add site_id
-    lake_id == "146" ~ "4",
-    lake_id == "166" ~ "6",
-    lake_id == "184" ~ "3",
-    lake_id == "190" ~ "8",
-    lake_id == "136" ~ "13",
-    lake_id == "100" ~ "11",
-    lake_id == "206" ~ "2",
-    lake_id == "11" ~ "3",
-    lake_id == "3" ~ "20",
-    TRUE ~ "")) # blank if no match; this will only occur if lake_id is missing
+    mutate(site_id = case_when( # add site_id
+      lake_id == "3" ~ "20",
+      lake_id == "4" ~ "3",
+      lake_id == "11" ~ "3",
+      lake_id == "99" ~ "16",
+      lake_id == "100" ~ "11",
+      lake_id == "136" ~ "13",
+      lake_id == "146" ~ "4",
+      lake_id == "166" ~ "6",
+      lake_id == "184" ~ "3",
+      lake_id == "190" ~ "8",
+      lake_id == "206" ~ "2",
+      TRUE ~ "")) # blank if no match; will only occur if lake_id is missing
   
   return(data)
   
 }
 
-# Read in root path for 2022 chemistry data analyzed in ADA.
+# Read in root path for chemistry data analyzed in ADA.
 
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/nutrients/ADA/2022/")
+                       "data/chemistry/nutrients/ADA/")
+
+# 2022 nutrient data
 
 no2no3nh4_2022_146_190_184_166 <-
-  get_ada_data(cin.ada.path, "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_NO3+NO2NH4.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # no2 no3 nh4 is filtered
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 tntp_2022_146_190_184_166 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_146_190_184_166_TN,TP.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_184_166_TN,TP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "unfiltered") %>% # tn tp is unfiltered
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 op_2022_146_190 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_146_190_oP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_146_190_oP.xls") %>%
   conv_units(filename = "EPAGPA076_146_190_oP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 op_2022_166 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_166_oP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_166_oP.xls") %>%
   conv_units(filename = "EPAGPA076_166_oP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 op_2022_184 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_184_oP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_184_oP.xls") %>%
   conv_units(filename = "EPAGPA076_184_oP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 no2no3nh4_2022_136_100_206 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA081_136_100_206_NO3+NO2NH4.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # # no2 no3 nh4 is filtered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 tntp_2022_136_100_206 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_TN,TP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_136_100_206_TN,TP.xls") %>%
   conv_units(filename = "EPAGPA081_136_100_206_TN,TP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "unfiltered") %>% # tn tp is unfiltered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 op_2022_136_100_206 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_136_100_206_oP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_136_100_206_oP.xls") %>%
   conv_units(filename = "EPAGPA081_136_100_206_oP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 no2no3nh4_2022_011_003 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_011_003_NO3+NO2NH4.xlsx") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_011_003_NO3+NO2NH4.xlsx") %>%
   conv_units(filename = "EPAGPA081_011_003_NO3+NO2NH4.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # # no2 no3 nh4 is filtered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 tntp_2022_011_003 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_011_003_TN,TP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_011_003_TN,TP.xls") %>%
   # Extra steps to deal with the Dissolved N & P columns;
   # consider making this a function if it occurs in other Excel files
   rename(TP_analyzed = contains("Dissolved Nitrogen") & 
            ends_with("analyzed")) %>%
   select(!contains("issolved")) %>%
   conv_units(filename = "EPAGPA081_011_003_TN,TP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "unfiltered") %>% # tn tp is unfiltered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte
 
 op_2022_011_003 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_011_003_oP.xls") %>%
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_011_003_oP.xls") %>%
   conv_units(filename = "EPAGPA081_011_003_oP.xls") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  site_id_number %>% # add site_id for 2022 samples
+  mutate(sample_filter = "filtered") %>% # op is filtered
+  dup_agg  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
+
+# 2023 nutrient data
+
+no2no3nh4_2023_099_004 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_NO3+NO2NH4.xlsx") %>%
+  conv_units(filename = "EPAGPA100_099_004_NO3+NO2NH4.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  mutate(sample_filter = "filtered") %>% # # no2 no3 nh4 is filtered
+  dup_agg  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
+
+tntp_2023_099_004 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_TN,TP.xls") %>%
+  # Extra steps to deal with the Dissolved N & P columns;
+  # consider making this a function if it occurs in other Excel files
+  rename(TP_analyzed = contains("Dissolved Nitrogen") & 
+           ends_with("analyzed")) %>%
+  select(!contains("issolved")) %>%
+  conv_units(filename = "EPAGPA100_099_004_TN,TP.xls") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  mutate(sample_filter = "unfiltered") %>% # tn tp is unfiltered
+  dup_agg  %>% # aggregate lab duplicates (optional)
+  flag_agg # merge flag columns for each analyte
+
+op_2023_099_004 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_oP.xls") %>%
+  conv_units(filename = "EPAGPA100_099_004_oP.xls") %>%
+  site_id_number %>% # add site_id for 2022 samples
   mutate(sample_filter = "filtered") %>% # op is filtered
   dup_agg  %>% # aggregate lab duplicates (optional)
   flag_agg # merge flag columns for each analyte

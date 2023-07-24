@@ -272,77 +272,89 @@ ove1 <-
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
-# ADA OC 2022--------------------------------------------------------------------
+# ADA OC 2022-2023-------------------------------------------------------------
 
-# The 2022 Excel files contain multiple lakes in each file. site_id can be 
+# Excel files may contain multiple lakes in each file. site_id can be 
 # assigned using the following function:
 
-site_id_22 <- function(data) { 
+site_id_number <- function(data) { 
   
   data <- data %>%
     mutate(site_id = case_when( # add site_id
+      lake_id == "3" ~ "20",
+      lake_id == "4" ~ "3",
+      lake_id == "11" ~ "3",
+      lake_id == "99" ~ "16",
+      lake_id == "100" ~ "11",
+      lake_id == "136" ~ "13",
       lake_id == "146" ~ "4",
       lake_id == "166" ~ "6",
       lake_id == "184" ~ "3",
       lake_id == "190" ~ "8",
-      lake_id == "136" ~ "13",
-      lake_id == "100" ~ "11",
       lake_id == "206" ~ "2",
-      lake_id == "11" ~ "3",
-      lake_id == "3" ~ "20",
-      TRUE ~ "")) # blank if no match; this will only occur if lake_id is missing
+      TRUE ~ "")) # blank if no match; will only occur if lake_id is missing
   
   return(data)
   
 }
 
-# create path for Lake Jean Neustadt
+# Read in root path for oc data analyzed in ADA.
+
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/oc_ada_masi/ADA/2022/")
+                       "data/chemistry/oc_ada_masi/ADA/")
+
+# 2022 oc data
 
 oc_2022_146_190 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_166 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_166_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_166_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA076_166_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_184 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_184_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_184_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA076_184_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_136_100 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_206 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_206_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_011_003 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
+# 2023 oc data
 
+oc_2023_099_004 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  conv_units(filename = "EPAGPA100_099_004_NPOCNPDOC.xlsx") %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
 
 
 # JOIN DATA OBJECTS-------------------------------------------------------------
