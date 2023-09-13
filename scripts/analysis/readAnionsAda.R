@@ -41,91 +41,99 @@ get_ada_data <- function(path, datasheet) {
     mutate(lab_sample_id = toupper(lab_sample_id)) %>% # make uppercase 
     mutate(labdup = if_else(str_detect(lab_sample_id, "LAB DUP"), 
                             "LAB DUP", "")) # flag the dups
-  
+
   # maintable_2: select columns, rename remaining columns, 
   # calculate hold times
-  
+
   maintable_2 <- maintable_1 %>%
     select(field_sample_id, labdup, starts_with("dat")) %>% # 
     rename_with(~paste0(analyte_names), 
                 .cols = starts_with("data")) %>% # rename w/ analyte names
     rename_with(~paste0(analyte_names, "_date_analyzed"), 
                 .cols = starts_with("date_a")) %>% # rename w/ analyte names
-    mutate(across(ends_with("analyzed"), # select the latest date in range
-                  ~ word(., -1) %>% 
-                    as.Date(., tryFormats = c("%m/%d/%Y", "%Y-%m-%d")))) %>%
-    mutate(across(ends_with("analyzed"), # compute holding time
-                  ~ as.numeric(as.Date(., tryFormats = c("%m/%d/%Y", 
-                                                         "%Y-%m-%d")) - 
-                                 as.Date(date_collected, 
-                                         format = "%m/%d/%Y")))) 
+    mutate(across(ends_with("nalyzed"), # remove junk from date column(s)
+                  ~ ifelse(
+                    str_detect(., "/|&|-"), word(., -1), .))) %>% 
+    mutate(across(
+      ends_with("nalyzed"), # convert to date format
+      ~ case_when(
+        # handle Excel-formatted dates
+        str_length(.) == 5 ~ lubridate::as_date(as.numeric(.),
+                                                origin = "1899-12-30"),
+        # handle dates in m/d/y format (this RegEx looks for any /year)
+        str_detect(., "/\\d{4}") ~ lubridate::mdy(.),
+        # otherwise the dates are already date-formatted (y-m-d)
+        TRUE ~ lubridate::ymd(.)))) %>%
+    mutate(across(ends_with("nalyzed"), # compute holding time
+                  ~  as.numeric(. - as.Date(date_collected,
+                                            tryFormats = c("%m/%d/%Y",
+                                                           "%Y-%m-%d")))))
   
     # Special procedure for Ada anions data:
     # The Ada anions Excel file has 1 date analyzed column for all analytes.
     # We need copy this column across all analytes. 
   
   ada_anions_dates <- maintable_2 %>% # get the date data
-    select(ends_with("analyzed")) %>%
+    select(ends_with("nalyzed")) %>%
     pull()
-  
+
+
   maintable_2.5 <- maintable_2 %>%
     mutate(across(ends_with("/L"), # create date columns for all analytes
                   ~ ada_anions_dates, # copy the date data into all columns
                   .names = "{col}_date_analyzed"))
-                
-  # maintable_3: remove extra rows, create ND flag and apply MDL value, 
-  # create L (i.e., BQL) flag
-  
+
+  # maintable_3: remove extra rows, create ND flag and apply MDL value,
+  # create L (i.e., BQL) flag, create 'visit' column
+
   maintable_3 <- maintable_2.5 %>%
-    mutate(field_sample_id = # clean-up sampleid field
-             str_remove_all(field_sample_id, "\\(|\\)|\\s")) %>% 
-    filter(str_starts(field_sample_id, 
-                      "TN\\d|DN\\d")|  # retain if ID starts with TN or DN, 
-             str_count(field_sample_id) == 5) %>% # and retain if length = 5
-    select(field_sample_id, labdup, everything(), 
+    mutate(field_sample_id = # remove "(TN or DN)" field_sample_id
+             str_remove_all(field_sample_id, "\\s|\\(|\\)|TN or DN")) %>%
+    filter(!str_detect(field_sample_id, # Keep only the data rows
+                       "[a-z]")) %>% # remove any rows w/ lowercase letters
+    select(field_sample_id, labdup, everything(),
            -date_collected) %>% # reorder columns to mutate()
     mutate(across(ends_with("/L"), # create new flag if analyte not detected
                   ~ if_else(str_detect(., "ND"), "ND", ""),
                   .names = "{col}_flag")) %>%
     mutate(across(ends_with("/L"), # replace ND with MDL value from toptable
-                  ~ ifelse(str_detect(., "ND"), 
-                           toptable[paste(cur_column()),2], .))) %>% 
+                  ~ ifelse(str_detect(., "ND"),
+                           toptable[paste(cur_column()),2], .))) %>%
     mutate(across(ends_with("/L"), # create new flag column for qual limit
                   ~ if_else(str_detect(., "BQL"), "L", ""),
-                  .names = "{col}_bql")) 
-  
-  # maintable_4: remove extra characters, make numeric, parse sample IDs,  
+                  .names = "{col}_bql")) %>%
+    mutate(visit = if_else(str_ends(field_sample_id, "2"), 2, 1))
+
+  # maintable_4: remove extra characters, make numeric, parse sample IDs,
   # format lake IDs, determine if hold time violated
-  
+
   maintable_4 <- maintable_3 %>%
-    mutate(field_sample_id = str_remove_all(
-      field_sample_id, "TN|or|DN")) %>% # clean-up data
-    mutate(across(!ends_with(c("flag", "analyzed", "bql", 
-                               "labdup", "field_sample_id")), 
-                  ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>% 
+    mutate(across(!ends_with(c("flag", "analyzed", "bql",
+                               "labdup", "field_sample_id")),
+                  ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>%
     mutate(across(!ends_with(c("flag", "analyzed","bql", # clean-up data
-                               "labdup", "field_sample_id")), 
+                               "labdup", "field_sample_id")),
                   ~ as.numeric(.))) %>% # make extracted data numeric
-    mutate(sample_depth = str_sub( # get sample depth 
-      str_remove_all(field_sample_id, "\\d"), 1, 1)) %>% 
-    mutate(sample_type = str_sub( # get sample type 
-      str_remove_all(field_sample_id, "\\d"), 2, 2)) %>% 
+    mutate(sample_depth = str_sub( # get sample depth
+      str_remove_all(field_sample_id, "\\d"), 1, 1)) %>%
+    mutate(sample_type = str_sub( # get sample type
+      str_remove_all(field_sample_id, "\\d"), 2, 2)) %>%
     mutate(lake_id = parse_number(field_sample_id) %>% # get lake id
              as.character())  %>% # match chemCoc format
-    mutate(sample_depth = str_replace_all(sample_depth, 
-                                          c("D" = "deep", 
-                                            "S" = "shallow", 
+    mutate(sample_depth = str_replace_all(sample_depth,
+                                          c("D" = "deep",
+                                            "S" = "shallow",
                                             "N" = "blank"))) %>%
-    mutate(sample_type = str_replace_all(sample_type, 
-                                         c("B" = "blank", 
-                                           "U" =  "unknown", 
+    mutate(sample_type = str_replace_all(sample_type,
+                                         c("B" = "blank",
+                                           "U" =  "unknown",
                                            "D" =  "duplicate"))) %>%
     mutate(across(ends_with("analyzed"), # check if hold time violated
                   ~ ifelse(.>28, "H", ""))) %>%
     select(-field_sample_id) # no longer needed
-  
+
   return(maintable_4)
-  
+
 }
 # Function to read-in and collate data from excel files 
 
@@ -281,7 +289,7 @@ flag_agg <- function(data) { # merge the flag columns for each analyte
   # If there are no flags, enter NA in the _flags column
   h <- g %>%
     mutate(across(ends_with("flags"),
-                  ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
+                  ~ if_else(str_detect(., ".*\\S.*"), ., NA_character_) %>%
                     str_squish(.))) # remove any extra white spaces
   
   return(h)
@@ -352,12 +360,16 @@ site_id_number <- function(data) {
       lake_id == "3" ~ "20",
       lake_id == "4" ~ "3",
       lake_id == "11" ~ "3",
+      lake_id == "18" ~ "26",
       lake_id == "99" ~ "16",
       lake_id == "100" ~ "11",
       lake_id == "136" ~ "13",
       lake_id == "146" ~ "4",
+      lake_id == "147" ~ "1",
+      lake_id == "148" ~ "7",
       lake_id == "166" ~ "6",
       lake_id == "184" ~ "3",
+      lake_id == "186" ~ "8",
       lake_id == "190" ~ "8",
       lake_id == "206" ~ "2",
       TRUE ~ "")) # blank if no match; will only occur if lake_id is missing
@@ -401,7 +413,7 @@ anions_2022_011_003 <-
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
-# 2022 anion data
+# 2023 anion data
 
 anions_2023_099_004 <- 
   get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_anions.xlsx") %>%
@@ -410,6 +422,19 @@ anions_2023_099_004 <-
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
+anions_2023_186_018 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA106_186_018_anions.xlsx") %>%
+  conv_units(filename = "EPAGPA106_186_018_anions.xlsx") %>%
+  site_id_number %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+anions_2023_148_147 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA108_148_147_anions.xlsx") %>%
+  conv_units(filename = "EPAGPA108_148_147_anions.xlsx") %>%
+  site_id_number %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
 
 
 ### JOIN DATA OBJECTS------------------------------------------------------------
@@ -420,7 +445,10 @@ ada.anions <- list(jea = list(jea1), key = list(key1),
                    ada_22_1 = list(anions_2022_146_190), 
                    ada_22_2 = list(anions_2022_184_166), 
                    ada_22_3 = list(anions_2022_136_100_206), 
-                   ada_22_4 = list(anions_2022_011_003)) %>% 
+                   ada_22_4 = list(anions_2022_011_003), 
+                   ada_23_1 = list(anions_2023_099_004),
+                   ada_23_2 = list(anions_2023_186_018),
+                   ada_23_3 = list(anions_2023_148_147)) %>% 
   map(~ reduce(.x, left_join)) %>% 
   reduce(full_join) %>% 
   select(-starts_with("no"), -starts_with("op")) %>% # remove no2, no3, and op
