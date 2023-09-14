@@ -24,7 +24,7 @@ lake.list.chem <- lake.list %>% # see readSurgeLakes.R
 
 # 2. filter comprehensive lake list to lakes that have been sampled
 lake.list.chem <- lake.list.chem %>% 
-  filter(sample_year <= 2022,
+  filter(sample_year <= 2023,
     !grepl(c("PI|LD|TR"), sample_year), # exclude inaccessible lakes (may not be necessary)
          !(lake_id == "250" & visit == 1), # chem samples from 250 visit 1 were lost
          !(lake_id == "281" & visit == 1)) # chem samples from 281 visit 1 were lost
@@ -67,6 +67,7 @@ qa.qc.samples <- expand.grid(lake_id = lake.list.chem %>% # lake_id for all samp
                              stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
   mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank"), # blank depth = blank
          visit = case_when(lake_id == 281 ~ 2, # qa.qc collected from 281 on visit == 2
+                           lake_id == 148 ~2, # qa.qc collected from 148 on visit == 2
                            TRUE ~ 1)) %>% # all others collected on visit == 1
   arrange(lake_id)
 
@@ -82,11 +83,15 @@ unknown.samples <- expand.grid(lake_id = lake.list.chem$lake_id,
                                sample_depth = c("shallow", "deep"),
                                stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
   mutate(visit = case_when(lake_id %in% c("250", "281") ~ 2, # visit == 1 samples were lost, only visit == 2 submitted
-                           TRUE ~ 1)) %>% # all other sites are visit == 1
+                           TRUE ~ 1)) %>% # all other sites unchanged (147 and 148 should have visits 1 and 2, see below)
   # algal indicator samples not collected at depth.  Filter out
   filter(!(sample_depth == "deep" & analyte %in% c(algae.nar, algae.gb))) %>%
   arrange(lake_id)
 
+unknown.samples <- unknown.samples %>%
+  filter(lake_id == 147 | lake_id == 148) %>% # pull out rows for 147, and 148
+  mutate(visit = 2) %>% # change visit to vist == 2
+  bind_rows(unknown.samples) # add two new rows to original df
 
 # 7. Combine df of qa.qc and df of unknowns.  Merge 'lab' and 'sample_year' fields
 # from lake.list.
@@ -143,6 +148,10 @@ chem.samples.foo <- chem.samples %>%
   filter(!(lake_id == "64" & sample_type == "blank" & analyte == "doc")) %>%
   # no DOC blank collected at 65
   filter(!(lake_id == "65" & sample_type == "blank" & analyte == "doc")) %>%
+  # this sample lost in lab.  See See 2/21/2023 email from Maily Pham
+  filter(!(lake_id == "240" & sample_type == "unknown" & analyte == "doc" & sample_depth == "deep")) %>%
+  # shallow water put in deep toc and doc shallow.  These vials were discarded at AWBERC.
+  filter(!(lake_id == "053" & analyte %in% c("doc", "toc") & sample_depth == "deep")) %>%
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          

@@ -9,8 +9,8 @@ lake.list <- readxl::read_excel(paste0(userPath,
            as.numeric(), #convert lake_id to numeric
          visit = 1) # all lakes except 250 and 281 were only visited once.  250/281 handled below
 
-# Add visit 2 for 250 and 281
+# Add visit 2 for 250 and 281 (CIN sites with lost cooler) and 147/148 (ADA sites revisited for quality)
 lake.list <- lake.list %>% 
-  filter(lake_id == 250 | lake_id == 281) %>% # pull out rows for 250 and 281
+  filter(lake_id == 250 | lake_id == 281 | lake_id == 147 | lake_id == 148) %>% # pull out rows for 250, 281, 147, and 148
   mutate(visit = 2) %>% # change visit to vist == 2
   bind_rows(lake.list) # add two new rows to original df

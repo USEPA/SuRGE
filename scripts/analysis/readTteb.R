@@ -27,7 +27,10 @@ tteb.SURGE2021 <- read_excel(paste0(userPath,
                                 "data/chemistry/tteb/SURGE_2021_06_30_2022_update.xlsx"))
 
 tteb.SURGE2022 <- read_excel(paste0(userPath, 
-                                    "data/chemistry/tteb/SURGE_2022_03_30_2023_update.xlsx"))
+                                    "data/chemistry/tteb/SURGE_2022_08_10_2023_update.xlsx"))
+
+tteb.SURGE2023 <- read_excel(paste0(userPath, 
+                                    "data/chemistry/tteb/SURGE_2023_08_10_2023_update.xlsx"))
 # Vectors of analyte names, grouped by reporting limit
 
 analytes_0.05 <- c("f", "cl", "no2", "br", "no3", "po4")
@@ -40,7 +43,7 @@ analytes_20 <- c("s", "p")
 analyte_names <- c(analytes_0.05, analytes_0.5, 
                    analytes_1, analytes_2, analytes_4, analytes_20)
 
-tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022) %>% 
+tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023) %>% 
   janitor::clean_names() %>%
   rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
   select(-studyid, -tn) %>% # remove unneeded columns
@@ -92,7 +95,6 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022) %>%
 
 # 2. READ CHAIN OF CUSTODY----------------
 # Read in chain on custody data for SuRGE samples submitted to TTEB
-# Need to add R10 2018 samples to ttebSampleIds.xlsx
 ttebCoc <- read_excel(paste0(userPath, 
                              "data/chemistry/tteb/ttebSampleIds.xlsx")) %>%
   clean_names(.) %>%
@@ -108,7 +110,7 @@ unique(ttebCoc$lake_id) # looks good
 # Compare list of submitted samples to comprehensive sample list
 # print rows of submitted samples (ttebSampleIds) that are not in theoretical
 # list of all samples to be generated.
-# All samples that were submitted for analysis were expected. Good. [7/12/2023]
+# All samples that were submitted for analysis were expected. Good. [9/7/2023]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
@@ -130,7 +132,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 # forms differentiate deep and shallow, but ttebSampleId.xlsx lists
 # both as shallow.  Need to consult with Leah.
 
-# [7/12/2023] - contains 2023 samples not yet collected and/or entered in CoC
+# [9/7/2023] - does not yet contain 2023 samples
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
@@ -152,12 +154,14 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 554 records [7/12/2023] 
+nrow(tteb.all) # 611 records [9/7/2023] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
 tteb.all <- tteb.all %>%
   # Add the visit field
+  # NEED TO ADD VISIT FIELD FOR 147 AND 148, BUT WAIT UNTIL 2023 DATA
+  # ARE ADDED TO chem.samples [9/7/2023]
   mutate(visit = if_else(lake_id %in% c("281", "250") & 
                            between(colldate, 
                                    as.Date("2022-08-15"), 
@@ -180,8 +184,7 @@ tteb.all <- tteb.all %>%
 
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
-# 9/30/2022 no 2022 data available yet, so all 2022 samples show up in this list.
-# missing 5 samples, but four of them were due to instrument failure.
+# missing samples, but four of them were due to instrument failure.
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
@@ -202,7 +205,7 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
   filter(!(lab_id %in% c(203606, 203165, 203642:203644))) %>% # instrument failure
-  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb072122023.txt"), row.names = FALSE)
+  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb09072023.txt"), row.names = FALSE)
 
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
