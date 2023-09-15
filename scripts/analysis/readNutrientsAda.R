@@ -63,7 +63,7 @@ get_ada_data <- function(path, datasheet) {
   
   maintable_3 <- maintable_2 %>%
     mutate(field_sample_id = # remove "(TN or DN)" field_sample_id
-             str_remove_all(field_sample_id, "\\s|\\(|\\)|TN or DN")) %>% 
+             str_remove_all(field_sample_id, "\\s|\\(|\\)|TN|or|DN")) %>% 
     filter(!str_detect(field_sample_id, # Keep only the data rows
                       "[a-z]")) %>% # remove any rows w/ lowercase letters
     select(field_sample_id, labdup, everything(), 
