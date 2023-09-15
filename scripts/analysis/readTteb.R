@@ -10,8 +10,7 @@
 # During the summer of 2021, TTEB ran metals, TOC, and DOC on SuRGE samples
 # multiple locations.  Data are in `SURGE_2021_03_10_2022_update.xlsx`.
 
-# As of 3/10/2022, `SURGE_2021_03_10_2022_update.xlsx` and `SURGE_03_10_2022_update.xlsx`
-# files contains a subset of the data.  We are waiting for an update from TTEB.
+# anions also analyzed in 2022 and 2023
 
 # As of 3/17/2022, the tteb sharedrive (L:\Public\CESER-PUB\IPCB) contains 
 # SURGE.dbf.  The records in this file are duplicates of those in SURGE 2021.dbf
@@ -32,15 +31,22 @@ tteb.SURGE2022 <- read_excel(paste0(userPath,
 tteb.SURGE2023 <- read_excel(paste0(userPath, 
                                     "data/chemistry/tteb/SURGE_2023_08_10_2023_update.xlsx"))
 # Vectors of analyte names, grouped by reporting limit
-
-analytes_0.05 <- c("f", "cl", "no2", "br", "no3", "po4")
+analytes_0.005 <- "no2" 
+analytes_0.006 <- "no3"
+analytes_0.007 <- "f"  
+analytes_0.008 <- "br" 
+analytes_0.011 <- "po4"
+analytes_0.03 <- "cl"  
+analytes_0.05 <- "so4" 
 analytes_0.5 <- c("al", "as", "ba", "be", "ca", "cd", "cr", "cu", "fe", "k",  "li", 
-               "mg", "mn", "na", "ni", "pb", "sb", "sr", "v", "zn", "so4") 
+               "mg", "mn", "na", "ni", "pb", "sb", "sr", "v", "zn") 
 analytes_1 <-c("toc", "doc")
 analytes_2 <- "sn"
 analytes_4 <- "si"
 analytes_20 <- c("s", "p")
-analyte_names <- c(analytes_0.05, analytes_0.5, 
+analyte_names <- c(analytes_0.005, analytes_0.006, analytes_0.007, 
+                   analytes_0.008, analytes_0.011, analytes_0.03,
+                   analytes_0.05, analytes_0.5, 
                    analytes_1, analytes_2, analytes_4, analytes_20)
 
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023) %>% 
@@ -210,7 +216,7 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
 # any combination of lake_id, site_id, sample_depth, and sample_type could
-# be repeated for metals, doc, and toc.  To eliminate replicates of rows
+# be repeated for anions, metals, doc, and toc.  To eliminate replicates of rows
 # that share unique IDs, split by analyte, select columns that contain data
 # for the analyte, then merge by unique ID.
 tteb.all <- tteb.all %>%
@@ -220,6 +226,12 @@ tteb.all <- tteb.all %>%
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit, contains("doc")) # select doc stuff
     } else if (unique(x$analyte == "toc")) { # if contains toc
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit, contains("toc")) # select toc stuff
+    } else if (unique(x$analyte == "anions")) { # if contains anions
+      x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
+                   f_ic, f_ic_bql,
+                   cl_ic, cl_ic_bql,
+                   br_ic, br_ic_bql,
+                   so4_ic, so4_ic_bql)
     } else if (unique(x$analyte == "metals")) { # if contains metals
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
                    ni, ni_flag, 
