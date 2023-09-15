@@ -476,6 +476,5 @@ ada.anions.analyzed <- ada.anions %>%
 setdiff(ada.anions.collected, ada.anions.analyzed) %>% print(n=Inf)
 
 # Are all analyzed ADA anion samples in list of ADA collected samples?
-# yes
 setdiff(ada.anions.analyzed, ada.anions.collected) %>% print(n=Inf)
 

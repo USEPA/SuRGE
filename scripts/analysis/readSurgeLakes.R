@@ -7,7 +7,7 @@ lake.list <- readxl::read_excel(paste0(userPath,
   dplyr::rename(nla_id = site_id_2) %>%
   mutate(lake_id = substr(lake_id, 5, 8) %>% # extract numeric part of lake_id
            as.numeric(), #convert lake_id to numeric
-         visit = 1) # all lakes except 250 and 281 were only visited once.  250/281 handled below
+         visit = 1) # all lakes except 147, 148, 250, and 281 were only visited once.  see below
 
 # Add visit 2 for 250 and 281 (CIN sites with lost cooler) and 147/148 (ADA sites revisited for quality)
 lake.list <- lake.list %>% 
