@@ -51,7 +51,10 @@ analyte_names <- c(analytes_0.005, analytes_0.006, analytes_0.007,
 
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023) %>% 
   janitor::clean_names() %>%
-  rename_with(.cols = contains("_aes"), ~gsub("_aes", "", .)) %>% # remove aes from variable name
+  rename_with(~ if_else( # rename any column names containing an underscore
+    str_detect(., "_"), str_extract(., "^[^_]*"), .)) %>%
+  rename_with(~ if_else( # rename any column names containing a number
+    str_detect(., "[0-9]"), str_sub(., 1, 3), .)) %>%
   select(-studyid, -tn) %>% # remove unneeded columns
   rename(lab_id = labid,
          toc = toc_comb) %>%
@@ -80,7 +83,13 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023)
   # create 'bql' columns to flag observations < reporting limit. 
   mutate(across(contains(analyte_names) & !ends_with(c("flag", "qual", "sampid")), 
                 ~ case_when(
-                  cur_column() %in% analytes_0.05 & . < 0.05 & . > 0 ~ "L",
+                  cur_column() %in% analytes_0.005 & . < 0.005 & . > 0  ~ "L", 
+                  cur_column() %in% analytes_0.006 & . < 0.006 & . > 0  ~ "L",
+                  cur_column() %in% analytes_0.007 & . < 0.007 & . > 0  ~ "L",
+                  cur_column() %in% analytes_0.008 & . < 0.008 & . > 0  ~ "L",
+                  cur_column() %in% analytes_0.011 & . < 0.011 & . > 0  ~ "L",
+                  cur_column() %in% analytes_0.03 & . < 0.03 & . > 0  ~ "L",
+                  cur_column() %in% analytes_0.05 & . < 0.05 & . > 0  ~ "L",
                   cur_column() %in% analytes_0.5 & . < 0.5 & . > 0 ~ "L", 
                   cur_column() %in% analytes_1 & . < 1 & . > 0 ~ "L",
                   cur_column() %in% analytes_2 & . < 2 & . > 0 ~ "L", 
