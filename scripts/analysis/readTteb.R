@@ -51,13 +51,12 @@ analyte_names <- c(analytes_0.005, analytes_0.006, analytes_0.007,
 
 tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023) %>% 
   janitor::clean_names() %>%
-  rename_with(~ if_else( # rename any column names containing an underscore
-    str_detect(., "_"), str_extract(., "^[^_]*"), .)) %>%
+  rename_with(~ if_else( # rename any column names containing an underscore _
+    str_detect(., "_"), str_extract(., "^[^_]*"), .)) %>% # keep chars before _
   rename_with(~ if_else( # rename any column names containing a number
-    str_detect(., "[0-9]"), str_sub(., 1, 3), .)) %>%
+    str_detect(., "[0-9]"), str_sub(., 1, 3), .)) %>% # keep first 3 chars
   select(-studyid, -tn) %>% # remove unneeded columns
-  rename(lab_id = labid,
-         toc = toc_comb) %>%
+  rename(lab_id = labid) %>%
   
   # a value of 9999999999999990.000 indicates no data for that sample/analyte.
   # This often occurs if a summary file contains samples with different
@@ -237,10 +236,10 @@ tteb.all <- tteb.all %>%
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit, contains("toc")) # select toc stuff
     } else if (unique(x$analyte == "anions")) { # if contains anions
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
-                   f_ic, f_ic_bql,
-                   cl_ic, cl_ic_bql,
-                   br_ic, br_ic_bql,
-                   so4_ic, so4_ic_bql)
+                   f, f_bql,
+                   cl, cl_bql,
+                   br, br_bql,
+                   so4, so4_bql)
     } else if (unique(x$analyte == "metals")) { # if contains metals
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
                    ni, ni_flag, 
