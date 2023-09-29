@@ -95,21 +95,19 @@ janitor::get_dupes(
 # no dupes
 
 anions <- ada.anions %>%
-  full_join(d.anions.aggregated) %>%
-  mutate(visit = 1) # only two lakes with visit == 2 are not in these files
-# check for unexpected behavior
+  full_join(d.anions.aggregated)
+# # check for unexpected behavior
 nrow(ada.anions) + nrow(d.anions.aggregated) == nrow(anions) # TRUE, good!
 janitor::get_dupes(
-  select(anions, lake_id, site_id, sample_depth, sample_type)) 
+  select(anions, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dupes
 
 oc <- ada.oc %>%
-  full_join(toc.masi) %>%
-  mutate(visit = 1) # only two lakes with visit == 2 are not in these files
+  full_join(toc.masi)
 # check for unexpected behavior
 nrow(ada.oc) + nrow(toc.masi) == nrow(oc) # TRUE, good!
 janitor::get_dupes(
-  select(oc, lake_id, site_id, sample_depth, sample_type)) 
+  select(oc, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dupes
 
 pigments <- chl18 %>%
@@ -118,7 +116,8 @@ pigments <- chl18 %>%
     is.na(visit), 1, visit)))
 # check for unexpected behavior
 nrow(chl18) + nrow(pigments_20_21_22) == nrow(pigments) # TRUE, good!
-janitor::get_dupes(select(pigments, lake_id, site_id, sample_depth, sample_type)) 
+janitor::get_dupes(select(pigments, lake_id, site_id, 
+                          sample_depth, sample_type, visit)) 
 
 
 # When joining objects containing different analytes, the nrow of the

@@ -58,6 +58,12 @@ fld_sheet_sonde <- fld_sheet %>%
     #sample_depth is 'shallow' or 'deep'.  The actual depth of sample collection will be 'sample_depth_m'
     name = replace(name, name == "sample_depth", "sample_depth_m")) 
 
+# Before pivoting to wide, make sure no rows have more than one value
+problem_rows <- fld_sheet_sonde %>% 
+  group_by(lake_id, site_id, visit, sample_depth, name) %>%  
+  summarize(n = n()) %>%          
+  filter(n > 1) # identify any rows that have more than one value                
+
 # Pivot back to wide, but now longer, just like chemistry
 fld_sheet_sonde <- fld_sheet_sonde %>% 
   pivot_wider(names_from = name, values_from = value) %>%
@@ -71,6 +77,7 @@ fld_sheet_sonde <- fld_sheet_sonde %>%
   relocate(lake_id, site_id, 
            sample_depth, sample_depth_m) # put identifiers first
 
+    
 
 
 # Now merge in non depth specific fields from fld_sheets
