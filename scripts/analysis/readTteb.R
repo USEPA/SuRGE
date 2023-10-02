@@ -104,7 +104,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023)
   mutate(across(al:zn, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
   select(order(colnames(.))) %>% # alphabetize column names
-  select(lab_id, sampid, everything()) # put these columns first
+  select(lab_id, sampid, colldate, comment, everything()) # put these columns first
 
 
 # 2. READ CHAIN OF CUSTODY----------------
@@ -305,6 +305,6 @@ tteb.all <- tteb.all %>%
                 str_squish(.))) # remove any extra white spaces
 
 
-janitor::get_dupes(tteb.all %>% select(lake_id, site_id, sample_type, sample_depth))
-
+janitor::get_dupes(tteb.all %>% select(lake_id, site_id, 
+                                       sample_type, sample_depth)) 
 
