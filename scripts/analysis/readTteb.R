@@ -77,8 +77,6 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023)
   mutate(across(ends_with(analyte_names), 
                 ~ if_else("H" %in% flag, "H", ""),
                 .names = "{col}_qual")) %>%
-  # we shouldn't need the original "flag" field now 
-  select(-flag) %>%
   # create 'bql' columns to flag observations < reporting limit. 
   mutate(across(contains(analyte_names) & !ends_with(c("flag", "qual", "sampid")), 
                 ~ case_when(
@@ -104,7 +102,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023)
   mutate(across(al:zn, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
   select(order(colnames(.))) %>% # alphabetize column names
-  select(lab_id, sampid, colldate, comment, everything()) # put these columns first
+  select(lab_id, sampid, colldate, flag, comment, everything()) # put these columns first
 
 
 # 2. READ CHAIN OF CUSTODY----------------
@@ -242,13 +240,11 @@ tteb.all <- tteb.all %>%
                    so4, so4_bql)
     } else if (unique(x$analyte == "metals")) { # if contains metals
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
-                   ni, ni_flag, 
-                   ni_bql, ni_units, # if ni in matches, also grabs units (i.e. doc_units)
                    s, s_flag, 
-                   s_bql, s_units, # if s in matches, grabs too many variable
-                   matches("(al|as|ba|be|ca|cd|cr|cu|fe|k|li|mg|mn|na|p|pb|sb|si|sn|sr|v|zn)")) # select metals stuff
+                   s_bql, s_units, # if s in matches, grabs too many variables
+                   matches("^(al|as|ba|be|ca|cd|cr|cu|fe|k|li|mg|mn|na|ni|p|pb|sb|si|sn|sr|v|zn)")) # select metals stuff
     }) %>%
-  reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type
+  reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type, visit
 
 dim(tteb.all) #175 rows.  Good, reduced from 347 to 175.
 
@@ -302,9 +298,9 @@ tteb.all <- tteb.all %>%
                 ~ if_else(str_detect(., "ND L"), "L", .))) %>%
   mutate(across(ends_with("flags"),   # replace any blank _flags with NA
                 ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
-                str_squish(.))) # remove any extra white spaces
+                str_squish(.)))  # remove any extra white spaces 
 
 
-janitor::get_dupes(tteb.all %>% select(lake_id, site_id, 
-                                       sample_type, sample_depth)) 
+# Final check for dupes
+janitor::get_dupes(tteb.all, lake_id, site_id, visit, sample_depth, sample_type)
 
