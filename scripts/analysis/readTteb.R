@@ -240,7 +240,7 @@ tteb.all <- tteb.all %>%
                    so4, so4_bql)
     } else if (unique(x$analyte == "metals")) { # if contains metals
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
-                   s, s_flag, 
+                   s, s_flag, s_qual, 
                    s_bql, s_units, # if s in matches, grabs too many variables
                    matches("^(al|as|ba|be|ca|cd|cr|cu|fe|k|li|mg|mn|na|ni|p|pb|sb|si|sn|sr|v|zn)")) # select metals stuff
     }) %>%
@@ -254,7 +254,6 @@ dim(tteb.all) #175 rows.  Good, reduced from 347 to 175.
 # 7. CLEAN UP FINAL OBJECT, STEP 1
 
 tteb.all <- tteb.all %>% 
-  select(-analyte, -sampid) %>%
   mutate(site_id = as.numeric(
     gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # remove non numeric chars
   # rename the toc and doc fields to enable a clean join with other objects 
