@@ -26,50 +26,23 @@ st_crs(surgeDsn.sf) # confirm CRS
 plot(surgeDsn.sf$geometry) # preview plot
 
 
-# Filter to sites to be sampled in 2023, plus all unused oversample sites
-surgeDsn23 <- surgeDsn.sf %>%
-  # remove site deemed unsampleable
-  filter(!eval_status_code %in% c("LD", "PI", "TR")) %>%
-  # Pull out sites that are yet to be sampled, or don't have a sample year yet assigned
-  # this includes oversample sites that do not have year assigned
-  filter(sample_year > 2022 | is.na(sample_year)) 
-
-surgeDsn23 %>% print(n=Inf)
-         
-
-# Filter to sites sampled in 2018, 2020, 2021, 2022, and those to be sampled in 2023,
-# plus oversample sites
+# Filter to sampled sites (2018, 2020, 2021, 2022, and 2023)
 surgeDsnSampled <- surgeDsn.sf %>%
-  # remove site deemed unsampleable
-  filter(!eval_status_code %in% c("LD", "PI", "TR")) 
+  # filter to sampled sites
+  filter(eval_status_code == "S") 
 
 surgeDsnSampled %>% print(n=Inf)
 
-# write 2023 sites to disk
-st_write(obj = surgeDsn23, 
-         dsn = file.path( "../../../surgeDsn", "SuRGE_design_20191206_eval_status.gpkg"), 
-         layer = "2023_sites", # package appends 'main.' to layer name?
-         append=FALSE, # this overwrites existing layer
-         driver = "GPKG")
-
 
 # write all sampled sites to disk
+# convert to .gdb in Pro for web app
 st_write(obj = surgeDsnSampled, 
          dsn = file.path( "../../../surgeDsn", "SuRGE_design_20191206_eval_status.gpkg"), 
          layer = "sampled_sites", # package appends 'main.' to layer name?
          append=FALSE, # this overwrites existing layer
          driver = "GPKG")
 
-# Quick look at what remains to be sampled
-surgeDsnSampled %>% 
-  filter(sample_year == 2023 | is.na(sample_year)) %>% # only those remaining
-  {table(.$lab)} # 10 CIN, 4 ADA, 2 DOE, 2 NAR
 
-
-
-# CIN sampled in 2021
-surgeDsnSampled %>% 
-  filter(sample_year == 2021, lab == "CIN")
 
 # should be 113 sites total (108 for SuRGE plus 5 extra from R10 2018)
 addmargins(table(surgeDsnSampled$lab)) # yes

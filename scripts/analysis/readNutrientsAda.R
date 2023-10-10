@@ -758,11 +758,11 @@ ada.nutrients <- list(jea = list(jea1, jea2, jea3),
 
 # Inspect final object for merge errors
 # any duplicate rows for a given set of unique identifiers?  No, good!
-ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
+ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type, visit) %>%
    janitor::get_dupes()
 
 # Did we preserve all combinations of unique identifiers in original data?
-# 98 unique combinations of lake_id, site_id, sample_depth, and sample_type
+# 116 unique combinations of lake_id, site_id, sample_depth, and sample_type
 # in original data.
 list(jea1, jea2, jea3, key1, key2, key3, 
      ove1, ove2, ove3, lmp1, lmp2, lmp3, 
@@ -776,14 +776,23 @@ list(jea1, jea2, jea3, key1, key2, key3,
      tntp_2022_011_003,
      no2no3nh4_2022_146_190_184_166,
      no2no3nh4_2022_136_100_206, 
-     no2no3nh4_2022_011_003) %>%
-  map(~select(., lake_id, site_id, sample_depth, sample_type)) %>%
+     no2no3nh4_2022_011_003,
+     no2no3nh4_2023_099_004, 
+     tntp_2023_099_004, 
+     op_2023_099_004,
+     no2no3nh4_2023_186_018,
+     tntp_2023_186_018, 
+     op_2023_186_018,
+     no2no3nh4_2023_148_147,
+     tntp_2023_148_147,
+     op_2023_148_147) %>%
+  map(~select(., lake_id, site_id, sample_depth, sample_type, visit)) %>%
   map_dfr(~bind_rows(.)) %>% # bind all df by rows, creates one df
   distinct() %>% # condense to unique observations
-  nrow(.) # 98 unique combinations
+  nrow(.) # 116 unique combinations
 
-# 98 unique combinations in merged df.  Everything looks good
-ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type) %>%
+# 116 unique combinations in merged df.  Everything looks good
+ada.nutrients %>% select(lake_id, site_id, sample_depth, sample_type, visit) %>%
   distinct() %>% {nrow(.)}
 
 
@@ -815,7 +824,7 @@ ada.nutrient.analyzed <- ada.nutrients %>%
   select(-value)
 
 # Are all collected samples that were sent to ADA in ADA data?
-# [9/30/2022] lake_id 3 and 11.  Waiting for Katie to upload data
+# yes
 setdiff(nutrient.collected.analyzed.ada, ada.nutrient.analyzed) %>% print(n=Inf)
 
 # Are all nutrient samples analyzed at ADA in list of samples sent to ADA?

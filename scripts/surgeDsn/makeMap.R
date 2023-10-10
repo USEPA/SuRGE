@@ -1,12 +1,28 @@
 # Map---------------
 # Load final design.  Design (NLA_Methane_Design_Lakes_20191206.shp) provided by
-# Olsen.  I added a few columns (e.g. laboratory), updated with site status
-# (e.g. land owner denial, oversample sites, etc), and converted to .gdb. 
-dsn <- read_sf("../../../surgeDsn/SuRGE_design_20191206_eval_status.gdb", 
-               layer = "main_sampled_sites") %>%
-  st_transform(5070) # Conus Albers
-st_crs(dsn) # 5070
+# Olsen.  I converted to .xlsx, added a few columns (e.g. laboratory), updated 
+# with site status (e.g. land owner denial, oversample sites, etc), wrote out to .gpkg 
+# (see surgeDsn/readSurgeDesign20191206.R), and converted to .gdb in GIS Pro.
+# Here we read the .xlsx file and convert to spatial, but could also read from
+# .gpkg or .gdb
+# Read in data
+surgeDsn <- readxl::read_xlsx("../../../surgeDsn/SuRGE_design_20191206_eval_status.xlsx") %>%
+  select(-xcoord_1, -ycoord_1) %>% # remove xcoord and ycoord, holdover from Tony's .shp
+  janitor::clean_names() # GIS is picky about names
 
+unique(surgeDsn$lab)
+
+# Convert to sf object
+surgeDsn.sf <- st_as_sf(surgeDsn, coords = c("lon_dd83", "lat_dd83"), 
+                        crs = 4269) %>% # NAD83
+  st_transform(., crs = 5070) # Conus Albers
+
+# Filter to sampled sites (2018, 2020, 2021, 2022, and 2023)
+surgeDsnSampled <- surgeDsn.sf %>%
+  # filter to sampled sites
+  filter(eval_status_code == "S")
+  
+  
 # READ NLA17 SAMPLED SITES-------
 # loaded object is 'dg'
 load(paste0(Sys.getenv("USERPROFILE"),
@@ -94,7 +110,7 @@ states <- USAboundaries::us_states() %>%
 ggplot() +
   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.1) +
-  geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3, aes(color = lab)) + # see dsgn.R
+  geom_sf(data = filter(surgeDsn.sf, eval_status_code == "S"), size = 3, aes(color = lab)) + # see dsgn.R
  scale_fill_manual("Ecoregion", values = cols) +
   ggtitle("SuRGE Sample Sites") +
   theme_bw() +
@@ -124,7 +140,10 @@ ggsave(filename="output/figures/surgeMainSitesByLab.tiff",
 ggplot() +
   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.5) +
-  geom_sf(data = filter(dsn, !is.na(sample_year), !grepl(pattern = c("253|331|302|308|999"), site_id)), size = 2) + # see dsgn.R. remove extra R10 sites.  See wiki
+  geom_sf(data = filter(surgeDsn.sf, 
+                        eval_status_code == "S", # only sampled sites 
+                        !grepl(pattern = c("253|331|302|308|999"), site_id)), #remove extra R10 sites.  See wiki 
+          size = 2) + # see dsgn.R. 
   scale_fill_manual("Ecoregion", values = cols) +
   #ggtitle("SuRGE Sample Sites") +
 theme_bw() +
@@ -156,7 +175,7 @@ ggplot() +
   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.5) +
   geom_sf(data = dg.sf, size = 1) +
-  geom_sf(data = filter(dsn, !is.na(sample_year)), size = 3, color = "red") + # see dsgn.R
+  geom_sf(data = filter(surgeDsn.sf, eval_status_code == "S"), size = 3, color = "red") + # see dsgn.R
   scale_fill_manual("Ecoregion", values = cols) +
   ggtitle("Reservoir Sample Sites") +
   theme_bw() +
