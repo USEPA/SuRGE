@@ -5,6 +5,17 @@
 # library(scales)  # load from masterLibrary
 # source("ohio2016/scriptsAndRmd/masterLibrary.R")
 
+# NOTES-----------
+# 9/28/2023  two file are in tab separated format.  These were likely inadvertently
+# reformatted by Scott when he was reviewing the GGA modeling windows.  Leah will
+# extract original files from GGA.  Here is some code to identify if the files
+# are tab separated:
+# if("\t" %in% strsplit(readLines(paste0(userPath, txtFiles[i]), n=1)[1], split="")[[1]]) {
+#   do something
+# }
+# data/CIN/CH4_188_Stubblefield/GGA/micro_2022-08-24_f0001.txt
+# data/CIN/CH4_235_Sylvan/GGA/gga_2020-09-03_f0000.txt
+
 
 # READ DATA -----------------
 # List of .txt files containing data 
@@ -23,6 +34,7 @@ for (i in 1:length(labs)) {
 # Strip these files out.
 txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr files with data we need; should be _f, but allowing -f)
                        !grepl(pattern = "zip", x = txtFiles) & # exclude .zip files
+                       !grepl(pattern = "xls", x = txtFiles) & # exclude excel files
                        !grepl(pattern = "Needs to be organized", x = txtFiles) & # temp file to be deleted
                        !grepl(pattern = "MGGA Archive and Calibration", x= txtFiles) &
                        !grepl(pattern = "2022 field season", x= txtFiles) & # CIN folder that will be deleted
@@ -30,7 +42,7 @@ txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr
 
 ggaList <- list()  # Empty list to hold results
 
-tic() # 50 seconds 2/6/2023
+tic() # 25 seconds 9/28/2023
 for (i in 1:length(txtFiles)) {  # loop to read and format each file
   print(i)
   if (grepl(pattern = "gga", x = txtFiles[i])) { 
@@ -63,15 +75,14 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file
   
   # MGGA FORMAT
   if (grepl(pattern = "micro", x = txtFiles[i])) { 
-    # slightly different colClasses values.
-    gga.i <- read.table(paste0(userPath, txtFiles[i]),
-                        sep=",",  # comma separate
-                        skip=1,  # Skip first line of file.  Header info
-                        #colClasses = c(rep("character", 2), rep("numeric", 31)),  # needed to comment out for DOE
-                        as.is=TRUE, # Prevent conversion to factor
-                        header=TRUE, # Import column names
-                        fill=TRUE) %>%
-      # assign data to particular field crew
+         gga.i <- read.table(paste0(userPath, txtFiles[i]),
+                          sep=",",  # comma separate
+                          skip=1,  # Skip first line of file.  Header info
+                          #colClasses = c(rep("character", 2), rep("numeric", 31)),  # needed to comment out for DOE
+                          as.is=TRUE, # Prevent conversion to factor
+                          header=TRUE, # Import column names
+                          fill=TRUE) %>% 
+    # assign data to particular field crew
       mutate(lab = str_split(txtFiles[i], "/")[[1]][2], # extract 2nd element from 1st list element 
              # extract lake_id 
              # sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]) works for most, but not R10 2018 lakes.  below is more general 
