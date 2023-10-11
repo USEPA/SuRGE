@@ -12,5 +12,7 @@ lake.list <- readxl::read_excel(paste0(userPath,
 # Add visit 2 for 250 and 281 (CIN sites with lost cooler) and 147/148 (ADA sites revisited for quality)
 lake.list <- lake.list %>% 
   filter(lake_id == 250 | lake_id == 281 | lake_id == 147 | lake_id == 148) %>% # pull out rows for 250, 281, 147, and 148
-  mutate(visit = 2) %>% # change visit to vist == 2
+  mutate(sample_year = case_when(lake_id %in% c(147, 148) ~ 2023, # ADA resampled in 2023, originally sampled in 2021
+                                 TRUE ~ sample_year), # CIN (lakes 250/281) conducted visits 1 and 2 in same year 
+         visit = 2) %>% # change visit to vist == 2
   bind_rows(lake.list) # add two new rows to original df

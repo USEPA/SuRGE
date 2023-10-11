@@ -148,6 +148,8 @@ chem.samples.foo <- chem.samples %>%
   filter(!(lake_id == "64" & sample_type == "blank" & analyte == "doc")) %>%
   # no DOC blank collected at 65
   filter(!(lake_id == "65" & sample_type == "blank" & analyte == "doc")) %>%
+  # no anion deep collected at 65 (chemistry065NARTtoCIN06September2022.pdf)
+  filter(!(lake_id == "65" & sample_type == "unknown" & sample_depth == "deep" & analyte_group == "anions")) %>%
   # this sample lost in lab.  See See 2/21/2023 email from Maily Pham
   filter(!(lake_id == "240" & sample_type == "unknown" & analyte == "doc" & sample_depth == "deep")) %>%
   # shallow water put in deep toc and doc shallow.  These vials were discarded at AWBERC.

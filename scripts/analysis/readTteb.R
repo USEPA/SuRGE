@@ -99,10 +99,13 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023)
                 ~ "mg_l", 
                 .names = "{col}_units")) %>%
   mutate(toc_units = "mg_c_l") %>% # TOC is the exception
-  mutate(across(al:zn, # make all values positive. absolute value of - detection limit
+  mutate(across(al:so4, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
   select(order(colnames(.))) %>% # alphabetize column names
-  select(lab_id, sampid, colldate, flag, comment, everything()) # put these columns first
+  select(lab_id, sampid, colldate, flag, comment, everything()) %>% # put these columns first
+  filter(!(lab_id == 214171)) # extra shallow collected.  See note in ttebSampleIds.xlsx
+                              # and chemistry065NARtoCIN06September2022.pdf.  Easier
+                              # to delete than integrate into analysis
 
 
 # 2. READ CHAIN OF CUSTODY----------------
@@ -113,7 +116,10 @@ ttebCoc <- read_excel(paste0(userPath,
   mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
          analyte = tolower(analyte)) %>%
   # this sample lost in lab.  See See 2/21/2023 email from Maily Pham
-  filter(!(lake_id == "240" & sample_type == "unknown" & analyte == "doc" & sample_depth == "deep"))
+  filter(!(lake_id == "240" & sample_type == "unknown" & analyte == "doc" & sample_depth == "deep"),
+         !(lab_id == 214171)) # extra shallow collected.  See note in ttebSampleIds.xlsx
+                              # and chemistry065NARtoCIN06September2022.pdf.  Easier
+                              # to delete than integrate into analysis
 
 unique(ttebCoc$lake_id) # looks good
 
@@ -122,7 +128,7 @@ unique(ttebCoc$lake_id) # looks good
 # Compare list of submitted samples to comprehensive sample list
 # print rows of submitted samples (ttebSampleIds) that are not in theoretical
 # list of all samples to be generated.
-# All samples that were submitted for analysis were expected. Good. [9/7/2023]
+# All samples that were submitted for analysis were expected. Good. [10/11/2023]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
@@ -140,11 +146,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
 
-# 65-deep-anions.  Two shallow samples sent.  TTEB sample submission
-# forms differentiate deep and shallow, but ttebSampleId.xlsx lists
-# both as shallow.  Need to consult with Leah.
-
-# [9/7/2023] - does not yet contain 2023 samples
+# [10/11/2023] - does not yet contain 2023 samples
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
@@ -166,20 +168,11 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 611 records [9/7/2023] 
+nrow(tteb.all) # 652 records [10/11/2023] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
 tteb.all <- tteb.all %>%
-  # Add the visit field
-  # NEED TO ADD VISIT FIELD FOR 147 AND 148, BUT WAIT UNTIL 2023 DATA
-  # ARE ADDED TO chem.samples [9/7/2023]
-  mutate(visit = if_else(lake_id %in% c("281", "250") & 
-                           between(colldate, 
-                                   as.Date("2022-08-15"), 
-                                   as.Date("2022-09-15")),
-                         2, 1, missing = 1)) %>% 
-  select(-colldate) %>% # Colldate no longer needed
   mutate(doc = case_when(analyte == "doc" ~ toc,
                          TRUE ~ NA_real_),
          doc_units = "mg_c_l",
@@ -214,6 +207,15 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 # still appears to be missing and no record of it was on the instrument logs as 
 # being run. We apologize for the inconvenience, but it is a MIA sample it appears."  
 
+# per Sonia, 9/28/2023: The missing DOC/TOC samples were analyzed on 9/13/2022. 
+# Except for 214916, Oct 5th submission, the missing IC samples were analyzed on 
+# 8/31/2022. 214916 was run with other samples on 10/11/22. The files were ready 
+# for the database but we must have missed them during the last data upload. Thank 
+# you for bringing this oversite to our attention.
+
+# per Sonia, 10/10/2023: As for 212510, we found your submission sheets and checked 
+# the AES run records. It seems like 212510 was not analyzed. Maily, could you see 
+# if you have any records indicating if the vial was spilled or broken? 
 
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
   filter(!(lab_id %in% c(203606, 203165, 203642:203644))) %>% # instrument failure
@@ -234,10 +236,10 @@ tteb.all <- tteb.all %>%
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit, contains("toc")) # select toc stuff
     } else if (unique(x$analyte == "anions")) { # if contains anions
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
-                   f, f_bql,
-                   cl, cl_bql,
-                   br, br_bql,
-                   so4, so4_bql)
+                   f, f_bql, f_flag, f_qual, f_units,
+                   cl, cl_bql, cl_flag, cl_qual, cl_units,
+                   br, br_bql, br_flag, br_qual, br_units,
+                   so4, so4_bql, so4_flag, so4_qual, so4_units)
     } else if (unique(x$analyte == "metals")) { # if contains metals
       x %>% select(lake_id, site_id, sample_depth, sample_type, visit,
                    s, s_flag, s_qual, 
@@ -246,7 +248,7 @@ tteb.all <- tteb.all %>%
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type, visit
 
-dim(tteb.all) #175 rows.  Good, reduced from 347 to 175.
+dim(tteb.all) #297 rows.  Good, reduced from 652 to 297.  [10/11/2023]
 
 
 
@@ -256,11 +258,23 @@ dim(tteb.all) #175 rows.  Good, reduced from 347 to 175.
 tteb.all <- tteb.all %>% 
   mutate(site_id = as.numeric(
     gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # remove non numeric chars
-  # rename the toc and doc fields to enable a clean join with other objects 
+  # rename the toc, doc, and anion fields to enable a clean join with other objects 
   rename(tteb.toc = toc, 
          tteb.doc = doc, 
          tteb.toc_units = toc_units, 
-         tteb.doc_units = doc_units) %>%
+         tteb.doc_units = doc_units,
+         tteb.f = f,
+         tteb.f_units = f_units,
+         tteb.cl = cl,
+         tteb.cl_units = cl_units,
+         tteb.br = br,
+         tteb.br_units = br_units,
+         tteb.so4 = so4,
+         tteb.so4_units = so4_units) %>%
+  unite("tteb.f_flags", f_flag, f_bql, f_qual, sep = " ") %>%
+  unite("tteb.cl_flags", cl_flag, cl_bql, cl_qual, sep = " ") %>%  
+  unite("tteb.br_flags", br_flag, br_bql, br_qual, sep = " ") %>%
+  unite("tteb.so4_flags", so4_flag, so4_bql, so4_qual, sep = " ") %>%
   unite("tteb.toc_flags", toc_flag, toc_bql, toc_qual,sep = " ")  %>%
   unite("tteb.doc_flags", doc_flag, doc_bql, doc_qual, sep = " ")  %>%
   unite("al_flags", al_flag, al_bql, al_qual, sep = " ")  %>%

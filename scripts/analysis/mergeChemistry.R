@@ -34,7 +34,7 @@
 # Inspect objects----
 
 # inspect object to merge
-## each df contains 10 - 175 observations [12/08/2022]
+## each df contains 10 - 297 observations [10/11/2023]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
   map_dfc(., nrow)
@@ -47,7 +47,7 @@ list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18,
     x, lake_id, site_id, sample_depth, sample_type) %>% 
       str(.))
 ## which ones have a visit field?
-### chemCinNutrients, tteb.all, pigments_20_21_22
+### ada.anions, ada.nutrients, ada.oc, chemCinNutrients, tteb.all, pigments_20_21_22
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
   map_lgl(., function(x) x %>% {"visit" %in% names(.)})
@@ -55,10 +55,9 @@ list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18,
 
 # Merge objects----
 # All observations are uniquely identified by a combination of lake_id, site_id,
-# sample_depth, and sample_type.  Lakes 281 and 250 were sampled twice, therefore
-# objects containing data from either of those lakes (chemCinNutrients, tteb.all, 
-# pigments_20_21_22) must have a visit column. This visit column will be propagated
-# into the final merged data object.
+# sample_depth, and sample_type.  Lakes 281/250 (CIN) and 147/148 (ADA) were sampled 
+# twice, therefore objects containing data from those lakes must have a visit column.
+# This visit column will be propagated into the final merged data object.
 # Objects must be joined in proper order to avoid unexpected duplicates.  Best to 
 # merge objects that share names other than the unique identifiers.  For example, 
 # all nutrient objects should be joined, all anion object should be joined, all 
@@ -95,7 +94,9 @@ janitor::get_dupes(
 # no dupes
 
 anions <- ada.anions %>%
-  full_join(d.anions.aggregated)
+  full_join(d.anions.aggregated) %>%
+  mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA.  needed for daniels anions
+    is.na(visit), 1, visit)))
 # # check for unexpected behavior
 nrow(ada.anions) + nrow(d.anions.aggregated) == nrow(anions) # TRUE, good!
 janitor::get_dupes(
@@ -103,7 +104,9 @@ janitor::get_dupes(
 # no dupes
 
 oc <- ada.oc %>%
-  full_join(toc.masi)
+  full_join(toc.masi) %>%
+  mutate(visit = (ifelse( # visit = 1 if visit column is blank/NA (all toc.masi data)
+  is.na(visit), 1, visit)))
 # check for unexpected behavior
 nrow(ada.oc) + nrow(toc.masi) == nrow(oc) # TRUE, good!
 janitor::get_dupes(
@@ -152,34 +155,68 @@ janitor::get_dupes(
 # no dups
 
 
-# The tteb.all object contains metals, DOC, and TOC data.  To prevent erroneous duplicates
-# when joining tteb.all with other objects containing TOC data, we appended "tteb."
-# to TOC and DOC column names in tteb.all (see readTteb.R).  Any samples where TOC/DOC was run
-# at TTEB will have TOC/DOC numbers in the tteb.toc/tteb.doc columns AND NAs in the TOC/DOC columns
-# that came from toc.masi and ada.oc.  For any observations that meet these criteria,
-# move the tteb OC data into the OC columns, then remove the tteb.toc columns.
-# TTEB will also run anions from the 2022 field season.  When we get those data,
-# we will need to take a similar approach to deal with anion analytes in tteb,
-# ada.anions, and d.anions.
+# The tteb.all object contains metals, anion, DOC, and TOC data.  To prevent erroneous duplicates
+# when joining tteb.all with other objects containing TOC, DOC, or aniona data, we appended "tteb."
+# to TOC, DOC, and anion column names in tteb.all (see readTteb.R).  Any samples where TOC/DOC/anions were run
+# at TTEB will have TOC/DOC/anion numbers in the tteb.toc/tteb.doc/tteb.cl.... columns AND NAs in the TOC/DOC/cl... columns
+# that came from toc.masi, ada.oc, and anions.  For any observations that meet these criteria,
+# move the tteb data into the tOC/doc/analyte columns, then remove the tteb. columns.
 chemistry_all <- chemistry_all %>%
-  mutate(toc = case_when(
-    is.na(toc) & !is.na(tteb.toc) ~ tteb.toc,
-    TRUE ~ toc)) %>%
-  mutate(toc_flags = case_when(
-    is.na(toc_flags) & !is.na(tteb.toc_flags) ~ tteb.toc_flags,
-    TRUE ~ toc_flags)) %>%
-  mutate(toc_units = case_when(
-    is.na(toc_units) & !is.na(tteb.toc_units) ~ "mg_c_l",
-    TRUE ~ toc_units)) %>%
-  mutate(doc = case_when(
-    is.na(doc) & !is.na(tteb.doc) ~ tteb.doc,
-    TRUE ~ doc)) %>%
-  mutate(doc_flags = case_when(
-    is.na(doc_flags) & !is.na(tteb.doc_flags) ~ tteb.doc_flags,
-    TRUE ~ doc_flags)) %>%
-  mutate(doc_units = case_when(
-    is.na(doc_units) & !is.na(tteb.doc_units) ~ "mg_c_l",
-    TRUE ~ doc_units)) %>%
+  # TOC
+  mutate(toc = case_when(is.na(toc) & !is.na(tteb.toc) ~ tteb.toc,
+                         TRUE ~ toc)) %>%
+  mutate(toc_flags = case_when(is.na(toc_flags) & !is.na(tteb.toc_flags) ~ tteb.toc_flags,
+                               TRUE ~ toc_flags)) %>%
+  mutate(toc_units = case_when(is.na(toc_units) & !is.na(tteb.toc_units) ~ "mg_c_l",
+                               TRUE ~ toc_units)) %>%
+  
+  # DOC
+  mutate(doc = case_when(is.na(doc) & !is.na(tteb.doc) ~ tteb.doc,
+                         TRUE ~ doc)) %>%
+  mutate(doc_flags = case_when(is.na(doc_flags) & !is.na(tteb.doc_flags) ~ tteb.doc_flags,
+                               TRUE ~ doc_flags)) %>%
+  mutate(doc_units = case_when(is.na(doc_units) & !is.na(tteb.doc_units) ~ "mg_c_l",
+                               TRUE ~ doc_units)) %>%
+  
+  # br
+  mutate(br = case_when(is.na(br) & !is.na(tteb.br) ~ tteb.br,
+                        TRUE ~ br)) %>%
+  mutate(br_flags = case_when(is.na(br_flags) & !is.na(tteb.br_flags) ~ tteb.br_flags,
+                               TRUE ~ br_flags)) %>%
+  mutate(br_units = case_when(is.na(br_units) & !is.na(tteb.br_units) ~ tteb.br_units,
+                              !is.na(br_units) & is.na(tteb.br_units) ~ br_units,
+                              !is.na(br_units) & is.na(tteb.br_units) ~ NA_character_,
+                               TRUE ~ NA_character_)) %>%
+  
+  # cl
+  mutate(cl = case_when(is.na(cl) & !is.na(tteb.cl) ~ tteb.cl,
+                        TRUE ~ cl)) %>%
+  mutate(cl_flags = case_when(is.na(cl_flags) & !is.na(tteb.cl_flags) ~ tteb.cl_flags,
+                              TRUE ~ cl_flags)) %>%
+  mutate(cl_units = case_when(is.na(cl_units) & !is.na(tteb.cl_units) ~ tteb.cl_units,
+                              !is.na(cl_units) & is.na(tteb.cl_units) ~ cl_units,
+                              !is.na(cl_units) & is.na(tteb.cl_units) ~ NA_character_,
+                              TRUE ~ NA_character_)) %>%
+  
+  # so4
+  mutate(so4 = case_when(is.na(so4) & !is.na(tteb.so4) ~ tteb.so4,
+                        TRUE ~ so4)) %>%
+  mutate(so4_flags = case_when(is.na(so4_flags) & !is.na(tteb.so4_flags) ~ tteb.so4_flags,
+                              TRUE ~ so4_flags)) %>%
+  mutate(so4_units = case_when(is.na(so4_units) & !is.na(tteb.so4_units) ~ tteb.so4_units,
+                              !is.na(so4_units) & is.na(tteb.so4_units) ~ so4_units,
+                              !is.na(so4_units) & is.na(tteb.so4_units) ~ NA_character_,
+                              TRUE ~ NA_character_)) %>%
+  
+  # f
+  mutate(f = case_when(is.na(f) & !is.na(tteb.f) ~ tteb.f,
+                        TRUE ~ f)) %>%
+  mutate(f_flags = case_when(is.na(f_flags) & !is.na(tteb.f_flags) ~ tteb.f_flags,
+                              TRUE ~ f_flags)) %>%
+  mutate(f_units = case_when(is.na(f_units) & !is.na(tteb.f_units) ~ tteb.f_units,
+                              !is.na(f_units) & is.na(tteb.f_units) ~ f_units,
+                              !is.na(f_units) & is.na(tteb.f_units) ~ NA_character_,
+                              TRUE ~ NA_character_)) %>%
   select(-contains("tteb"))
 
 janitor::get_dupes(

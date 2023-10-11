@@ -42,7 +42,7 @@ paths <- paste0(userPath,  "data/", labs)
 # 2. Function for reading 'data' tab of surgeData files.
 
 get_data_sheet <- function(paths){
-  # d <-  
+  #d <-  
   fs::dir_ls(path = paths, # see above
              regexp = 'surgeData', # file names containing this pattern
              recurse = TRUE) %>% # look in all subdirectories
@@ -93,6 +93,12 @@ get_data_sheet <- function(paths){
 
 # 3. Read 'data' tab of surgeData files.
 fld_sheet <- get_data_sheet(paths = paths) 
+unique(fld_sheet$lake_id)
+unique(fld_sheet$site_id)
+janitor::get_dupes(fld_sheet %>% select(lake_id, site_id, visit))
+fld_sheet %>% filter(visit == 2) %>% distinct(lake_id) # two visits at 250 and 281
+
+
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
 get_dg_sheet <- function(paths){
