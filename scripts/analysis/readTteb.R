@@ -30,6 +30,28 @@ tteb.SURGE2022 <- read_excel(paste0(userPath,
 
 tteb.SURGE2023 <- read_excel(paste0(userPath, 
                                     "data/chemistry/tteb/SURGE_2023_08_10_2023_update.xlsx"))
+
+# Anions preliminary data (as of 18 Oct 2023)
+tteb.prelim.anions <- read_excel(
+  paste0(userPath, 
+         "data/chemistry/tteb/tteb_prelim_anions.xlsx")) %>%
+  filter(!str_detect(lab_id, "DUP")) %>% # remove lab dupes for now
+  filter(across(-lab_id, ~ !str_detect(., "n.a."))) %>% # remove any 'n.a.' rows
+  mutate(across(everything(), 
+                ~ str_extract(., "[0-9]+") %>% # remove non-numeric 
+                  as.numeric()), # make class numeric
+         across(everything(),
+                ~ if_else(. == 0, NA_real_, .))) # replace zeroes with NAs
+
+# toc preliminary data (as of 18 Oct 2023)
+tteb.prelim.toc <- read_excel(
+  paste0(userPath, 
+         "data/chemistry/tteb/tteb_prelim_toc.xlsx")) %>%
+  filter(str_detect(lab_id, "^[0-9]")) %>% # keep if lab_id starts w/ a number
+  mutate(lab_id = str_extract(lab_id, "[0-9]+") %>% # remove non-numeric
+           as.numeric()) # make numeric
+
+  
 # Vectors of analyte names, grouped by reporting limit
 analytes_0.005 <- "no2" 
 analytes_0.006 <- "no3"
@@ -49,7 +71,8 @@ analyte_names <- c(analytes_0.005, analytes_0.006, analytes_0.007,
                    analytes_0.05, analytes_0.5, 
                    analytes_1, analytes_2, analytes_4, analytes_20)
 
-tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023) %>% 
+tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, 
+                  tteb.SURGE2023) %>% 
   janitor::clean_names() %>%
   rename_with(~ if_else( # rename any column names containing an underscore _
     str_detect(., "_"), str_extract(., "^[^_]*"), .)) %>% # keep chars before _
@@ -104,9 +127,11 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022, tteb.SURGE2023)
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, colldate, flag, comment, everything()) %>% # put these columns first
   filter(!(lab_id == 214171)) # extra shallow collected.  See note in ttebSampleIds.xlsx
-                              # and chemistry065NARtoCIN06September2022.pdf.  Easier
-                              # to delete than integrate into analysis
+# and chemistry065NARtoCIN06September2022.pdf.  Easier
+# to delete than integrate into analysis
 
+# Add the tteb prelim data, which already has matching column names
+tteb <- bind_rows(tteb, tteb.prelim.anions, tteb.prelim.toc)
 
 # 2. READ CHAIN OF CUSTODY----------------
 # Read in chain on custody data for SuRGE samples submitted to TTEB
