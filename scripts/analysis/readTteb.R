@@ -31,7 +31,7 @@ tteb.SURGE2022 <- read_excel(paste0(userPath,
 tteb.SURGE2023 <- read_excel(paste0(userPath, 
                                     "data/chemistry/tteb/SURGE_2023_08_10_2023_update.xlsx"))
 
-# Anions preliminary data (as of 18 Oct 2023)
+# Anions preliminary data (18 Oct 2023)
 tteb.prelim.anions <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_anions.xlsx")) %>%
@@ -40,10 +40,30 @@ tteb.prelim.anions <- read_excel(
   mutate(across(everything(), 
                 ~ str_extract(., "[0-9]+") %>% # remove non-numeric 
                   as.numeric()), # make class numeric
-         across(everything(),
-                ~ if_else(. == 0, NA_real_, .))) # replace zeroes with NAs
+         # The function below replaces all zeroes with NA. Note that any
+         # values below the det. limit are zero, so they become NA as well. 
+         # We can change this if desired. 
+         across(everything(), 
+                ~ if_else(. == 0, NA_real_, .))) 
 
-# toc preliminary data (as of 18 Oct 2023)
+# anions ic preliminary data (13 Nov 2023)
+tteb.prelim.anions.ic <- read_excel(
+  paste0(userPath, 
+         "data/chemistry/tteb/tteb_prelim_anions_ic.xlsx")) %>%
+  filter(str_detect(lab_id, "^[0-9]+$")) %>% # keep numeric only (no dups)
+  mutate(lab_id = as.numeric(lab_id)) %>% # make lab_id numeric
+  mutate(across(f:so4, # replace anything below det limit with zero for now
+                ~ ifelse(str_detect(., "<"), 0, .))) %>%
+  mutate(across(f:so4, 
+         ~ str_extract(., "\\d+\\.?\\d*") %>%
+           as.numeric()), # extract numbers and make numeric
+         # The function below replaces all zeroes with NA. Note that any
+         # values below the det. limit are zero, so they become NA as well. 
+         # We can change this if desired.
+         across(everything(), 
+                ~ if_else(. == 0, NA_real_, .))) 
+
+# toc preliminary data (18 Oct 2023)
 tteb.prelim.toc <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_toc.xlsx")) %>%
@@ -51,7 +71,6 @@ tteb.prelim.toc <- read_excel(
   mutate(lab_id = str_extract(lab_id, "[0-9]+") %>% # remove non-numeric
            as.numeric()) # make numeric
 
-  
 # Vectors of analyte names, grouped by reporting limit
 analytes_0.005 <- "no2" 
 analytes_0.006 <- "no3"
