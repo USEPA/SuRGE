@@ -81,31 +81,32 @@ clean_chem <- function(data) {
            across(contains("flag"),
                  ~ case_when(
                    # Check for all combinations of flags
-                    all(.) == "ND H S" ~ "ND H S",
-                    all(.) == "L H S" ~ "L H S",
-                    all(str_detect(., "ND.*H")) ~ "ND H",
-                    all(str_detect(., "L.*H")) ~ "L H",
-                    all(str_detect(., "ND.*S")) ~ "ND S",
-                    all(str_detect(., "L.*S")) ~ "L S",
-                    all(str_detect(., "H.*S")) ~ "H S",
-                    all(str_detect(., "ND")) ~ "ND",
-                    all(str_detect(., "L")) ~ "L",
-                    all(str_detect(., "H")) ~ "H",
-                    all(str_detect(., "S")) ~ "S",
+                   all(str_detect(., "ND H S")) ~ "ND H S",
+                   all(str_detect(., "L H S")) ~ "L H S",
+                   all(str_detect(., "ND.*H")) ~ "ND H",
+                   all(str_detect(., "L.*H")) ~ "L H",
+                   all(str_detect(., "ND.*S")) ~ "ND S",
+                   all(str_detect(., "L.*S")) ~ "L S",
+                   all(str_detect(., "H.*S")) ~ "H S",
+                   all(str_detect(., "ND")) ~ "ND",
+                   all(str_detect(., "L")) ~ "L",
+                   all(str_detect(., "H")) ~ "H",
+                   all(str_detect(., "S")) ~ "S",
                     # All other combinations should result in NA
-                    TRUE ~ NA_character_)),
-           
-           across(contains("units"),
-                  ~ ifelse(any(str_detect(., "_") == TRUE), 
-                           first(str_sort(.)), # if any group has units ("_" detected), use same units  
-                                  .))) %>% # if no units in group, no change (i.e., NA)
-    filter(!(sample_type == "duplicate")) %>% # now we can remove dups
-    rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
-    select(-sample_type) %>% # no longer need sample_type (all unknowns)
-    ungroup() %>% # remove grouping
-    mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
-                  ~ ifelse(. == "no value", NA, .)))
-  
+                    TRUE ~ NA_character_)))
+  # ,
+  #          
+  #          across(contains("units"),
+  #                 ~ ifelse(any(str_detect(., "_")), 
+  #                          first(str_sort(.)), # if any group has units ("_" detected), use same units  
+  #                                 .))) %>% # if no units in group, no change (i.e., NA)
+  #   filter(!(sample_type == "duplicate")) %>% # now we can remove dups
+  #   rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
+  #   select(-sample_type) %>% # no longer need sample_type (all unknowns)
+  #   ungroup() %>% # remove grouping
+  #   mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
+  #                 ~ ifelse(. == "no value", NA, .)))
+  # 
 } 
 
 chemistry <- clean_chem(chemistry_all)
