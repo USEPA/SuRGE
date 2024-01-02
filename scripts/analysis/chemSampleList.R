@@ -37,9 +37,9 @@ qa.qc <- readxl::read_excel(paste0(userPath,
   mutate(qa_qc = 1) # column indicating qa.qc samples collected
 
 # merge qa.qc with lake.list.chem
-nrow(lake.list.chem) # 99
+nrow(lake.list.chem) # 120
 lake.list.chem <- left_join(lake.list.chem, qa.qc) # keep all 
-nrow(lake.list.chem) # 99
+nrow(lake.list.chem) # 120
 
 # 4. create vectors of analyte groups.
 nutrients <- c("nh4", "no2_3", "no2", "tn", "tp", "op")

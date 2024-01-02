@@ -47,7 +47,7 @@ get_data_sheet <- function(paths){
              regexp = 'surgeData', # file names containing this pattern
              recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
-    # .[11] %>%
+    #.[4] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
@@ -96,7 +96,7 @@ fld_sheet <- get_data_sheet(paths = paths)
 unique(fld_sheet$lake_id)
 unique(fld_sheet$site_id)
 janitor::get_dupes(fld_sheet %>% select(lake_id, site_id, visit))
-fld_sheet %>% filter(visit == 2) %>% distinct(lake_id) # two visits at 250 and 281
+fld_sheet %>% filter(visit == 2) %>% distinct(lake_id) # [1/2/2024] two visits at 250, 281, 147, 148.  
 
 
 
@@ -158,6 +158,7 @@ dg_sheet <- dg_sheet %>%
     TRUE ~ 1))
 
 # right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
+# Below is in progress
 
 trap.air.extList <- fld_sheet %>% 
   select(lake_id, site_id, trap_deply_date, contains("extn")) %>%
@@ -166,8 +167,8 @@ trap.air.extList <- fld_sheet %>%
 dg.extList <- dg_sheet %>% 
   select(lake_id, site_id, dg_extn) 
 
-dim(trap.air.extList) #1036,9
-dim(dg.extList) #364,3
+dim(trap.air.extList) #1922,9
+dim(dg.extList) #682,3
 
 extList <- full_join(trap.air.extList, dg.extList) %>% 
   pivot_longer(!c(lake_id, site_id, trap_deply_date), 
