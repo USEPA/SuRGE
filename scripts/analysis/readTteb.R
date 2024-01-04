@@ -117,7 +117,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022,
                 .names = "{col}_flag")) %>%
   # create 'qual' for hold time violations
   mutate(across(ends_with(analyte_names), 
-                ~ if_else("H" %in% flag, "H", ""),
+                ~ if_else(str_detect(flag, "H"), "H", ""),
                 .names = "{col}_qual")) %>%
   # create 'bql' columns to flag observations < reporting limit. 
   mutate(across(contains(analyte_names) & !ends_with(c("flag", "qual", "sampid")), 
@@ -338,6 +338,7 @@ tteb.all <- tteb.all %>%
   unite("ni_flags", ni_flag, ni_bql, ni_qual,sep = " ")  %>%
   unite("p_flags", p_flag, p_bql, p_qual, sep = " ")  %>%
   unite("pb_flags", pb_flag, pb_bql, pb_qual, sep = " ")  %>%
+  unite("po4_flags", po4_flag, po4_bql, po4_qual, sep = " ")  %>%
   unite("s_flags", s_flag, s_bql, s_qual, sep = " ")  %>%
   unite("sb_flags", sb_flag, sb_bql, sb_qual, sep = " ")  %>%
   unite("si_flags", si_flag, si_bql, si_qual, sep = " ")  %>%
