@@ -172,7 +172,7 @@ unique(ttebCoc$lake_id) # looks good
 # Compare list of submitted samples to comprehensive sample list
 # print rows of submitted samples (ttebSampleIds) that are not in theoretical
 # list of all samples to be generated.
-# All samples that were submitted for analysis were expected. Good. [10/11/2023]
+# All samples that were submitted for analysis were expected. Good. [1/24/2024]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
@@ -190,7 +190,10 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
 
-# [10/11/2023] - does not yet contain 2023 samples
+# [1/4/2023] missing anion blank from lake 57.  Per sample tracking sheet, this sample
+# was collected. but sample submission form has shallow-unknow, shallow-duplicate,
+# and shallow-unknown.  One of those is likely the missing blank.  I asked for
+# preliminary results on 1/4/2023.
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
@@ -212,7 +215,7 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 652 records [10/11/2023] 
+nrow(tteb.all) # 689 records [1/4/2024] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -234,6 +237,7 @@ tteb.all <- tteb.all %>%
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
 # missing samples, but four of them were due to instrument failure.
+# many are 2023 samples that havent' delivered data yet [1/4/2023]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
@@ -292,7 +296,7 @@ tteb.all <- tteb.all %>%
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type, visit
 
-dim(tteb.all) #297 rows.  Good, reduced from 652 to 297.  [10/11/2023]
+dim(tteb.all) #326 rows.  Good, reduced from 689 to 326.  [1/4/2024]
 
 
 
