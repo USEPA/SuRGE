@@ -44,7 +44,8 @@ tteb.prelim.anions <- read_excel(
          # values below the det. limit are zero, so they become NA as well. 
          # We can change this if desired. 
          across(everything(), 
-                ~ if_else(. == 0, NA_real_, .))) 
+                ~ if_else(. == 0, NA_real_, .))) %>%
+  filter(!(lab_id %in% tteb.SURGE2023$labid)) # this removes observations that are in preliminary AND final data sets
 
 # anions ic preliminary data (13 Nov 2023)
 tteb.prelim.anions.ic <- read_excel(
@@ -211,7 +212,7 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake dat)
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 689 records [1/4/2024] 
+nrow(tteb.all) # 664 records [1/4/2024] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -292,7 +293,7 @@ tteb.all <- tteb.all %>%
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type, visit
 
-dim(tteb.all) #326 rows.  Good, reduced from 689 to 326.  [1/4/2024]
+dim(tteb.all) #301 rows.  Good, reduced from 664 to 301.  [1/4/2024]
 
 
 
@@ -360,5 +361,6 @@ tteb.all <- tteb.all %>%
 
 
 # Final check for dupes
+# if dups, check for duplicate records between final and preliminary data.
 janitor::get_dupes(tteb.all, lake_id, site_id, visit, sample_depth, sample_type)
 
