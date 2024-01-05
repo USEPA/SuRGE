@@ -150,7 +150,8 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022,
 # to delete than integrate into analysis
 
 # Add the tteb prelim data, which already has matching column names
-tteb <- bind_rows(tteb, tteb.prelim.anions, tteb.prelim.toc)
+tteb <- bind_rows(tteb, tteb.prelim.anions, 
+                  tteb.prelim.toc, tteb.prelim.anions.ic)
 
 # 2. READ CHAIN OF CUSTODY----------------
 # Read in chain on custody data for SuRGE samples submitted to TTEB
