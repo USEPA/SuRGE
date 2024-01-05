@@ -189,11 +189,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
-
-# [1/4/2023] missing anion blank from lake 57.  Per sample tracking sheet, this sample
-# was collected. but sample submission form has shallow-unknow, shallow-duplicate,
-# and shallow-unknown.  One of those is likely the missing blank.  I asked for
-# preliminary results on 1/4/2023.
+# [1/4/2023] all good!
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
