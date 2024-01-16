@@ -18,18 +18,55 @@
 # 1. READ CHEMISTRY DATA--------------
 # Files contain samples from SuRGE + other studies.  Filter below.
 
-tteb.BEAULIEU <- read_excel(paste0(userPath, 
-                                   "data/chemistry/tteb/BEAULIEU_06_30_2022_update.xlsx")) 
+tteb.BEAULIEU <- read_excel(paste0(
+  userPath, 
+  "data/chemistry/tteb/BEAULIEU_06_30_2022_update.xlsx")) 
+
+
+# Aug 23-24 2022 samples excluded from earlier TTEB reports due to qa.qc issues
+
+# Get vector of lab ids of Aug 23 & 24 2022 (to filter sample data from excel)
+tteb.23.24Aug2022.ids <- read_excel(paste0(
+  userPath, 
+  "data/chemistry/tteb/ttebAnions23August2022.xlsx"), 
+  sheet = 1, range = "F7:F13") %>%
+  bind_rows(read_excel(paste0(
+    userPath, 
+    "data/chemistry/tteb/ttebAnions24August2022.xlsx"), 
+    sheet = 1, range = "F7:F13")) %>%
+  janitor::clean_names() %>%
+  pull(x1) %>%
+  as.character()
+
+tteb.23.24Aug2022 <- read_excel(paste0(
+  userPath, 
+  "data/chemistry/tteb/TOC_L6_220913 - QC Failures - DNR.xlsx"), 
+  sheet = 1, range = "A11:N72") %>%
+  janitor::clean_names() %>%
+  select(lab_id = sample_id_1, npoc = result_npoc, 
+         colldate = date_time_14, toc = x11) %>%
+  mutate(colldate = lubridate::date(colldate)) %>%
+  filter(str_starts(lab_id, "^[0-9]"), 
+         str_sub(lab_id, 1, 6) %in% tteb.23.24Aug2022.ids)
+
+# IN WORK -- confirming data are correct
+
 
 # SuRGE only data
-tteb.SURGE2021 <- read_excel(paste0(userPath, 
-                                "data/chemistry/tteb/SURGE_2021_06_30_2022_update.xlsx"))
+tteb.SURGE2021 <- read_excel(paste0(
+  userPath, 
+  "data/chemistry/tteb/SURGE_2021_06_30_2022_update.xlsx"))
 
-tteb.SURGE2022 <- read_excel(paste0(userPath, 
-                                    "data/chemistry/tteb/SURGE_2022_08_10_2023_update.xlsx"))
+tteb.SURGE2022 <- read_excel(paste0(
+  userPath, 
+  "data/chemistry/tteb/SURGE_2022_08_10_2023_update.xlsx"))
 
-tteb.SURGE2023 <- read_excel(paste0(userPath, 
-                                    "data/chemistry/tteb/SURGE_2023_08_10_2023_update.xlsx"))
+tteb.SURGE2023 <- read_excel(paste0(
+  userPath, 
+  "data/chemistry/tteb/SURGE_2023_11_02_2023_update_with_SURGE_appended.xlsx"))
+
+
+
 
 # Anions preliminary data (18 Oct 2023)
 tteb.prelim.anions <- read_excel(
@@ -44,8 +81,7 @@ tteb.prelim.anions <- read_excel(
          # values below the det. limit are zero, so they become NA as well. 
          # We can change this if desired. 
          across(everything(), 
-                ~ if_else(. == 0, NA_real_, .))) %>%
-  filter(!(lab_id %in% tteb.SURGE2023$labid)) # this removes observations that are in preliminary AND final data sets
+                ~ if_else(. == 0, NA_real_, .))) 
 
 # anions ic preliminary data (13 Nov 2023)
 tteb.prelim.anions.ic <- read_excel(
@@ -56,8 +92,8 @@ tteb.prelim.anions.ic <- read_excel(
   mutate(across(f:so4, # replace anything below det limit with zero for now
                 ~ ifelse(str_detect(., "<"), 0, .))) %>%
   mutate(across(f:so4, 
-         ~ str_extract(., "\\d+\\.?\\d*") %>%
-           as.numeric()), # extract numbers and make numeric
+                ~ str_extract(., "\\d+\\.?\\d*") %>%
+                  as.numeric()), # extract numbers and make numeric
          # The function below replaces all zeroes with NA. Note that any
          # values below the det. limit are zero, so they become NA as well. 
          # We can change this if desired.
@@ -81,7 +117,7 @@ analytes_0.011 <- "po4"
 analytes_0.03 <- "cl"  
 analytes_0.05 <- "so4" 
 analytes_0.5 <- c("al", "as", "ba", "be", "ca", "cd", "cr", "cu", "fe", "k",  "li", 
-               "mg", "mn", "na", "ni", "pb", "sb", "sr", "v", "zn") 
+                  "mg", "mn", "na", "ni", "pb", "sb", "sr", "v", "zn") 
 analytes_1 <-c("toc", "doc")
 analytes_2 <- "sn"
 analytes_4 <- "si"
