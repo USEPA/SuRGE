@@ -28,11 +28,11 @@ tteb.BEAULIEU <- read_excel(paste0(
 # Get vector of lab ids of Aug 23 & 24 2022 (to filter sample data from excel)
 tteb.23.24Aug2022.ids <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/ttebAnions23August2022.xlsx"), 
+  "data/chemistry/tteb/ttebTOC.DOC23August2022.xlsx"), 
   sheet = 1, range = "F7:F13") %>%
   bind_rows(read_excel(paste0(
     userPath, 
-    "data/chemistry/tteb/ttebAnions24August2022.xlsx"), 
+    "data/chemistry/tteb/ttebTOC.DOC24August2022.xlsx"), 
     sheet = 1, range = "F7:F13")) %>%
   janitor::clean_names() %>%
   pull(x1) %>%
@@ -43,11 +43,13 @@ tteb.23.24Aug2022 <- read_excel(paste0(
   "data/chemistry/tteb/TOC_L6_220913 - QC Failures - DNR.xlsx"), 
   sheet = 1, range = "A11:N72") %>%
   janitor::clean_names() %>%
-  select(lab_id = sample_id_1, npoc = result_npoc, 
+  select(lab_id = sample_id_1, doc = result_npoc, 
          colldate = date_time_14, toc = x11) %>%
-  mutate(colldate = lubridate::date(colldate)) %>%
-  filter(str_starts(lab_id, "^[0-9]"), 
-         str_sub(lab_id, 1, 6) %in% tteb.23.24Aug2022.ids)
+  filter(!str_detect(lab_id, "Dup|Spk"),  # remove lab dupes/spikes for now
+         str_starts(lab_id, "^[0-9]"), 
+         str_sub(lab_id, 1, 6) %in% tteb.23.24Aug2022.ids) %>%
+  mutate(colldate = lubridate::date(colldate),
+         lab_id = as.numeric(lab_id)) 
 
 # IN WORK -- confirming data are correct
 
@@ -64,7 +66,6 @@ tteb.SURGE2022 <- read_excel(paste0(
 tteb.SURGE2023 <- read_excel(paste0(
   userPath, 
   "data/chemistry/tteb/SURGE_2023_11_02_2023_update_with_SURGE_appended.xlsx"))
-
 
 
 
@@ -134,8 +135,10 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022,
     str_detect(., "_"), str_extract(., "^[^_]*"), .)) %>% # keep chars before _
   rename_with(~ if_else( # rename any column names containing a number
     str_detect(., "[0-9]"), str_sub(., 1, 3), .)) %>% # keep first 3 chars
-  select(-studyid, -tn) %>% # remove unneeded columns
-  rename(lab_id = labid) %>%
+  select(-studyid, -tn, lab_id = labid) %>% # remove unneeded columns
+  rename() %>%
+  # Add Aug 23 & 24 2022 data, which already has matching column names
+  bind_rows(tteb.23.24Aug2022) %>%
   
   # a value of 9999999999999990.000 indicates no data for that sample/analyte.
   # This often occurs if a summary file contains samples with different
@@ -181,7 +184,8 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022,
   mutate(across(al:so4, # make all values positive. absolute value of - detection limit
                 ~ abs(.))) %>%
   select(order(colnames(.))) %>% # alphabetize column names
-  select(lab_id, sampid, colldate, flag, comment, everything()) %>% # put these columns first
+  select(lab_id, sampid, colldate, flag, 
+         comment, everything()) %>% # put these columns first
   filter(!(lab_id == 214171)) # extra shallow collected.  See note in ttebSampleIds.xlsx
 # and chemistry065NARtoCIN06September2022.pdf.  Easier
 # to delete than integrate into analysis
