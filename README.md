@@ -27,3 +27,6 @@ Scripts must be run in the sequence documented in scripts/masterScript.R.  Pleas
 
 ## Version Control
 This project uses git version control.  git software is independent from the github website and must be installed on each users computer.  Users will be given push/pull rights to the repo and can therefore push directly to the repo without the need to submit a pull request.  To minimize conflicts among separate commits, it is best practice to start each session by pulling from the repo to get the most up to date code.  Similarly, users should commit and push their changes to the repo at the conclusion of each working session.  
+
+## Disclaimer
+The United States Environmental Protection Agency (EPA) GitHub project code is provided on an "as is" basis and the user assumes responsibility for its use. EPA has relinquished control of the information and no longer has responsibility to protect the integrity, confidentiality, or availability of the information. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA. The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.

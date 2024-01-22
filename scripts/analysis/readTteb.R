@@ -204,8 +204,8 @@ ttebCoc <- read_excel(paste0(userPath,
   # this sample lost in lab.  See See 2/21/2023 email from Maily Pham
   filter(!(lake_id == "240" & sample_type == "unknown" & analyte == "doc" & sample_depth == "deep"),
          !(lab_id == 214171)) # extra shallow collected.  See note in ttebSampleIds.xlsx
-                              # and chemistry065NARtoCIN06September2022.pdf.  Easier
-                              # to delete than integrate into analysis
+# and chemistry065NARtoCIN06September2022.pdf.  Easier
+# to delete than integrate into analysis
 
 unique(ttebCoc$lake_id) # looks good
 
@@ -266,7 +266,7 @@ tteb.all <- tteb.all %>%
          doc_qual = case_when(analyte == "doc" ~ toc_qual,
                               TRUE ~ ""),
          doc_bql = case_when(analyte == "doc" ~ toc_bql,
-                              TRUE ~ "")) %>%
+                             TRUE ~ "")) %>%
   mutate(toc = case_when(analyte == "doc" ~ NA_real_,
                          TRUE ~ toc)) %>%
   # Remove shipping_notes; they're added in mergeChemistry.R
@@ -398,10 +398,11 @@ tteb.all <- tteb.all %>%
                 ~ if_else(str_detect(., "ND L"), "L", .))) %>%
   mutate(across(ends_with("flags"),   # replace any blank _flags with NA
                 ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
-                str_squish(.)))  # remove any extra white spaces 
+                  str_squish(.)))  # remove any extra white spaces 
 
 
 # Final check for dupes
 # if dups, check for duplicate records between final and preliminary data.
 janitor::get_dupes(tteb.all, lake_id, site_id, visit, sample_depth, sample_type)
+
 
