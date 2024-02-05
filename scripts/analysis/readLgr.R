@@ -43,7 +43,7 @@ txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr
 ggaList <- list()  # Empty list to hold results
 
 tic() # 25 seconds 9/28/2023
-for (i in 1:length(txtFiles)) {  # loop to read and format each file
+for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txtFiles) 92 is tab delimited.  must convert to comma
   print(i)
   if (grepl(pattern = "gga", x = txtFiles[i])) { 
     # I think this will work for all UGGA files.  The colClasses argument skips the final 71 columns of data.

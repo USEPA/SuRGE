@@ -6,7 +6,7 @@
 #          FOR SITES WHERE PERIODS OF LINEAR ACCUMULATION ARE INDICATED 
 # STEP 2: USE AIC TO DETERMINE WHETHER LINEAR OF NON-LINEAR FIT IS BEST.
 #         CONFIRM CHOICE BY INSPECTING RAW DATA
-# STEP 3: MERGE WITH eqAreaData
+# STEP 3: MERGE WITH OTHER DATA
 
 
 # STEP 1: LINEAR AND NONLINEAR REGRESSION
@@ -54,7 +54,7 @@ for (i in 1:n) {  # For each unique site
   OUT[i,"lake_id"] <- lake.i
   OUT[i, "visit"] <- visit.i
   
-  # Need chamber volume.  SEE chamberVolume.R IN PROGRESS [2/7/2023]
+  # Need chamber volume.  SEE chamberVolume.R 
   chmVol.L.i <- fld_sheet %>% filter(site_id == site.i, 
                                      lake_id == lake.i, visit == visit.i) %>% 
     select(chmVol.L) %>% pull()   
