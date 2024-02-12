@@ -2,14 +2,14 @@
 ## January 17, 2024
 
 #You will need to install LAGOSUS in R the first time you run this
-devtools::install_github("cont-limno/LAGOSUS", dependencies = TRUE)
+#devtools::install_github("cont-limno/LAGOSUS", dependencies = TRUE)
 
 #set relevant working directory
 #setwd("C:/Users/bdeemer/OneDrive - DOI/Documents/Terminal Lakes/Data_Explore")
 
 library(LAGOSUS)
-library(mapview)
-library(dplyr)
+#library(mapview)
+#library(dplyr)
 #need to install devtools, dplyr, and mapview on SuRGE 
 
 #I think you'll need to run the lagosus_get command once and then can hash it out
@@ -19,14 +19,12 @@ names(lg)
 ll<-(lg$locus$lake_link)
 
 #Read in the SuRGE sites from the updated eval_status spreadsheet, created a .csv from excel file in share drive
-#SuRGEex<-read.csv("C:/Users/bdeemer/OneDrive - DOI/Documents/Terminal Lakes/Data_Explore/downloaded_files_willard/SuRGE_design_20191206_eval_status.csv")
-SuRGEex<-read.csv("SuRGE_design_20191206_eval_status.csv")
+# read in SuRGE site information (lat/long required) and filter to sampled sites
+SuRGEex <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
+  filter(`EvalStatus Code` == "S")
 
-#Now subset this file for eval_status="S"
-#Also simplify spreadsheet to just contain Surge SiteID, NLA_SITE_ID, NHDPlusCOMID
-
+#simplify spreadsheet to just contain Surge SiteID, NLA_SITE_ID, NHDPlusCOMID
 SuRGE<-SuRGEex %>%
-  filter(EvalStatus.Code=="S")%>%
   select(siteID,SITE_ID,NHDPlusWaterbodyCOMID,GNIS_NAME,LAT_DD83,LON_DD83)
 
 colnames(SuRGE)<-c("siteID","NLA_SITE_ID","nhdplusv2_comid","GNIS_NAME","LAT_DD83","LON_DD83")
