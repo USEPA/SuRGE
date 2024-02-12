@@ -1,12 +1,12 @@
 # LINK HYDRO-LAKES ID WITH SURGE SITES BASED ON LATITUDE/LONGITUDE
 
-devtools::install_github("https://github.com/lawinslow/hydrolinks")
-# or install from hydrolinks archive can be found here:
-# https://cran.r-project.org/src/contrib/Archive/hydrolinks/
-
-library(tidyverse)
-library(readxl)
-library(hydrolinks) # add to renv output
+# devtools::install_github("https://github.com/lawinslow/hydrolinks")
+# # or install from hydrolinks archive can be found here:
+# # https://cran.r-project.org/src/contrib/Archive/hydrolinks/
+# 
+# library(tidyverse)
+# library(readxl)
+# library(hydrolinks) # add to renv output
 
 # read in SuRGE site information (lat/long required) and filter to sampled sites
 surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
@@ -38,6 +38,6 @@ surge_hylak_final <- surge_sites %>%
             by = c("siteID" = "MATCH_ID")) %>%
   dplyr::select(siteID, NHDPlusCOMID, hylak_id, lake_name, SampleYear, LAT_DD83, LON_DD83)
 
-# OPTIONAL:  output csv with SuRGE information and hylak_id
-write.csv(surge_hylak_final, row.names = F,
-          file = paste0(userPath, "SuRGEdsn/SuRGE_design_hylakID.csv"))
+# # OPTIONAL:  output csv with SuRGE information and hylak_id
+# write.csv(surge_hylak_final, row.names = F,
+#           file = paste0(userPath, "SuRGEdsn/SuRGE_design_hylakID.csv"))

@@ -4,9 +4,10 @@
 #####################################################
 ## TO RUN THE CODE BELOW, YOU MUST FIRST GENERATE THE gga AND fld_sheet DATA 
 ## OBJECTS.  THIS CAN BE DONE BY RUNNING ALL SCRIPTS IN THE ORDER
-## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 4 LINES:
+## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 5 LINES:
 # source("scripts/masterLibrary.R") # Read in renv controlled library
 # source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
+# source("scripts/analysis/readSurgeLakes.R")
 # source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
 # source("scripts/analysis/readLgr.R") # read raw LGR data
 
@@ -17,7 +18,7 @@
 #1. INSPECT INSTANCES OF NA IN GGA------------
 # Time/date stamp first
 filter(gga, is.na(RDateTime))
-# no NAs for this field [1/5/2023] 
+# no NAs for this field [2/1/2024] 
 gga <- filter(gga, !is.na(RDateTime)) # strip out missing RDateTime which complicate functions below.
 
 
@@ -55,7 +56,7 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "167"  # numeric component of lake_id without leading zero(s), formatted as character
+lake_id.i <- "13"  # numeric component of lake_id without leading zero(s), formatted as character
 site_id.i <- 13 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
 plotCh4 <- gga_2 %>% 
