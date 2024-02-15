@@ -56,8 +56,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "13"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- 13 # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "51"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- 9 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
@@ -91,13 +91,15 @@ ggplotly(plotCo2)
 # use .xls.  Can read file into R while file is open in Excel, which is convenient.
 
 # list of files containing deployment and retrieval data.
-adjDataList <- paste0("../../../data/", 
-                      c("ADA/chamberAdjustmentsAda.xls", "CIN/chamberAdjustmentsCIN.xls", 
+adjDataList <- paste0("C:\\Users\\bdeemer/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/", 
+                      c( "ADA/chamberAdjustmentsAda.xls", 
                         "RTP/chamberAdjustmentsRTP.xls", "R10/chamberAdjustmentsR10.xls", 
-                        "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls",
-                        "NAR/chamberAdjustmentsNAR.xls"))
+                       "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls"))
+
+adjDataListb<-paste0("C:\\Users\\bdeemer/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/", 
+                     c("CIN/chamberAdjustmentsCIN.xls","NAR/chamberAdjustmentsNAR.xls"))
 # Read data, but not CIN
-adjData <- map_df(adjDataList[!grepl(pattern = "CIN", adjDataList)], # exclude CIN, different formatting
+adjData <- map_df(adjDataList, # exclude CIN and NAR, different formatting
                   readxl::read_xls, 
                   range =cell_cols("DATA!A:J"), # columns A:J
                   col_types = c("text", "numeric", 
@@ -105,8 +107,8 @@ adjData <- map_df(adjDataList[!grepl(pattern = "CIN", adjDataList)], # exclude C
                                 rep("text", 4))) %>% #lake_id is character
   janitor::remove_empty("rows") # remove rows that contain only NA
 
-# Read CIN data.  date and time fields contain tenths of a second that confuse read_xls
-adjDataCIN <- map_df(adjDataList[grepl(pattern = "CIN", adjDataList)], # only CIN, different formatting than others
+# Read CIN and NAR data.  date and time fields contain tenths of a second that confuse read_xls
+adjDataB <- map_df(adjDataListb, # only CIN, different formatting than others
                   readxl::read_xls, 
                   range =cell_cols("DATA!A:J"), # columns A:J
                   col_types = c("text", "numeric", 
@@ -114,8 +116,9 @@ adjDataCIN <- map_df(adjDataList[grepl(pattern = "CIN", adjDataList)], # only CI
   janitor::remove_empty("rows") %>% # remove rows that contain only NA
   mutate(across(contains("DtTm"), ~as.POSIXct(., "%m/%d/%Y %H:%M:%S", tz="UTC")))
 
+
 # Combine CIN and other data
-adjData <- rbind(adjData, adjDataCIN)
+adjData <- rbind(adjData, adjDataB)
 
 str(adjData)
 
