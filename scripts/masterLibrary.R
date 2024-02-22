@@ -10,6 +10,7 @@ library(leaflet) # for lake design printables
 library(mapview) # for lake design printables
 library(tictoc) # timing operations
 library(gridExtra) # grid.arrange() for multiple panels per page on .pdf
+library(lubridate) #for adjusting time offsets in readLGR
 
 library(conflicted)
 conflicted::conflict_scout()
