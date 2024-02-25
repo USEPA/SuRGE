@@ -1291,6 +1291,13 @@
       ],
       "Hash": "e87a35ec73b157552814869f45a63aa3"
     },
+    "minpack.lm": {
+      "Package": "minpack.lm",
+      "Version": "1.2-4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0d04497c6553720b3f1c2ae373c57aa9"
+    },
     "modelr": {
       "Package": "modelr",
       "Version": "0.1.7",
