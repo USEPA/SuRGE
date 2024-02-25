@@ -57,7 +57,7 @@ for (i in 1:n) {  # For each unique site
   # Need chamber volume.  SEE chamberVolume.R 
   chmVol.L.i <- fld_sheet %>% filter(site_id == site.i, 
                                      lake_id == lake.i, visit == visit.i) %>% 
-    select(chmVol.L) %>% pull()   
+    select(chm_vol_l) %>% pull()   
   
   data.i.ch4 <- filter(gga_4,  # extract data
                        RDateTime >= ch4DeplyDtTm, # based on diff start time
