@@ -3,6 +3,7 @@
 # LIBRARIES---------------
 # library(ggplot2) # load from masterLibrary
 # library(scales)  # load from masterLibrary
+# library(lubridate) 
 # source("ohio2016/scriptsAndRmd/masterLibrary.R")
 
 # NOTES-----------
@@ -126,9 +127,30 @@ gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
 
 # FIX DATES------
 # summer 2021 MGGA internal battery died, causing date to default to 2001-12-31
-# IN PROGRESS
+# load .csv file with records from CIN lab 
 
+CIN_adjustments<-read.csv(paste0(userPath,"data/CIN/Time_Adjustments.csv"))
+CIN_adjustments$wrong.datetime<-as.POSIXct(CIN_adjustments$wrong.datetime,format="%m/%d/%Y %H:%M",tz = "UTC")
+CIN_adjustments$right.datetime<-as.POSIXct(CIN_adjustments$right.datetime,format="%m/%d/%Y %H:%M",tz = "UTC")
+CIN_adjustments$TO<-difftime(CIN_adjustments$right.datetime, CIN_adjustments$wrong.datetime, tz="UTC",
+                                      units =  "mins")
+CIN_adjustments$Time.Offset<-time_length(CIN_adjustments$TO,unit="second")
 
+gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[1]),
+                      ifelse(gga$lake_id=="68",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[2]),
+                             ifelse(gga$lake_id=="69_riverine",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[3]),
+                                    ifelse(gga$lake_id=="70_transitional",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[4]),
+                                           ifelse(gga$lake_id=="71",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[5]),
+                                                  ifelse(gga$lake_id=="72",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[6]),
+                                                      ifelse(gga$lake_id=="75",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                             ifelse(gga$lake_id=="79",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                                    ifelse(gga$lake_id=="149",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                           ifelse(gga$lake_id=="231",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                                  ifelse(gga$lake_id=="232",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                         ifelse(gga$lake_id=="236",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                                ifelse(gga$lake_id=="237",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[13]),gga$RDateTime)))))))))))))
+
+gga$RDateTime<-as_datetime(gga$RDateTime_adj)
 
 # BASIC PLOTS-----------------
 ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +

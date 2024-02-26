@@ -57,7 +57,7 @@ for (i in 1:n) {  # For each unique site
   # Need chamber volume.  SEE chamberVolume.R 
   chmVol.L.i <- fld_sheet %>% filter(site_id == site.i, 
                                      lake_id == lake.i, visit == visit.i) %>% 
-    select(chmVol.L) %>% pull()   
+    select(chm_vol_l) %>% pull()   
   
   data.i.ch4 <- filter(gga_4,  # extract data
                        RDateTime >= ch4DeplyDtTm, # based on diff start time
@@ -67,7 +67,7 @@ for (i in 1:n) {  # For each unique site
                        visit == visit.i)  %>%
     # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
     mutate(elapTime = RDateTime - RDateTime[1], # Calculate elapsed time (seconds).
-           chmVol.L = chmVol.L.i) %>%
+           chmVol.L = chmVol.L.i[1]) %>%
     select(lake_id, site_id, visit, CH4._ppm, elapTime, GasT_C, chmVol.L)  # Pull out data of interest
 
   OUT[i, "ch4.diff.max"] <- max(data.i.ch4$CH4._ppm, na.rm=TRUE) # maximum CH4 mixing ratio measured during the chamber deployment time
@@ -259,7 +259,7 @@ start.time;Sys.time()
 # Choose best rate.  Just use AIC
 # Cowan lake manual syringe sample data wouldn't support ex model.
 # Include is.na(ex.aic) to accomodate this.
-OUT <- mutate(OUT, 
+OUT2 <- mutate(OUT, 
               co2.best.model = ifelse(co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic), 
                                            "linear", "exponential"),
               co2.drate.mg.h.best = ifelse(co2.best.model == "linear",
@@ -269,13 +269,13 @@ OUT <- mutate(OUT,
               ch4.drate.mg.h.best = ifelse(ch4.best.model == "linear",
                                            ch4.lm.drate.mg.h, ch4.ex.drate.mg.h)) 
 # Inspect r2.
-plot(with(OUT,ifelse(co2.best.model == "linear", 
+plot(with(OUT2,ifelse(co2.best.model == "linear", 
                      co2.lm.r2, co2.ex.r2)))  # CO2: some low ones to investigate
-plot(with(OUT,ifelse(ch4.best.model == "linear", 
+plot(with(OUT2,ifelse(ch4.best.model == "linear", 
                      ch4.lm.r2, ch4.ex.r2)))  # CH4:  some low ones to investigate
 
 # If r2 of best model < 0.9, then set to NA
-OUT <- mutate(OUT, 
+OUT2 <- mutate(OUT2, 
               co2.drate.mg.h.best = case_when(
                 (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ NA_real_,
                 (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ NA_real_,
@@ -306,18 +306,31 @@ OUT <- mutate(OUT,
 # NOTE JWC 2023MAR17 Plots don't work (no xlim values)
 
 # Inspect r2 after scrubbing r2<0.9
-plot(with(OUT[!is.na(OUT$co2.drate.mg.h.best),], 
+plot(with(OUT2[!is.na(OUT2$co2.drate.mg.h.best),], 
           ifelse(co2.best.model == "linear", co2.lm.r2, co2.ex.r2)))  # CO2: all > 0.9
 
-plot(with(OUT[!is.na(OUT$ch4.drate.mg.h.best),], 
+plot(with(OUT2[!is.na(OUT2$ch4.drate.mg.h.best),], 
           ifelse(ch4.best.model == "linear", ch4.lm.r2, ch4.ex.r2)))  # CH4: all > 0.9
+
+#Look at averages by site/visit combo
+bysch4<-OUT2 %>%
+  filter(!is.na(ch4.drate.mg.h.best))%>%
+  mutate(vID=paste(lake_id,visit))%>%
+  group_by(vID)%>%
+  summarise(lake_id[1],visit[1],ch4.drate.mg.h=mean(ch4.drate.mg.h.best))
+
+bysco2<-OUT2 %>%
+  filter(!is.na(co2.drate.mg.h.best))%>%
+  mutate(vID=paste(lake_id,visit))%>%
+  group_by(vID)%>%
+  summarise(lake_id[1],visit[1],co2.drate.mg.h=mean(co2.drate.mg.h.best))
 
 # STEP 3: MERGE DIFFUSION RATES WITH eqAreaData
 # First, strip NA from OUT
 
 
-OUT <- filter(OUT, !is.na(Lake_Name)) # Just one NA slipped in
-eqAreaData <- merge(eqAreaData, OUT, by.x = c("Lake_Name", "siteID"), 
+#OUT2 <- filter(OUT2, !is.na(Lake_Name)) # Just one NA slipped in
+eqAreaData <- merge(eqAreaData, OUT2, by.x = c("Lake_Name", "siteID"), 
       by.y = c("Lake_Name", "site"), all=TRUE)
 
 str(eqAreaData) # 1531 observations

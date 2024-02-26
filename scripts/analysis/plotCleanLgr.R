@@ -56,8 +56,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "51"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- 9 # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "52"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- 6 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
@@ -92,14 +92,14 @@ ggplotly(plotCo2)
 
 # list of files containing deployment and retrieval data.
 adjDataList <- paste0("C:\\Users\\bdeemer/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/", 
-                      c( "ADA/chamberAdjustmentsAda.xls", 
-                        "RTP/chamberAdjustmentsRTP.xls", "R10/chamberAdjustmentsR10.xls", 
+                     c( "ADA/chamberAdjustmentsAda.xls", 
                        "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls"))
 
 adjDataListb<-paste0("C:\\Users\\bdeemer/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/", 
-                     c("CIN/chamberAdjustmentsCIN.xls","NAR/chamberAdjustmentsNAR.xls"))
+                     c("CIN/chamberAdjustmentsCIN.xls","NAR/chamberAdjustmentsNAR.xls", "RTP/chamberAdjustmentsRTP.xls",
+                       "R10/chamberAdjustmentsR10.xls"))
 # Read data, but not CIN
-adjData <- map_df(adjDataList, # exclude CIN and NAR, different formatting
+adjData <- map_df(adjDataList, # exclude CIN, RTP, R10, and NAR, different formatting
                   readxl::read_xls, 
                   range =cell_cols("DATA!A:J"), # columns A:J
                   col_types = c("text", "numeric", 
@@ -116,6 +116,67 @@ adjDataB <- map_df(adjDataListb, # only CIN, different formatting than others
   janitor::remove_empty("rows") %>% # remove rows that contain only NA
   mutate(across(contains("DtTm"), ~as.POSIXct(., "%m/%d/%Y %H:%M:%S", tz="UTC")))
 
+#Fix adjustment times for CIN sites with clock issue
+
+tem<-ifelse(adjDataB$lake_id=="67",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+                          ifelse(adjDataB$lake_id=="68",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                                 ifelse(adjDataB$lake_id=="69_riverine",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                                        ifelse(adjDataB$lake_id=="70_transitional",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                               ifelse(adjDataB$lake_id=="71",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                                      ifelse(adjDataB$lake_id=="72",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                                             ifelse(adjDataB$lake_id=="75",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                                    ifelse(adjDataB$lake_id=="79",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                                           ifelse(adjDataB$lake_id=="149",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                                  ifelse(adjDataB$lake_id=="231",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                                         ifelse(adjDataB$lake_id=="232",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                                ifelse(adjDataB$lake_id=="236",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                                       ifelse(adjDataB$lake_id=="237",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[13]),adjDataB$co2DeplyDtTm)))))))))))))
+adjDataB$co2DeplyDtTm<-as_datetime(tem)
+
+ten<-ifelse(adjDataB$lake_id=="67",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+            ifelse(adjDataB$lake_id=="68",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                   ifelse(adjDataB$lake_id=="69_riverine",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                          ifelse(adjDataB$lake_id=="70_transitional",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                 ifelse(adjDataB$lake_id=="71",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                        ifelse(adjDataB$lake_id=="72",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                               ifelse(adjDataB$lake_id=="75",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                      ifelse(adjDataB$lake_id=="79",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                             ifelse(adjDataB$lake_id=="149",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                    ifelse(adjDataB$lake_id=="231",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                           ifelse(adjDataB$lake_id=="232",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                  ifelse(adjDataB$lake_id=="236",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                         ifelse(adjDataB$lake_id=="237",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[13]),adjDataB$co2RetDtTm)))))))))))))
+adjDataB$co2RetDtTm<-as_datetime(ten)
+
+teo<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+            ifelse(adjDataB$lake_id=="68",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                   ifelse(adjDataB$lake_id=="69_riverine",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                          ifelse(adjDataB$lake_id=="70_transitional",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                 ifelse(adjDataB$lake_id=="71",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                        ifelse(adjDataB$lake_id=="72",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                               ifelse(adjDataB$lake_id=="75",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                      ifelse(adjDataB$lake_id=="79",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                             ifelse(adjDataB$lake_id=="149",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                    ifelse(adjDataB$lake_id=="231",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                           ifelse(adjDataB$lake_id=="232",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                  ifelse(adjDataB$lake_id=="236",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                         ifelse(adjDataB$lake_id=="237",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[13]),adjDataB$ch4RetDtTm)))))))))))))
+adjDataB$ch4RetDtTm<-as_datetime(teo)
+
+tep<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+            ifelse(adjDataB$lake_id=="68",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                   ifelse(adjDataB$lake_id=="69_riverine",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                          ifelse(adjDataB$lake_id=="70_transitional",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                 ifelse(adjDataB$lake_id=="71",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                        ifelse(adjDataB$lake_id=="72",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                               ifelse(adjDataB$lake_id=="75",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                      ifelse(adjDataB$lake_id=="79",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                             ifelse(adjDataB$lake_id=="149",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                    ifelse(adjDataB$lake_id=="231",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                           ifelse(adjDataB$lake_id=="232",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                  ifelse(adjDataB$lake_id=="236",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                         ifelse(adjDataB$lake_id=="237",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[13]),adjDataB$ch4DeplyDtTm)))))))))))))
+adjDataB$ch4DeplyDtTm<-as_datetime(tep)
 
 # Combine CIN and other data
 adjData <- rbind(adjData, adjDataB)

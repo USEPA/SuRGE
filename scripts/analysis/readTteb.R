@@ -65,24 +65,25 @@ tteb.SURGE2022 <- read_excel(paste0(
 
 tteb.SURGE2023 <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/SURGE_2023_11_02_2023_update_with_SURGE_appended.xlsx"))
+  "data/chemistry/tteb/SURGE_2023_02_14_2024_update.xlsx"))
 
 
 
 # Anions preliminary data (18 Oct 2023)
-tteb.prelim.anions <- read_excel(
-  paste0(userPath, 
-         "data/chemistry/tteb/tteb_prelim_anions.xlsx")) %>%
-  filter(!str_detect(lab_id, "DUP")) %>% # remove lab dupes for now
-  filter(across(-lab_id, ~ !str_detect(., "n.a."))) %>% # remove any 'n.a.' rows
-  mutate(across(everything(), 
-                ~ str_extract(., "[0-9]+") %>% # remove non-numeric 
-                  as.numeric()), # make class numeric
-         # The function below replaces all zeroes with NA. Note that any
-         # values below the det. limit are zero, so they become NA as well. 
-         # We can change this if desired. 
-         across(everything(), 
-                ~ if_else(. == 0, NA_real_, .))) 
+# 2/22/2024: Commented out; data duplicated in SURGE_2023_02_14_2024_update.xlsx
+# tteb.prelim.anions <- read_excel(
+#   paste0(userPath, 
+#          "data/chemistry/tteb/tteb_prelim_anions.xlsx")) %>%
+#   filter(!str_detect(lab_id, "DUP")) %>% # remove lab dupes for now
+#   filter(across(-lab_id, ~ !str_detect(., "n.a."))) %>% # remove any 'n.a.' rows
+#   mutate(across(everything(), 
+#                 ~ str_extract(., "[0-9]+") %>% # remove non-numeric 
+#                   as.numeric()), # make class numeric
+#          # The function below replaces all zeroes with NA. Note that any
+#          # values below the det. limit are zero, so they become NA as well. 
+#          # We can change this if desired. 
+#          across(everything(), 
+#                 ~ if_else(. == 0, NA_real_, .))) 
 
 # anions ic preliminary data (13 Nov 2023)
 tteb.prelim.anions.ic <- read_excel(
@@ -191,8 +192,9 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022,
 # to delete than integrate into analysis
 
 # Add the tteb prelim data, which already has matching column names
-tteb <- bind_rows(tteb, tteb.prelim.anions, 
-                  tteb.prelim.toc, tteb.prelim.anions.ic)
+tteb <- bind_rows(tteb, tteb.prelim.toc, tteb.prelim.anions.ic)
+
+# tteb.prelim.anions contains duplicates of SURGE_2023_02_14_2024_update.xlsx
 
 # 2. READ CHAIN OF CUSTODY----------------
 # Read in chain on custody data for SuRGE samples submitted to TTEB
