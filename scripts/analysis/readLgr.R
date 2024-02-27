@@ -148,7 +148,8 @@ gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustmen
                                                                            ifelse(gga$lake_id=="231",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[10]),
                                                                                   ifelse(gga$lake_id=="232",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[11]),
                                                                                          ifelse(gga$lake_id=="236",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[12]),
-                                                                                                ifelse(gga$lake_id=="237",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[13]),gga$RDateTime)))))))))))))
+                                                                                                ifelse(gga$lake_id=="237",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[13]),
+                                                                                                       ifelse(gga$lake_id=="69_lacustrine",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[14]),gga$RDateTime))))))))))))))
 
 gga$RDateTime<-as_datetime(gga$RDateTime_adj)
 
