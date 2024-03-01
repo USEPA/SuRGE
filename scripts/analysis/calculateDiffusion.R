@@ -253,6 +253,7 @@ for (i in 1:n) {  # For each unique site
  dev.off()
 start.time;Sys.time() 
 
+save(OUT,file="C:/R_Projects/SuRGE/output/diffusiveOUT.RData")
 
 # STEP 2: USE AIC TO DETERMINE WHETHER LINEAR OR NON-LINEAR FIT IS BEST.
 #         CONFIRM CHOICE BY INSPECTING RAW DATA
@@ -277,8 +278,10 @@ plot(with(OUT2,ifelse(ch4.best.model == "linear",
 # If r2 of best model < 0.9, then set to NA
 OUT2 <- mutate(OUT2, 
               co2.drate.mg.h.best = case_when(
-                (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ NA_real_,
-                (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ NA_real_,
+                # (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ NA_real_,
+                # (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ NA_real_,
+                (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ 0,
+                (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ 0,
                 TRUE ~ co2.drate.mg.h.best),
               
               # 
@@ -291,8 +294,10 @@ OUT2 <- mutate(OUT2,
               #                                                   co2.drate.mg.h.best)), # otherwise assume value defined above
               #         
               ch4.drate.mg.h.best = case_when(
-                (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ NA_real_, 
-                (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ NA_real_,
+                # (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ NA_real_,
+                # (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ NA_real_,
+                (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ 0,
+                (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ 0,
                 TRUE ~ ch4.drate.mg.h.best))
               
               #                                    
@@ -315,17 +320,68 @@ plot(with(OUT2[!is.na(OUT2$ch4_drate_mg_h_best),],
           ifelse(ch4_best_model == "linear", ch4_lm_r2, ch4_ex_r2)))  # CH4: all > 0.9
 
 #Look at averages by site/visit combo
+#You get an average of 4.06, median of 1.35 and 3rd quartile of 2.7 mg m_2 h-1 when you make all the r2<0.9 values 0
+#You get an average of 4.52, median of 1.65 and 3rd quartile of 2.77 mg m_2 h-1 when you make all the r2<0.9 values NA
 bysch4<-OUT2 %>%
   filter(!is.na(ch4_drate_mg_h_best))%>%
   mutate(vID=paste(lake_id,visit))%>%
   group_by(vID)%>%
-  summarise(lake_id[1],visit[1],ch4_drate_mg_h=mean(ch4_drate_mg_h_best))
+  summarise(lake_id[1],visit[1],ch4_drate_mg_h=mean(ch4_drate_mg_h_best),
+            length=length(ch4_drate_mg_h_best))
 
+#You get an average of 113.8, median of 44.1, 3rd quartile of 180  CO2 m-2 h-1 when r2<0.9 is NA
+#You get an average of  121.2, median of 80.3, 3rd quartile of 195  CO2 m-2 h-1 when r2<0.9 is NA
 bysco2<-OUT2 %>%
   filter(!is.na(co2_drate_mg_h_best))%>%
   mutate(vID=paste(lake_id,visit))%>%
   group_by(vID)%>%
   summarise(lake_id[1],visit[1],co2_drate_mg_h=mean(co2_drate_mg_h_best))
+
+
+
+# STEP 3: MERGE DIFFUSION RATES WITH eqAreaData
+# First, strip NA from OUT
+
+# 
+# #OUT2 <- filter(OUT2, !is.na(Lake_Name)) # Just one NA slipped in
+# eqAreaData <- merge(eqAreaData, OUT2, by.x = c("Lake_Name", "siteID"), 
+#       by.y = c("Lake_Name", "site"), all=TRUE)
+# 
+# str(eqAreaData) # 1531 observations
+# 
+# # Any sites not have a diffusive rate?
+# # Only a subset of Cowan Lake sites were sampled due to water in LGR.
+# # Other sites had strong ebullition in LGR profile.
+# filter(eqAreaData, EvalStatus == "sampled", is.na(ch4.drate.mg.h.best)) %>%
+#   select(Lake_Name, siteID, 
+#          ch4.lm.drate.mg.h, ch4.ex.drate.mg.h, ch4.drate.mg.h.best,
+#          co2.lm.drate.mg.h, co2.ex.drate.mg.h, co2.drate.mg.h.best)
+# 
+# # Calculate diffusive CO2 emissions for Cowan Lake site where we 
+# # had diffusive CH4 and dissolved gases, but not diffusive CO2.  This
+# # is only site 04, but combined with the estimate from site 09, will provide
+# # sufficient observations (n=2) for grts function to work. Recall LGR got
+# # wet at Cowan and samples were manually collected
+# 
+# logInd <- with(eqAreaData, grepl(pattern = "Cowan", x = Lake_Name) & # cowan lake
+#                  !is.na(co2.sat.ratio) & # has dissolved co2
+#                  !is.na(ch4.sat.ratio) & # has dissolved ch4
+#                  !is.na(ch4.drate.mg.h.best) & # has diffusive CH4
+#                  is.na(co2.drate.mg.h.best)) # does not have diffusive CO2
+# 
+# dco2Tmp <- filter(eqAreaData, logInd) %>%
+#   # 10,000 L->m3; 1mol CH4 = 16 g CH4; 1000mgCH4 = 1g CH4
+#   mutate(excessCo2 = (dissolved.co2 - (dissolved.co2/co2.sat.ratio)) * 10000*44*1000, # mg/m3
+#          excessCh4 = (dissolved.ch4 - (dissolved.ch4/ch4.sat.ratio)) * 10000*16*1000, # mg/m3
+#          kCh4 = ch4.drate.mg.h.best / excessCh4, # m/h
+#          scCh4 = 1897.8 - (114.28*Tmp_C_S) + (3.2902*(Tmp_C_S^2)) - (0.039061*(Tmp_C_S^3)), # CH4 schmidt number
+#          scCo2 = 1911.1 - (118.11*Tmp_C_S) + (3.4527*(Tmp_C_S^2)) - (0.04132*(Tmp_C_S^3)), # CO2 schmidt number
+#          kCo2 = kCh4 * ((scCo2/scCh4)^-0.5), # k for CH4 converted to CO2 (m/h)
+#          co2.drate.mg.h.best = kCo2 * excessCo2) %>%
+#   select(co2.drate.mg.h.best) %>% as.numeric
+# 
+# eqAreaData[logInd, "co2.drate.mg.h.best"] = dco2Tmp
+
 
 # # STEP 3: MERGE DIFFUSION RATES WITH eqAreaData
 # # First, strip NA from OUT
