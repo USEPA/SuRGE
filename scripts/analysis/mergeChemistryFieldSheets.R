@@ -66,7 +66,7 @@ problem_rows <- fld_sheet_sonde %>%
 
 # Pivot back to wide, but now longer, just like chemistry
 fld_sheet_sonde <- fld_sheet_sonde %>% 
-  pivot_wider(names_from = name, values_from = value) %>%
+  pivot_wider(names_from = name, values_from = value) %>%  ###THIS PIVOT IS BROKEN [2/26/2024]
   # convert numeric back to numeric
   mutate(across(.cols = c(site_id, sample_depth_m, temp, 
                           do_mg, sp_cond, ph, chl, turb,
