@@ -25,6 +25,7 @@ source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  tteb.all
 #source("scripts/analysis/readTaxonomy.R") # GB taxonomy
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl18
 source("scripts/analysis/readPigmentsMicrocystin.R") # 2020+ chloro/phyco
+source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
 
 # Aggregate and review chemistry
@@ -32,19 +33,27 @@ source("scripts/analysis/mergeChemistry.R") # merge all chem objects
 source("scripts/analysis/cincinnatiShippingNotes.R") # adding S flag
 source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates
 #source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
+#source("scripts/analysis/mergeGc.R") # not written yet.  Need to add dissolved gas to gc_lakeid_agg
 
 # Merge chemistry and field sheets
-source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld
+source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.  2/26/2024, NOT WORKING
 # need to do something with dg_sheet
 
 # Prep 2020 and 2021 data sets for RAPID reporting
-source("scripts/analysis/rapidReport.R")
+#source("scripts/analysis/rapidReport.R")
 
 
 # Diffusive emission rates
 source("scripts/analysis/readLgr.R") # read raw LGR data
 source("scripts/analysis/plotCleanLgr.R") # define deployment/retrieval times for chambers
-source("scripts/analysis/calculateEmissions.R") # diffusive emission rates
+source("scripts/analysis/calculateDiffusion.R") # diffusive emission rates
+
+# Ebullition rates
+source("scripts/analysis/ebullitionMassFluxFunction.R") # source function
+source("scripts/analysis/calculateEbullition.R") # eb_results
+
+# Merge diffusive and ebulitive rates --> calculate total
+source("scripts/analysis/totalEmissions.R")
 
 # Random
 #source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 

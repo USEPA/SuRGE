@@ -53,7 +53,7 @@ get_data_sheet <- function(paths){
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
                            na = c("NA", "", "N/A", "n/a")) %>%
                   # Assign the filename to the visit column for now
-                 mutate(visit = .y)) %>%
+                 mutate(visit = .y)) %>% # assign file name
     # remove empty dataframes.  Pegasus put empty Excel files in each lake
     # folder at beginning of season.  These files will be populated eventually,
     # but are causing issues with code below
@@ -84,6 +84,9 @@ get_data_sheet <- function(paths){
                trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
                                                  format = "%Y-%m-%d%H:%M:%S",
                                                  tz = "UTC"),
+               trap_rtrvl_date_time = as.POSIXct(x = paste0(trap_rtrvl_date, trap_rtrvl_time),
+                                                format = "%Y-%m-%d%H:%M:%S",
+                                                tz = "UTC"),
                chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
                                                   format = "%Y-%m-%d%H:%M:%S",
                                                   tz = "UTC"))
@@ -157,43 +160,43 @@ dg_sheet <- dg_sheet %>%
     dg_extn %in% visit2 ~ 2, 
     TRUE ~ 1))
 
-# right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
-# Below is in progress
-
-trap.air.extList <- fld_sheet %>% 
-  select(lake_id, site_id, trap_deply_date, contains("extn")) %>%
-  select(!contains("notes")) 
-
-dg.extList <- dg_sheet %>% 
-  select(lake_id, site_id, dg_extn) 
-
-dim(trap.air.extList) #1922,9
-dim(dg.extList) #682,3
-
-extList <- full_join(trap.air.extList, dg.extList) %>% 
-  pivot_longer(!c(lake_id, site_id, trap_deply_date), 
-               names_to = "extn") %>% # pivot to longer
-  mutate(extn = case_when(grepl("trap", extn) ~ "trap",
-                          grepl("air", extn) ~ "air",
-                          grepl("dg", extn) ~ "dg",
-                          TRUE ~ "poo")) %>%
-  filter(!is.na(value)) %>%
-  distinct() #1375
-
-
-extList %>% janitor::get_dupes() # no dups
-extList %>% filter(is.na(value)) # no missing values
-extList %>% filter(nchar(value) != 8) # 2018 R10 are formatted differently
-
-extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
-  {table(.$extn)} # 102 air, 212 dg, 525 trap
-
-extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
-  {table(.$extn, .$lake_id)} # 0-42 trap sample per lake
-
-extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
-  select(lake_id) %>%
-  distinct(.) # 38 lakes
+# # right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
+# # Below is in progress
+# 
+# trap.air.extList <- fld_sheet %>% 
+#   select(lake_id, site_id, trap_deply_date, contains("extn")) %>%
+#   select(!contains("notes")) 
+# 
+# dg.extList <- dg_sheet %>% 
+#   select(lake_id, site_id, dg_extn) 
+# 
+# dim(trap.air.extList) #1922,9
+# dim(dg.extList) #682,3
+# 
+# extList <- full_join(trap.air.extList, dg.extList) %>% 
+#   pivot_longer(!c(lake_id, site_id, trap_deply_date), 
+#                names_to = "extn") %>% # pivot to longer
+#   mutate(extn = case_when(grepl("trap", extn) ~ "trap",
+#                           grepl("air", extn) ~ "air",
+#                           grepl("dg", extn) ~ "dg",
+#                           TRUE ~ "poo")) %>%
+#   filter(!is.na(value)) %>%
+#   distinct() #1375
+# 
+# 
+# extList %>% janitor::get_dupes() # no dups
+# extList %>% filter(is.na(value)) # no missing values
+# extList %>% filter(nchar(value) != 8) # 2018 R10 are formatted differently
+# 
+# extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
+#   {table(.$extn)} # 102 air, 212 dg, 525 trap
+# 
+# extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
+#   {table(.$extn, .$lake_id)} # 0-42 trap sample per lake
+# 
+# extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
+#   select(lake_id) %>%
+#   distinct(.) # 38 lakes
 
 
 
