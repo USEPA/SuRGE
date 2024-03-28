@@ -105,13 +105,13 @@ ggplotly(plotH2O)
 # use .xls.  Can read file into R while file is open in Excel, which is convenient.
 
 # list of files containing deployment and retrieval data.
-adjDataList <- paste0("C:\\Users\\bdeemer/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/", 
-                     c( "ADA/chamberAdjustmentsAda.xls", 
-                       "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls"))
+adjDataList <- paste0(userPath,
+                     c( "data/ADA/chamberAdjustmentsAda.xls", 
+                       "data/USGS/chamberAdjustmentsUSGS.xls", "data/DOE/chamberAdjustmentsDOE.xls"),sep="")
 
-adjDataListb<-paste0("C:\\Users\\bdeemer/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/", 
-                     c("CIN/chamberAdjustmentsCIN.xls","NAR/chamberAdjustmentsNAR.xls", "RTP/chamberAdjustmentsRTP.xls",
-                       "R10/chamberAdjustmentsR10.xls"))
+adjDataListb<-paste0(userPath, 
+                     c("data/CIN/chamberAdjustmentsCIN.xls","data/NAR/chamberAdjustmentsNAR.xls", "data/RTP/chamberAdjustmentsRTP.xls",
+                       "data/R10/chamberAdjustmentsR10.xls"), sep="")
 # Read data, but not CIN
 adjData <- map_df(adjDataList, # exclude CIN, RTP, R10, and NAR, different formatting
                   readxl::read_xls, 
