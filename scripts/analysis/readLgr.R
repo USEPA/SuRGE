@@ -115,7 +115,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txt
                                 tz = "UTC")  # POSIXct
   gga.i$RDate <- as.Date(gga.i$Date, format = "%m/%d/%Y")  # format as R Date oject
   names(gga.i)[grep("ppm", names(gga.i))] = gsub("^X.", "", names(gga.i)[grep("X", names(gga.i))]) # replace "X." with ""
-  gga.i <- select(gga.i, lab, lake_id, RDate, RDateTime, CH4._ppm, CO2._ppm, GasT_C)  # select columns of interest
+  gga.i <- select(gga.i, lab, lake_id, RDate, RDateTime, CH4._ppm, CO2._ppm,H2O._ppm, GasT_C)  # select columns of interest
   
   ggaList[[i]] <- gga.i  # dump in list
 }  # End of loop

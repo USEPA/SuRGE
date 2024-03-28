@@ -56,8 +56,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "52"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- 6 # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "288"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- 14 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
@@ -86,6 +86,20 @@ plotCo2 <- gga_2 %>%
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
   ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
 ggplotly(plotCo2)
+
+plotH2O <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, H2O._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+ggplotly(plotH2O)
 
 #3.2  Read in refined deployment and retrieval data from Excel files.
 # use .xls.  Can read file into R while file is open in Excel, which is convenient.
