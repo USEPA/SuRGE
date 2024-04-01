@@ -64,8 +64,8 @@ plotCh4 <- gga_2 %>%
          site_id == site_id.i, 
          RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
          RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
-         CH4._ppm > 0) %>%
-  ggplot(aes(RDateTime, CH4._ppm)) + 
+         CH4.d_ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4.d_ppm)) + 
   geom_point() +
   geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
   geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
@@ -78,8 +78,8 @@ plotCo2 <- gga_2 %>%
          site_id == site_id.i, 
          RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
          RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
-         CO2._ppm > 0) %>%
-  ggplot(aes(RDateTime, CO2._ppm)) + 
+         CO2.d_ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2.d_ppm)) + 
   geom_point() +
   geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
   geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
@@ -92,7 +92,7 @@ plotH2O <- gga_2 %>%
          site_id == site_id.i, 
          RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
          RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
-         CO2._ppm > 0) %>%
+         CO2.d_ppm > 0) %>%
   ggplot(aes(RDateTime, H2O._ppm)) + 
   geom_point() +
   geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +

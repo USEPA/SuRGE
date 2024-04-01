@@ -115,7 +115,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txt
                                 tz = "UTC")  # POSIXct
   gga.i$RDate <- as.Date(gga.i$Date, format = "%m/%d/%Y")  # format as R Date oject
   names(gga.i)[grep("ppm", names(gga.i))] = gsub("^X.", "", names(gga.i)[grep("X", names(gga.i))]) # replace "X." with ""
-  gga.i <- select(gga.i, lab, lake_id, RDate, RDateTime, CH4._ppm, CO2._ppm,H2O._ppm, GasT_C)  # select columns of interest
+  gga.i <- select(gga.i, lab, lake_id, RDate, RDateTime, CH4.d_ppm, CO2.d_ppm,H2O._ppm, GasT_C)  # select columns of interest
   
   ggaList[[i]] <- gga.i  # dump in list
 }  # End of loop
@@ -123,7 +123,7 @@ toc()
 
 # Merge files
 gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
-  filter(CH4._ppm < 500) # filter out clearly erroneous values
+  filter(CH4.d_ppm < 500) # filter out clearly erroneous values
 
 # FIX DATES------
 # summer 2021 MGGA internal battery died, causing date to default to 2001-12-31
@@ -154,14 +154,14 @@ gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustmen
 gga$RDateTime<-as_datetime(gga$RDateTime_adj)
 
 # BASIC PLOTS-----------------
-ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +
+ggplot(gga, aes(RDateTime, CH4.d_ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) + 
   facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
  
 # ggsave("output/figures/ch4profile.tiff")
 
-ggplot(gga, aes(RDateTime, CO2._ppm)) + geom_point() +
+ggplot(gga, aes(RDateTime, CO2.d_ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
@@ -170,14 +170,14 @@ ggplot(gga, aes(RDateTime, CO2._ppm)) + geom_point() +
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lake_id == "045", CH4._ppm > 0) %>%
+plotCh4 <- gga %>% filter(lake_id == "045", CH4.d_ppm > 0) %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
   ggtitle("045")
 ggplotly(plotCh4)  
   
 plotCo2 <- gga %>% filter(lake_id == "010") %>%
-  ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
+  ggplot(aes(RDateTime, CO2.d_ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   ggtitle("045")
 ggplotly(plotCo2)  
