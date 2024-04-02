@@ -12,6 +12,7 @@ library(tictoc) # timing operations
 library(gridExtra) # grid.arrange() for multiple panels per page on .pdf
 library(lubridate) #for adjusting time offsets in readLGR
 library(minpack.lm) #for the exponential modeling of diffusive flux
+library(dttr2) # NA_Date_
 
 library(conflicted)
 conflicted::conflict_scout()

@@ -25,33 +25,35 @@ tteb.BEAULIEU <- read_excel(paste0(
 
 # Aug 23-24 2022 samples excluded from earlier TTEB reports due to qa.qc issues
 
-# Get vector of lab ids of Aug 23 & 24 2022 (to filter sample data from excel)
+# Get vector of lab ids of Aug 23 & 24 2022 from sample submission forms
+# (to filter sample data from excel)
 tteb.23.24Aug2022.ids <- read_excel(paste0(
   userPath, 
   "data/chemistry/tteb/ttebTOC.DOC23August2022.xlsx"), 
-  sheet = 1, range = "F7:F13") %>%
+  sheet = 1, range = "F7:F23") %>%
   bind_rows(read_excel(paste0(
     userPath, 
     "data/chemistry/tteb/ttebTOC.DOC24August2022.xlsx"), 
-    sheet = 1, range = "F7:F13")) %>%
+    sheet = 1, range = "F7:F23")) %>%
   janitor::clean_names() %>%
-  pull(x1) %>%
-  as.character()
+  janitor::remove_empty(which = c("rows", "cols")) %>%
+  rename(lab_id = x1) %>%
+  mutate(lab_id = as.character(lab_id)) 
 
+# Grab data from spreadsheet of samples affected by qa.qc issues.
 tteb.23.24Aug2022 <- read_excel(paste0(
   userPath, 
   "data/chemistry/tteb/TOC_L6_220913 - QC Failures - DNR.xlsx"), 
   sheet = 1, range = "A11:N72") %>%
   janitor::clean_names() %>%
-  select(lab_id = sample_id_1, doc = result_npoc, 
-         colldate = date_time_14, toc = x11) %>%
+  select(lab_id = sample_id_1,  
+         colldate = date_time_14, toc = x11) %>% # measured as TOC, see line 271 for fix
   filter(!str_detect(lab_id, "Dup|Spk"),  # remove lab dupes/spikes for now
-         str_starts(lab_id, "^[0-9]"), 
-         str_sub(lab_id, 1, 6) %in% tteb.23.24Aug2022.ids) %>%
+         str_starts(lab_id, "^[0-9]"),  
+  str_sub(lab_id, 1, 6) %in% tteb.23.24Aug2022.ids$lab_id) %>%
   mutate(colldate = lubridate::date(colldate),
          lab_id = as.numeric(lab_id)) 
 
-# IN WORK -- confirming data are correct
 
 
 # SuRGE only data
@@ -61,11 +63,11 @@ tteb.SURGE2021 <- read_excel(paste0(
 
 tteb.SURGE2022 <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/SURGE_2022_08_10_2023_update.xlsx"))
+  "data/chemistry/tteb/SURGE_2022_04_01_2024_update.xlsx"))
 
 tteb.SURGE2023 <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/SURGE_2023_02_14_2024_update.xlsx"))
+  "data/chemistry/tteb/SURGE_2023_02_26_2024_update.xlsx"))
 
 
 
@@ -85,7 +87,7 @@ tteb.SURGE2023 <- read_excel(paste0(
 #          across(everything(), 
 #                 ~ if_else(. == 0, NA_real_, .))) 
 
-# anions ic preliminary data (13 Nov 2023)
+# anions ic preliminary data (13 Nov 2023) [not in formal data report 3/29/24]
 tteb.prelim.anions.ic <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_anions_ic.xlsx")) %>%
@@ -102,7 +104,7 @@ tteb.prelim.anions.ic <- read_excel(
          across(everything(), 
                 ~ if_else(. == 0, NA_real_, .))) 
 
-# toc preliminary data (18 Oct 2023)
+# toc preliminary data (18 Oct 2023) [not in formal data report 3/29/24]
 tteb.prelim.toc <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_toc.xlsx")) %>%
@@ -216,7 +218,7 @@ unique(ttebCoc$lake_id) # looks good
 # Compare list of submitted samples to comprehensive sample list
 # print rows of submitted samples (ttebSampleIds) that are not in theoretical
 # list of all samples to be generated.
-# All samples that were submitted for analysis were expected. Good. [1/24/2024]
+# All samples that were submitted for analysis were expected. Good. [3/29/2024]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
@@ -233,7 +235,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
-# [1/4/2023] all good!
+# [3/29/2024] all good!
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
@@ -253,9 +255,11 @@ setdiff(chem.samples.foo %>%
 # 4. JOIN TTEB DATA WITH CoC--------------
 # inner_join will keep all matched samples.  Since
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
-# tteb contains data from other studies too (i.e. Falls Lake dat)
+# tteb contains data from other studies too (i.e. Falls Lake data)
+dim(ttebCoc) #854
+dim(tteb) #1161
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 664 records [1/4/2024] 
+nrow(tteb.all) # 815 records [3/29/2024] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -277,7 +281,7 @@ tteb.all <- tteb.all %>%
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
 # missing samples, but four of them were due to instrument failure.
-# many are 2023 samples that havent' delivered data yet [1/4/2023]
+# many are 2023 samples that haven't delivered data yet [3/29/2024]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
@@ -307,7 +311,9 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
   filter(!(lab_id %in% c(203606, 203165, 203642:203644))) %>% # instrument failure
-  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb09072023.txt"), row.names = FALSE)
+  filter(!grepl("2023", coc)) %>% # exclude 2023 samples where we are waiting for update
+  select(-contains("notes")) %>%
+  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb04012024.txt"), row.names = FALSE)
 
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
@@ -336,7 +342,7 @@ tteb.all <- tteb.all %>%
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type, visit
 
-dim(tteb.all) #301 rows.  Good, reduced from 664 to 301.  [1/4/2024]
+dim(tteb.all) #333 rows.  Good, reduced from 815 to 333.  [4/1/2024]
 
 
 

@@ -6,17 +6,6 @@
 # library(lubridate) 
 # source("ohio2016/scriptsAndRmd/masterLibrary.R")
 
-# NOTES-----------
-# 9/28/2023  two file are in tab separated format.  These were likely inadvertently
-# reformatted by Scott when he was reviewing the GGA modeling windows.  Leah will
-# extract original files from GGA.  Here is some code to identify if the files
-# are tab separated:
-# if("\t" %in% strsplit(readLines(paste0(userPath, txtFiles[i]), n=1)[1], split="")[[1]]) {
-#   do something
-# }
-# data/CIN/CH4_188_Stubblefield/GGA/micro_2022-08-24_f0001.txt
-# data/CIN/CH4_235_Sylvan/GGA/gga_2020-09-03_f0000.txt
-
 
 # READ DATA -----------------
 # List of .txt files containing data 
@@ -113,9 +102,10 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txt
   gga.i$RDateTime <- as.POSIXct(paste(gga.i$Date, gga.i$hms,sep=""),
                                 format="%m/%d/%Y%H:%M:%S",
                                 tz = "UTC")  # POSIXct
-  gga.i$RDate <- as.Date(gga.i$Date, format = "%m/%d/%Y")  # format as R Date oject
+  gga.i$RDate <- as.Date(gga.i$Date, format = "%m/%d/%Y")  # format as R Date object
   names(gga.i)[grep("ppm", names(gga.i))] = gsub("^X.", "", names(gga.i)[grep("X", names(gga.i))]) # replace "X." with ""
-  gga.i <- select(gga.i, lab, lake_id, RDate, RDateTime, CH4._ppm, CO2._ppm,H2O._ppm, GasT_C)  # select columns of interest
+  gga.i <- gga.i %>% select(lab, lake_id, RDate, RDateTime, CH4.d_ppm, CO2.d_ppm, H2O._ppm, GasT_C) %>% # select columns of interest
+    rename(CH4._ppm = CH4.d_ppm, CO2._ppm = CO2.d_ppm)
   
   ggaList[[i]] <- gga.i  # dump in list
 }  # End of loop

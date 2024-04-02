@@ -160,115 +160,30 @@ dg_sheet <- dg_sheet %>%
     dg_extn %in% visit2 ~ 2, 
     TRUE ~ 1))
 
-# # right now have immediate need to get exetainer numbers read in.  Lets just focus on data needed now.
-# # Below is in progress
-# 
-# trap.air.extList <- fld_sheet %>% 
-#   select(lake_id, site_id, trap_deply_date, contains("extn")) %>%
-#   select(!contains("notes")) 
-# 
-# dg.extList <- dg_sheet %>% 
-#   select(lake_id, site_id, dg_extn) 
-# 
-# dim(trap.air.extList) #1922,9
-# dim(dg.extList) #682,3
-# 
-# extList <- full_join(trap.air.extList, dg.extList) %>% 
-#   pivot_longer(!c(lake_id, site_id, trap_deply_date), 
-#                names_to = "extn") %>% # pivot to longer
-#   mutate(extn = case_when(grepl("trap", extn) ~ "trap",
-#                           grepl("air", extn) ~ "air",
-#                           grepl("dg", extn) ~ "dg",
-#                           TRUE ~ "poo")) %>%
-#   filter(!is.na(value)) %>%
-#   distinct() #1375
-# 
-# 
-# extList %>% janitor::get_dupes() # no dups
-# extList %>% filter(is.na(value)) # no missing values
-# extList %>% filter(nchar(value) != 8) # 2018 R10 are formatted differently
-# 
-# extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
-#   {table(.$extn)} # 102 air, 212 dg, 525 trap
-# 
-# extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
-#   {table(.$extn, .$lake_id)} # 0-42 trap sample per lake
-# 
-# extList %>% filter(trap_deply_date > as.Date("2021-01-01")) %>% # exclude 2018, 2019, 2020
-#   select(lake_id) %>%
-#   distinct(.) # 38 lakes
+# create object containing all exetainer codes for readGc.R
+all_exet <- bind_rows(
+  dg_sheet %>% # DG exetainers
+    select(lake_id, site_id, visit, dg_extn) %>%
+    rename(sample = dg_extn) %>%
+    mutate(type = "dg"),
+  fld_sheet %>% # air + trap exetainers
+    select(lake_id, site_id, visit, trap_deply_date, matches("trap_extn|air_extn")) %>%
+    select(!contains("notes")) %>%
+    pivot_longer(!c(lake_id, site_id, visit, trap_deply_date), 
+                 values_to = "sample") %>%
+    mutate(sample = toupper(sample),
+           type = case_when(grepl("trap", name) ~ "trap",
+                            grepl("air", name) ~ "air",
+                            TRUE ~ "Fly you fools")) %>%
+    select(-name) %>%
+    filter(!is.na(sample))
+) %>%
+  mutate(trap_deply_date = case_when(type == "trap" ~ trap_deply_date,
+                                     TRUE ~ dttr2::NA_Date_))
 
-
-
-# #################################################################
-# ######CODE BELOW NOT YET UPDATED FOR SURGE#######################
-# # 3. Strip column names that are not consisent (or necessary) across different .dbf
-# # files.  Inconsistency related to source of original GIS shapefile.  Also because
-# # data for Acton 2017 came from Sarah's EC study.
-# 
-# # Vector of columns to remove
-# columnsToRemove <- c("OBJECTID|Permanent_|FDate|Resolution|GNIS_ID|Elevation|ReachCode|FType|FCode|Connectivi|Issue_Type|Lake_Name_|Reservoir_|QC|ECstudy")
-#                                   
-# # remove columns from all dfs in list
-# mylist1 <- lapply(mylist, function(x) select(x, -matches(columnsToRemove))) # matches allows for multiple terms
-# 
-# # Some dfs in list have column name "GNIS_Name".  Rename to Lake_Name where it appears. 
-# # ;x needed to have function report whole df.
-# mylist2 <- lapply(mylist1, function(x) {names(x) <- sub("GNIS_Name", "Lake_Name", names(x));x})
-# 
-# # Add 'section' as column, if not already present.  This happens in equal area designs
-# mylist3 <- lapply(mylist2, function(x){
-#   if("section" %in% names(x))  # if 'section' already exists
-#     x  # then report original df
-#   else 
-#     cbind(x, section = NA) # if 'section' doesn't exist, report new column of NAs
-# })
-#                                           
-# # 4.  Arrange columns in identical way to facilitate rbind
-# mylist4 <- lapply(mylist3, function(x) {
-#   select(x, noquote(order(colnames(x))))} # sort colnames alphabetically
-#   ) 
-# 
-# # 5.  Coerce list into dataframe via rbind
-#  eqAreaData <- do.call("rbind", mylist4)  # Coerces list into dataframe.
-# 
-# # FORMAT DATAFRAME-----------
-#  eqAreaData <- mutate(eqAreaData, 
-#                       chmDeplyDtTm = as.POSIXct(paste(trim(deplyDt), # trim removes white space
-#                                                       trim(chmStTm), sep=""),
-#                                                 format = "%m/%d/%Y%H:%M",
-#                                                 tz="UTC"), # set tz!
-#                       trapDeplyDtTm = as.POSIXct(paste(trim(deplyDt), # trim removes white space
-#                                                        trim(deplyTm), sep=""),
-#                                                  format = "%m/%d/%Y%H:%M",
-#                                                  tz="UTC"),
-#                       trapRtrvDtTm = as.POSIXct(paste(trim(RtrvDat), # trim removes white space
-#                                                        trim(RtrvTim), sep=""),
-#                                                  format = "%m/%d/%Y%H:%M",
-#                                                  tz="UTC"),
-#                       deplyDt = as.Date(deplyDt, format = "%m/%d/%Y"))  
-# 
-#  # Columns that should be converted to numeric
-#  cols <- c("chm_vol", "wtrDpth", "smDpthS", "Tmp_C_S", "DOPrc_S", "DO__L_S",   
-#            "SpCn__S", "pH_S", "ORP_S", "TrNTU_S", "chla_S", "smDpthD", "Tmp_C_D", "DOPrc_D", "DO__L_D",   
-#            "SpCn__D", "pH_D", "ORP_D", "TrNTU_D", "chla_D", "BrPrssr", "TtTrpVl", "LatSamp", "LongSmp")
-#  
-#  eqAreaData[, cols] <- lapply(eqAreaData[, cols], as.numeric) # convert to numeric
-#  
-#  # NA in character fields (i.e. TrapExtn) shapefile are being read as character values.
-#  # Convert to NA.
-#  eqAreaData[, "TrapExtn"] <- ifelse(eqAreaData[, "TrapExtn"] == "NA", 
-#                                     NA, 
-#                                     eqAreaData[, "TrapExtn"])
-#  
-#  eqAreaData[, "ArExtnrs"] <- ifelse(eqAreaData[, "ArExtnrs"] == "NA", 
-#                                     NA, 
-#                                     eqAreaData[, "ArExtnrs"])
-#  
-#  eqAreaData[, "DG_Extn"] <- ifelse(eqAreaData[, "DG_Extn"] == "NA", 
-#                                     NA, 
-#                                     eqAreaData[, "DG_Extn"])
-#  
+  
+  
+  
 #  # BAROMETRIC PRESSURE----------------
 #  # Assign barometric pressure to dissolved gas sampling site where BP
 #  # was not recorded.  All lakes have at least one measurement, so assign

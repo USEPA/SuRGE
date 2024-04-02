@@ -59,17 +59,25 @@ algae.gb <- c("taxonomy", "physiology")
 qa.qc.samples <- expand.grid(lake_id = lake.list.chem %>% # lake_id for all sampled lakes
                                filter(qa_qc == 1) %>% # filter to qa.qc lakes
                                select(lake_id) %>% # pull lake_id
+                               # 148 is in here twice, once for visit 1 and again for visit 2
+                               # the distinct removes one occurence of 148, so it is only
+                               # in there once.  Below we included visits 1 and 2 for all
+                               # sites, then exclude visit 2 for all except 148 and 281.
+                               dplyr::distinct() %>%
                                pull(), # extract lake_id to vector
+                             visit = 1:2, # visit 1 and 2 for all sites, remove those that don't have visit 2 below
                              sample_type = c("duplicate", "blank"),
                              analyte = c(nutrients, anions, organics, 
                                          metals, algae.nar), # no qa.qc for algae.gb analytes
                              sample_depth = "shallow", # qa.qc only collected from shallow depth
                              stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
-  mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank"), # blank depth = blank
-         visit = case_when(lake_id == 281 ~ 2, # qa.qc collected from 281 on visit == 2
-                           lake_id == 148 ~2, # qa.qc collected from 148 on visit == 2
-                           TRUE ~ 1)) %>% # all others collected on visit == 1
+  mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank")) %>%  # blank depth = blank
+  # exclude visit 2 for all except 281 and 148
+  filter(!(visit == 2 & !(lake_id %in% c(281, 148)))) %>%
+  # exclude visit 1 for 281 (qa.qc performed on visit 2 only)
+  filter(!(visit == 1 & lake_id == 281)) %>%
   arrange(lake_id)
+
 
 # 6. create df of samples collected from all lakes
 # 2018 (R10) and 2020 sampling (CIN, RTP, R10) did not include doc, anions, 
@@ -90,7 +98,7 @@ unknown.samples <- expand.grid(lake_id = lake.list.chem$lake_id,
 
 unknown.samples <- unknown.samples %>%
   filter(lake_id == 147 | lake_id == 148) %>% # pull out rows for 147, and 148
-  mutate(visit = 2) %>% # change visit to vist == 2
+  mutate(visit = 2) %>% # change visit to visit == 2
   bind_rows(unknown.samples) # add two new rows to original df
 
 # 7. Combine df of qa.qc and df of unknowns.  Merge 'lab' and 'sample_year' fields
@@ -141,7 +149,7 @@ chem.samples.foo <- chem.samples %>%
   # toc and doc blanks not collected from 67.  No DI brought to field
   filter(!(lake_id == "67" & sample_type == "blank" & analyte %in% c("doc", "toc"))) %>%
   # chl unknown filter tore during sample prep at 148.  no replacement available
-  filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla")) %>%
+  filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla" & visit == 1)) %>%
   # no DOC blank collected at 275
   filter(!(lake_id == "275" & sample_type == "blank" & analyte == "doc")) %>%
   # no DOC blank collected at 64

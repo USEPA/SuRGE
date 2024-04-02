@@ -2,22 +2,23 @@
 # CALCULATE EBULLITION RATE------------------
 
 # 1. merge relevant columns from fld_sheets and dg_sheets with gc_lakeid_agg
-# note that as of 2/26/2024 gc_lakeid_agg only contains trap gas data
+# note that as of 4/2/2024 only trap runs have been read into gc_lakeid_agg,
+# but a few dissolved gas samples slipped in
 eb_data <- full_join( # keep all data.  Will assume GC data if not present (e.g. insufficient volume for sample)
-  gc_lakeid_agg, # GC trap data
+  gc_lakeid_agg, # GC data
   # now select from fld_sheets
   fld_sheet %>% 
     select(lake_id, site_id, visit,
                        contains("trap")) %>%
     select(-contains("extn")) %>%
     filter(!is.na(trap_volume))) %>% # exclude where no data are reported for trap volume (e.g. tube fell off)
-  # now join with dg_sheet
+  # now join with dg_sheet to get pressure and temp for ebullition calcs
   left_join(., # keep all data from above, discard dg_sheet data that don't match up 
             dg_sheet %>% select(lake_id, site_id, visit,
                                 atm_pressure, air_temperature) %>%
               distinct(.))
 
-dim(eb_data) # 1773
+dim(eb_data) # 1787
 
 # 2. Calculate volumetric ebullition rate.  Straightforward operation
 # that can be vectorized across the entire df.
@@ -52,5 +53,5 @@ eb_results <- do.call("rbind", my_eb_list) %>%  # This coerces the list into a d
 
 
 
-str(eb_results)  # 1713 observations
+str(eb_results)  # 1727 observations
 

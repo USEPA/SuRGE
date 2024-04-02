@@ -29,11 +29,15 @@ get_chla_data <- function(path, data, sheet) {
     #   TRUE   ~ "")) %>%
     
     # Create visit field
-    mutate(visit = if_else(lake_id %in% c("281", "250") &
-                             between(date %>% as.Date(format = "%m/%d/%Y"),
-                                     as.Date("2022-08-15"),
-                                     as.Date("2022-09-15")),
-                           2, 1, missing = 1)) %>%
+    mutate(visit = case_when(lake_id %in% c("281", "250") &
+                               between(date %>% as.Date(format = "%m/%d/%Y"),
+                                       as.Date("2022-08-15"),
+                                       as.Date("2022-09-15")) ~ 2,
+                             lake_id %in% c("147", "148") &
+                               between(date %>% as.Date(format = "%m/%d/%Y"),
+                                       as.Date("2023-08-01"),
+                                       as.Date("2023-08-30")) ~ 2,
+                             TRUE ~ 1)) %>%
     select(lake_id, site_id, sample_type, sample_depth, visit,
            chla, chla_units, chla_flag) 
 
@@ -68,11 +72,16 @@ get_phyco_data <- function(path, data, sheet) {
     #   TRUE   ~ "")) %>%
     
     # Create visit field
-    mutate(visit = if_else(lake_id %in% c("281", "250") &
+    mutate(visit = case_when(lake_id %in% c("281", "250") &
                              between(date %>% as.Date(format = "%m/%d/%Y"),
                                      as.Date("2022-08-15"),
-                                     as.Date("2022-09-15")),
-                           2, 1, missing = 1)) %>%
+                                     as.Date("2022-09-15")) ~ 2,
+                             lake_id %in% c("147", "148") &
+                               between(date %>% as.Date(format = "%m/%d/%Y"),
+                                       as.Date("2023-08-01"),
+                                       as.Date("2023-08-30")) ~ 2,
+                             TRUE ~ 1)) %>%
+    
     select(lake_id, site_id, sample_type, sample_depth, visit, 
            phycocyanin, phycocyanin_units, phyco_flag) %>%
     # variable names must be same for aggregateFieldDupsStripFieldBlanks.R
@@ -92,18 +101,24 @@ get_phyco_data <- function(path, data, sheet) {
 
 
 # chlorophyll, phycocyanin, and microcystin results
-cin.pig.path <- paste0(userPath,
+cin.peg.path <- paste0(userPath,
                        "data/algalIndicators/pigments/")
 
+chla <- get_chla_data(cin.peg.path,
+                      "surge_chl_all_years.csv")
 
-chla_20_21_22 <- get_chla_data(cin.pig.path,
-                               "surge_chla_all_2020_2021_2022.csv") 
+phycocyanin <- get_phyco_data(cin.peg.path,
+                              "surge_phyco_all_years.csv")
 
-phycocyanin_20_21_22 <- get_phyco_data(cin.pig.path,
-                            "surge_phyco_all_2020_2021_2022.csv")
+# chla_20_21_22 <- get_chla_data(cin.pig.path,
+#                                "surge_chla_all_2020_2021_2022.csv") 
+# 
+# phycocyanin_20_21_22 <- get_phyco_data(cin.pig.path,
+#                             "surge_phyco_all_2020_2021_2022.csv")
 
-
-pigments_20_21_22 <- left_join(chla_20_21_22, phycocyanin_20_21_22, 
+nrow(chla) #160
+nrow(phycocyanin) #161
+pigments <- full_join(chla, phycocyanin, 
                             by = c("lake_id", "site_id", 
                                    "sample_depth", "sample_type", "visit")) 
 
@@ -112,21 +127,23 @@ pigments_20_21_22 <- left_join(chla_20_21_22, phycocyanin_20_21_22,
 # SAMPLE INVENTORY------------------------
 # Read list of samples received by NAR.
 nar.samples <- read_excel(paste0(userPath,
-         "data/sampleTrackingSheets//NAR algal indicator//",
-         "narSampleReceiptList.xlsx"))
+                                 "data/sampleTrackingSheets//NAR algal indicator//",
+                                 "narSampleReceiptList.xlsx"))
 
-# Were all samples received expected?  Compare list of received samples to 
-# those expected. YES. [10/14/2022]
-setdiff(nar.samples[c("lake_id", "analyte", "sample_type")],
-        chem.samples.foo[c("lake_id", "analyte", "sample_type")]) %>% 
+
+# Were all samples received expected?  Compare list of received samples to
+# those expected. YES. [4/2/2024]
+setdiff(nar.samples[c("lake_id", "visit", "analyte", "sample_type")],
+        chem.samples.foo[c("lake_id", "visit", "analyte", "sample_type")]) %>%
   print(n=Inf)
 
 
 # Have all NAR algae samples in comprehensive sample list been delivered to NAR?
 # Missing lake 204 samples.  Confirmed missing by NAR.  Sample found on lab floor
-# and framed in Jeff's office! 
-setdiff(chem.samples.foo %>% 
-          filter(analyte_group == "algae.nar", 
+# and framed in Jeff's office!
+# but are we also missing lake 204 microcystin?
+setdiff(chem.samples.foo %>%
+          filter(analyte_group == "algae.nar",
                  sample_year != 2018) %>% # 2018 R10 not sent to NAR
           select(lake_id, analyte, sample_type),
         nar.samples[c("lake_id", "analyte", "sample_type")]) %>%
@@ -134,8 +151,7 @@ setdiff(chem.samples.foo %>%
 
 
 # Now lets make sure that all samples were analyzed
-# 20_21 pigment samples analyzed
-pigments_analyzed <- pigments_20_21_22 %>%
+pigments_analyzed <- pigments %>%
   pivot_longer(cols = c(chla, phycocyanin),
                 names_to = "analyte",
               values_to = "concentration") %>%
@@ -144,14 +160,12 @@ pigments_analyzed <- pigments_20_21_22 %>%
 pigments_collected <- chem.samples.foo %>% 
   filter(analyte %in% c("phycocyanin", "chla"),
          sample_year != 2018, # 2018 R10 not sent to NAR
-          sample_year < 2023, #
+          #sample_year < 2023, #
          sample_type != "blank") %>% # NAR not sure how to handle blanks.  Active issue in hollister's repo
   select(lake_id, sample_type, sample_depth, visit, analyte)
 
 # Have all collected NAR pigment samples been analyzed?
 # 204 was known to be lost, see above
-# 288 was cofirmed received, but not in data file?
-# 316 was confirmed received, but not in data file?
 # See issue #6 at https://github.com/jhollist/surge_algal/issues/6
 setdiff(pigments_collected, pigments_analyzed) %>% print(n=Inf)
 

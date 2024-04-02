@@ -59,11 +59,42 @@ gga_2 <- gga_2 %>%
 lake_id.i <- "288"  # numeric component of lake_id without leading zero(s), formatted as character
 site_id.i <- 14 # numeric component of lake_id, no leading zero(s), formatted as numeric
 
+# this code generates a 3 panel plot used to demonstrate relationship between
+# CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
+# has been resolved. [JB 3/29/2024]
+
+# gga_2 %>%
+#   filter(lake_id == lake_id.i,
+#          site_id == site_id.i,
+#          RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+#          RDateTime < ch4RetDtTm + 300, # extend plot 1 minute post deployment
+#          CH4._ppm > 0) %>%
+#   select(lake_id, RDateTime, CH4._ppm, CO2._ppm, H2O._ppm,
+#          co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, ch4RetDtTm) %>%
+#   pivot_longer(!c(lake_id, RDateTime,co2DeplyDtTm, co2RetDtTm,
+#                   ch4DeplyDtTm, ch4RetDtTm)) %>%
+#   ggplot(aes(RDateTime, value)) +
+#   geom_point() +
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:16:22", tz = "UTC")),
+#                  color = "deployment"), key_glyph = "path") +
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:03", tz = "UTC")),
+#                  color = "CH4 stabilizes"), key_glyph = "path") + # CH4
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:43", tz = "UTC")),
+#                  color = "CO2 stabilizes"), key_glyph = "path") + #CO2
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
+#                  color = "retrieval"), key_glyph = "path") +
+#   scale_color_discrete(breaks = c("deployment", "CH4 stabilizes", "CO2 stabilizes", "retrieval"), name="") +
+#   #scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+#   xlab("time (hh:mm)") +
+#   facet_wrap(~name, scales = "free", nrow = 3)
+  
+
+
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
          site_id == site_id.i, 
          RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
-         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         RDateTime < ch4RetDtTm + 300, # extend plot 1 minute post deployment
          CH4._ppm > 0) %>%
   ggplot(aes(RDateTime, CH4._ppm)) + 
   geom_point() +
@@ -90,7 +121,7 @@ ggplotly(plotCo2)
 plotH2O <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
          site_id == site_id.i, 
-         RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime > co2DeplyDtTm - 120, # start plot 1 minute prior to deployment
          RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
          CO2._ppm > 0) %>%
   ggplot(aes(RDateTime, H2O._ppm)) + 
