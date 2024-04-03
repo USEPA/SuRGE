@@ -93,7 +93,7 @@ clean_chem <- function(data) {
                    all(str_detect(., "H")) ~ "H",
                    all(str_detect(., "S")) ~ "S",
                     # All other combinations should result in NA
-                    TRUE ~ NA_character_)))
+                    TRUE ~ NA_character_))) %>%
   # ,
   #          
   #          across(contains("units"),
@@ -102,16 +102,16 @@ clean_chem <- function(data) {
   #                                 .))) %>% # if no units in group, no change (i.e., NA)
   #   filter(!(sample_type == "duplicate")) %>% # now we can remove dups
   #   rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
-  #   select(-sample_type) %>% # no longer need sample_type (all unknowns)
-  #   ungroup() %>% # remove grouping
+    select(-sample_type) %>% # no longer need sample_type (all unknowns)
+    ungroup() # remove grouping
   #   mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
   #                 ~ ifelse(. == "no value", NA, .)))
   # 
 } 
 
 chemistry <- clean_chem(chemistry_all)
-dim(chemistry_all) # 372, 128 [10/12/2023]
-dim(chemistry) # 237, 127 [10/12/2023], good fewer rows, but one fewer column (-sample_type)
+dim(chemistry_all) # 368, 127 [4/2/2024]
+dim(chemistry) # 315, 126 [4/2/2024], good fewer rows, but one fewer column (-sample_type)
 
 names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
 

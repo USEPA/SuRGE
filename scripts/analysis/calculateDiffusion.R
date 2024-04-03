@@ -253,7 +253,10 @@ for (i in 1:n) {  # For each unique site
  dev.off()
 start.time;Sys.time() 
 
-save(OUT,file="C:/R_Projects/SuRGE/output/diffusiveOUT.RData")
+# many hours to run.  Write to disk to expedite future analysis
+#save(OUT, file="output/diffusiveOUT.RData")
+#load("output/diffusiveOUT.RData") # load if not run above
+
 
 # STEP 2: USE AIC TO DETERMINE WHETHER LINEAR OR NON-LINEAR FIT IS BEST.
 #         CONFIRM CHOICE BY INSPECTING RAW DATA

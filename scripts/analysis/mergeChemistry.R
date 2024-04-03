@@ -34,22 +34,22 @@
 # Inspect objects----
 
 # inspect object to merge
-## each df contains 10 - 297 observations [10/11/2023]
+## each df contains 10 - 333 observations [4/2/2024]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
   map_dfc(., nrow)
 
 # are the unique IDs formatted identically across the dfs?
 ## All have lake_id, site_id, sample_depth, sample_type
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
   map(., function(x) select(
     x, lake_id, site_id, sample_depth, sample_type) %>% 
       str(.))
 ## which ones have a visit field?
-### ada.anions, ada.nutrients, ada.oc, chemCinNutrients, tteb.all, pigments_20_21_22
+### ada.anions, ada.nutrients, ada.oc, chemCinNutrients, tteb.all, pigments
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments_20_21_22) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
   map_lgl(., function(x) x %>% {"visit" %in% names(.)})
 
 
@@ -113,13 +113,13 @@ janitor::get_dupes(
   select(oc, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dupes
 
-pigments <- chl18 %>%
-  full_join(pigments_20_21_22) %>%
+pigments_all <- chl18 %>%
+  full_join(pigments) %>%
   mutate(visit = (ifelse( # visit = 1 if visit column is otherwise blank/NA
     is.na(visit), 1, visit)))
 # check for unexpected behavior
-nrow(chl18) + nrow(pigments_20_21_22) == nrow(pigments) # TRUE, good!
-janitor::get_dupes(select(pigments, lake_id, site_id, 
+nrow(chl18) + nrow(pigments) == nrow(pigments_all) # TRUE, good!
+janitor::get_dupes(select(pigments_all, lake_id, site_id, 
                           sample_depth, sample_type, visit)) 
 
 
@@ -127,7 +127,7 @@ janitor::get_dupes(select(pigments, lake_id, site_id,
 # joined object can't be easily predicted, but the objects to be joined can't 
 # contain duplicates of the joining variables.
 metal.pig <- tteb.all %>%
-  full_join(pigments) 
+  full_join(pigments_all) 
 # check for unexpected behavior
 janitor::get_dupes(
   select(metal.pig, lake_id, site_id, sample_depth, sample_type, visit)) 
@@ -156,7 +156,7 @@ janitor::get_dupes(
 
 
 # The tteb.all object contains metals, anion, DOC, and TOC data.  To prevent erroneous duplicates
-# when joining tteb.all with other objects containing TOC, DOC, or aniona data, we appended "tteb."
+# when joining tteb.all with other objects containing TOC, DOC, or anion data, we appended "tteb."
 # to TOC, DOC, and anion column names in tteb.all (see readTteb.R).  Any samples where TOC/DOC/anions were run
 # at TTEB will have TOC/DOC/anion numbers in the tteb.toc/tteb.doc/tteb.cl.... columns AND NAs in the TOC/DOC/cl... columns
 # that came from toc.masi, ada.oc, and anions.  For any observations that meet these criteria,

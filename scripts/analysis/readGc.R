@@ -96,7 +96,7 @@ gc <- gc %>%
 
 # MERGE EXETAINER CODES----------------------
 # see readFieldSheets.R
-dim(all_exet) #2664
+dim(all_exet) #2713
 
 # List of exetainer codes !=8 characters long.
 # region 8 stuff plus SG2201, a short tube sample from NAR, so good
@@ -271,7 +271,7 @@ dev.off()
 ggplot(gc_lakeid, aes(paste(lake_id, site_id), (co2_ppm/10000))) + geom_point()
 gc_lakeid %>%
   select(-contains("trap")) %>%
-  pivot_longer(!c(sample, lake_id, site_id, visit, file)) %>%
+  pivot_longer(!c(sample, lake_id, site_id, visit, file, type)) %>%
   filter(value < 0) %>%
   arrange(sample) %>%
   print(n=Inf)

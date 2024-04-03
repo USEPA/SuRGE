@@ -21,10 +21,9 @@ source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2
 source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data.  ada.oc
 source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab. toc.masi
 source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  tteb.all
-#source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin
+source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin
 #source("scripts/analysis/readTaxonomy.R") # GB taxonomy
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl18
-source("scripts/analysis/readPigmentsMicrocystin.R") # 2020+ chloro/phyco
 source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
 
@@ -36,7 +35,7 @@ source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blan
 #source("scripts/analysis/mergeGc.R") # not written yet.  Need to add dissolved gas to gc_lakeid_agg
 
 # Merge chemistry and field sheets
-source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.  2/26/2024, NOT WORKING
+source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.
 # need to do something with dg_sheet
 
 # Prep 2020 and 2021 data sets for RAPID reporting
@@ -46,7 +45,8 @@ source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.  2/2
 # Diffusive emission rates
 source("scripts/analysis/readLgr.R") # read raw LGR data
 source("scripts/analysis/plotCleanLgr.R") # define deployment/retrieval times for chambers
-source("scripts/analysis/calculateDiffusion.R") # diffusive emission rates
+# CAUTION, MANY HOURS TO RUN. CAN LOAD FROM DISK.  SEE line 258
+source("scripts/analysis/calculateDiffusion.R") # diffusive emission rates.  
 
 # Ebullition rates
 source("scripts/analysis/ebullitionMassFluxFunction.R") # source function

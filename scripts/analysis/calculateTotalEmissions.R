@@ -1,12 +1,11 @@
 #1.  Merge diffusive and ebullitive emissions
-# either load diffusive emissions from disk, or run "calculateEmissions.R"
-load("output/diffusiveOUT.RData") # loads "OUT" object.  
-# This should really be OUT2. Load into calculateEmissions.R to generate OUT2
+# OUT2 created in "calculateDiffusion.R"
 
-dim(OUT2) #1492 observations
-dim(eb_results) #1713 observation
+
+dim(OUT2) #1493 observations
+dim(eb_results) #1727 observation
 emissions <- full_join(eb_results, OUT2)
-dim(emissions) #1849
+dim(emissions) #1850
 
 
 

@@ -2,7 +2,7 @@
 
 
 # 1. Create a list of file paths where the data are stored.  
-labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS")
+labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "data/", labs)
 
 # code below creates a list of paths for each file.  This can then be fed into
@@ -91,7 +91,7 @@ get_data_sheet <- function(paths){
                                                   format = "%Y-%m-%d%H:%M:%S",
                                                   tz = "UTC"))
     }) %>%
-    map_dfr(., identity) # rbinds into one df
+    map_dfr(., bind_rows) # rbinds into one df
 }
 
 # 3. Read 'data' tab of surgeData files.
@@ -100,7 +100,8 @@ unique(fld_sheet$lake_id)
 unique(fld_sheet$site_id)
 janitor::get_dupes(fld_sheet %>% select(lake_id, site_id, visit))
 fld_sheet %>% filter(visit == 2) %>% distinct(lake_id) # [1/2/2024] two visits at 250, 281, 147, 148.  
-
+fld_sheet %>% filter(grepl(c("250|281|147|148"), lake_id)) %>%
+  select(lake_id, site_id, visit, trap_deply_date)
 
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
@@ -112,8 +113,10 @@ get_dg_sheet <- function(paths){
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     
     # map will read each file in fs_path list generated above
-    purrr::map(~ read_excel(., skip = 1, sheet = "dissolved.gas", 
-                           na = c("NA", "", "N/A", "n/a"))) %>%
+    purrr::imap(~ read_excel(., skip = 1, sheet = "dissolved.gas", 
+                             na = c("NA", "", "N/A", "n/a")) %>%
+    # Assign the filename to the visit column for now
+    mutate(visit = .y)) %>% # assign file name
     # remove empty dataframes.  Pegasus put empty Excel files in each lake
     # folder at begining of season.  These files will be populated eventually,
     # but are causing issues with code below
@@ -121,8 +124,11 @@ get_dg_sheet <- function(paths){
     # format data
     map(., function(x){
       janitor::clean_names(x) %>%
-        # format lake_id and site_id.  See Wiki
-        mutate(lake_id = as.character(lake_id) %>%
+        # Assign value to visit based on the Excel filename
+        mutate(visit = if_else(str_detect(visit, "visit2"),
+                               2, 1, missing = 1),
+               # format lake_id and site_id.  See Wiki
+               lake_id = as.character(lake_id) %>%
                  tolower(.) %>% # i.e. Lacustrine -> lacustrine
                  str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
                  str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
@@ -140,25 +146,6 @@ dg_sheet %>% filter(is.na(atm_pressure) | is.na(air_temperature) |
                       is.na(water_vol) | is.na(air_vol)) %>%
   distinct(lake_id) %>% print(n=Inf)
 
-# Create vector of exetainers from Lakes 250 & 281 for 2022 2nd visit
-visit2 <- c("SG220986", "SG220987", "SG220988", "SG220991", "SG220992", 
-            "SG220993", "SG220997", "SG220998", "SG220999", "SG220994", 
-            "SG220995", "SG220996", "SG220659", "SG220660", "SG220661", 
-            "SG220653", "SG220654", "SG220655", "SG220972", "SG220973", 
-            "SG220974", "SG220975", "SG220976", "SG220977", "SG220983", 
-            "SG220984", "SG220985", "SG220981", "SG220982", "SG220978", 
-            "SG220979", "SG220980", "SG220989", "SG220990", "SG221076", 
-            "SG221084", "SG221082", "SG220941", "SG220942", "SG220943", 
-            "SG220669", "SG220670", "SG220671", "SG220666", "SG220667", 
-            "SG220668", "SG220944", "SG220945", "SG220946", "SG220938", 
-            "SG220939", "SG220940", "SG220947","SG220948")
-
-# Modify dg_sheet: add visit column based on exetainer numbers
-
-dg_sheet <- dg_sheet %>%
-  mutate(visit = case_when(
-    dg_extn %in% visit2 ~ 2, 
-    TRUE ~ 1))
 
 # create object containing all exetainer codes for readGc.R
 all_exet <- bind_rows(

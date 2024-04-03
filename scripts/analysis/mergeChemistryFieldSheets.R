@@ -10,14 +10,13 @@ fld_sheet
 
 # First, split out data fields not associated with a depth
 fld_sheet_no_depth <- fld_sheet %>% 
-  select(-eval_status,
-         -contains("trap"),
+  select(-contains("trap"),
          -contains("chamb"),
          -contains("air"),
          -contains("check"),
          -contains("_s"), # shallow sonde
          -contains("_d"), # deep sonde
-         lake_id, site_id, visit, lat, long, 
+         lake_id, site_id, visit, lat, long, eval_status,
          site_depth, # character, 'shallow' 'deep'
          trap_deply_date) %>% # keep this to indicate sample_year
   rename(sample_date = trap_deply_date)
@@ -54,7 +53,8 @@ fld_sheet_sonde <- fld_sheet %>%
                      grepl("d_flag", name) 
                      ~ gsub("d_flag", "flag", name), # Remove _d from _d_flag
                      grepl("d_comment", name) 
-                     ~ gsub("d_comment", "comment", name)), # Remove _d from _d_comment
+                     ~ gsub("d_comment", "comment", name), # Remove _d from _d_comment
+                     TRUE ~ name),
     #sample_depth is 'shallow' or 'deep'.  The actual depth of sample collection will be 'sample_depth_m'
     name = replace(name, name == "sample_depth", "sample_depth_m")) 
 
@@ -66,7 +66,7 @@ problem_rows <- fld_sheet_sonde %>%
 
 # Pivot back to wide, but now longer, just like chemistry
 fld_sheet_sonde <- fld_sheet_sonde %>% 
-  pivot_wider(names_from = name, values_from = value) %>%  ###THIS PIVOT IS BROKEN [2/26/2024]
+  pivot_wider(names_from = name, values_from = value) %>% 
   # convert numeric back to numeric
   mutate(across(.cols = c(site_id, sample_depth_m, temp, 
                           do_mg, sp_cond, ph, chl, turb,
@@ -82,37 +82,33 @@ fld_sheet_sonde <- fld_sheet_sonde %>%
 
 # Now merge in non depth specific fields from fld_sheets
 fld_sheet_sonde1 <- full_join(fld_sheet_sonde, fld_sheet_no_depth)
-dim(fld_sheet_sonde) # 2956, 25 [1/5/2023]
-dim(fld_sheet_no_depth) #147, 8 [1/5/2023]
-dim(fld_sheet_sonde1) #2956, 29 good [1/5/2023]
+dim(fld_sheet_sonde) # 4104, 26 [4/3/2024]
+dim(fld_sheet_no_depth) #2052, 8 [4/3/2024]
+dim(fld_sheet_sonde1) #4104, 31 good [4/3/2024]
 
-# Will merge on common names: lake_id and site_id
+# Will merge on common names: lake_id, site_id, visit
 names(chemistry)[names(chemistry) %in% names(fld_sheet_sonde1)] #lake_id, site_id, sample_depth, visit
 names(fld_sheet_sonde1)[names(fld_sheet_sonde1) %in% names(chemistry)] #lake_id, site_id, sample_depth, visit
 class(chemistry$lake_id) == class(fld_sheet_sonde1$lake_id) # TRUE
 class(chemistry$site_id) == class(fld_sheet_sonde1$site_id) # TRUE
 
 # Check dimensions
-dim(chemistry) # 199, 121 [1/5/2023]
-dim(fld_sheet_sonde1) # 2956, 29 [1/5/2023]
+dim(chemistry) # 315, 126 [4/3/2024]
+dim(fld_sheet_sonde1) # 4104, 31 [4/3/2024]
 
 # Check for correspondence among unique identifiers
-# 12 lakes in chemistry, but not in field sheets.  Some of these are
-# R10 lakes from 2018.  As of 1/5/2023, these field sheets
-# haven't been read in yet.  Others are 2023 lakes where chem
-# data are available, but field sheets haven't been populated yet.
 chemistry %>% filter(!(lake_id %in% fld_sheet_sonde1$lake_id)) %>%
   select(lake_id) %>% distinct() %>% print(n=Inf)
 
 
 # any lakes in fld_sheets, but not in chemistry? 
-# Some 2022 lakes for which we don't have any data yet
+# Good
 fld_sheet_sonde1 %>% filter(!(lake_id %in% chemistry$lake_id)) %>%
   select(lake_id) %>% distinct() %>% print(n=Inf)
 
 chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
   relocate(lake_id, site_id, lat, long, sample_date, site_depth, sample_depth, sample_depth_m)
-dim(chem_fld) # 2990, 146 [1/5/2023]
+dim(chem_fld) # 4161, 153 [4/3/2024]
 
 # write to disk for reference in lake reports
 save(chem_fld, file = "output/chem_fld.RDATA")
