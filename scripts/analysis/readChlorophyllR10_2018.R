@@ -114,7 +114,8 @@ get_results_data <- function(path, data, sheet) {
     unite("chla_flags", c(chla_flag, chla_qual), sep = " ", na.rm = TRUE) %>%
     mutate(chla_flags = if_else( # NA if there are no flags
       str_detect(chla_flags, "\\w"), chla_flags, NA_character_) %>%
-        str_squish()) # remove any extra white spaces
+        str_squish()) %>% # remove any extra white spaces
+    rename(chla_flag = chla_flags)
   
   return(e)
   
@@ -206,7 +207,8 @@ get_bsa_data <- function(path, data, sheet) {
     unite("chla_flags", c(chla_flag, chla_qual), sep = " ", na.rm = TRUE) %>%
     mutate(chla_flags = if_else( # NA if there are no flags
       str_detect(chla_flags, "\\w"), chla_flags, NA_character_) %>%
-        str_squish()) # remove any extra white spaces
+        str_squish()) %>% # remove any extra white spaces
+    rename(chla_flag = chla_flags)
 
   return(f)
 

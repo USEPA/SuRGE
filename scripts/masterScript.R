@@ -21,14 +21,14 @@ source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2
 source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data.  ada.oc
 source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab. toc.masi
 source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  tteb.all
-source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin
+source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin. pigments
 #source("scripts/analysis/readTaxonomy.R") # GB taxonomy
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl18
 source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
 
 # Aggregate and review chemistry
-source("scripts/analysis/mergeChemistry.R") # merge all chem objects
+source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
 source("scripts/analysis/cincinnatiShippingNotes.R") # adding S flag
 source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates
 #source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
@@ -53,7 +53,11 @@ source("scripts/analysis/ebullitionMassFluxFunction.R") # source function
 source("scripts/analysis/calculateEbullition.R") # eb_results
 
 # Merge diffusive and ebulitive rates --> calculate total
-source("scripts/analysis/totalEmissions.R")
+source("scripts/analysis/calculateTotalEmissions.R")
+
+# Merge emissions, chemistry, and field sheets
+source("scripts/analysis/mergeChemEmissions.R")
+
 
 # Random
 #source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 
