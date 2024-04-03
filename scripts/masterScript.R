@@ -30,6 +30,7 @@ source("scripts/analysis/readGc.R") # gc_lakeid_agg
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
 source("scripts/analysis/cincinnatiShippingNotes.R") # adding S flag
+# see issue #89  when resolved, come back to this.
 source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates
 #source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
 #source("scripts/analysis/mergeGc.R") # not written yet.  Need to add dissolved gas to gc_lakeid_agg
