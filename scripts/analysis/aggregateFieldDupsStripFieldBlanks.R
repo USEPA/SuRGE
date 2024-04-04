@@ -111,8 +111,8 @@ clean_chem <- function(data) {
 } 
 
 chemistry <- clean_chem(chemistry_all)
-dim(chemistry_all) # 368, 127 [4/2/2024]
-dim(chemistry) # 315, 126 [4/2/2024], good fewer rows, but one fewer column (-sample_type)
+dim(chemistry_all) # 374, 126 [4/2/2024]
+dim(chemistry) # 265, 84 [4/4/2024], good fewer rows, but lost all units columns
 
 names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
 

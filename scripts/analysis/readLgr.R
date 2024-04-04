@@ -114,7 +114,7 @@ toc()
 
 # Merge files
 gga <- do.call("rbind", ggaList)  %>% # Coerces list into dataframe.
-  filter(CH4.d_ppm < 500) # filter out clearly erroneous values
+  filter(CH4._ppm < 500) # filter out clearly erroneous values
 
 # FIX DATES------
 # summer 2021 MGGA internal battery died, causing date to default to 2001-12-31
@@ -145,14 +145,14 @@ gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustmen
 gga$RDateTime<-as_datetime(gga$RDateTime_adj)
 
 # BASIC PLOTS-----------------
-ggplot(gga, aes(RDateTime, CH4.d_ppm)) + geom_point() +
+ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) + 
   facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
  
 # ggsave("output/figures/ch4profile.tiff")
 
-ggplot(gga, aes(RDateTime, CO2.d_ppm)) + geom_point() +
+ggplot(gga, aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   facet_wrap(~lab + lake_id, scales = "free", 
              labeller = label_wrap_gen(multi_line=FALSE)) # facet labels in same row
@@ -161,14 +161,14 @@ ggplot(gga, aes(RDateTime, CO2.d_ppm)) + geom_point() +
 
 
 # Try an interactive version for each lake
-plotCh4 <- gga %>% filter(lake_id == "045", CH4.d_ppm > 0) %>%
+plotCh4 <- gga %>% filter(lake_id == "045", CH4._ppm > 0) %>%
   ggplot(aes(RDateTime, CH4._ppm)) + geom_point() +
   scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
   ggtitle("045")
 ggplotly(plotCh4)  
   
 plotCo2 <- gga %>% filter(lake_id == "010") %>%
-  ggplot(aes(RDateTime, CO2.d_ppm)) + geom_point() +
+  ggplot(aes(RDateTime, CO.d_ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   ggtitle("045")
 ggplotly(plotCo2)  

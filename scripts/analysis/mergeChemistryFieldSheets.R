@@ -10,14 +10,9 @@ fld_sheet
 
 # First, split out data fields not associated with a depth
 fld_sheet_no_depth <- fld_sheet %>% 
-  select(-contains("trap"),
-         -contains("chamb"),
-         -contains("air"),
-         -contains("check"),
-         -contains("_s"), # shallow sonde
-         -contains("_d"), # deep sonde
-         lake_id, site_id, visit, lat, long, eval_status,
-         site_depth, # character, 'shallow' 'deep'
+  select(lake_id, site_id, visit, lat, long, eval_status,
+         chm_vol_l,
+         site_depth, # numeric, total depth
          trap_deply_date) %>% # keep this to indicate sample_year
   rename(sample_date = trap_deply_date)
 
@@ -29,7 +24,7 @@ fld_sheet_sonde <- fld_sheet %>%
          -contains("chamb"),
          -contains("air"),
          -contains("check"),
-         -lat, -long, -site_depth) %>%
+         -lat, -long, -site_depth, -chm_vol_l) %>%
   mutate(across(everything(), ~as.character(.x))) %>% # all columns must be same class
   pivot_longer(!(c(lake_id, site_id, visit))) %>%
   # move depth info from column names into separate columns
@@ -93,8 +88,8 @@ class(chemistry$lake_id) == class(fld_sheet_sonde1$lake_id) # TRUE
 class(chemistry$site_id) == class(fld_sheet_sonde1$site_id) # TRUE
 
 # Check dimensions
-dim(chemistry) # 315, 126 [4/3/2024]
-dim(fld_sheet_sonde1) # 4104, 31 [4/3/2024]
+dim(chemistry) # 320, 125 [4/3/2024]
+dim(fld_sheet_sonde1) # 4104, 32 [4/3/2024]
 
 # Check for correspondence among unique identifiers
 chemistry %>% filter(!(lake_id %in% fld_sheet_sonde1$lake_id)) %>%
@@ -108,7 +103,7 @@ fld_sheet_sonde1 %>% filter(!(lake_id %in% chemistry$lake_id)) %>%
 
 chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
   relocate(lake_id, site_id, lat, long, sample_date, site_depth, sample_depth, sample_depth_m)
-dim(chem_fld) # 4161, 153 [4/3/2024]
+dim(chem_fld) # 4166, 153 [4/3/2024]
 
 # write to disk for reference in lake reports
 save(chem_fld, file = "output/chem_fld.RDATA")

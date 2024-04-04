@@ -8,7 +8,7 @@ lake.list <- readxl::read_excel(paste0(userPath,
   mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
            as.numeric(), # convert lake_id to numeric
          visit = 1) %>% # all lakes except 147, 148, 250, and 281 were only visited once.  see below
-  filter(lake_id <= 1000) # 999 and 1000 are handpicked R10 site and PR, respecively.  1001 - 1032 are the 2016 multireservoir survey lakes + Falls Lake
+  filter(lake_id <= 1000) # 999 and 1000 are handpicked R10 site and PR, respectively.  1001 - 1032 are the 2016 multireservoir survey lakes + Falls Lake
 
 # Add visit 2 for 250 and 281 (CIN sites with lost cooler) and 147/148 (ADA sites revisited for quality)
 lake.list <- lake.list %>% 

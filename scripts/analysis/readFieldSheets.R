@@ -102,7 +102,7 @@ janitor::get_dupes(fld_sheet %>% select(lake_id, site_id, visit))
 fld_sheet %>% filter(visit == 2) %>% distinct(lake_id) # [1/2/2024] two visits at 250, 281, 147, 148.  
 fld_sheet %>% filter(grepl(c("250|281|147|148"), lake_id)) %>%
   select(lake_id, site_id, visit, trap_deply_date)
-
+dim(fld_sheet) #2052, 83  [4/3/2024]
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
 get_dg_sheet <- function(paths){
