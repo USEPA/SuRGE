@@ -11,7 +11,7 @@ fld_sheet
 # First, split out data fields not associated with a depth
 fld_sheet_no_depth <- fld_sheet %>% 
   select(lake_id, site_id, visit, lat, long, eval_status,
-         chm_vol_l,
+         #chm_vol_l, # pulled from fld_sheet in calculateDiffusion.  can be dropped
          site_depth, # numeric, total depth
          trap_deply_date) %>% # keep this to indicate sample_year
   rename(sample_date = trap_deply_date)
@@ -78,8 +78,8 @@ fld_sheet_sonde <- fld_sheet_sonde %>%
 # Now merge in non depth specific fields from fld_sheets
 fld_sheet_sonde1 <- full_join(fld_sheet_sonde, fld_sheet_no_depth)
 dim(fld_sheet_sonde) # 4104, 26 [4/3/2024]
-dim(fld_sheet_no_depth) #2052, 8 [4/3/2024]
-dim(fld_sheet_sonde1) #4104, 31 good [4/3/2024]
+dim(fld_sheet_no_depth) #2052, 9 [4/3/2024]
+dim(fld_sheet_sonde1) #4104, 32 good [4/3/2024]
 
 # Will merge on common names: lake_id, site_id, visit
 names(chemistry)[names(chemistry) %in% names(fld_sheet_sonde1)] #lake_id, site_id, sample_depth, visit
@@ -88,7 +88,7 @@ class(chemistry$lake_id) == class(fld_sheet_sonde1$lake_id) # TRUE
 class(chemistry$site_id) == class(fld_sheet_sonde1$site_id) # TRUE
 
 # Check dimensions
-dim(chemistry) # 320, 125 [4/3/2024]
+dim(chemistry) # 265, 124 [4/3/2024]
 dim(fld_sheet_sonde1) # 4104, 32 [4/3/2024]
 
 # Check for correspondence among unique identifiers
@@ -103,7 +103,7 @@ fld_sheet_sonde1 %>% filter(!(lake_id %in% chemistry$lake_id)) %>%
 
 chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
   relocate(lake_id, site_id, lat, long, sample_date, site_depth, sample_depth, sample_depth_m)
-dim(chem_fld) # 4166, 153 [4/3/2024]
+dim(chem_fld) # 4111, 152 [4/3/2024]
 
 # write to disk for reference in lake reports
 save(chem_fld, file = "output/chem_fld.RDATA")

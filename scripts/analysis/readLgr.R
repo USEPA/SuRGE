@@ -168,7 +168,7 @@ plotCh4 <- gga %>% filter(lake_id == "045", CH4._ppm > 0) %>%
 ggplotly(plotCh4)  
   
 plotCo2 <- gga %>% filter(lake_id == "010") %>%
-  ggplot(aes(RDateTime, CO.d_ppm)) + geom_point() +
+  ggplot(aes(RDateTime, CO2._ppm)) + geom_point() +
   scale_x_datetime(labels=date_format ("%m/%d %H:%M")) +
   ggtitle("045")
 ggplotly(plotCo2)  

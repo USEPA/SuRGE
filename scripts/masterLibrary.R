@@ -6,8 +6,8 @@ library(janitor) # format dataframe names
 library(scales) # for ggplot2 datetime formatting 
 library(plotly) # interactive plots (readLgr.R)
 library(spsurvey) # lake design
-library(leaflet) # for lake design printables
-library(mapview) # for lake design printables
+#library(leaflet) # for lake design printables
+#library(mapview) # for lake design printables
 library(tictoc) # timing operations
 library(gridExtra) # grid.arrange() for multiple panels per page on .pdf
 library(lubridate) #for adjusting time offsets in readLGR

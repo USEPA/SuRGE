@@ -43,17 +43,17 @@ paths <- paste0(userPath,  "data/", labs)
 
 get_data_sheet <- function(paths){
   #d <-  
-  fs::dir_ls(path = paths, # see above
-             regexp = 'surgeData', # file names containing this pattern
-             recurse = TRUE) %>% # look in all subdirectories
+    fs::dir_ls(path = paths, # see above
+               regexp = 'surgeData', # file names containing this pattern
+               recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     #.[4] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
-                           na = c("NA", "", "N/A", "n/a")) %>%
+                            na = c("NA", "", "N/A", "n/a")) %>%
                   # Assign the filename to the visit column for now
-                 mutate(visit = .y)) %>% # assign file name
+                  mutate(visit = .y)) %>% # assign file name
     # remove empty dataframes.  Pegasus put empty Excel files in each lake
     # folder at beginning of season.  These files will be populated eventually,
     # but are causing issues with code below
@@ -73,7 +73,7 @@ get_data_sheet <- function(paths){
                long = case_when(long > 0 ~ long * -1, # longitude should be negative
                                 TRUE ~ long),
                # Empty columns cause data-class conflicts; make classes identical
-               across(contains(c("lat", "long")), ~ as.numeric(.)),
+               across(c(lat, long), ~ as.numeric(.)),
                across(contains("comment"), ~ as.character(.)),
                across(contains("flag"), ~ as.character(.)),
                across(contains("extn"), ~ as.character(.)),
@@ -85,8 +85,8 @@ get_data_sheet <- function(paths){
                                                  format = "%Y-%m-%d%H:%M:%S",
                                                  tz = "UTC"),
                trap_rtrvl_date_time = as.POSIXct(x = paste0(trap_rtrvl_date, trap_rtrvl_time),
-                                                format = "%Y-%m-%d%H:%M:%S",
-                                                tz = "UTC"),
+                                                 format = "%Y-%m-%d%H:%M:%S",
+                                                 tz = "UTC"),
                chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
                                                   format = "%Y-%m-%d%H:%M:%S",
                                                   tz = "UTC"))
@@ -167,7 +167,7 @@ all_exet <- bind_rows(
 ) %>%
   mutate(trap_deply_date = case_when(type == "trap" ~ trap_deply_date,
                                      TRUE ~ dttr2::NA_Date_))
-
+dim(all_exet) #2713
   
   
   

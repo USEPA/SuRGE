@@ -49,7 +49,8 @@ get_gc <- function(paths){
                #                   TRUE ~ NA_real_),
                sample = str_remove(sample, '\\.'), # remove "." from exetainer codes
                sample = str_remove(sample, '\\_'), # remove "_" from exetainer codes
-               sample = gsub("sg", "SG", sample, ignore.case = TRUE)) %>% # sg -> SG
+               sample = gsub("sg", "SG", sample, ignore.case = TRUE), # sg -> SG
+               sample = sub("\\R10+$", "", sample)) %>% # replace "R10" from the END of sample code.
         # "flag" and "analyte" are in different orders across the spreadsheets.
         # Need to make uniform
         # case_when works even if the specified column isn't present
@@ -108,32 +109,34 @@ all_exet %>%
 # It appears that the Region 10 and Cincinnati field crews used exetainers 
 # with identical sample codes in 2020.  I asked Kit and Pegasus to investigate
 # I asked Katie Buckler to check on duplicated codes from ADA # [2/28/2024]
-all_exet %>% janitor::get_dupes(sample) %>% print(n=Inf) #92 dups
+# Pegasus inadvertantly sent ADA two ...0153 exetainers in 2022 and 2023.
+# These are air and DG samples.  Probably discard the air and compare DG to
+# dups to determine which lakes they are from.
+all_exet %>% janitor::get_dupes(sample) %>% print(n=Inf) #136 dups
+# which are not from 2020,  just 0153, see above
 all_exet %>% janitor::get_dupes(sample) %>% 
   filter(!grepl("SG20", sample)) %>% # if interested in those other than 2020 codes
   left_join(., lake.list %>% select(lake_id, lab) %>% 
               mutate(lake_id = as.character(lake_id))) %>%
   left_join(gc %>% select(sample, file)) %>%
-  select(-file) %>% # pegasus doesn't need name of GC file
-  write.csv(., "output/duplicatedExetainers.csv")
+  select(-file)
 
 # omit duplicates.  We can't determine which lake/site they came from.
 all_exet <- all_exet[!(duplicated(all_exet$sample) | duplicated(all_exet$sample, fromLast = TRUE)), ]
 
-dim(all_exet) #2621, down 92, good
+dim(all_exet) #2577, down 136, good
 
 # MERGE EXETAINER CODES AND GC DATA-----------------
 # [2/23/2026] need to come back and resolve
 # any unmatched records
 dim(gc) #1289 [2/26/24]
-dim(all_exet) #2621
+dim(all_exet) #2577
 gc_lakeid <- full_join(gc, all_exet)
-dim(gc_lakeid) # 2803
+dim(gc_lakeid) # 2755
 
 # omit rows that don't have gas data.  
 # as of [4/2/2024] I haven't read in DG or AIR gc data
-# These are codes from field sheets
-# that I haven't found a GC match yet.  Note that some trap samples were run
+# Note that some trap samples were run
 # on Shimadzu and therefore don't have n2, ar, or O2 percent.  Filter on ppm variables.
 # Had some trouble with this operation.  Ended up using tidyverse 1.3.1 approach
 # https://stackoverflow.com/questions/41609912/remove-rows-where-all-variables-are-na-using-dplyr
@@ -142,25 +145,30 @@ gc_lakeid <- gc_lakeid %>% rowwise() %>%
 dim(gc_lakeid) # 1289
 
 # How many are missing lake_id and/or site_id
-# 64 samples with GC data, but no matching code?  
+# 60 samples with GC data, but no matching code?  
 gc_lakeid %>% filter(is.na(lake_id), # no lake_id 
                      !grepl("r", sample)) # exclude reruns which are indicated with an r and are not in field sheets  
 # How many are missing lake_id and/or site_id
 gc_lakeid %>% filter(is.na(site_id), # no site_id 
                      !grepl("r", sample)) # no reruns.
 # the unmatched codes are from several years.  In a few cases the GC codes
-# were formatted incorrectly, Kit and Pegasus are working on these.  Need to revisit
-gc_lakeid %>% filter(is.na(site_id), (!grepl("r", sample))) %>% pull(sample) %>%
+# were formatted incorrectly, Kit and Pegasus are working on these.  The
+# many 2020 codes were stripped out due to duplication and may account for some of these.
+# Have Pegasus look at 21, 22, and 23 codes.Need to revisit
+gc_lakeid %>% filter(is.na(site_id), 
+                     !grepl("r", sample),
+                     !grepl("SG20", sample)) %>% 
+  pull(sample) %>%
   write.csv(., "output/exetainersCodesOnGcButNotFieldSheets.csv")
   
 
 # remove records without lake_id, but gotta keep the repeat injections
-# from 1289 to 1187, dropped 102,  good (see row 144 above)
+# from 1289 to 1229, dropped 60,  good (see row 144 above)
 gc_lakeid <- gc_lakeid %>% 
   filter(case_when(
     !is.na(lake_id) ~ TRUE, # retain observations that have a lake_id value
     is.na(lake_id) & grepl("r", sample) ~ TRUE)) # keep if no lake_id but have "r'" in code (reruns)
-dim(gc_lakeid) #1225
+dim(gc_lakeid) #1229
 
 
 # DEAL WITH REPEAT INJECTIONS---------
@@ -176,18 +184,18 @@ rerun <- gc_lakeid %>%
 dim(rerun) #118
 
 # 2.  Do all reruns have a value for the original analyses?
-# 20 reruns without corresponding initial run.  These are likely
+# 10 reruns without corresponding initial run.  These are likely
 # samples where Kit needs to fix Exetainer codes.  Make sure these
 # get incorporated into final DF.
 rerun$sample[!(rerun$sample %in% gc_lakeid$sample)]
 
 # 3. remove reruns from gc_lakeid
 gc_lakeid <- gc_lakeid %>% filter(!grepl("r", sample))
-dim(gc_lakeid) #1107, down by 118 from 1225, good
+dim(gc_lakeid) #1111, down by 118 from 118, good
 
 # 4. Merge reruns into gc_lakeid
 gc_lakeid <- full_join(gc_lakeid, rerun)
-dim(gc_lakeid) #1117, up 10 from 1069, these are rerun samples without corresponding initial run.
+dim(gc_lakeid) #1121, up 10 from 1069, these are rerun samples without corresponding initial run.
 
 # 5. replace flagged values with rerun values
 gc_lakeid <- gc_lakeid %>%
@@ -212,7 +220,7 @@ gc_lakeid <- gc_lakeid %>%
          total = sum((ch4_ppm/10000) + (co2_ppm/10000) + (n2o_ppm/10000) + n2_percent + o2_percent + ar_percent)) %>%
   select(-matches("flag|rerun"))
 
-dim(gc_lakeid) #1117
+dim(gc_lakeid) #1121
 
 
 
