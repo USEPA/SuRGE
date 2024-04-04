@@ -94,7 +94,10 @@ clean_chem <- function(data) {
                    all(str_detect(., "H")) ~ "H",
                    all(str_detect(., "S")) ~ "S",
                     # All other combinations should result in NA
-                    TRUE ~ NA_character_))) %>%
+                    TRUE ~ NA_character_)), 
+           # Retain units columns; look for any non-NA value
+           across(contains("unit"), 
+                  ~ min(., na.rm = TRUE))) %>%
   # ,
   #          
   #          across(contains("units"),
@@ -104,7 +107,9 @@ clean_chem <- function(data) {
   #   filter(!(sample_type == "duplicate")) %>% # now we can remove dups
   #   rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
     # select(-sample_type) %>% # no longer need sample_type (all unknowns)
-    ungroup() # remove grouping
+    ungroup() %>% # remove grouping
+    fill(contains("unit"), .direction = "updown") %>% # fill any NA in units columns 
+    select(lake_id:visit, order(colnames(.))) # reorder columns
   #   mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
   #                 ~ ifelse(. == "no value", NA, .)))
   # 
