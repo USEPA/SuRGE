@@ -61,6 +61,10 @@ get_data_sheet <- function(paths){
     # format data
     map(., function(x) { 
       janitor::clean_names(x) %>%
+        rename_with(~gsub("chl", "chla_sonde", .), #specify sonde
+                    contains("chl")) %>%
+        rename_with(~gsub("phyc", "phycocyanin_sonde", .), #specify sonde
+                    contains("phyc")) %>%
         # Assign value to visit based on the Excel filename
         mutate(visit = if_else(str_detect(visit, "visit2"),
                                2, 1, missing = 1), 

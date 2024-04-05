@@ -64,8 +64,8 @@ fld_sheet_sonde <- fld_sheet_sonde %>%
   pivot_wider(names_from = name, values_from = value) %>% 
   # convert numeric back to numeric
   mutate(across(.cols = c(site_id, sample_depth_m, temp, 
-                          do_mg, sp_cond, ph, chl, turb,
-                          visit), 
+                          do_mg, sp_cond, ph, chla_sonde, turb,
+                          phycocyanin_sonde, visit), 
                 ~ as.numeric(.x))) %>%
   # sort sonde parameters alphabetically
   select(sort(tidyselect::peek_vars())) %>%
@@ -106,4 +106,6 @@ chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
 dim(chem_fld) # 4111, 152 [4/3/2024]
 
 # write to disk for reference in lake reports
-save(chem_fld, file = "output/chem_fld.RDATA")
+save(chem_fld, file = paste0("output/chem_fld_", Sys.Date(), ".RData"))
+
+     

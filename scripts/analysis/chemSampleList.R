@@ -50,7 +50,7 @@ metals <- c("al", "as", "ba", "be", "ca",
             "k", "li",  "mg", "mn", "na",
             "ni", "pb", "p", "sb", "si",
             "sn", "sr", "s", "v", "zn")
-algae.nar <- c("microcystin", "phycocyanin", "chla")
+algae.nar <- c("microcystin", "phycocyanin_lab", "chla_lab")
 algae.gb <- c("taxonomy", "physiology")
 
 # 5. create df of chem samples collected from qa.qc lakes.
@@ -127,7 +127,7 @@ chem.samples.foo <- chem.samples %>%
   # use ! to exclude any samples that meet these criteria
   # R10 in 2018 did not include doc, anions, taxonomy, physiology, or metals. 
   filter(!((lab == "R10" & sample_year == 2018) & # for R10 sampling in 2018
-             (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
+             (analyte %in% c("microcystin", "phycocyanin_lab", "doc") | # that contain these
                 analyte_group %in% c("algae.gb", "anions", "metals")))) %>% 
   # R10 only collected at shallow depth in 2018
   filter(!((lab == "R10" & sample_year == 2018) & # for R10 sampling in 2018
@@ -136,8 +136,8 @@ chem.samples.foo <- chem.samples %>%
   filter(!((sample_year == 2020) & # for R10, RTP, and CIN samples in 2020
              (analyte == "doc" | # that contain these
                 analyte_group %in% c("algae.gb", "anions")))) %>% # or these
-  # chla and phycocyanin blanks not collected at lake_id == 67
-  filter(!(lake_id == "67" & analyte %in% c("chla", "phycocyanin") & sample_type == "blank")) %>%
+  # chla and phycocyanin_lab blanks not collected at lake_id == 67
+  filter(!(lake_id == "67" & analyte %in% c("chla_lab", "phycocyanin_lab") & sample_type == "blank")) %>%
   # no deep chemistry at 69_lacustrine (forgot van dorn)
   filter(!(lake_id == "69_lacustrine" & sample_depth == "deep")) %>% 
   # blanks collected at 238, but no duplicates
@@ -149,7 +149,7 @@ chem.samples.foo <- chem.samples %>%
   # toc and doc blanks not collected from 67.  No DI brought to field
   filter(!(lake_id == "67" & sample_type == "blank" & analyte %in% c("doc", "toc"))) %>%
   # chl unknown filter tore during sample prep at 148.  no replacement available
-  filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla" & visit == 1)) %>%
+  filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla_lab" & visit == 1)) %>%
   # no DOC blank collected at 275
   filter(!(lake_id == "275" & sample_type == "blank" & analyte == "doc")) %>%
   # no DOC blank collected at 64

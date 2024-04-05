@@ -61,10 +61,11 @@
 clean_chem <- function(data) {
   data %>%
     rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores.
-    # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC ? 11/4/2022, no tteb.foo flags in df? -JB
-    mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
-                    ifelse(is.na(get(word(paste(cur_column(), .), sep = "_"))) == TRUE, 
-                           "no value", .))) %>%
+    # JB 4/4/2024 I don't think this is needed
+    # # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC ? 11/4/2022, no tteb.foo flags in df? -JB
+    # mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
+    #                 ifelse(is.na(get(word(paste(cur_column(), .), sep = "_"))) == TRUE, 
+    #                        "no value", .))) %>%
     group_by(lake_id, site_id, sample_depth, visit) %>%
     filter(!(sample_type == "blank")) %>% # remove blanks
     # site_id is numeric, but ignored below because it is a grouping variable.
@@ -120,5 +121,5 @@ dim(chemistry_all) # 374, 126 [4/2/2024]
 dim(chemistry) # 265, 124 [4/4/2024], lost analyte_group
 
 names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
-
+# lost analyte_group, do we care?
 

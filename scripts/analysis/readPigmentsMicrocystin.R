@@ -20,8 +20,9 @@ get_chla_data <- function(path, data, sheet) {
     
     rename(sample_type = field_dups, 
            lake_id = waterbody, 
-           chla_units = units, 
-           chla = value)  %>%
+           chla_lab_units = units, 
+           chla_lab = value,
+           chla_lab_flag = chla_flag)  %>%
     
     # mutate(hold_time = collection_date - extraction_date) %>% # get hold time
     # mutate(chla_qual = case_when( # flag with "H" if hold time exceeded
@@ -39,7 +40,7 @@ get_chla_data <- function(path, data, sheet) {
                                        as.Date("2023-08-30")) ~ 2,
                              TRUE ~ 1)) %>%
     select(lake_id, site_id, sample_type, sample_depth, visit,
-           chla, chla_units, chla_flag) 
+           chla_lab, chla_lab_units, chla_lab_flag) 
 
     # unite("chla_flags", chla_qual, chla_ship, sep = " ") %>% 
     #   mutate(chla_flags = if_else( # NA if there are no flags
@@ -63,8 +64,9 @@ get_phyco_data <- function(path, data, sheet) {
     
     rename(sample_type = field_dups, 
            lake_id = waterbody, 
-           phycocyanin_units = units, 
-           phycocyanin = value)  %>%
+           phycocyanin_lab_units = units, 
+           phycocyanin_lab = value,
+           phycocyanin_lab_flag = phyco_flag)  %>%
     
     # mutate(hold_time = collection_date - extraction_date) %>% # get hold time
     # mutate(chla_qual = case_when( # flag with "H" if hold time exceeded
@@ -83,9 +85,9 @@ get_phyco_data <- function(path, data, sheet) {
                              TRUE ~ 1)) %>%
     
     select(lake_id, site_id, sample_type, sample_depth, visit, 
-           phycocyanin, phycocyanin_units, phyco_flag) %>%
+           phycocyanin_lab, phycocyanin_lab_units, phycocyanin_lab_flag) 
     # variable names must be same for aggregateFieldDupsStripFieldBlanks.R
-    rename(phycocyanin_flag = phyco_flag)
+
     
     # unite("phycocyanin_flags", phycocyanin_qual, 
     #       phycocyanin_ship, sep = " ") %>% # merge all flag columns:
@@ -152,13 +154,13 @@ setdiff(chem.samples.foo %>%
 
 # Now lets make sure that all samples were analyzed
 pigments_analyzed <- pigments %>%
-  pivot_longer(cols = c(chla, phycocyanin),
+  pivot_longer(cols = c(chla_lab, phycocyanin_lab),
                 names_to = "analyte",
               values_to = "concentration") %>%
   select(lake_id, sample_type, sample_depth, visit, analyte)
 
 pigments_collected <- chem.samples.foo %>% 
-  filter(analyte %in% c("phycocyanin", "chla"),
+  filter(analyte %in% c("phycocyanin_lab", "chla_lab"),
          sample_year != 2018, # 2018 R10 not sent to NAR
           #sample_year < 2023, #
          sample_type != "blank") %>% # NAR not sure how to handle blanks.  Active issue in hollister's repo
