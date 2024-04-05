@@ -16,7 +16,26 @@ emissions <- mutate(emissions,
                      co2_trate_mg_h = co2_drate_mg_h_best + co2_erate_mg_h,
                      ch4_trate_mg_h = ch4_drate_mg_h_best + ch4_erate_mg_h)
 
-
+# FORMAT TO BE CONSISTENT WITH CHEM DATA
+emissions <- emissions %>%
+  # adopt clearer names.  Remove units
+  rename_with(~gsub("erate_mg_h", "ebullition", .),
+              contains("erate_mg_h")) %>%
+  rename_with(~gsub("drate_mg_h_best", "diffusion_best", .),
+              contains("drate_mg_h_best")) %>%
+  rename_with(~gsub("trate_mg_h", "total", .),
+              contains("trate_mg_h")) %>%
+  # define units
+  mutate(ch4_ebullition_units = "mg_ch4_m2_h",
+         co2_ebullition_units = "mg_co2_m2_h",
+         n2o_ebullition_units = "mg_n2o_m2_h",
+         ch4_diffusion_units = "mg_ch4_m2_h",
+         co2_diffusion_units = "mg_co2_m2_h",
+         ch4_total_units = "mg_ch4_m2_h",
+         co2_total_units = "mg_co2_m2_h") %>%
+  # arrange columns
+  select(lake_id, visit, site_id, # these first
+         sort(tidyselect::peek_vars())) # all others alphabetical
 
 # # CO2 EQUIVALENTS------------------
 # source("ohio2016/scriptsAndRmd/co2Equiv.R")
