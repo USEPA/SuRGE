@@ -86,7 +86,7 @@ clean_chem <- function(data) {
                    all(str_detect(., "ND H S")) ~ "ND H S",
                    all(str_detect(., "L H S")) ~ "L H S",
                    all(str_detect(., "ND.*H")) ~ "ND H",
-                   all(str_detect(., "L.*H")) ~ "L H",
+                   all(str_detect(., "L.*H|H.*L")) ~ "L H",
                    all(str_detect(., "ND.*S")) ~ "ND S",
                    all(str_detect(., "L.*S")) ~ "L S",
                    all(str_detect(., "H.*S")) ~ "H S",
