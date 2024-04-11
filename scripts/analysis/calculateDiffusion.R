@@ -84,11 +84,11 @@ time.taken = end.time - start.time
 print(round(time.taken,2))
 
 #Takes ~3hr to compile data 
-#save(data.gga.ch4.list,file="C:/R_Projects/SuRGE/inputData/input.ch4.list.Rdata")
-#save(data.gga.co2.list,file="C:/R_Projects/SuRGE/inputData/input.co2.list.Rdata")
+#save(data.gga.ch4.list,file="inputData/input.ch4.list.Rdata")
+#save(data.gga.co2.list,file="inputData/input.co2.list.Rdata")
 
-#load(file="C:/R_Projects/SuRGE/inputData/input.ch4.list.Rdata")
-#load(file="C:/R_Projects/SuRGE/inputData/input.co2.list.Rdata")
+#load(file="inputData/input.ch4.list.Rdata")
+#load(file="inputData/input.co2.list.Rdata")
 
 
 #pdf("output/figures/curveFits.pdf")

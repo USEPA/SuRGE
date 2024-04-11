@@ -2,10 +2,13 @@
 # OUT2 created in "calculateDiffusion.R"
 
 
-dim(OUT2) #1493 observations
-dim(eb_results) #1727 observation
+dim(OUT2) #1646 observations
+unique(OUT2$lake_id) # there is an <NA>
+OUT2 %>% filter(is.na(lake_id)) # one observation of NAs
+OUT2 <- OUT2 %>% filter(!is.na(lake_id))
+dim(eb_results) #1739 observation
 emissions <- full_join(eb_results, OUT2)
-dim(emissions) #1850
+dim(emissions) #1867
 
 
 
