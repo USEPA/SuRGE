@@ -30,91 +30,50 @@ gga_4 <- gga_4 %>% mutate(CO2.case = ifelse(co2Status == "done", "a",
 n <- length(unique(paste(gga_4$lake_id, gga_4$site_id, gga_4$visit)))
 temp <- rep(NA, n)
 
-#Separate the input formatting from the flux calculations to deal with long run time
-#Format list of input gga files for methane and for CO2
-data.gga.ch4.list  <- list()
-data.gga.co2.list <- list()
+tic()
 
-start.time <- Sys.time()  # start timer
-
-for (i in 1:n) {  # For each unique site
-  site.lake.visit.i <- unique(paste(gga_4$site_id, gga_4$lake_id, gga_4$visit))[i]
-  site.i <- stringr::word(site.lake.visit.i, 1) %>% as.numeric() # extract characters before space.  site_id is numeric.
-  lake.i <- stringr::word(site.lake.visit.i, 2) # extract characters after space. lake_id is character  
-  visit.i <- stringr::word(site.lake.visit.i, 3) # extract characters after space. lake_id is character 
-  
-  # Need chamber volume.  SEE chamberVolume.R 
-  chmVol.L.i <- fld_sheet %>% filter(site_id == site.i, 
-                                     lake_id == lake.i, visit == visit.i) %>% 
-    select(chm_vol_l) %>% pull()   
-  
-  data.i.ch4 <- filter(gga_4,  # extract data
+#foo is a list containing the results
+foo <- gga_4 %>%
+  left_join(fld_sheet %>% select(lake_id, site_id, visit, chm_vol_l)) %>% # bring in chamber volume
+  group_split(lake_id, site_id, visit) %>% # dump each group into list element
+  #.[1:10] %>% #work with subset
+  map(function(x) {
+    
+    ch4.data <- filter(x,  # extract data
                        RDateTime >= ch4DeplyDtTm, # based on diff start time
-                       RDateTime <= ch4RetDtTm, # based on diff end time
-                       site_id == site.i,
-                       lake_id == lake.i, 
-                       visit == visit.i)  %>%
-    # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
-    mutate(elapTime = RDateTime - RDateTime[1], # Calculate elapsed time (seconds).
-           chmVol.L = chmVol.L.i[1]) %>%
-    select(lake_id, site_id, visit, CH4._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm)  # Pull out data of interest
-  
-  data.gga.ch4.list[[i]]<-data.i.ch4 
-  
-  data.i.co2 <- filter(gga_4,  # extract data
+                       RDateTime <= ch4RetDtTm) %>% # based on diff end time
+      # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
+      mutate(elapTime = RDateTime - RDateTime[1]) %>% # Calculate elapsed time (seconds).
+      rename(chmVol.L = chm_vol_l) %>%
+      select(lake_id, site_id, visit, CH4._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm,co2Notes)  # Pull out data of interest
+    
+    co2.data <- filter(x,  # extract data
                        RDateTime >= co2DeplyDtTm, # based on diff start time
-                       RDateTime <= co2RetDtTm, # based on diff end time
-                       site_id == site.i,
-                       lake_id == lake.i, 
-                       visit == visit.i)  %>%
-    # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
-    mutate(elapTime = RDateTime - RDateTime[1], # Calculate elapsed time (seconds).
-           chmVol.L = chmVol.L.i[1]) %>%  # subscripting needed to remove name
-    select(lake_id, site_id, visit, CO2._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm,co2Notes)  # Pull out data of interest
-  
-  data.gga.co2.list[[i]]<-data.i.co2
-  
-  print(i)
-}
+                       RDateTime <= co2RetDtTm) %>% # based on diff end time
+      # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
+      mutate(elapTime = RDateTime - RDateTime[1]) %>% # Calculate elapsed time (seconds).
+      rename(chmVol.L = chm_vol_l) %>%
+      select(lake_id, site_id, visit, CO2._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm,co2Notes)  # Pull out data of interest
+    
+    return(list("ch4" = ch4.data, "co2" = co2.data)) # returns a nested list
+    print(i)
+  }) %>%
+  flatten() # simplify list to a depth of one
 
-end.time = Sys.time()
+data.gga.ch4.list <- foo[grep("ch", names(foo))] #put all CH4 data into new list
+data.gga.co2.list <- foo[grep("co", names(foo))] # put all CO2 data into new list
 
-time.taken = end.time - start.time
+toc()
 
-print(round(time.taken,2))
-
-#Takes ~3hr to compile data 
-#save(data.gga.ch4.list,file="C:/R_Projects/SuRGE/inputData/input.ch4.list.Rdata")
-#save(data.gga.co2.list,file="C:/R_Projects/SuRGE/inputData/input.co2.list.Rdata")
-
-#load(file="C:/R_Projects/SuRGE/inputData/input.ch4.list.Rdata")
-#load(file="C:/R_Projects/SuRGE/inputData/input.co2.list.Rdata")
-
-
-#pdf("output/figures/curveFits.pdf")
-co<-parallel::detectCores()
-
-n.core = 4 
-
-cl1 = makeCluster(n.core) # number of cores you want to use
-
-registerDoParallel(cl1)
-
-# make sure each cluster has the packages used 
-
-cllibs <- clusterEvalQ(cl1, c(library(dplyr), library(minpack.lm))) # exports packages to each core
-
-# exports all things in workspace to each core
-# clusterExport(cl = cl1, varlist = ls(), envir = environment()) 
-clusterExport(cl = cl1, varlist = ls(pattern = "data.gga")) 
+#Now calculate fluxes on input list
 
 start.time <- Sys.time()
 
-out=NULL
+OUT=NULL
 
 # Run the model
-OUT =  foreach(i = 1:length(data.gga.ch4.list))%dopar% {   
-  
+#OUT =  foreach(i = 1:length(data.gga.ch4.list))%dopar% {   
+for(i in 1:length(data.gga.ch4.list)){  
   site_id <- data.gga.ch4.list[[i]]$site_id[1]
   lake_id <- data.gga.ch4.list[[i]]$lake_id[1]
   visit <- data.gga.ch4.list[[i]]$visit[1]
@@ -227,6 +186,8 @@ OUT =  foreach(i = 1:length(data.gga.ch4.list))%dopar% {
   co2note<-data.gga.co2.list[[i]]$co2Notes[1]
   nco2<-length(data.gga.co2.list[[i]]$CO2._ppm)
   nch4<-length(data.gga.ch4.list[[i]]$CH4._ppm)
+  dh2o<-max(data.gga.ch4.list[[i]]$H2O._ppm)-min(data.gga.ch4.list[[i]]$H2O._ppm)
+  mh2o<-mean(data.gga.ch4.list[[i]]$H2O._ppm)
   
   out<-data.frame(site_id, lake_id, visit, 
                   ch4.lm.slope, ch4.lm.drate.mg.h, 
@@ -236,7 +197,7 @@ OUT =  foreach(i = 1:length(data.gga.ch4.list))%dopar% {
                   co2.lm.slope, co2.lm.drate.mg.h, 
                   co2.lm.aic, co2.lm.r2, co2.lm.se, co2.lm.pval,
                   co2.ex.aic, co2.ex.se, co2.ex.r2, co2.ex.slope, 
-                  co2.ex.k, co2.ex.drate.mg.h,co2note,nco2,nch4, row.names = i)
+                  co2.ex.k, co2.ex.drate.mg.h,co2note,nco2,nch4,dh2o,mh2o, row.names = i)
   colnames(out)<-c("site_id", "lake_id", "visit", 
                    "ch4.lm.slope", "ch4.lm.drate.mg.h", 
                    "ch4.lm.aic", "ch4.lm.r2", "ch4.lm.se", "ch4.lm.pval",
@@ -245,9 +206,11 @@ OUT =  foreach(i = 1:length(data.gga.ch4.list))%dopar% {
                    "co2.lm.slope", "co2.lm.drate.mg.h", 
                    "co2.lm.aic", "co2.lm.r2", "co2.lm.se", "co2.lm.pval",
                    "co2.ex.aic", "co2.ex.se", "co2.ex.r2", "co2.ex.slope", 
-                   "co2.ex.k", "co2.ex.drate.mg.h","co2note","nco2","nch4")
+                   "co2.ex.k", "co2.ex.drate.mg.h","co2note","nco2","nch4",
+                   "dh2o","mh2o")
 
-  out
+  OUT[[i]] = out
+  
   # Plots
   # CH4 first
   # ch4.ex.pred <- try(
@@ -324,20 +287,14 @@ OUT =  foreach(i = 1:length(data.gga.ch4.list))%dopar% {
 
 #--------------------------------------
 end.time = Sys.time()
-
 time.taken = end.time - start.time
-
 print(round(time.taken,2))
-
-stopCluster(cl1)  # close the clusters
-
 dev.off()
-start.time;Sys.time() 
 
 OUTb<-do.call(bind_rows, OUT)
 
 #A lot faster to run now
-#save(OUT, file="output/diffusiveOUT.RData")
+#save(OUTb, file="output/diffusiveOUT.RData")
 #load("output/diffusiveOUT.RData") # load if not run above
 
 
@@ -346,13 +303,15 @@ OUTb<-do.call(bind_rows, OUT)
 # Choose best rate.  Just use AIC
 # Cowan lake manual syringe sample data wouldn't support ex model.
 # Include is.na(ex.aic) to accommodate this.
+a = case_when(OUTb$co2note=="unstable start" ~ "linear")
+b = case_when(OUTb$co2.lm.aic <= OUTb$co2.ex.aic ~ "linear")
+c = case_when(is.na(OUTb$co2.ex.k)~ "linear")
+
 OUT2 <- mutate(OUTb, 
-              co2.best.model = ifelse(co2note=="unstable start", "linear", ifelse(is.na(co2.ex.k),"linear",
-                                      ifelse(co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic), 
-                                           "linear", "exponential"))),
-              co2.drate.mg.h.best = ifelse(co2.best.model == "linear",
+              co2.best.model = ifelse(!is.na(a)|!is.na(b)|!is.na(c),"linear","exponential"),
+              co2.drate.mg.h.best = if_else(co2.best.model == "linear",
                                            co2.lm.drate.mg.h, co2.ex.drate.mg.h),
-              ch4.best.model = ifelse(ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic), 
+              ch4.best.model = if_else(ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic), 
                                       "linear", "exponential"),
               ch4.drate.mg.h.best = ifelse(ch4.best.model == "linear",
                                            ch4.lm.drate.mg.h, ch4.ex.drate.mg.h),
@@ -360,6 +319,19 @@ OUT2 <- mutate(OUTb,
                                       ch4.lm.slope-ch4.lm.se,ch4.ex.k-ch4.ex.se),
               co2.se.overlap =ifelse(co2.best.model == "linear",
                                      co2.lm.slope-co2.lm.se,co2.ex.k-co2.ex.se)) 
+
+summary(OUT2)
+
+#Check the number of lakes that have at least some gas data-- 109 which is total number
+#Check the average number of independent site estimates in each lake (and min and max)
+test<-OUT2 %>%
+  group_by(lake_id)%>%
+  summarise(a=length(!is.na(co2.drate.mg.h.best)),b=length(!is.na(ch4.drate.mg.h.best)))
+
+#Fraction of usable ch4 data
+(1646-(length(filter(OUT2,is.na(ch4.drate.mg.h.best)))))/1646
+#Fraction of usable co2 data
+(1646-40)/1646
 
 #Maximum methane diffusion rate whose standard error overlaps zero
 #66 mg CH4 m-2 d-1
