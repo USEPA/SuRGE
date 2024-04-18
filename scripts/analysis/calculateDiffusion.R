@@ -65,38 +65,7 @@ data.gga.co2.list <- foo[grep("co", names(foo))] # put all CO2 data into new lis
 
 toc()
 
-<<<<<<< HEAD
 #Now calculate fluxes on input list
-=======
-print(round(time.taken,2))
-
-#Takes ~3hr to compile data 
-#save(data.gga.ch4.list,file="inputData/input.ch4.list.Rdata")
-#save(data.gga.co2.list,file="inputData/input.co2.list.Rdata")
-
-#load(file="inputData/input.ch4.list.Rdata")
-#load(file="inputData/input.co2.list.Rdata")
-
-
-#pdf("output/figures/curveFits.pdf")
-co<-parallel::detectCores()
-
-n.core = 4 
-
-cl1 = makeCluster(n.core) # number of cores you want to use
-
-registerDoParallel(cl1)
-
-# make sure each cluster has the packages used 
-
-cllibs <- clusterEvalQ(cl1, c(library(dplyr), library(minpack.lm))) # exports packages to each core
-
-# exports all things in workspace to each core
-# clusterExport(cl = cl1, varlist = ls(), envir = environment()) 
-clusterExport(cl = cl1, varlist = ls(pattern = "data.gga")) 
->>>>>>> f4c012225c09cc90f6166a9752f10a886d9102af
-
-start.time <- Sys.time()
 
 OUT=NULL
 
@@ -314,6 +283,7 @@ for(i in 1:length(data.gga.ch4.list)){
   
 }
 
+#pdf("output/figures/curveFits.pdf")
 #--------------------------------------
 end.time = Sys.time()
 time.taken = end.time - start.time
