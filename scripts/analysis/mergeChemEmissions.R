@@ -30,17 +30,18 @@ all_obs <- full_join(chem_fld_wide, # keep all observations
          everything()) # then everything else, unchanged
 
 dim(chem_fld_wide) # 2057, 252
-dim(emissions) # 1863, 33
-dim(all_obs) # 2058, 282
+dim(emissions) # 1868, 33
+dim(all_obs) # 2059, 282
 
 # all observations from emissions are in chem
 emissions[!(with(emissions, paste(lake_id, site_id, visit)) %in% 
-            with(chem_fld_wide, paste(lake_id, site_id, visit)))]
+            with(chem_fld_wide, paste(lake_id, site_id, visit))),]
 
-# 195 observations from chem_fld are not in emissions
-# these are mostly sites that weren't samples but kept in database
+# 191 observations from chem_fld are not in emissions
+# these are mostly sites that weren't sampled but kept in database
 # for potential weight adjustments.  Also includes 69_lacustrine sites
-# with chemistry but no emissions?
+# with chemistry (sonde) but no emissions?  Not sure how this occurred but accurately
+# reflects field sheets.
 chem_fld_wide[!(with(chem_fld_wide, paste(lake_id, site_id, visit)) %in%
                   with(emissions, paste(lake_id, site_id, visit))),
               c("lake_id", "site_id", "visit", "eval_status", "deep_sample_depth_m")] %>%

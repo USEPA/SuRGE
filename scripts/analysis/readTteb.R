@@ -63,7 +63,7 @@ tteb.SURGE2021 <- read_excel(paste0(
 
 tteb.SURGE2022 <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/SURGE_2022_04_01_2024_update.xlsx"))
+  "data/chemistry/tteb/SURGE_2022_04_10_2024_update.xlsx"))
 
 tteb.SURGE2023 <- read_excel(paste0(
   userPath, 
@@ -87,7 +87,7 @@ tteb.SURGE2023 <- read_excel(paste0(
 #          across(everything(), 
 #                 ~ if_else(. == 0, NA_real_, .))) 
 
-# anions ic preliminary data (13 Nov 2023) [not in formal data report 3/29/24]
+# anions ic preliminary data (13 Nov 2023) [not in formal data report 4/11/24]
 tteb.prelim.anions.ic <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_anions_ic.xlsx")) %>%
@@ -235,7 +235,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
-# [3/29/2024] all good!
+# [4/11/2024] all good!
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
@@ -257,9 +257,9 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake data)
 dim(ttebCoc) #854
-dim(tteb) #1161
+dim(tteb) #1173
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 815 records [3/29/2024] 
+nrow(tteb.all) # 827 records [4/11/2024] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -281,7 +281,7 @@ tteb.all <- tteb.all %>%
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
 # missing samples, but four of them were due to instrument failure.
-# many are 2023 samples that haven't delivered data yet [3/29/2024]
+# many are 2023 samples that haven't delivered data yet [4/11/2024]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
@@ -308,12 +308,13 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 # per Sonia, 10/10/2023: As for 212510, we found your submission sheets and checked 
 # the AES run records. It seems like 212510 was not analyzed. Maily, could you see 
 # if you have any records indicating if the vial was spilled or broken? 
+# per Sonia, 4/2/2024: Unfortunately, 212510 was not run for AES and we do not have the sample. 
 
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
-  filter(!(lab_id %in% c(203606, 203165, 203642:203644))) %>% # instrument failure
+  filter(!(lab_id %in% c(212510, 203606, 203165, 203642:203644))) %>% # instrument failure
   filter(!grepl("2023", coc)) %>% # exclude 2023 samples where we are waiting for update
-  select(-contains("notes")) %>%
-  write.table(paste0(userPath, "data/chemistry/tteb/missingTteb04012024.txt"), row.names = FALSE)
+  select(-contains("notes")) #%>%
+  #write.table(paste0(userPath, "data/chemistry/tteb/missingTteb04012024.txt"), row.names = FALSE)
 
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE

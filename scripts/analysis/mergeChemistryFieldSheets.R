@@ -79,7 +79,7 @@ fld_sheet_sonde <- fld_sheet_sonde %>%
 fld_sheet_sonde1 <- full_join(fld_sheet_sonde, fld_sheet_no_depth)
 dim(fld_sheet_sonde) # 4104, 26 [4/3/2024]
 dim(fld_sheet_no_depth) #2052, 9 [4/3/2024]
-dim(fld_sheet_sonde1) #4104, 32 good [4/3/2024]
+dim(fld_sheet_sonde1) #4104, 31 good [4/11/2024]
 
 # Will merge on common names: lake_id, site_id, visit
 names(chemistry)[names(chemistry) %in% names(fld_sheet_sonde1)] #lake_id, site_id, sample_depth, visit
@@ -89,7 +89,7 @@ class(chemistry$site_id) == class(fld_sheet_sonde1$site_id) # TRUE
 
 # Check dimensions
 dim(chemistry) # 265, 124 [4/3/2024]
-dim(fld_sheet_sonde1) # 4104, 32 [4/3/2024]
+dim(fld_sheet_sonde1) # 4104, 31 [4/11/2024]
 
 # Check for correspondence among unique identifiers
 chemistry %>% filter(!(lake_id %in% fld_sheet_sonde1$lake_id)) %>%
@@ -103,7 +103,7 @@ fld_sheet_sonde1 %>% filter(!(lake_id %in% chemistry$lake_id)) %>%
 
 chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
   relocate(lake_id, site_id, lat, long, sample_date, site_depth, sample_depth, sample_depth_m)
-dim(chem_fld) # 4111, 152 [4/3/2024]
+dim(chem_fld) # 4111, 151 [4/3/2024]
 
 # write to disk for reference in lake reports
 save(chem_fld, file = paste0("output/chem_fld_", Sys.Date(), ".RData"))
