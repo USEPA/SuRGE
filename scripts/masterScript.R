@@ -45,7 +45,6 @@ source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.
 # Diffusive emission rates
 source("scripts/analysis/readLgr.R") # read raw LGR data
 source("scripts/analysis/plotCleanLgr.R") # define deployment/retrieval times for chambers
-# CAUTION, MANY HOURS TO RUN. CAN LOAD FROM DISK.  SEE line 258
 source("scripts/analysis/calculateDiffusion.R") # diffusive emission rates.  
 
 # Ebullition rates
