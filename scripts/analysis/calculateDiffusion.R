@@ -15,7 +15,7 @@ good.data <- adjData %>% filter(co2Notes == "unstable start" | co2Status == "don
   select(lake_id, site_id, contains("status"),co2Notes)
 
 # filter down to lake and sites with good data
-gga_4 <- gga_3 %>% filter(paste0(lake_id, site_id) %in% paste0(good.data$lake_id, good.data$site_id)) %>%
+gga_4 <- gga_3 %>% filter(paste(lake_id, site_id) %in% paste(good.data$lake_id, good.data$site_id)) %>%
   left_join(., good.data %>% select(lake_id, site_id, ch4Status, co2Status,co2Notes))
 
 # substitute NA for profiles that are "in progress"
@@ -288,7 +288,6 @@ for(i in 1:length(data.gga.ch4.list)){
 end.time = Sys.time()
 time.taken = end.time - start.time
 print(round(time.taken,2))
-dev.off()
 
 OUTb<-do.call(bind_rows, OUT)
 
