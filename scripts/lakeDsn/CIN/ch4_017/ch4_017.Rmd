@@ -1,0 +1,55 @@
+---
+title: "Design files for CH4-017, Blue Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+**Boating ramps and  restrictions:**	No boat ramps.  Electric motor only.
+
+**Contacts:**	Pondhawk Natural Area is owned by Palm Beach County and is managed by Lee Lietzke 561-233-2517 or 561-506-0362.
+Blue Lake is owned by the City of Boca Raton.  Greg Polidora ((561-393-7960 or 561-409-6576) is the City of Boca contact.
+Another City of Boca contact is Lauren Burack, City Engineer.  All would like site reports.  
+**Access letter sent:**	6/15/23
+**Access info received:**	Greg Polidora and Lauren Burack are informing Boca Raton offices including the Spanish Library where there is parking and access to carry in.  
+Lee Lietzke is informing the county sheriff and the wildlife task force.  Mr. Lietzke will visit to see sampling activities if his schedule fits.  I also informed Patrick Wille, Env. Prog. Supervisor for Palm Beach County.  
+
+
+**Site visit:** actual	Monday 7/17/23
+**Notes:	Potential Alligators!**  SOP for safety around these animals in FL, per Mr. Lietzke, is to assume there are alligators present.  He has seen them in Blue Lake but only a few times during the last 20 years.  
+
+
+## Index Site
+
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-017/017_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-017/017_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-017/ch4_017Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

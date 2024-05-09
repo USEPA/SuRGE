@@ -1,0 +1,47 @@
+---
+title: "Design files for CH4-004, Cotile Lake"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+7km2 Lake Cotile.  There is a bridge bisecting the southern portion of the lake, but it appears to be tall enough to navigate underneath it.  There is only one site south of the bridge.  I expect the water to be about 5 feet deep in that area.
+
+The lake is split into two sections for efficiency if oversample sites are needed.  Be sure to use oversample sites in numeric order within each section.
+
+The lake was drawn down by 8 feet last summer to eradicate nuisance aquatic vegetation.  It was scheduled to be raised up to full pool by early spring 2023.
+
+## Index Site
+Maximum depth is 28 feet near the dam.  I'm guessing sites 3 or 7 will be the Index Site.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/ADA/CH4-004/004_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/ADA/CH4-004/004_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/ADA/CH4-004/ch4_004Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

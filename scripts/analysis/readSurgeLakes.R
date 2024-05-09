@@ -17,3 +17,14 @@ lake.list <- lake.list %>%
                                  TRUE ~ sample_year), # CIN (lakes 250/281) conducted visits 1 and 2 in same year 
          visit = 2) %>% # change visit to vist == 2
   bind_rows(lake.list) # add two new rows to original df
+
+
+lake.list.2016 <- readxl::read_excel(paste0(userPath, 
+                                       "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
+  janitor::clean_names() %>%
+  dplyr::rename(lake_id = site_id) %>%
+  dplyr::rename(nla_id = site_id_2) %>%
+  mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
+           as.numeric(), # convert lake_id to numeric
+         visit = 1) %>% # all lakes except 147, 148, 250, and 281 were only visited once.  see below
+  filter(lake_id > 1000) # 1001 - 1032 are the 2016 multireservoir survey lakes + Falls Lake

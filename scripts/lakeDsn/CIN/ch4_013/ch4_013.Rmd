@@ -1,0 +1,54 @@
+---
+title: "Design files for CH4-013, Concord Pond"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Small Pond (km2)
+
+## Index Site
+NLA reports maximum depth of 1.2m.  Bathymetry map shows 2m near dam.  Site U-01, located near the dam, is likely to be the deepest.
+
+Sounds like a pretty place.  I found this review online:
+Concord pond has been a favorite of ours for the past year. I am an amateur family kayaker. I stumbled on the ponds beautiful back tributaries of fresh cool water and have been hooked every since.
+
+This was our fitfth trip and the waters were higher than usual with a pretty strong current. Ever season I've been there is something new to see. Abundant wild life, moss, fungus and beautiful trees. We packed a lunch and bass fished slowly toward the back.
+
+If you enter the pond from the cement boat ramp left and hug the left bank a bit you'll soon be in 25 foot wide tributary. It's an easy beautiful paddle back.
+
+In the shallowest of water my son caught good sized bass and pickerel. I saw an eagle fly over clutching a bass and multiple juvenile copper head, turtles everywhere and a round a bend a newborn dawn sleeping in some ferns by the banks.
+
+The water is cool and clear. Last time in fall a red fox ran along the bank next to my boat.
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-013/013_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/CIN/CH4-013/013_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/CIN/CH4-013/ch4_013Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```
