@@ -47,7 +47,7 @@ get_data_sheet <- function(paths){
                regexp = 'surgeData', # file names containing this pattern
                recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
-    #.[4] %>%
+    #.[100:101] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
@@ -65,7 +65,7 @@ get_data_sheet <- function(paths){
                     contains("chl")) %>%
         rename_with(~gsub("phyc", "phycocyanin_sonde", .), #specify sonde
                     contains("phyc")) %>%
-        # Assign value to visit based on the Excel filename
+        # Assign value to visit based on the Excel file name
         mutate(visit = if_else(str_detect(visit, "visit2"),
                                2, 1, missing = 1), 
                # format lake_id and site_id.  See Wiki
@@ -102,11 +102,11 @@ get_data_sheet <- function(paths){
 fld_sheet <- get_data_sheet(paths = paths) 
 unique(fld_sheet$lake_id)
 unique(fld_sheet$site_id)
-janitor::get_dupes(fld_sheet %>% select(lake_id, site_id, visit))
+janitor::get_dupes(fld_sheet %>% select(lake_id, site_id, visit)) # no dups
 fld_sheet %>% filter(visit == 2) %>% distinct(lake_id) # [1/2/2024] two visits at 250, 281, 147, 148.  
 fld_sheet %>% filter(grepl(c("250|281|147|148"), lake_id)) %>%
-  select(lake_id, site_id, visit, trap_deply_date)
-dim(fld_sheet) #2052, 83  [4/3/2024]
+  select(lake_id, site_id, visit, trap_deply_date) %>% print(n=Inf)
+dim(fld_sheet) #2052, 83  [5/9/2024]
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
 get_dg_sheet <- function(paths){
