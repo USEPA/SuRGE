@@ -106,7 +106,7 @@ unknown.samples <- unknown.samples %>%
 # R10 and 2020 sampling did not include doc, anions, taxonomy, physiology.  Filter
 # out in step 8.
 chem.samples <- rbind(qa.qc.samples, unknown.samples) %>%
-  full_join(., select(lake.list.chem, lake_id, lab, sample_year)) %>% 
+  full_join(., select(lake.list.chem, lake_id, lab, visit, sample_year)) %>% 
   arrange(sample_year, lab, lake_id, sample_type, sample_depth) %>%
   relocate(sample_year, lab, lake_id, sample_type, sample_depth, analyte)
 
@@ -179,4 +179,5 @@ wpl <- chem.samples.foo %>% filter(lake_id == "308") %>%
 
 # Bind these dfs to main df
 chem.samples.foo <- rbind(chem.samples.foo, lgr, wpl) %>% as_tibble()
+dim(chem.samples.foo) #12,506 [5/9/2024]
                                      

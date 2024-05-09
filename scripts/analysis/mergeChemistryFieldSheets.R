@@ -13,7 +13,9 @@ fld_sheet_no_depth <- fld_sheet %>%
   select(lake_id, site_id, visit, lat, long, eval_status,
          #chm_vol_l, # pulled from fld_sheet in calculateDiffusion.  can be dropped
          site_depth, # numeric, total depth
-         trap_deply_date) %>% # keep this to indicate sample_year
+         trap_deply_date, # keep this to indicate sample_year
+         trap_deply_date_time, # for calculating delta atmospheric pressure
+         trap_rtrvl_date_time) %>% # for calculating delta atmospheric pressure
   rename(sample_date = trap_deply_date)
 
   
