@@ -15,7 +15,7 @@ good.data <- adjData %>% filter(co2Notes == "unstable start" | co2Status == "don
   select(lake_id, site_id, contains("status"),co2Notes)
 
 # filter down to lake and sites with good data
-gga_4 <- gga_3 %>% filter(paste(lake_id, site_id) %in% paste(good.data$lake_id, good.data$site_id)) %>%
+gga_4 <- gga_3 %>% filter(paste0(lake_id, site_id) %in% paste0(good.data$lake_id, good.data$site_id)) %>%
   left_join(., good.data %>% select(lake_id, site_id, ch4Status, co2Status,co2Notes))
 
 # substitute NA for profiles that are "in progress"
@@ -285,9 +285,6 @@ for(i in 1:length(data.gga.ch4.list)){
 
 #pdf("output/figures/curveFits.pdf")
 #--------------------------------------
-end.time = Sys.time()
-time.taken = end.time - start.time
-print(round(time.taken,2))
 
 OUTb<-do.call(bind_rows, OUT)
 
@@ -348,7 +345,7 @@ plot(with(OUT2,ifelse(co2.best.model == "linear",
 plot(with(OUT2,ifelse(ch4.best.model == "linear", 
                      ch4.lm.r2, ch4.ex.r2)))  # CH4:  some low ones to investigate
 
-# If r2 of best model < 0.9, then set to NA
+# If r2 of best model < 0.9, then set to 0
 OUT2 <- mutate(OUT2, 
               co2.drate.mg.h.best = case_when(
                 # (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ NA_real_,

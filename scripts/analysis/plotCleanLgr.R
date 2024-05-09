@@ -33,11 +33,12 @@ missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logica
 # Join with fld_sheet to get site_id and chamb_deply_date_time
 # This join duplicates the time series for each station within
 # each lake
+gga$visit<-as.numeric(gga$visit)
 gga_2 <- gga %>%
   left_join(fld_sheet %>% 
                        filter(!missing_chamb_deply_date_time) %>%
                        select(lake_id, site_id, visit, chamb_deply_date_time), 
-                     by = "lake_id")
+                     by = c("lake_id","visit"))
 
 #3. ADD CO2 AND CH4 RETRIEVAL AND DEPLOYMENT TIMES
 # We may want to model different portions of the time series for CO2 and CH4.
@@ -57,9 +58,9 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "232"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- 15 # numeric component of lake_id, no leading zero(s), formatted as numeric
-
+lake_id.i <- "136"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- "1" # numeric component of lake_id, no leading zero(s), formatted as numeric
+visit_id.i <- "1"
 # this code generates a 3 panel plot used to demonstrate relationship between
 # CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
 # has been resolved. [JB 3/29/2024]
@@ -92,6 +93,7 @@ site_id.i <- 15 # numeric component of lake_id, no leading zero(s), formatted as
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
          site_id == site_id.i, 
+         visit == visit_id.i,
          RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
          RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
          CH4._ppm > 0) %>%
@@ -245,16 +247,17 @@ gga_2 <- gga_2 %>%
   # This won't throw error if specified columns are absent.
   select_if(!names(.) %in% c("co2Notes", "ch4Notes", "co2Status", "ch4Status")) %>%
   # Join with adjDataDf.
-  left_join(., adjData) %>%
+  left_join(., adjData)
   # mutate ensures that all records have deployment and retrieval times for CO2 and CH4
-  mutate(co2DeplyDtTm = case_when(is.na(co2DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
-                            TRUE ~ co2DeplyDtTm), # if not na, then use data supplied from adjDataDf
-         co2RetDtTm = case_when(is.na(co2RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
-                            TRUE ~ co2RetDtTm), # if not na, then use data supplied from adjDataDf
-         ch4DeplyDtTm = case_when(is.na(ch4DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
-                                  TRUE ~ ch4DeplyDtTm), # if not na, then use data supplied from adjDataDf
-         ch4RetDtTm = case_when(is.na(ch4RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
-                                TRUE ~ ch4RetDtTm))  # if not na, then use data supplied from adjDataDf
+  # now that we have gone through all the chamber adjustments, I am not going to use the chamb_deply_date_time anymore
+  # mutate(co2DeplyDtTm = case_when(is.na(co2DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
+  #                           TRUE ~ co2DeplyDtTm), # if not na, then use data supplied from adjDataDf
+  #        co2RetDtTm = case_when(is.na(co2RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+  #                           TRUE ~ co2RetDtTm), # if not na, then use data supplied from adjDataDf
+  #        ch4DeplyDtTm = case_when(is.na(ch4DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
+  #                                 TRUE ~ ch4DeplyDtTm), # if not na, then use data supplied from adjDataDf
+  #        ch4RetDtTm = case_when(is.na(ch4RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+  #                               TRUE ~ ch4RetDtTm))  # if not na, then use data supplied from adjDataDf
 
 # GO BACK TO STEP 3.1 TO REVIEW TIME SERIES AFTER INCORPORATING NEW DEPLOYMENT AND RETRIEVAL TIMES
 # IF SATISFIED WITH PROFILES, MOVE ON TO STEP 4.
