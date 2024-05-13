@@ -1,16 +1,15 @@
 ## Look at LAGOS Dataset and Get Lagos ID Links for Surge Sites
 ## January 17, 2024
 
-#You will need to install LAGOSUS in R the first time you run this
+#Installed via renv
 #devtools::install_github("cont-limno/LAGOSUS", dependencies = TRUE)
 
 #set relevant working directory
 #setwd("C:/Users/bdeemer/OneDrive - DOI/Documents/Terminal Lakes/Data_Explore")
 
-library(LAGOSUS)
-#library(mapview)
-#library(dplyr)
-#need to install devtools, dplyr, and mapview on SuRGE 
+# loaded from masterlibrary.R
+#library(LAGOSUS)
+
 
 #I think you'll need to run the lagosus_get command once and then can hash it out
 lagosus_get(dest_folder = lagosus_path())

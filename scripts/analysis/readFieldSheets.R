@@ -5,41 +5,8 @@
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "data/", labs)
 
-# code below creates a list of paths for each file.  This can then be fed into
-# a loop for reading each file.  This has been deprecated in favor of fs::dir_ls
-# and purr map (see below).  
-# Create a list of files to read in.  The completed data files all
-# contain the pattern ...surgeDataXXX.xlsx.  This gets everything except 2018 
-# R10 data.  Those data files are '...EqAreaData.xlsx' and need to be inspected 
-# for consistency with SuRGE data files.
 
-# labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS")
-# paths <- paste0(userPath,  "data/", labs)
-
-#  for (i in 1:length(labs)) {
-#  fileNames.i <- list.files(path = paste0(userPath,  "data/", labs[i]),
-#                          pattern = "surgeData", # file names containing this pattern
-#                          recursive = TRUE) %>% # look in all subdirectories
-#    .[!grepl(c(".pdf|.docx"), .)] # remove pdf and .docx review files
-# 
-#  if(length(fileNames.i) > 0) { # if any file names were read...
-#    fileNames.i <- paste0(labs[i], "/", fileNames.i) # add lab directory to file path
-#  }
-# 
-#  fileNames <- c(fileNames, fileNames.i) # append new names to existing vector
-#  }
-
-# 2.  Read in files
-# # deprecated in favor of function below
-#  mylist.data <- list()  # Create an empty list to hold data
-# 
-#  for (i in 1:length(fileNames)){  # for each file
-#    data.i <- readxl::read_excel(paste0(userPath, "data/", fileNames[i]), skip = 1, sheet = "data") %>%
-#      janitor::clean_names()
-#    mylist.data[[i]] <- data.i
-#  }
-
-# 2. Function for reading 'data' tab of surgeData files.
+# Function for reading 'data' tab of surgeData files.
 
 get_data_sheet <- function(paths){
   #d <-  
@@ -47,6 +14,7 @@ get_data_sheet <- function(paths){
                regexp = 'surgeData', # file names containing this pattern
                recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
+    .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway
     #.[100:101] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
@@ -115,7 +83,7 @@ get_dg_sheet <- function(paths){
              regexp = 'surgeData', # file names containing this pattern
              recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
-    
+    .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway
     # map will read each file in fs_path list generated above
     purrr::imap(~ read_excel(., skip = 1, sheet = "dissolved.gas", 
                              na = c("NA", "", "N/A", "n/a")) %>%

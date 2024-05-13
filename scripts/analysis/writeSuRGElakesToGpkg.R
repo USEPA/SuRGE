@@ -1,12 +1,16 @@
+# THIS SCRIPT COLLECTS LAKE POLYGONS AND SAMPLING POINTS
+# FOR USE IN lakeMorpho AND JEREMY SCHROEDER'S WORK
+# ON GRIDDED DATA
 
-#### READ IN SuRGE LAKE POLYGONS FIRST
 
+# COLLECT LAKE POLYGONS------------------------
 
-# 1. create a list file paths where the surge lake polygons are stored.  
+## SuRGE, including R10 2018, polygons
+# 1. CREATE A LIST FILE PATHS WHERE THE SURGE LAKE POLYGONS ARE STORED.  
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "lakeDsn/", labs)
 
-# 2. # list of .gdb to ignore
+# 2. LIST OF .gdb TO IGNORE
 omit_gdb <- paste(c("2013 Lake Tschida Heart Butte Reservoir Sedimentation Survey.gdb",
                     "069nhd.gdb", "randomPoints.gdb", "randomPoints.gdb", "annotation.gdb",
                     "mercxxx.gdb", "WGSxxx.gdb", "mercharsha.gdb", "homeMerc.gdb",
@@ -46,7 +50,7 @@ layers <- purrr::map(fs_paths, ~st_layers(.)) %>% # Read layers in each .gdb
   }
   )
 
-# 3. READ LAKE POLYGONS, FORMAT, WRITE TO DISK
+# 3. READ AND FORMAT LAKE POLYGONS
 # with map2, the first vector/list will be supplied as the first argument to the 
 # named function and the second vector/list will be supplied as the second argument.
 # here dsn = fs_paths, and layer = layers.
@@ -81,9 +85,7 @@ return(surge_lakes)
 # get SuRGE lakes (2018, 2020-2023)
 surge_lakes <- get_surge(paths)
 
-#######################################################
-###### GET 2016 LAKES  ################################
-#######################################################
+# 2016 AND FALLS LAKE POLYGONS
 
 # 1. file paths where the 2016 lake polygons are stored.  
 paths <- paste0(userPath,  "lakeDsn/", "2016_survey")
@@ -100,7 +102,7 @@ get_2016 <- function(paths){
     #.[8] %>% # subset for code development
     #imap: .x is object piped into impap, .y is object index (name of list element)
     imap(~st_read(.x, stringsAsFactors = FALSE) %>% # read shapefiles
-           st_transform(., 3857) %>%  # consistent with surge_lakes
+           st_transform(., 3857) %>%  # web meractor, consistent with surge_lakes
            # Each .shp must have a lake_name attribute.  All but 5 do.  Below
            # we address the 5 that need the attribute
            mutate( # first mutate creates a lake_name attribute if not already present
@@ -134,10 +136,63 @@ get_2016 <- function(paths){
 lakes_2016 <- get_2016(paths)
   
 
-#######################################################
-###### MERGE 2016 AND SURGE LAKES  ####################
-#######################################################
-# WRITE POLYGONS TO SINGLE .gpkg
+# GET POINTS AND TRAP DEPOLYMENT/RETRIEVAL TIMES-----------------
+## SuRGE sites
+dat.surge.sf <- fld_sheet %>%
+  filter(eval_status == "TS", # only sampled sites
+         !(is.na(long)|is.na(lat)), # only sites where lat and long were recorded
+         !(is.na(trap_deply_date_time)|is.na(trap_rtrvl_date_time))) %>% # only rows with trap data
+  st_as_sf(., coords = c("long", "lat")) %>%
+  `st_crs<-` (4326) %>% # latitude and longitude
+  st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
+  select(lake_id, site_id, (contains("trap") & contains("date_time")))
+
+dim(dat.surge.sf) #1819
+
+
+## 2016 data
+# load 2016 data
+load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaData
+
+dat.2016 <- eqAreaData # rename to dat.2016
+remove(eqAreaData) # remove original object
+
+# Format and coerce to spatial object
+
+dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>% 
+  `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
+  st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
+  select(Lake_Name, siteID, (contains("trap") & contains("DtTm"))) %>%
+  filter(!(is.na(trapDeplyDtTm)|is.na(trapRtrvDtTm))) %>% # exclude sites with no trap deployment
+  rename(trap_deply_date_time = trapDeplyDtTm, trap_rtrvl_date_time = trapRtrvDtTm) %>% # change name to SuRGE convention
+  # multiple deployments at Acton Lake have different names (e.g. Acton Aug).  Change them
+  # all to Acton Lake
+  mutate(Lake_Name = case_when(grepl("acton", Lake_Name, ignore.case = TRUE) ~ "Acton Lake",
+                               TRUE ~ Lake_Name)) %>%
+  left_join(lake.list.2016 %>% select(lake_id, eval_status_code_comment), 
+            by = c("Lake_Name" = "eval_status_code_comment")) %>%
+  select(-Lake_Name) %>% # lake_name no longer needed
+  rename(site_id = siteID) %>%
+  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)), # format site_id
+         lake_id = as.character(lake_id)) %>%
+  relocate(lake_id, site_id)
+
+dim(dat.2016) #1531
+dim(dat.2016.sf) #539, lots of rows with no trap data (e.g. oversample sites)
+
+
+# WRITE POLYGONS AND POINTS TO DISK-----------
+## POLYGONS
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
            append = FALSE)
+
+## POINTS
+# merge 2016 and SuRGE data
+# [5/13/2024] missing Falls Lake
+# add point to all_lakes.gpkg
+bind_rows(list(dat.2016.sf, dat.surge.sf)) %>% # merge polygons
+  st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+           layer = "points",
+           append = FALSE)
+
