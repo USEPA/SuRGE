@@ -20,7 +20,13 @@ omit_gdb <- paste(c("2013 Lake Tschida Heart Butte Reservoir Sedimentation Surve
                     "highMerc265.gdb", "originalMerc265.gdb", # low point set used
                     "highMerc249", "lowMerc249", "originalMerc249", # used mid point set
                     "merc188", # used high points
-                    "merc326low"), # used high points
+                    "merc326low", # used high points
+                    "merc070lacustrine", # using polygon for entire reservoir
+                    "merc070riverine",
+                    "merc070transitional",
+                    "merc069lacustrine", # using polygon for entire reservoir
+                    "merc069riverine",
+                    "merc069transitional"),                    
                   collapse = "|")
 
 # 2018 R10 and 2020-2023 SuRGE data are formatted similarly
@@ -79,11 +85,24 @@ map(~if(.$lake_id == "317") { #  .shp has two separate polygons, only one was sa
   }) %>%
   bind_rows() # collapse to one sf object
  
-return(surge_lakes)
+
+# Missouri rive impoundments split into riverine, transitional, and lacustrine.
+# Here we read in .shp for entire reservoir to be used for  morpho and gridded
+# data
+missouri_river <- map(list(paste0(userPath, "lakeDsn/CIN/CH4-070/merc070dissolve.shp"),
+                           paste0(userPath, "lakeDsn/CIN/CH4-069/merc069dissolve.shp")),
+                      st_read) %>%
+  bind_rows() %>% rename(geom = geometry)
+
+
+return(bind_rows(surge_lakes, missouri_river))
 }
 
 # get SuRGE lakes (2018, 2020-2023)
 surge_lakes <- get_surge(paths)
+# warning OK:  Warning message:
+# In st_cast.sf(., "POLYGON") :
+#   repeating attributes for all sub-geometries for which they may not be constant
 
 # 2016 AND FALLS LAKE POLYGONS
 
@@ -175,7 +194,7 @@ dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>%
   rename(site_id = siteID) %>%
   mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)), # format site_id
          lake_id = as.character(lake_id)) %>%
-  relocate(lake_id, site_id)
+  relocate(lake_id, site_id) 
 
 dim(dat.2016) #1531
 dim(dat.2016.sf) #539, lots of rows with no trap data (e.g. oversample sites)
@@ -186,6 +205,10 @@ dim(dat.2016.sf) #539, lots of rows with no trap data (e.g. oversample sites)
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
            append = FALSE)
+
+dim(surge_lakes) #123
+dim(lakes_2016) #33
+33+123 #156
 
 ## POINTS
 # merge 2016 and SuRGE data
