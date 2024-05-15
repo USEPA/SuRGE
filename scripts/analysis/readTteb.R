@@ -218,7 +218,7 @@ unique(ttebCoc$lake_id) # looks good
 # Compare list of submitted samples to comprehensive sample list
 # print rows of submitted samples (ttebSampleIds) that are not in theoretical
 # list of all samples to be generated.
-# All samples that were submitted for analysis were expected. Good. [3/29/2024]
+# All samples that were submitted for analysis were expected. Good. [5/15/2024]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
@@ -235,7 +235,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
-# [4/11/2024] all good!
+# [5/15/2024] all good!
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics

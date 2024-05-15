@@ -130,11 +130,13 @@ pigments <- full_join(chla, phycocyanin,
 # Read list of samples received by NAR.
 nar.samples <- read_excel(paste0(userPath,
                                  "data/sampleTrackingSheets//NAR algal indicator//",
-                                 "narSampleReceiptList.xlsx"))
+                                 "narSampleReceiptList.xlsx")) %>%
+  mutate(analyte = case_when(analyte == "microcystin" ~ analyte,
+                             TRUE ~ paste0(analyte, "_lab")))
 
 
 # Were all samples received expected?  Compare list of received samples to
-# those expected. YES. [4/2/2024]
+# those expected. YES. [5/15/2024]
 setdiff(nar.samples[c("lake_id", "visit", "analyte", "sample_type")],
         chem.samples.foo[c("lake_id", "visit", "analyte", "sample_type")]) %>%
   print(n=Inf)
@@ -142,8 +144,8 @@ setdiff(nar.samples[c("lake_id", "visit", "analyte", "sample_type")],
 
 # Have all NAR algae samples in comprehensive sample list been delivered to NAR?
 # Missing lake 204 samples.  Confirmed missing by NAR.  Sample found on lab floor
-# and framed in Jeff's office!
-# but are we also missing lake 204 microcystin?
+# and framed in Jeff's office! Microcystin also appears to have been lost. See
+# 4/2/2024 email from Shivers.
 setdiff(chem.samples.foo %>%
           filter(analyte_group == "algae.nar",
                  sample_year != 2018) %>% # 2018 R10 not sent to NAR
