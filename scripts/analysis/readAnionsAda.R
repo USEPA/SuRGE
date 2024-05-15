@@ -209,7 +209,7 @@ dup_agg <- function(data) {
               # By ignoring NA, this will return any flag
               across(ends_with(c("units", "flag", "bql", "qual")),
                      # 'order_by' sorts the column in question
-                     ~ first(., na_rm = TRUE, order_by = .))) %>%
+                     ~ last(., na_rm = TRUE, order_by = .))) %>%
     ungroup()
 
   return(d)
