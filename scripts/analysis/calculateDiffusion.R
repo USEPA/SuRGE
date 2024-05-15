@@ -390,8 +390,8 @@ plot(with(OUT2[!is.na(OUT2$ch4_drate_mg_h_best),],
           ifelse(ch4_best_model == "linear", ch4_lm_r2, ch4_ex_r2)))  # CH4: all > 0.9
 
 #Look at averages by site/visit combo
-#You get an average of 4.06, median of 1.35 and 3rd quartile of 2.7 mg m_2 h-1 when you make all the r2<0.9 values 0
-#You get an average of 4.52, median of 1.65 and 3rd quartile of 2.77 mg m_2 h-1 when you make all the r2<0.9 values NA
+#average of 4.83, median of 1.81 and 3rd quartile of 3.38 mg m_2 h-1 
+
 bysch4<-OUT2 %>%
   filter(!is.na(ch4_drate_mg_h_best))%>%
   mutate(vID=paste(lake_id,visit))%>%
@@ -399,8 +399,7 @@ bysch4<-OUT2 %>%
   summarise(lake_id[1],visit[1],ch4_drate_mg_h=mean(ch4_drate_mg_h_best),
             length=length(ch4_drate_mg_h_best))
 
-#You get an average of 113.8, median of 44.1, 3rd quartile of 180  CO2 m-2 h-1 when r2<0.9 is NA
-#You get an average of  121.2, median of 80.3, 3rd quartile of 195  CO2 m-2 h-1 when r2<0.9 is NA
+#You get an average of 70.3, median of 38.2, 3rd quartile of 100 mg m-2 h-1 
 bysco2<-OUT2 %>%
   filter(!is.na(co2_drate_mg_h_best))%>%
   mutate(vID=paste(lake_id,visit))%>%

@@ -25,16 +25,17 @@ for (i in 1:length(labs)) {
 txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr files with data we need; should be _f, but allowing -f)
                        !grepl(pattern = "zip", x = txtFiles) & # exclude .zip files
                        !grepl(pattern = "xls", x = txtFiles) & # exclude excel files
+                       !grepl(pattern = "Field Sheets and Data", x = txtFiles) & # exclude the directory Jake made for integrating 2018 monitoring at Falls Lake
                        !grepl(pattern = "Needs to be organized", x = txtFiles) & # temp file to be deleted
                        !grepl(pattern = "MGGA Archive and Calibration", x= txtFiles) &
                        !grepl(pattern = "2022 field season", x= txtFiles) & # CIN folder that will be deleted
                        !grepl(pattern = "SuRGE chamber data calculations SAJ", x= txtFiles)] # Scott's folder
 
 #Check that you have txtFiles for all lakes
-chk <- str_split (txtFiles, "/")
-ck2<-matrix(unlist(chk),ncol=5,byrow=T)
-laken<-unique(substr(ck2[,3],5,7))
-lab<-unique(ck2[,2])
+# chk <- str_split (txtFiles, "/")
+# ck2<-matrix(unlist(chk),ncol=5,byrow=T)
+# laken<-unique(substr(ck2[,3],5,7))
+# lab<-unique(ck2[,2])
 
 ggaList <- list()  # Empty list to hold results
 
