@@ -56,7 +56,7 @@ get_ada_data <- function(path, datasheet) {
                                          tryFormats = c("%m/%d/%Y",
                                                     "%Y-%m-%d")))))
   
-  
+  print(maintable_2)
   # Pull column of date data (it doesn't matter which, since they're identical)
   analyzed_dates <- maintable_1 %>% select(contains("date_analyzed")) %>% pull()
   
@@ -87,7 +87,7 @@ maintable_3 <- maintable_2.5 %>%
 
 # maintable_4: remove extra characters, make numeric, parse sample IDs,
 # format lake IDs, determine if hold time violated
-
+print(maintable_3)
 maintable_4 <- maintable_3 %>%
   mutate(across(!ends_with(c("flag", "analyzed", "bql",
                              "labdup", "field_sample_id")),
@@ -589,12 +589,7 @@ no2no3nh4_2022_011_003 <-
 
 tntp_2022_011_003 <- 
   get_ada_data(cin.ada.path, "2022/EPAGPA081_011_003_TN,TP.xls") %>%
-  # Extra steps to deal with the Dissolved N & P columns;
-  # consider making this a function if it occurs in other Excel files
-  rename(TN_analyze = contains("Dissolved Nitrogen") & 
-           ends_with("analyzed"), 
-         TP_analyze = contains("Dissolved Phosphorus") & 
-           ends_with("analyzed")) %>%
+  # Extra step to deal with the Dissolved N & P columns
   select(!contains("issolved")) %>%
   conv_units(filename = "EPAGPA081_011_003_TN,TP.xls") %>%
   site_id_number %>% # add site_id for 2022 samples
@@ -638,10 +633,7 @@ no2no3nh4_2023_148_147 <-
 
 tntp_2023_099_004 <- 
   get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_TN,TP.xls") %>%
-  # Extra steps to deal with the Dissolved N & P columns;
-  # consider making this a function if it occurs in other Excel files
-  rename(TP_analyzed = contains("Dissolved Nitrogen") & 
-           ends_with("analyzed")) %>%
+  # Extra step to deal with the Dissolved N & P columns
   select(!contains("issolved")) %>%
   conv_units(filename = "EPAGPA100_099_004_TN,TP.xls") %>%
   site_id_number %>% # add site_id for 2023 samples
@@ -651,10 +643,7 @@ tntp_2023_099_004 <-
   
 tntp_2023_186_018 <- 
   get_ada_data(cin.ada.path, "2023/EPAGPA106_186_018_TN,TP.xls") %>%
-  # Extra steps to deal with the Dissolved N & P columns;
-  # consider making this a function if it occurs in other Excel files
-  rename(TP_analyzed = contains("Dissolved Nitrogen") & 
-           ends_with("analyzed")) %>%
+  # Extra step to deal with the Dissolved N & P columns
   select(!contains("issolved")) %>%
   conv_units(filename = "EPAGPA106_186_018_TN,TP.xls") %>%
   site_id_number %>% # add site_id for 2023 samples
@@ -664,10 +653,7 @@ tntp_2023_186_018 <-
 
 tntp_2023_148_147 <- 
   get_ada_data(cin.ada.path, "2023/EPAGPA108_148_147_TN,TP.xls") %>%
-  # Extra steps to deal with the Dissolved N & P columns;
-  # consider making this a function if it occurs in other Excel files
-  rename(TP_analyzed = contains("Dissolved Nitrogen") & 
-           ends_with("analyzed")) %>%
+  # Extra step to deal with the Dissolved N & P columns;
   select(!contains("issolved")) %>%
   conv_units(filename = "EPAGPA108_148_147_TN,TP.xls") %>%
   site_id_number %>% # add site_id for 2023 samples
