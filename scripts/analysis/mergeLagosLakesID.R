@@ -4,15 +4,12 @@
 #Installed via renv
 #devtools::install_github("cont-limno/LAGOSUS", dependencies = TRUE)
 
-#set relevant working directory
-#setwd("C:/Users/bdeemer/OneDrive - DOI/Documents/Terminal Lakes/Data_Explore")
-
 # loaded from masterlibrary.R
 #library(LAGOSUS)
 
 
 #I think you'll need to run the lagosus_get command once and then can hash it out
-lagosus_get(dest_folder = lagosus_path())
+#lagosus_get(dest_folder = lagosus_path())
 lg <- lagosus_load(modules = c("locus"))
 names(lg)
 ll<-(lg$locus$lake_link)
@@ -58,4 +55,6 @@ SurGE_links$lagoslakeid<-ifelse(SurGE_links$siteID=="CH4-010","201797",
 #Now add the NHD comid ID to CH4-1009 since lagos lacked the comid ID to link to SuRGE
 SurGE_links$nhdplusv2_comid<-ifelse(SurGE_links$siteID=="CH4-1009","456124",SurGE_links$nhdplusv2_comid)
 
-write.csv(SurGE_links,file="Surge_nhdhr.csv")
+write.csv(SurGE_links,file=paste0(userPath,"data/siteDescriptors/Surge_nhdhr.csv"))
+
+          
