@@ -202,9 +202,9 @@ dim(dat.2016.sf) #539, lots of rows with no trap data (e.g. oversample sites)
 
 # WRITE POLYGONS AND POINTS TO DISK-----------
 ## POLYGONS
-bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
-  st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
-           append = FALSE)
+# bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
+#   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+#            append = FALSE)
 
 dim(surge_lakes) #123
 dim(lakes_2016) #33
@@ -214,8 +214,8 @@ dim(lakes_2016) #33
 # merge 2016 and SuRGE data
 # [5/13/2024] missing Falls Lake
 # add point to all_lakes.gpkg
-bind_rows(list(dat.2016.sf, dat.surge.sf)) %>% # merge polygons
-  st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
-           layer = "points",
-           append = FALSE)
+# bind_rows(list(dat.2016.sf, dat.surge.sf)) %>% # merge polygons
+#   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+#            layer = "points",
+#            append = FALSE)
 

@@ -67,7 +67,7 @@ tteb.SURGE2022 <- read_excel(paste0(
 
 tteb.SURGE2023 <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/SURGE_2023_02_26_2024_update.xlsx"))
+  "data/chemistry/tteb/SURGE_2023_05_06_2024_update.xlsx"))
 
 
 
@@ -152,7 +152,7 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022,
   # However, a value of 9999999999999990.000 may also indicate that the analyte
   # was outside of the standard curve and was rerun, but the summary file wasn't
   # updated with re-run value.  This is the case for labid 203173.
-  mutate(across(everything(), # replace lab's placeholder numbers with 'NA'
+  mutate(across(where(is.numeric), # replace lab's placeholder numbers with 'NA'
                 ~ na_if(., 9999999999999990.000))) %>%
   # create 'flag' columns for every analyte to flag observations < det. limit
   mutate(across(ends_with(analyte_names), # nice code Joe!
@@ -218,7 +218,7 @@ unique(ttebCoc$lake_id) # looks good
 # Compare list of submitted samples to comprehensive sample list
 # print rows of submitted samples (ttebSampleIds) that are not in theoretical
 # list of all samples to be generated.
-# All samples that were submitted for analysis were expected. Good. [3/29/2024]
+# All samples that were submitted for analysis were expected. Good. [5/15/2024]
 setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
         chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
@@ -235,7 +235,7 @@ setdiff(ttebCoc[c("lake_id", "sample_depth", "sample_type", "analyte")],
 
 # Have all tteb samples in comprehensive sample list been submitted?
 # Print rows from comprehensive sample list not in tteb coc.
-# [4/11/2024] all good!
+# [5/15/2024] all good!
 setdiff(chem.samples.foo %>% 
           filter(analyte_group %in% c("organics", "metals", "anions"), #tteb does organics, metals and anions in >=2022
                  !(lab == "ADA" & analyte_group == "organics"), # ADA does own organics
@@ -407,7 +407,7 @@ tteb.all <- tteb.all %>%
                 ~ if_else(str_detect(., "ND L"), "L", .))) %>%
   mutate(across(ends_with("flags"),   # replace any blank _flags with NA
                 ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
-                  str_squish(.)))  # remove any extra white spaces 
+                  str_squish()))  # remove any extra white spaces 
 
 
 # Final check for dupes

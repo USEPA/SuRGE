@@ -44,13 +44,12 @@ get_ada_data <- function(path, datasheet) {
 
   # maintable_2: select columns, rename remaining columns, 
   # calculate hold times
-
   maintable_2 <- maintable_1 %>%
     select(field_sample_id, labdup, starts_with("dat")) %>% # 
     rename_with(~paste0(analyte_names), 
                 .cols = starts_with("data")) %>% # rename w/ analyte names
-    rename_with(~paste0(analyte_names, "_date_analyzed"), 
-                .cols = starts_with("date_a")) %>% # rename w/ analyte names
+    # rename_with(~paste0(analyte_names, "_date_analyzed"), 
+    #             .cols = starts_with("date_a")) %>% # rename w/ analyte names
     mutate(across(ends_with("nalyzed"), # remove junk from date column(s)
                   ~ ifelse(
                     str_detect(., "/|&|-"), word(., -1), .))) %>% 
@@ -64,15 +63,15 @@ get_ada_data <- function(path, datasheet) {
         str_detect(., "/\\d{4}") ~ lubridate::mdy(.),
         # otherwise the dates are already date-formatted (y-m-d)
         TRUE ~ lubridate::ymd(.)))) %>%
-    mutate(across(ends_with("nalyzed"), # compute holding time
+    # Compute holding time. 'date_analyzed' is now holding time (in days).
+    mutate(across(ends_with("nalyzed"), 
                   ~  as.numeric(. - as.Date(date_collected,
                                             tryFormats = c("%m/%d/%Y",
                                                            "%Y-%m-%d")))))
-  
+
     # Special procedure for Ada anions data:
     # The Ada anions Excel file has 1 date analyzed column for all analytes.
     # We need copy this column across all analytes. 
-  
   ada_anions_dates <- maintable_2 %>% # get the date data
     select(ends_with("nalyzed")) %>%
     pull()
@@ -85,7 +84,6 @@ get_ada_data <- function(path, datasheet) {
 
   # maintable_3: remove extra rows, create ND flag and apply MDL value,
   # create L (i.e., BQL) flag, create 'visit' column
-
   maintable_3 <- maintable_2.5 %>%
     mutate(field_sample_id = # remove "(TN or DN)" field_sample_id
              str_remove_all(field_sample_id, "\\s|\\(|\\)|TN or DN")) %>%
@@ -106,7 +104,6 @@ get_ada_data <- function(path, datasheet) {
 
   # maintable_4: remove extra characters, make numeric, parse sample IDs,
   # format lake IDs, determine if hold time violated
-
   maintable_4 <- maintable_3 %>%
     mutate(across(!ends_with(c("flag", "analyzed", "bql",
                                "labdup", "field_sample_id")),
@@ -130,7 +127,7 @@ get_ada_data <- function(path, datasheet) {
                                            "D" =  "duplicate"))) %>%
     mutate(across(ends_with("analyzed"), # check if hold time violated
                   ~ ifelse(.>28, "H", ""))) %>%
-    select(-field_sample_id) # no longer needed
+    select(-field_sample_id, -date_analyzed) # no longer needed
 
   return(maintable_4)
 
@@ -200,49 +197,22 @@ conv_units <- function(data, filename) {
 
 dup_agg <- function(data) {
   
-  # first, convert all _flag columns to a numeric for summarize operations;
-  # Must be performed in case lab dup has a different flag than the sample.
-  
-  data <- data %>% 
-    mutate(across(ends_with(c("flag", "bql", "qual")), 
-                  ~ ifelse(str_detect(., "ND|L|H"), 1, 0))) 
-  
-  
-  # carve out the _flag and _units columns so they can be re-joined later
-  
-  c <- data %>% select(ends_with(c("id","labdup", "type", "depth", 
-                                   "units")))
-  
-  # summarize means of analyte values and flags 
+
+  # summarize means of analyte values
   
   d <- data %>%
-    dplyr::group_by(lake_id, sample_depth, sample_type) %>%
-    # '!' to exclude columns we don't want to aggregate
-    summarize(across(!ends_with(c("site_id","labdup", "type", "depth", 
-                                  "units")), 
-                     ~ mean(., na.rm = TRUE))) 
-  
-  # rejoin data 
-  
-  e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% 
-    mutate(across(4:last_col(), # convert NaN to NA
-                  ~ ifelse(is.nan(.), NA, .))) %>% # must use 'ifelse' here 
-    select(order(colnames(.))) %>% # alphabetize column names
-    select(lake_id, site_id, sample_depth, sample_type, 
-           labdup, everything()) %>% # put 'sampleid' first
-    # if both sample and dup had a flag, value = 1. If only one had a flag, 
-    # value = 0.5. In both cases, flag is retained in aggregated observation.
-    mutate(across(ends_with("flag"), # convert all _flag values back to text
-                  ~ if_else(.< 0.5, "", "ND"))) %>% 
-    mutate(across(ends_with("bql"), # convert all _flag values back to text
-                  ~ if_else(.< 0.5, "", "L"))) %>% 
-    mutate(across(ends_with("qual"), # convert all _flag values back to text
-                  ~ if_else(.< 0.5, "", "H"))) %>% 
-    filter(labdup != "LAB DUP") %>% # remove the lab dup
-    select(-labdup) %>% # remove labdup column. JB 12/7/2021
+    dplyr::group_by(lake_id, site_id, sample_depth, sample_type) %>%
+    # Summarize() to get means of all analyte values
+    summarize(across(where(is.numeric), 
+                     ~ mean(., na.rm = TRUE)),
+              # First() gets the first value only for the character fields
+              # By ignoring NA, this will return any flag
+              across(ends_with(c("units", "flag", "bql", "qual")),
+                     # 'order_by' sorts the column in question
+                     ~ last(., na_rm = TRUE, order_by = .))) %>%
     ungroup()
-  
-  return(e)
+
+  return(d)
   
 }
 
@@ -290,7 +260,7 @@ flag_agg <- function(data) { # merge the flag columns for each analyte
   h <- g %>%
     mutate(across(ends_with("flags"),
                   ~ if_else(str_detect(., ".*\\S.*"), ., NA_character_) %>%
-                    str_squish(.))) # remove any extra white spaces
+                    str_squish())) # remove any extra white spaces
   
   return(h)
   
