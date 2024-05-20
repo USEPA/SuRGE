@@ -305,7 +305,7 @@ chem22 <- get_awberc_data(cin.awberc.path,
                           "2022 Data") 
 
 chem23 <- get_awberc_data(cin.awberc.path, 
-                          "2023_ESF-EFWS_NutrientData_Updated02282024_AKB.xlsx", 
+                          "2023_ESF-EFWS_NutrientData_Updated05012024_AKB.xlsx", 
                           "2023 Data") 
 
 chemCinNutrients <- bind_rows(chem21, chem22, chem23) %>%
@@ -343,7 +343,7 @@ setdiff(chem.inventory.expected, chem.inventory.analyzed) %>%
 
 # all collected samples in analyzed list? Extract sample year and lab
 # for missing samples.
-# 4/3/2024, lakes 1, 14, and 57. All 2023 lakes.  I asked Pegasus to get an update.
+# All good! [5/20/2024]
 right_join(lake.list %>% select(lake_id, lab, sample_year, visit),
            setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
              select(lake_id, visit) %>%
