@@ -38,7 +38,7 @@ gga_2 <- gga %>%
   left_join(fld_sheet %>% 
                        filter(!missing_chamb_deply_date_time) %>%
                        select(lake_id, site_id, visit, chamb_deply_date_time), 
-                     by = c("lake_id","visit"))
+                     by = c("lake_id","visit"), relationship = "many-to-many")
 
 #3. ADD CO2 AND CH4 RETRIEVAL AND DEPLOYMENT TIMES
 # We may want to model different portions of the time series for CO2 and CH4.
@@ -247,7 +247,7 @@ gga_2 <- gga_2 %>%
   # This won't throw error if specified columns are absent.
   select_if(!names(.) %in% c("co2Notes", "ch4Notes", "co2Status", "ch4Status")) %>%
   # Join with adjDataDf.
-  left_join(., adjData)
+  left_join(., adjData, relationship = "many-to-many")
   # mutate ensures that all records have deployment and retrieval times for CO2 and CH4
   # now that we have gone through all the chamber adjustments, I am not going to use the chamb_deply_date_time anymore
   # mutate(co2DeplyDtTm = case_when(is.na(co2DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data

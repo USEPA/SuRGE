@@ -34,7 +34,7 @@
 # Inspect objects----
 
 # inspect object to merge
-## each df contains 10 - 333 observations [4/2/2024]
+## each df contains 10 - 335 observations [5/18/2024]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
   map_dfc(., nrow)
@@ -131,7 +131,6 @@ metal.pig <- tteb.all %>%
 # check for unexpected behavior
 janitor::get_dupes(
   select(metal.pig, lake_id, site_id, sample_depth, sample_type, visit)) 
-# no dups
 
 metal.pig.oc <- metal.pig %>%
   full_join(oc)
@@ -227,3 +226,6 @@ janitor::get_dupes(
 chemistry_all <- chemistry_all %>%
   relocate(lake_id, site_id, sample_depth, sample_type, visit, 
            sort(colnames(.))) # others arranged alphabetically
+
+
+dim(chemistry_all) # 374, 125 [5/19/2024]

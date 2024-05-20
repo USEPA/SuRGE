@@ -29,9 +29,9 @@ all_obs <- full_join(chem_fld_wide, # keep all observations
          matches("diffusion|ebullition|total"), # then these
          everything()) # then everything else, unchanged
 
-dim(chem_fld_wide) # 2057, 252
-dim(emissions) # 1868, 33
-dim(all_obs) # 2059, 282
+dim(chem_fld_wide) # 2057, 256
+dim(emissions) # 1867, 50
+dim(all_obs) # 2058, 270
 
 # all observations from emissions are in chem
 emissions[!(with(emissions, paste(lake_id, site_id, visit)) %in% 
@@ -49,4 +49,4 @@ chem_fld_wide[!(with(chem_fld_wide, paste(lake_id, site_id, visit)) %in%
 
 # write to disk
 save(all_obs, file = paste0("output/all_obs_", Sys.Date(), ".RData"))
-write.table(all_obs, file = paste0(userPath, "data/all_obs_",  Sys.Date(),".txt"), row.names = F, col.names = T)
+#write.table(all_obs, file = paste0(userPath, "data/all_obs_",  Sys.Date(),".txt"), row.names = F, col.names = T)

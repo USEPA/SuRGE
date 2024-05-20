@@ -18,7 +18,7 @@ eb_data <- full_join( # keep all data.  Will assume GC data if not present (e.g.
                                 atm_pressure, air_temperature) %>%
               distinct(.))
 
-dim(eb_data) # 1787
+dim(eb_data) # 1799
 
 # 2. Calculate volumetric ebullition rate.  Straightforward operation
 # that can be vectorized across the entire df.
@@ -53,5 +53,5 @@ eb_results <- do.call("rbind", my_eb_list) %>%  # This coerces the list into a d
 
 
 
-str(eb_results)  # 1727 observations
+str(eb_results)  # 1739 observations
 

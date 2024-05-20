@@ -117,9 +117,9 @@ clean_chem <- function(data) {
 } 
 
 chemistry <- clean_chem(chemistry_all)
-dim(chemistry_all) # 374, 126 [4/2/2024]
-dim(chemistry) # 265, 124 [4/4/2024], lost analyte_group
+dim(chemistry_all) # 374, 126 [5/19/2024]
+dim(chemistry) # 265, 124 [5/19/2024], lost analyte_group
 
 names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
-# lost analyte_group, do we care?
+
 
