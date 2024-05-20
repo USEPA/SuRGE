@@ -1,20 +1,20 @@
 
 
-# MERGE LAKE.LIST AND CHEM_FLD------------
+# MERGE LAKE.LIST AND all_obs------------
 # lake.list object is created with readSurgeLakes.R
-dim(lake.list) #337, 34
+dim(lake.list) # 342, 36
 str(lake.list) # numeric lake_id
 unique(lake.list$lake_id) # no lacustrine, riverine, or transitional
 
 
-# chem_fld is created with mergeChemistryFieldSheets.R
-dim(chem_fld) #1127, 200
-str(chem_fld) # character lake_id
-unique(chem_fld$lake_id) # this has lacustrine, riverine, and transitional
+# all_obs is created with mergeChemEmissions.R
+dim(all_obs) # 2058, 270
+str(all_obs) # character lake_id
+unique(all_obs$lake_id) # this has lacustrine, riverine, and transitional
 
 
 # common names
-names(lake.list)[names(lake.list) %in% names(chem_fld)] # lake_id and eval_status
+names(lake.list)[names(lake.list) %in% names(all_obs)] # lake_id, eval_status, visit
 
 
 # [5/6/2022] merge is ugly because lacustrine, riverine, and transitional

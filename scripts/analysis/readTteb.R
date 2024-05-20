@@ -67,8 +67,7 @@ tteb.SURGE2022 <- read_excel(paste0(
 
 tteb.SURGE2023 <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/SURGE_2023_05_16_2024_update.xlsx")) %>%
-  select(-"NO2N") # smartchem analysis added in May 2024.  Will use NO2_IC instead
+  "data/chemistry/tteb/SURGE_2023_05_06_2024_update.xlsx"))
 
 
 
@@ -259,9 +258,9 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake data)
 dim(ttebCoc) #854
-dim(tteb) #1207 [5/20/2024]
+dim(tteb) #1211 [5/18/2024]
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 849 records [5/20/2024] 
+nrow(tteb.all) # 847 records [5/18/2024] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -283,7 +282,6 @@ tteb.all <- tteb.all %>%
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
 # missing samples, but four of them were due to instrument failure.
-# many are 2023 samples that haven't delivered data yet [4/11/2024]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
@@ -317,7 +315,7 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
   #filter(!grepl("2023", coc)) %>% # exclude 2023 samples where we are waiting for update
   select(-contains("notes")) #%>%
   #write.table(paste0(userPath, "data/chemistry/tteb/missingTteb05152024.txt"), row.names = FALSE)
-#[5/18/24] sonia provided preliminary data.  Joe will read in.
+
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
 # any combination of lake_id, site_id, sample_depth, and sample_type could
@@ -345,7 +343,7 @@ tteb.all <- tteb.all %>%
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type, visit
 
-dim(tteb.all) #333 rows.  Good, reduced from 847 to 335.  [5/20/2024]
+dim(tteb.all) #333 rows.  Good, reduced from 847 to 335.  [5/18/2024]
 
 
 
