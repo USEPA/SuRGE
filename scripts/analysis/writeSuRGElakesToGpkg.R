@@ -65,7 +65,9 @@ surge_lakes <- map2(fs_paths, layers,  st_read, stringsAsFactors = FALSE) %>% # 
   map(~rename(., lake_id = lakeSiteID) %>% 
         rename(lake_name = lakeName) %>% 
         mutate(lake_id = gsub("ch4-", "", lake_id, ignore.case = TRUE) %>% # remove "ch4-"
-                 str_remove("^0+"))) %>% # remove leading zeroes
+                 str_remove("^0+")) |> # remove leading zeroes
+        st_set_geometry("geom")) %>% # make sure geometry column name is geom (it is Shape, geometry, .... across objects)
+  
   # dissolve sections and strata (e.g., trib, open_water), but keep
   # lakeName and lakeSiteID attributes.  st_union and st_combine will do the
   # dissolve bit, but drops attributes.  This slick dplyr code does the trick
@@ -121,7 +123,8 @@ get_2016 <- function(paths){
     #.[8] %>% # subset for code development
     #imap: .x is object piped into impap, .y is object index (name of list element)
     imap(~st_read(.x, stringsAsFactors = FALSE) %>% # read shapefiles
-           st_transform(., 3857) %>%  # web meractor, consistent with surge_lakes
+           st_transform(., 3857) |>  # web meractor, consistent with surge_lakes
+           st_set_geometry("geom") %>% # make sure geometry column name is geom (it is Shape, geometry, .... across objects)
            # Each .shp must have a lake_name attribute.  All but 5 do.  Below
            # we address the 5 that need the attribute
            mutate( # first mutate creates a lake_name attribute if not already present
@@ -164,6 +167,7 @@ dat.surge.sf <- fld_sheet %>%
   st_as_sf(., coords = c("long", "lat")) %>%
   `st_crs<-` (4326) %>% # latitude and longitude
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
+  st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
   select(lake_id, site_id, (contains("trap") & contains("date_time")))
 
 dim(dat.surge.sf) #1819
@@ -181,6 +185,7 @@ remove(eqAreaData) # remove original object
 dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>% 
   `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
+  st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
   select(Lake_Name, siteID, (contains("trap") & contains("DtTm"))) %>%
   filter(!(is.na(trapDeplyDtTm)|is.na(trapRtrvDtTm))) %>% # exclude sites with no trap deployment
   rename(trap_deply_date_time = trapDeplyDtTm, trap_rtrvl_date_time = trapRtrvDtTm) %>% # change name to SuRGE convention
@@ -203,7 +208,9 @@ dim(dat.2016.sf) #539, lots of rows with no trap data (e.g. oversample sites)
 # WRITE POLYGONS AND POINTS TO DISK-----------
 ## POLYGONS
 # bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
+#   st_make_valid() %>%
 #   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+#            layer = "all_lakes",
 #            append = FALSE)
 
 dim(surge_lakes) #123
