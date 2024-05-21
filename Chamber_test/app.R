@@ -28,16 +28,16 @@ conflict_prefer("rename", "dplyr") # filter() will call dplyr::rename()
 # LOAD AND ORGANIZE DATA -----------------------------------------------------
 
 # Set User path for the sourced scripts
-source("../scripts/setUserPath.R")
+source("scripts/setUserPath.R")
 
 # read in survey design file
-source("../scripts/analysis/readSurgeLakes.R")
+source("scripts/analysis/readSurgeLakes.R")
 
 # Read in field sheets data 
-source("../scripts/analysis/readFieldSheets.R")
+source("scripts/analysis/readFieldSheets.R")
 
 # read raw LGR data
-source("../scripts/analysis/readLgr.R")
+source("scripts/analysis/readLgr.R")
 
 filter(gga, is.na(RDateTime))
 gga <- filter(gga, !is.na(RDateTime)) # strip out missing RDateTime
@@ -137,7 +137,7 @@ ui <- fluidPage(
     sidebarPanel("choose lake and site",
                  selectInput("lake", label = "lake id", 
                              choices = unique(fld_sheet$lake_id) %>% 
-                               str_sort(numeric = "TRUE"), 
+                               str_sort(numeric = TRUE), 
                              selected = "275"),
                  selectInput("site", label = "site id", 
                              choices = unique(fld_sheet$site_id) %>% 
