@@ -2,30 +2,22 @@
 *.Rproj
 .Rproj.user
 .RData
-
 # too big for github
 inputData/lMorpho
-
 # big files in Tony Olsen's script
 /scripts/surgeDsn/olsenCode
-
 # too big for github
 surgeOverview.html
-
 # ignore all .html lake reports
 /scripts/lakeReports/*.html
-
 # ignore .docx lake report comments
 /scripts/lakeReports/*.docx
-
-# ignore .pdf lake report clearance forms 
+# ignore .pdf lake report clearance forms
 /scripts/lakeReports/*.pdf
-
-
 # ignore all .html lake design files.  **/ matches any count of subdirectories
 # https://stackoverflow.com/questions/6794717/git-ignore-certain-files-in-sub-directories-but-not-all
-/scripts/lakeDsn/**/*.html 
-
-
+/scripts/lakeDsn/**/*.html
 # ignore .pdf files in scripts/analysis
 /scripts/analysis/*.pdf
+Peer Nomination Award SuRGE.pdf
+Peer Nomination Award SuRGE signed.pdf
