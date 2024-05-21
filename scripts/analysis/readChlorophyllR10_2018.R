@@ -96,10 +96,10 @@ get_results_data <- function(path, data, sheet) {
       sample_type == "UKN" ~ "unknown",
       sample_type == "UNK" ~ "unknown",
       TRUE   ~ sample_type)) %>%
-    rename(chla = chl_a_jh) %>% # see Wiki for naming conventions
+    rename(chla_lab = chl_a_jh) %>% # see Wiki for naming conventions
     mutate(sample_depth = case_when(sample_type == "blank" ~ "blank",
                                     TRUE ~ "shallow")) %>% # all samples were collected near a-w interface
-    mutate(extract_conc = (5 * chla) / extract_volume_l) %>% # extracted concentration
+    mutate(extract_conc = (5 * chla_lab) / extract_volume_l) %>% # extracted concentration
     mutate(filter_hold_time = collection_date - extraction_date) %>% # get hold time
     mutate(extract_hold_time = analysis_date - extraction_date) %>% # get hold time
     mutate(chla_qual = case_when( # qual flag if either hold time exceeded
@@ -109,12 +109,13 @@ get_results_data <- function(path, data, sheet) {
     mutate(chla_flag = case_when( # flag if conc is below detection limit 
       extract_conc < 9 ~ "ND",
       TRUE   ~ "")) %>%
-    select(lake_id, site_id, sample_type, sample_depth, chla, extract_conc, 
+    select(lake_id, site_id, sample_type, sample_depth, chla_lab, extract_conc, 
            chla_flag, chla_qual) %>%
     unite("chla_flags", c(chla_flag, chla_qual), sep = " ", na.rm = TRUE) %>%
     mutate(chla_flags = if_else( # NA if there are no flags
       str_detect(chla_flags, "\\w"), chla_flags, NA_character_) %>%
-        str_squish()) # remove any extra white spaces
+        str_squish()) %>% # remove any extra white spaces
+    rename(chla_lab_flag = chla_flags)
   
   return(e)
   
@@ -140,8 +141,8 @@ chl18.results <- get_results_data(cin.chl.results.path,
 dim(chl18.results) # 18 observations (subset of 2018 samples run at AWBERC)
 dim(chl18.volume) # 30 observations (all 2018 R10 samples)
 chl18.awberc <- left_join(chl18.results, chl18.volume, by = c("lake_id", "site_id", "sample_type")) %>%
-  mutate(chla = chla / volume_filtered_l) %>% # calculate chl-a in ug_l
-  mutate(chla_units = "ug_l") %>% # add units column for chl-a
+  mutate(chla_lab = chla_lab / volume_filtered_l) %>% # calculate chl-a in ug_l
+  mutate(chla_lab_units = "ug_l") %>% # add units column for chl-a
   select(-extract_conc, -volume_filtered_l) # no longer needed
 
 dim(chl18.awberc) #18, all chla data retained
@@ -173,7 +174,7 @@ get_bsa_data <- function(path, data, sheet) {
                   sheet = sheet) %>%
     janitor::clean_names() %>% # clean up names 
     filter(study == "AEBRR") %>% # 
-    rename(chla = chlorophyll_a_mg_m3) %>%
+    rename(chla_lab = chlorophyll_a_mg_m3) %>%
     mutate(sample_date = as.Date(sample_date, format = "%Y-%m-%d")) %>%
     mutate(analyzed_date = as.Date(analyzed_date, format = "%Y-%m-%d")) %>%
     mutate(extract_hold_time = analyzed_date - (sample_date + 60)) %>% # assume extraction occurred 60 days after collection
@@ -201,12 +202,13 @@ get_bsa_data <- function(path, data, sheet) {
     mutate(sample_depth = case_when(sample_type == "blank" ~ "blank",
                                     TRUE ~ "shallow")) %>% # all samples were collected near a-w interface
     mutate(chla_flag = "") %>% # assume all are above mdl (data unavailable)
-    mutate(chla_units = "ug_l") %>%
-    select(lake_id, site_id, sample_type, sample_depth, chla, chla_flag, chla_qual, chla_units) %>%
-    unite("chla_flags", c(chla_flag, chla_qual), sep = " ", na.rm = TRUE) %>%
-    mutate(chla_flags = if_else( # NA if there are no flags
-      str_detect(chla_flags, "\\w"), chla_flags, NA_character_) %>%
-        str_squish()) # remove any extra white spaces
+    mutate(chla_lab_units = "ug_l") %>%
+    select(lake_id, site_id, sample_type, sample_depth, chla_lab, chla_flag, chla_qual, chla_lab_units) %>%
+    unite("chla_lab_flags", c(chla_flag, chla_qual), sep = " ", na.rm = TRUE) %>%
+    mutate(chla_lab_flags = if_else( # NA if there are no flags
+      str_detect(chla_lab_flags, "\\w"), chla_lab_flags, NA_character_) %>%
+        str_squish()) %>% # remove any extra white spaces
+    rename(chla_lab_flag = chla_lab_flags)
 
   return(f)
 

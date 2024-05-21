@@ -10,16 +10,12 @@ fld_sheet
 
 # First, split out data fields not associated with a depth
 fld_sheet_no_depth <- fld_sheet %>% 
-  select(-eval_status,
-         -contains("trap"),
-         -contains("chamb"),
-         -contains("air"),
-         -contains("check"),
-         -contains("_s"), # shallow sonde
-         -contains("_d"), # deep sonde
-         lake_id, site_id, visit, lat, long, 
-         site_depth, # character, 'shallow' 'deep'
-         trap_deply_date) %>% # keep this to indicate sample_year
+  select(lake_id, site_id, visit, lat, long, eval_status,
+         #chm_vol_l, # pulled from fld_sheet in calculateDiffusion.  can be dropped
+         site_depth, # numeric, total depth
+         trap_deply_date, # keep this to indicate sample_year
+         trap_deply_date_time, # for calculating delta atmospheric pressure
+         trap_rtrvl_date_time) %>% # for calculating delta atmospheric pressure
   rename(sample_date = trap_deply_date)
 
   
@@ -30,7 +26,7 @@ fld_sheet_sonde <- fld_sheet %>%
          -contains("chamb"),
          -contains("air"),
          -contains("check"),
-         -lat, -long, -site_depth) %>%
+         -lat, -long, -site_depth, -chm_vol_l) %>%
   mutate(across(everything(), ~as.character(.x))) %>% # all columns must be same class
   pivot_longer(!(c(lake_id, site_id, visit))) %>%
   # move depth info from column names into separate columns
@@ -54,58 +50,64 @@ fld_sheet_sonde <- fld_sheet %>%
                      grepl("d_flag", name) 
                      ~ gsub("d_flag", "flag", name), # Remove _d from _d_flag
                      grepl("d_comment", name) 
-                     ~ gsub("d_comment", "comment", name)), # Remove _d from _d_comment
+                     ~ gsub("d_comment", "comment", name), # Remove _d from _d_comment
+                     TRUE ~ name),
     #sample_depth is 'shallow' or 'deep'.  The actual depth of sample collection will be 'sample_depth_m'
     name = replace(name, name == "sample_depth", "sample_depth_m")) 
 
+# Before pivoting to wide, make sure no rows have more than one value
+problem_rows <- fld_sheet_sonde %>% 
+  group_by(lake_id, site_id, visit, sample_depth, name) %>%  
+  summarize(n = n()) %>%          
+  filter(n > 1) # identify any rows that have more than one value                
+
 # Pivot back to wide, but now longer, just like chemistry
 fld_sheet_sonde <- fld_sheet_sonde %>% 
-  pivot_wider(names_from = name, values_from = value) %>%
+  pivot_wider(names_from = name, values_from = value) %>% 
   # convert numeric back to numeric
   mutate(across(.cols = c(site_id, sample_depth_m, temp, 
-                          do_mg, sp_cond, ph, chl, turb,
-                          visit), 
+                          do_mg, sp_cond, ph, chla_sonde, turb,
+                          phycocyanin_sonde, visit), 
                 ~ as.numeric(.x))) %>%
   # sort sonde parameters alphabetically
   select(sort(tidyselect::peek_vars())) %>%
   relocate(lake_id, site_id, 
            sample_depth, sample_depth_m) # put identifiers first
 
+    
 
 
 # Now merge in non depth specific fields from fld_sheets
 fld_sheet_sonde1 <- full_join(fld_sheet_sonde, fld_sheet_no_depth)
-dim(fld_sheet_sonde) # 2956, 25 [1/5/2023]
-dim(fld_sheet_no_depth) #147, 8 [1/5/2023]
-dim(fld_sheet_sonde1) #2956, 29 good [1/5/2023]
+dim(fld_sheet_sonde) # 4104, 26 [5/19/2024]
+dim(fld_sheet_no_depth) #2052, 10 [5/19/2024]
+dim(fld_sheet_sonde1) #4104, 33 good [5/19/2024]
 
-# Will merge on common names: lake_id and site_id
+# Will merge on common names: lake_id, site_id, visit
 names(chemistry)[names(chemistry) %in% names(fld_sheet_sonde1)] #lake_id, site_id, sample_depth, visit
 names(fld_sheet_sonde1)[names(fld_sheet_sonde1) %in% names(chemistry)] #lake_id, site_id, sample_depth, visit
 class(chemistry$lake_id) == class(fld_sheet_sonde1$lake_id) # TRUE
 class(chemistry$site_id) == class(fld_sheet_sonde1$site_id) # TRUE
 
 # Check dimensions
-dim(chemistry) # 199, 121 [1/5/2023]
-dim(fld_sheet_sonde1) # 2956, 29 [1/5/2023]
+dim(chemistry) # 265, 124 [5/19/2024]
+dim(fld_sheet_sonde1) # 4104, 33 [5/19/2024]
 
 # Check for correspondence among unique identifiers
-# 12 lakes in chemistry, but not in field sheets.  Some of these are
-# R10 lakes from 2018.  As of 1/5/2023, these field sheets
-# haven't been read in yet.  Others are 2023 lakes where chem
-# data are available, but field sheets haven't been populated yet.
 chemistry %>% filter(!(lake_id %in% fld_sheet_sonde1$lake_id)) %>%
   select(lake_id) %>% distinct() %>% print(n=Inf)
 
 
 # any lakes in fld_sheets, but not in chemistry? 
-# Some 2022 lakes for which we don't have any data yet
+# Good
 fld_sheet_sonde1 %>% filter(!(lake_id %in% chemistry$lake_id)) %>%
   select(lake_id) %>% distinct() %>% print(n=Inf)
 
 chem_fld <- full_join(chemistry, fld_sheet_sonde1) %>%
   relocate(lake_id, site_id, lat, long, sample_date, site_depth, sample_depth, sample_depth_m)
-dim(chem_fld) # 2990, 146 [1/5/2023]
+dim(chem_fld) # 4111, 153 [5/19/2024]
 
 # write to disk for reference in lake reports
-save(chem_fld, file = "output/chem_fld.RDATA")
+save(chem_fld, file = paste0("output/chem_fld_", Sys.Date(), ".RData"))
+
+     

@@ -9,26 +9,17 @@ lake.list.2023 <- lake.list %>%
   arrange(lab)
 
 
-# 2. Assume half of lakes sampled by each lab gets qa.qc 
-# foo is number of lakes getting qa.qc.  funky code accounts for odd number of
-# lakes, in which calculating half isn't straightforward
-foo <- lake.list.2023 %>% group_by(lab) %>%
-  summarize(n = n()) %>% 
-  mutate(qa.qc.n = ifelse(((n/2) %% 2 == 0) | n == 2,
-                          n/2,
-                          (n-1)/2)
-         )
 
-# hardcode qa.qc indicator.  Don't know which lakes will get qa.qc,
+# 2. hardcode qa.qc indicator.  Don't know which lakes will get qa.qc,
 # so assigning randomly
 lake.list.2023 <- lake.list.2023 %>%
-  mutate(qa_qc = c(1, 1, NA, NA, NA, # ADA, 5 lakes, 2 qa.qc
-                   1, NA, NA, # CIN, 3 lakes, 1 qa.qc
-                   1, NA, NA, # DOE, 3 lakes, 1 qa.qc
-                   1, 1, NA, NA, NA)) # NAR, 5 lakes, 2 qa.qc
+  mutate(qa_qc = c(1, 1, 1, NA, # ADA, 4 lakes, 3 qa.qc
+                   1, 1, 1, NA, NA, NA, NA, NA, NA, NA, # CIN, 10 lakes, 3 qa.qc
+                   1, NA, # DOE, 2 lakes, 1 qa.qc
+                   1, NA)) # NAR, 1 lakes, 1 qa.qc
 
 
-# 4. create vectors of analyte groups.
+# 3. create vectors of analyte groups.
 nutrients <- c("nh4", "no2_3", "no3", "no2", "tn", "tp", "op")
 anions <- c("fluoride", "cl", "br", "so4")
 organics <- c("doc", "toc")
@@ -41,7 +32,7 @@ algae.nar <- c("microcystin", "phycocyanin", "chla")
 algae.gb <- c("taxonomy", "physiology")
 suva <- "suva"
 
-# 5. create df of chem samples collected from qa.qc lakes.
+# 4. create df of chem samples collected from qa.qc lakes.
 qa.qc.samples <- expand.grid(lake_id = lake.list.2023 %>% # lake_id for all sampled lakes
                                filter(qa_qc == 1) %>% # filter to qa.qc lakes
                                select(lake_id) %>% # pull lake_id

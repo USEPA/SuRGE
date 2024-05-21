@@ -1,0 +1,45 @@
+---
+title: "Design files for CH4-183, Lake Copper Breaks"
+author: "J. Beaulieu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, echo=FALSE}
+# trick for forcing a page break when printing .html
+#URL for inserting hard page breaks for print html
+#https://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+## General Information
+Small waterbody (0.1km2) in Copper Breaks State Park.  Lake had insufficient water to sample in 2021.  Design is based on Landsat imagery from May 5, 2023.
+
+According to state park website, "Bring your kayak, canoe or small fishing boat. Lake Copper Breaks has a small boat ramp. The 60-acre lake is a no-wake zone; jet skis are not allowed."  It looks like boating is possible under 'normal' water levels.
+
+## Index Site
+NLA reports maximum depth of 4m.  No bathymetry data available, but presumably deepest spot will be near dam.  
+
+## Main Sites
+```{r, echo=FALSE, out.width="100%"}
+# Main sites
+knitr::include_graphics( "../../../../../../../lakeDsn/ADA/CH4-183/183_Main.png")
+```
+<P style="page-break-before: always">
+  
+  
+
+## Oversample Sites
+```{r, echo=FALSE, out.width="100%"}
+# Oversample sites
+knitr::include_graphics( "../../../../../../../lakeDsn/ADA/CH4-183/183_Over.png")
+```
+
+<P style="page-break-before: always">
+## Site Coordinates
+```{r, echo=FALSE, }
+
+coords <- read.table(file = "../../../../../../../lakeDsn/ADA/CH4-183/ch4_183Sites.txt",
+                      header = TRUE, sep = "\t")
+
+
+knitr::kable(coords, caption = "Site coordinates")
+```

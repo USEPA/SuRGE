@@ -4,9 +4,10 @@
 #####################################################
 ## TO RUN THE CODE BELOW, YOU MUST FIRST GENERATE THE gga AND fld_sheet DATA 
 ## OBJECTS.  THIS CAN BE DONE BY RUNNING ALL SCRIPTS IN THE ORDER
-## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 3 LINES:
+## DEFINED IN masterScript.R, OR YOU CAN JUST RUN THESE 5 LINES:
 # source("scripts/masterLibrary.R") # Read in renv controlled library
 # source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
+# source("scripts/analysis/readSurgeLakes.R")
 # source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
 # source("scripts/analysis/readLgr.R") # read raw LGR data
 
@@ -17,7 +18,7 @@
 #1. INSPECT INSTANCES OF NA IN GGA------------
 # Time/date stamp first
 filter(gga, is.na(RDateTime))
-# no NAs for this field [1/5/2023] 
+# no NAs for this field [2/1/2024] 
 gga <- filter(gga, !is.na(RDateTime)) # strip out missing RDateTime which complicate functions below.
 
 
@@ -26,16 +27,18 @@ gga <- filter(gga, !is.na(RDateTime)) # strip out missing RDateTime which compli
 # sites where chambers were not deployed.  We want to remove these rows, or the missing
 # values complicate the loop.
 
+
 missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logical for missing chamber deployment times
 
 # Join with fld_sheet to get site_id and chamb_deply_date_time
 # This join duplicates the time series for each station within
 # each lake
+gga$visit<-as.numeric(gga$visit)
 gga_2 <- gga %>%
   left_join(fld_sheet %>% 
                        filter(!missing_chamb_deply_date_time) %>%
-                       select(lake_id, site_id, chamb_deply_date_time), 
-                     by = "lake_id")
+                       select(lake_id, site_id, visit, chamb_deply_date_time), 
+                     by = c("lake_id","visit"), relationship = "many-to-many")
 
 #3. ADD CO2 AND CH4 RETRIEVAL AND DEPLOYMENT TIMES
 # We may want to model different portions of the time series for CO2 and CH4.
@@ -55,12 +58,42 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "54"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- 1 # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "136"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- "1" # numeric component of lake_id, no leading zero(s), formatted as numeric
+visit_id.i <- "1"
+# this code generates a 3 panel plot used to demonstrate relationship between
+# CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
+# has been resolved. [JB 3/29/2024]
+
+# gga_2 %>%
+#   filter(lake_id == lake_id.i,
+#          site_id == site_id.i,
+#          RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+#          RDateTime < ch4RetDtTm + 300, # extend plot 1 minute post deployment
+#          CH4._ppm > 0) %>%
+#   select(lake_id, RDateTime, CH4._ppm, CO2._ppm, H2O._ppm,
+#          co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, ch4RetDtTm) %>%
+#   pivot_longer(!c(lake_id, RDateTime,co2DeplyDtTm, co2RetDtTm,
+#                   ch4DeplyDtTm, ch4RetDtTm)) %>%
+#   ggplot(aes(RDateTime, value)) +
+#   geom_point() +
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:16:22", tz = "UTC")),
+#                  color = "deployment"), key_glyph = "path") +
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:03", tz = "UTC")),
+#                  color = "CH4 stabilizes"), key_glyph = "path") + # CH4
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:43", tz = "UTC")),
+#                  color = "CO2 stabilizes"), key_glyph = "path") + #CO2
+#   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
+#                  color = "retrieval"), key_glyph = "path") +
+#   scale_color_discrete(breaks = c("deployment", "CH4 stabilizes", "CO2 stabilizes", "retrieval"), name="") +
+#   #scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+#   xlab("time (hh:mm)") +
+#   facet_wrap(~name, scales = "free", nrow = 3)
 
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
          site_id == site_id.i, 
+         visit == visit_id.i,
          RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
          RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
          CH4._ppm > 0) %>%
@@ -86,17 +119,122 @@ plotCo2 <- gga_2 %>%
   ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
 ggplotly(plotCo2)
 
+plotH2O <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > co2DeplyDtTm - 120, # start plot 1 minute prior to deployment
+         RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, H2O._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+ggplotly(plotH2O)
+
 #3.2  Read in refined deployment and retrieval data from Excel files.
 # use .xls.  Can read file into R while file is open in Excel, which is convenient.
+
 # list of files containing deployment and retrieval data.
-sdjDataList <- paste0("../../../data/", 
-                      c("ADA/chamberAdjustmentsAda.xls", "CIN/chamberAdjustmentsCIN.xls", 
-                        "RTP/chamberAdjustmentsRTP.xls", "R10/chamberAdjustmentsR10.xls", 
-                        "USGS/chamberAdjustmentsUSGS.xls", "DOE/chamberAdjustmentsDOE.xls",
-                        "NAR/chamberAdjustmentsNAR.xls"))
-# Read data
-adjData <- map_df(sdjDataList, readxl::read_xls, sheet = "DATA",
-                            col_types = c("text", "numeric", rep("date", 4), rep("text", 4))) #lake_id is character
+adjDataList <- paste0(userPath,
+                     c( "data/ADA/chamberAdjustmentsAda.xls", 
+                       "data/USGS/chamberAdjustmentsUSGS.xls", "data/DOE/chamberAdjustmentsDOE.xls"),sep="")
+
+adjDataListb<-paste0(userPath, 
+                     c("data/CIN/chamberAdjustmentsCIN.xls","data/NAR/chamberAdjustmentsNAR.xls", "data/RTP/chamberAdjustmentsRTP.xls",
+                       "data/R10/chamberAdjustmentsR10.xls"), sep="")
+# Read data, but not CIN
+adjData <- map_df(adjDataList, # exclude CIN, RTP, R10, and NAR, different formatting
+                  readxl::read_xls, 
+                  range =cell_cols("DATA!A:J"), # columns A:J
+                  col_types = c("text", "numeric", 
+                                rep("date", 4), 
+                                rep("text", 4))) %>% #lake_id is character
+  janitor::remove_empty("rows") # remove rows that contain only NA
+
+# Read CIN and NAR data.  date and time fields contain tenths of a second that confuse read_xls
+adjDataB <- map_df(adjDataListb, # only CIN, different formatting than others
+                  readxl::read_xls, 
+                  range =cell_cols("DATA!A:J"), # columns A:J
+                  col_types = c("text", "numeric", 
+                                rep("text", 8))) %>% # date.time fields must be read as character
+  janitor::remove_empty("rows") %>% # remove rows that contain only NA
+  mutate(across(contains("DtTm"), ~as.POSIXct(., "%m/%d/%Y %H:%M:%S", tz="UTC")))
+
+#Fix adjustment times for CIN sites with clock issue
+
+tem<-ifelse(adjDataB$lake_id=="67",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+                          ifelse(adjDataB$lake_id=="68",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                                 ifelse(adjDataB$lake_id=="69_riverine",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                                        ifelse(adjDataB$lake_id=="70_transitional",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                               ifelse(adjDataB$lake_id=="71",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                                      ifelse(adjDataB$lake_id=="72",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                                             ifelse(adjDataB$lake_id=="75",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                                    ifelse(adjDataB$lake_id=="79",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                                           ifelse(adjDataB$lake_id=="149",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                                  ifelse(adjDataB$lake_id=="231",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                                         ifelse(adjDataB$lake_id=="232"& adjDataB$site_id %in% c("10","14","32","26","4","8","12","20","7","15"),adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                                ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
+                                                                                                ifelse(adjDataB$lake_id=="236",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                                       ifelse(adjDataB$lake_id=="237",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
+                                                                                                              ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[14]),adjDataB$co2DeplyDtTm)))))))))))))))
+adjDataB$co2DeplyDtTm<-as_datetime(tem)
+
+ten<-ifelse(adjDataB$lake_id=="67",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+            ifelse(adjDataB$lake_id=="68",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                   ifelse(adjDataB$lake_id=="69_riverine",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                          ifelse(adjDataB$lake_id=="70_transitional",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                 ifelse(adjDataB$lake_id=="71",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                        ifelse(adjDataB$lake_id=="72",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                               ifelse(adjDataB$lake_id=="75",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                      ifelse(adjDataB$lake_id=="79",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                             ifelse(adjDataB$lake_id=="149",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                    ifelse(adjDataB$lake_id=="231",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                           ifelse(adjDataB$lake_id=="232"& adjDataB$site_id %in% c("10","14","32","26","4","8","12","20","7","15"),adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                  ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
+                                                                                  ifelse(adjDataB$lake_id=="236",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                         ifelse(adjDataB$lake_id=="237",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
+                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[14]), adjDataB$co2RetDtTm)))))))))))))))
+adjDataB$co2RetDtTm<-as_datetime(ten)
+
+teo<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+            ifelse(adjDataB$lake_id=="68",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                   ifelse(adjDataB$lake_id=="69_riverine",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                          ifelse(adjDataB$lake_id=="70_transitional",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                 ifelse(adjDataB$lake_id=="71",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                        ifelse(adjDataB$lake_id=="72",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                               ifelse(adjDataB$lake_id=="75",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                      ifelse(adjDataB$lake_id=="79",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                             ifelse(adjDataB$lake_id=="149",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                    ifelse(adjDataB$lake_id=="231",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                           ifelse(adjDataB$lake_id=="232"& adjDataB$site_id %in% c("10","14","32","26","4","8","12","20","7","15"),adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                  ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
+                                                                                  ifelse(adjDataB$lake_id=="236",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                         ifelse(adjDataB$lake_id=="237",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
+                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[14]),adjDataB$ch4RetDtTm)))))))))))))))
+adjDataB$ch4RetDtTm<-as_datetime(teo)
+
+tep<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
+            ifelse(adjDataB$lake_id=="68",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[2]),
+                   ifelse(adjDataB$lake_id=="69_riverine",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[3]),
+                          ifelse(adjDataB$lake_id=="70_transitional",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[4]),
+                                 ifelse(adjDataB$lake_id=="71",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[5]),
+                                        ifelse(adjDataB$lake_id=="72",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[6]),
+                                               ifelse(adjDataB$lake_id=="75",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[7]),
+                                                      ifelse(adjDataB$lake_id=="79",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[8]),
+                                                             ifelse(adjDataB$lake_id=="149",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[9]),
+                                                                    ifelse(adjDataB$lake_id=="231",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[10]),
+                                                                           ifelse(adjDataB$lake_id=="232"& adjDataB$site_id %in% c("10","14","32","26","4","8","12","20","7","15"),adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[11]),
+                                                                                  ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
+                                                                                  ifelse(adjDataB$lake_id=="236",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
+                                                                                         ifelse(adjDataB$lake_id=="237",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
+                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[14]), adjDataB$ch4DeplyDtTm)))))))))))))))
+adjDataB$ch4DeplyDtTm<-as_datetime(tep)
+
+# Combine CIN and other data
+adjData <- rbind(adjData, adjDataB)
+
 str(adjData)
 
 #3.3. update deployment and retrieval times based on fixes above (see 3.1 and 3.2)
@@ -109,16 +247,17 @@ gga_2 <- gga_2 %>%
   # This won't throw error if specified columns are absent.
   select_if(!names(.) %in% c("co2Notes", "ch4Notes", "co2Status", "ch4Status")) %>%
   # Join with adjDataDf.
-  left_join(., adjData) %>%
+  left_join(., adjData, relationship = "many-to-many")
   # mutate ensures that all records have deployment and retrieval times for CO2 and CH4
-  mutate(co2DeplyDtTm = case_when(is.na(co2DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
-                            TRUE ~ co2DeplyDtTm), # if not na, then use data supplied from adjDataDf
-         co2RetDtTm = case_when(is.na(co2RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
-                            TRUE ~ co2RetDtTm), # if not na, then use data supplied from adjDataDf
-         ch4DeplyDtTm = case_when(is.na(ch4DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
-                                  TRUE ~ ch4DeplyDtTm), # if not na, then use data supplied from adjDataDf
-         ch4RetDtTm = case_when(is.na(ch4RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
-                                TRUE ~ ch4RetDtTm))  # if not na, then use data supplied from adjDataDf
+  # now that we have gone through all the chamber adjustments, I am not going to use the chamb_deply_date_time anymore
+  # mutate(co2DeplyDtTm = case_when(is.na(co2DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
+  #                           TRUE ~ co2DeplyDtTm), # if not na, then use data supplied from adjDataDf
+  #        co2RetDtTm = case_when(is.na(co2RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+  #                           TRUE ~ co2RetDtTm), # if not na, then use data supplied from adjDataDf
+  #        ch4DeplyDtTm = case_when(is.na(ch4DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
+  #                                 TRUE ~ ch4DeplyDtTm), # if not na, then use data supplied from adjDataDf
+  #        ch4RetDtTm = case_when(is.na(ch4RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+  #                               TRUE ~ ch4RetDtTm))  # if not na, then use data supplied from adjDataDf
 
 # GO BACK TO STEP 3.1 TO REVIEW TIME SERIES AFTER INCORPORATING NEW DEPLOYMENT AND RETRIEVAL TIMES
 # IF SATISFIED WITH PROFILES, MOVE ON TO STEP 4.
@@ -128,7 +267,7 @@ gga_2 <- gga_2 %>%
 # Trim data to only those we plan to model, plus 60 second buffer on either side
 # of modeling window.
 gga_3 <- gga_2 %>%
-  group_by(lake_id, site_id) %>% # for each lake and site....
+  group_by(lake_id, site_id, visit) %>% # for each lake and site....
   filter(RDateTime > (min(c(co2DeplyDtTm, ch4DeplyDtTm)) - 60) & 
            RDateTime < (max(c(co2RetDtTm, ch4RetDtTm)) + 60)) %>%
   ungroup()

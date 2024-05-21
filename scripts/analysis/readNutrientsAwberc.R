@@ -76,7 +76,7 @@ get_awberc_data <- function(path, data, sheet) {
   #                        "2021_ESF-EFWS_NutrientData_Updated01272022_AKB.xlsx"), #
   #                 sheet = "2021 Data", skip = 1) %>%
   # d <- read_excel(paste0(cin.awberc.path,
-  #                        "2022_ESF-EFWS_NutrientData_Updated08302022_AKB.xlsx"), #
+  #                        "2022_ESF-EFWS_NutrientData_Updated06262023_AKB.xlsx"), #
   #                 sheet = "2022 Data", skip = 1) %>%
     janitor::clean_names() %>% # clean up names for rename and select, below
     janitor::remove_empty(which = c("rows", "cols")) %>% # remove empty rows
@@ -94,7 +94,7 @@ get_awberc_data <- function(path, data, sheet) {
     (as.Date(ddate, format = "%Y%m%d") - as.Date(rdate, format = "%m/%d/%Y")) > 28,
     "H", NA_character_)) %>% # TRUE = hold time violation
   mutate(visit = if_else(lake_id %in% c("281", "250") &
-                           between(rdate,
+                           between(as.Date(rdate),
                                    as.Date("2022-08-15"),
                                    as.Date("2022-09-15")),
                          2, 1, missing = 1)) %>%
@@ -301,10 +301,14 @@ chem21 <- get_awberc_data(cin.awberc.path,
 
 
 chem22 <- get_awberc_data(cin.awberc.path, 
-                          "2022_ESF-EFWS_NutrientData_Updated11292022_AKB.xlsx", 
+                          "2022_ESF-EFWS_NutrientData_Updated06262023_AKB.xlsx", 
                           "2022 Data") 
 
-chemCinNutrients <- bind_rows(chem21, chem22) %>%
+chem23 <- get_awberc_data(cin.awberc.path, 
+                          "2023_ESF-EFWS_NutrientData_Updated05012024_AKB.xlsx", 
+                          "2023 Data") 
+
+chemCinNutrients <- bind_rows(chem21, chem22, chem23) %>%
   dup_agg() %>% # final object, cast to wide with dups aggregated
   flag_agg()
 
@@ -313,7 +317,7 @@ chemCinNutrients <- bind_rows(chem21, chem22) %>%
 # Are all collected samples included?
 
 # Samples collected
-chem.inventory.expected <- chem.samples.foo %>% # see chemSampleList.R, [11/03/22] few 2022 nutrient data available
+chem.inventory.expected <- chem.samples.foo %>% # see chemSampleList.R
   filter(lab != "R10", # see readNutrientsR10_2018.R for 2018 R10 samples
          # See readNutrientsAda.R for R10 2020 nutrient data
          lab != "ADA", # Ada analyzed their own. readNutrientsAda.R  
@@ -333,15 +337,16 @@ setdiff(chem.inventory.analyzed, chem.inventory.expected) %>% print(n=Inf)
 
 
 # all collected samples in analyzed list?
+# 4/3/2024, all 2020-2022 samples have been analyzed
 setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
   arrange(analyte, lake_id) %>% print(n=Inf)
 
-# all collected samples in analyzed list? A more condensed view
-setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
-  select(lake_id, visit, analyte) %>%
-  table()
+# all collected samples in analyzed list? Extract sample year and lab
+# for missing samples.
+# All good! [5/20/2024]
+right_join(lake.list %>% select(lake_id, lab, sample_year, visit),
+           setdiff(chem.inventory.expected, chem.inventory.analyzed) %>% 
+             select(lake_id, visit) %>%
+             mutate(lake_id = as.numeric(lake_id)) %>%
+             distinct())
 
-# [12/8/2022]
-# missing samples from lakes 76 and 77 (see NUTRIENTS COC 2022-06-27 LJ.xls)
-# and 65/281/250 (see NUTRIENTS COC 2022-10-05 LJ.xls).  I asked Pegasus to look
-# into this on 12/8/2022.

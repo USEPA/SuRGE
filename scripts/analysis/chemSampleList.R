@@ -24,8 +24,8 @@ lake.list.chem <- lake.list %>% # see readSurgeLakes.R
 
 # 2. filter comprehensive lake list to lakes that have been sampled
 lake.list.chem <- lake.list.chem %>% 
-  filter(sample_year <= 2022, # lakes sampled in or before 2022
-         !grepl(c("PI|LD|TR"), sample_year), # exclude inaccessible lakes (may not be necessary)
+  filter(sample_year <= 2023, # excludes lakes with NA for sample_year
+    !grepl(c("PI|LD|TR"), eval_status_code), # exclude inaccessible lakes
          !(lake_id == "250" & visit == 1), # chem samples from 250 visit 1 were lost
          !(lake_id == "281" & visit == 1)) # chem samples from 281 visit 1 were lost
 
@@ -37,9 +37,9 @@ qa.qc <- readxl::read_excel(paste0(userPath,
   mutate(qa_qc = 1) # column indicating qa.qc samples collected
 
 # merge qa.qc with lake.list.chem
-nrow(lake.list.chem) # 99
+nrow(lake.list.chem) # 120
 lake.list.chem <- left_join(lake.list.chem, qa.qc) # keep all 
-nrow(lake.list.chem) # 99
+nrow(lake.list.chem) # 120
 
 # 4. create vectors of analyte groups.
 nutrients <- c("nh4", "no2_3", "no2", "tn", "tp", "op")
@@ -50,7 +50,7 @@ metals <- c("al", "as", "ba", "be", "ca",
             "k", "li",  "mg", "mn", "na",
             "ni", "pb", "p", "sb", "si",
             "sn", "sr", "s", "v", "zn")
-algae.nar <- c("microcystin", "phycocyanin", "chla")
+algae.nar <- c("microcystin", "phycocyanin_lab", "chla_lab")
 algae.gb <- c("taxonomy", "physiology")
 
 # 5. create df of chem samples collected from qa.qc lakes.
@@ -59,16 +59,25 @@ algae.gb <- c("taxonomy", "physiology")
 qa.qc.samples <- expand.grid(lake_id = lake.list.chem %>% # lake_id for all sampled lakes
                                filter(qa_qc == 1) %>% # filter to qa.qc lakes
                                select(lake_id) %>% # pull lake_id
+                               # 148 is in here twice, once for visit 1 and again for visit 2
+                               # the distinct removes one occurence of 148, so it is only
+                               # in there once.  Below we included visits 1 and 2 for all
+                               # sites, then exclude visit 2 for all except 148 and 281.
+                               dplyr::distinct() %>%
                                pull(), # extract lake_id to vector
+                             visit = 1:2, # visit 1 and 2 for all sites, remove those that don't have visit 2 below
                              sample_type = c("duplicate", "blank"),
                              analyte = c(nutrients, anions, organics, 
                                          metals, algae.nar), # no qa.qc for algae.gb analytes
                              sample_depth = "shallow", # qa.qc only collected from shallow depth
                              stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
-  mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank"), # blank depth = blank
-         visit = case_when(lake_id == 281 ~ 2, # qa.qc collected from 281 on visit == 2
-                           TRUE ~ 1)) %>% # all others collected on visit == 1
+  mutate(sample_depth = replace(sample_depth, sample_type == "blank", "blank")) %>%  # blank depth = blank
+  # exclude visit 2 for all except 281 and 148
+  filter(!(visit == 2 & !(lake_id %in% c(281, 148)))) %>%
+  # exclude visit 1 for 281 (qa.qc performed on visit 2 only)
+  filter(!(visit == 1 & lake_id == 281)) %>%
   arrange(lake_id)
+
 
 # 6. create df of samples collected from all lakes
 # 2018 (R10) and 2020 sampling (CIN, RTP, R10) did not include doc, anions, 
@@ -82,18 +91,22 @@ unknown.samples <- expand.grid(lake_id = lake.list.chem$lake_id,
                                sample_depth = c("shallow", "deep"),
                                stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE) %>%
   mutate(visit = case_when(lake_id %in% c("250", "281") ~ 2, # visit == 1 samples were lost, only visit == 2 submitted
-                           TRUE ~ 1)) %>% # all other sites are visit == 1
+                           TRUE ~ 1)) %>% # all other sites unchanged (147 and 148 should have visits 1 and 2, see below)
   # algal indicator samples not collected at depth.  Filter out
   filter(!(sample_depth == "deep" & analyte %in% c(algae.nar, algae.gb))) %>%
   arrange(lake_id)
 
+unknown.samples <- unknown.samples %>%
+  filter(lake_id == 147 | lake_id == 148) %>% # pull out rows for 147, and 148
+  mutate(visit = 2) %>% # change visit to visit == 2
+  bind_rows(unknown.samples) # add two new rows to original df
 
 # 7. Combine df of qa.qc and df of unknowns.  Merge 'lab' and 'sample_year' fields
 # from lake.list.
 # R10 and 2020 sampling did not include doc, anions, taxonomy, physiology.  Filter
 # out in step 8.
 chem.samples <- rbind(qa.qc.samples, unknown.samples) %>%
-  full_join(., select(lake.list.chem, lake_id, lab, sample_year)) %>% 
+  full_join(., select(lake.list.chem, lake_id, lab, visit, sample_year)) %>% 
   arrange(sample_year, lab, lake_id, sample_type, sample_depth) %>%
   relocate(sample_year, lab, lake_id, sample_type, sample_depth, analyte)
 
@@ -114,7 +127,7 @@ chem.samples.foo <- chem.samples %>%
   # use ! to exclude any samples that meet these criteria
   # R10 in 2018 did not include doc, anions, taxonomy, physiology, or metals. 
   filter(!((lab == "R10" & sample_year == 2018) & # for R10 sampling in 2018
-             (analyte %in% c("microcystin", "phycocyanin", "doc") | # that contain these
+             (analyte %in% c("microcystin", "phycocyanin_lab", "doc") | # that contain these
                 analyte_group %in% c("algae.gb", "anions", "metals")))) %>% 
   # R10 only collected at shallow depth in 2018
   filter(!((lab == "R10" & sample_year == 2018) & # for R10 sampling in 2018
@@ -123,8 +136,8 @@ chem.samples.foo <- chem.samples %>%
   filter(!((sample_year == 2020) & # for R10, RTP, and CIN samples in 2020
              (analyte == "doc" | # that contain these
                 analyte_group %in% c("algae.gb", "anions")))) %>% # or these
-  # chla and phycocyanin blanks not collected at lake_id == 67
-  filter(!(lake_id == "67" & analyte %in% c("chla", "phycocyanin") & sample_type == "blank")) %>%
+  # chla and phycocyanin_lab blanks not collected at lake_id == 67
+  filter(!(lake_id == "67" & analyte %in% c("chla_lab", "phycocyanin_lab") & sample_type == "blank")) %>%
   # no deep chemistry at 69_lacustrine (forgot van dorn)
   filter(!(lake_id == "69_lacustrine" & sample_depth == "deep")) %>% 
   # blanks collected at 238, but no duplicates
@@ -136,13 +149,19 @@ chem.samples.foo <- chem.samples %>%
   # toc and doc blanks not collected from 67.  No DI brought to field
   filter(!(lake_id == "67" & sample_type == "blank" & analyte %in% c("doc", "toc"))) %>%
   # chl unknown filter tore during sample prep at 148.  no replacement available
-  filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla")) %>%
+  filter(!(lake_id == "148" & sample_type == "unknown" & analyte == "chla_lab" & visit == 1)) %>%
   # no DOC blank collected at 275
   filter(!(lake_id == "275" & sample_type == "blank" & analyte == "doc")) %>%
   # no DOC blank collected at 64
   filter(!(lake_id == "64" & sample_type == "blank" & analyte == "doc")) %>%
   # no DOC blank collected at 65
   filter(!(lake_id == "65" & sample_type == "blank" & analyte == "doc")) %>%
+  # no anion deep collected at 65 (chemistry065NARTtoCIN06September2022.pdf)
+  filter(!(lake_id == "65" & sample_type == "unknown" & sample_depth == "deep" & analyte_group == "anions")) %>%
+  # this sample lost in lab.  See See 2/21/2023 email from Maily Pham
+  filter(!(lake_id == "240" & sample_type == "unknown" & analyte == "doc" & sample_depth == "deep")) %>%
+  # shallow water put in deep toc and doc shallow.  These vials were discarded at AWBERC.
+  filter(!(lake_id == "053" & analyte %in% c("doc", "toc") & sample_depth == "deep")) %>%
   arrange(sample_year, lab, lake_id, sample_type, analyte_group, sample_depth)
          
          
@@ -160,4 +179,5 @@ wpl <- chem.samples.foo %>% filter(lake_id == "308") %>%
 
 # Bind these dfs to main df
 chem.samples.foo <- rbind(chem.samples.foo, lgr, wpl) %>% as_tibble()
+dim(chem.samples.foo) #12,506 [5/9/2024]
                                      

@@ -49,8 +49,8 @@ get_ada_data <- function(path, datasheet) {
     select(field_sample_id, labdup, starts_with("dat")) %>% # 
     rename_with(~paste0(analyte_names), 
                 .cols = starts_with("data")) %>% # rename w/ analyte names
-    rename_with(~paste0(analyte_names, "_date_analyzed"), 
-                .cols = starts_with("date_a")) %>% # rename w/ analyte names
+    # rename_with(~paste0(analyte_names, "_date_analyzed"), 
+    #             .cols = starts_with("date_a")) %>% # rename w/ analyte names
     mutate(across(ends_with("analyzed"), # select the latest date in range
                   ~ word(., -1) %>% 
                     as.Date(., tryFormats = c("%m/%d/%Y", "%Y-%m-%d")))) %>%
@@ -61,15 +61,22 @@ get_ada_data <- function(path, datasheet) {
                                          format = "%m/%d/%Y")))) 
   
   
-  # maintable_3: remove extra rows, create ND flag and apply MDL value, 
-  # create L (i.e., BQL) flag
+  # Pull column of date data (it doesn't matter which, since they're identical)
+  analyzed_dates <- maintable_1 %>% select(contains("date_analyzed")) %>% pull()
   
-  maintable_3 <- maintable_2 %>%
-    mutate(field_sample_id = # clean-up sampleid field
-             str_remove_all(field_sample_id, "\\(|\\)|\\s")) %>% 
-    filter(str_starts(field_sample_id, 
-                      "TN\\d|DN\\d")|  # retain if ID starts with TN or DN, 
-             str_count(field_sample_id) == 5) %>% # and retain if length = 5
+  maintable_2.5 <- maintable_2 %>%
+    mutate(across(ends_with("/L"), # create date columns for all analytes
+                  ~ analyzed_dates, # copy the date data into all columns
+                  .names = "{col}_date_analyzed"))
+  
+  # maintable_3: remove extra rows, create ND flag and apply MDL value, 
+  # create L (i.e., BQL) flag, create 'visit' column
+  
+  maintable_3 <- maintable_2.5 %>%
+    mutate(field_sample_id = # remove "(TN or DN)" field_sample_id
+             str_remove_all(field_sample_id, "\\s|\\(|\\)|TN or DN")) %>% 
+    filter(!str_detect(field_sample_id, # Keep only the data rows
+                       "[a-z]")) %>% # remove any rows w/ lowercase letters
     select(field_sample_id, labdup, everything(), 
            -date_collected) %>% # reorder columns to mutate()
     mutate(across(ends_with("/L"), # create new flag if analyte not detected
@@ -80,14 +87,13 @@ get_ada_data <- function(path, datasheet) {
                            toptable[paste(cur_column()),2], .))) %>% 
     mutate(across(ends_with("/L"), # create new flag column for qual limit
                   ~ if_else(str_detect(., "BQL"), "L", ""),
-                  .names = "{col}_bql")) 
+                  .names = "{col}_bql")) %>%
+    mutate(visit = if_else(str_ends(field_sample_id, "2"), 2, 1))
   
   # maintable_4: remove extra characters, make numeric, parse sample IDs,  
   # format lake IDs, determine if hold time violated
   
   maintable_4 <- maintable_3 %>%
-    mutate(field_sample_id = str_remove_all(
-      field_sample_id, "TN|or|DN")) %>% # clean-up data
     mutate(across(!ends_with(c("flag", "analyzed", "bql", 
                                "labdup", "field_sample_id")), 
                   ~ str_extract(., pattern = "\\-*\\d+\\.*\\d*"))) %>% 
@@ -142,6 +148,7 @@ conv_units <- function(data, filename) {
   
   # select and order columns
   e <- d %>% 
+    select(!starts_with("date_analyzed")) %>% # shouldn't need these
     select(order(colnames(.))) %>% # alphabetize and reorder columns
     select(lake_id, site_id, sample_depth, sample_type, labdup, everything())
   
@@ -153,49 +160,25 @@ conv_units <- function(data, filename) {
 
 dup_agg <- function(data) {
   
-  # first, convert all _flag columns to a numeric for summarize operations;
-  # Must be performed in case lab dup has a different flag than the sample.
+  # filter out any observations where value is NA
   
-  data <- data %>% 
-    mutate(across(ends_with(c("flag", "bql", "qual")), 
-                  ~ if_else(str_detect(., "ND|L|H"), 1, 0))) 
+  data <- data %>% filter(!if_any(where(is.numeric), is.na))
   
   
-  # carve out the _flag and _units columns so they can be re-joined later
-  
-  c <- data %>% select(ends_with(c("id","labdup", "type", "depth", 
-                                   "filter", "units")))
-  
-  # summarize means of analyte values and flags 
-  
+  # summarize means of analyte values
   d <- data %>%
-    dplyr::group_by(lake_id, sample_depth, sample_type) %>%
-    # '!' to exclude columns we don't want to aggregate
-    summarize(across(!ends_with(c("site_id","labdup", "type", "depth", 
-                                  "filter", "units")), 
-                     ~ mean(., na.rm = TRUE))) 
-  
-  # rejoin data 
-  
-  e <- left_join(d, c, by = c("lake_id", "sample_depth", "sample_type")) %>% 
-    mutate(across(4:last_col(), # convert NaN to NA
-                  ~ ifelse(is.nan(.), NA, .))) %>% # must use 'ifelse' here 
-    select(order(colnames(.))) %>% # alphabetize column names
-    select(lake_id, site_id, sample_depth, sample_type, 
-           labdup, everything()) %>% # put 'sampleid' first
-    # if both sample and dup had a flag, value = 1. If only one had a flag, 
-    # value = 0.5. In both cases, flag is retained in aggregated observation.
-    mutate(across(ends_with("flag"), # convert all _flag values back to text
-                  ~ if_else(.< 0.5, "", "ND"))) %>% 
-    mutate(across(ends_with("bql"), # convert all _flag values back to text
-                  ~ if_else(.< 0.5, "", "L"))) %>% 
-    mutate(across(ends_with("qual"), # convert all _flag values back to text
-                  ~ if_else(.< 0.5, "", "H"))) %>% 
-    filter(labdup != "LAB DUP") %>% # remove the lab dup
-    select(-labdup) %>% # remove labdup column. JB 12/7/2021
+    dplyr::group_by(lake_id, site_id, sample_depth, sample_type) %>%
+    # Summarize() to get means of all analyte values
+    summarize(across(where(is.numeric), 
+                     ~ mean(., na.rm = TRUE)),
+              # First() gets the first value only for the character fields
+              # By ignoring NA, this will return any flag
+              across(ends_with(c("units", "flag", "bql", "qual")),
+                     # 'order_by' sorts the column in question
+                     ~ last(., na_rm = TRUE, order_by = .))) %>%
     ungroup()
   
-  return(e)
+  return(d)
   
 }
 
@@ -223,7 +206,7 @@ flag_agg <- function(data) { # merge the flag columns for each analyte
   h <- g %>%
     mutate(across(ends_with("flags"),
                   ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
-                    str_squish(.))) # remove any extra white spaces
+                    str_squish())) # remove any extra white spaces
   
   return(h)
   
@@ -272,75 +255,122 @@ ove1 <-
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
-# ADA OC 2022--------------------------------------------------------------------
+# ADA OC 2022-2023-------------------------------------------------------------
 
-# The 2022 Excel files contain multiple lakes in each file. site_id can be 
+# Excel files may contain multiple lakes in each file. site_id can be 
 # assigned using the following function:
 
-site_id_22 <- function(data) { 
+site_id_number <- function(data) { 
   
   data <- data %>%
     mutate(site_id = case_when( # add site_id
+      lake_id == "3" ~ "20",
+      lake_id == "4" ~ "3",
+      lake_id == "11" ~ "3",
+      lake_id == "18" ~ "26",
+      lake_id == "99" ~ "16",
+      lake_id == "100" ~ "11",
+      lake_id == "136" ~ "13",
       lake_id == "146" ~ "4",
+      lake_id == "147" ~ "1",
+      lake_id == "148" ~ "7",
       lake_id == "166" ~ "6",
       lake_id == "184" ~ "3",
+      lake_id == "186" ~ "8",
       lake_id == "190" ~ "8",
-      lake_id == "136" ~ "13",
-      lake_id == "100" ~ "11",
       lake_id == "206" ~ "2",
-      lake_id == "11" ~ "3",
-      lake_id == "3" ~ "20",
-      TRUE ~ "")) # blank if no match; this will only occur if lake_id is missing
+      TRUE ~ "")) # blank if no match; will only occur if lake_id is missing
   
   return(data)
   
 }
 
-# create path for Lake Jean Neustadt
+# Read in root path for oc data analyzed in ADA.
+
 cin.ada.path <- paste0(userPath, 
-                       "data/chemistry/oc_ada_masi/ADA/2022/")
+                       "data/chemistry/oc_ada_masi/ADA/")
+
+# 2022 oc data
 
 oc_2022_146_190 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA076_146_190_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_166 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_166_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_166_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA076_166_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_184 <- 
-  get_ada_data(cin.ada.path, "EPAGPA076_184_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA076_184_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA076_184_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_136_100 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA081_136_100_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_206 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_206_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA081_206_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
 
 oc_2022_011_003 <- 
-  get_ada_data(cin.ada.path, "EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
-  site_id_22 %>% # add site_id for 2022 samples
+  get_ada_data(cin.ada.path, "2022/EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
   conv_units(filename = "EPAGPA081_011_003_NPOCNPDOC.xlsx") %>%
   dup_agg %>% # aggregate lab duplicates (optional)
   flag_agg
+
+# 2023 oc data
+
+oc_2023_099_004 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA100_099_004_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  conv_units(filename = "EPAGPA100_099_004_NPOCNPDOC.xlsx") %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+oc_2023_018 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA106_018_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  conv_units(filename = "EPAGPA106_018_NPOCNPDOC.xlsx") %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+oc_2023_186 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA106_186_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  conv_units(filename = "EPAGPA106_186_NPOCNPDOC.xlsx") %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+oc_2023_147 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA108_147_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  conv_units(filename = "EPAGPA108_147_NPOCNPDOC.xlsx") %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
+oc_2023_148 <- 
+  get_ada_data(cin.ada.path, "2023/EPAGPA108_148_NPOCNPDOC.xlsx") %>%
+  site_id_number %>% # add site_id for 2022 samples
+  conv_units(filename = "EPAGPA108_148_NPOCNPDOC.xlsx") %>%
+  dup_agg %>% # aggregate lab duplicates (optional)
+  flag_agg
+
 
 
 
@@ -357,7 +387,12 @@ ada.oc <- list(
   oc_2022_184,
   oc_2022_136_100, 
   oc_2022_206,
-  oc_2022_011_003) %>% 
+  oc_2022_011_003, 
+  oc_2023_099_004, 
+  oc_2023_018, 
+  oc_2023_186, 
+  oc_2023_147, 
+  oc_2023_148) %>% 
   reduce(full_join) %>%
   arrange(lake_id) %>%
   mutate(site_id = as.numeric(site_id)) %>% # make site id numeric

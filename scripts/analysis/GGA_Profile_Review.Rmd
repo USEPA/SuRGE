@@ -1,0 +1,512 @@
+---
+title: "GGA Profile Review"
+author: "J. Beaulieu"
+date: '2023-02-28'
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+# This document is intended to provide guidance for SuRGE collaborators when reviewing GGA profiles.
+# code below has been adapted from plotClean.R
+
+# set user path and get data
+userPath <- paste0(Sys.getenv("USERPROFILE"), 
+                   "/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+source(paste0(userPath, "rProjects/Jake/SuRGE/scripts/masterLibrary.R"))# load libraries
+source(paste0(userPath, "rProjects/Jake/SuRGE/scripts/analysis/readFieldSheets.R")) # read surgeData...xlsx.  fld_sheet, dg_sheet
+source(paste0(userPath, "rProjects/Jake/SuRGE/scripts/analysis/readLgr.R")) # read raw LGR data
+
+
+# Prepare data
+# Join with fld_sheet to get site_id and chamb_deply_date_time
+# This join duplicates the time series for each station within
+# each lake
+gga_2 <- gga %>%
+  left_join(fld_sheet %>% 
+              select(lake_id, site_id, chamb_deply_date_time), 
+            by = "lake_id")
+
+#1. ADD CO2 AND CH4 RETRIEVAL AND DEPLOYMENT TIMES
+# We may want to model different portions of the time series for CO2 and CH4.
+# Here we create fields to hold retrieval and deployment times for each gas.
+gga_2 <- gga_2 %>% 
+  # mutate ensures that all records have deployment and retrieval times for CO2 and CH4
+  # assume deployment time recorded in field is correct, will inspect/modify below.
+  mutate(co2DeplyDtTm = chamb_deply_date_time , 
+         co2RetDtTm =  chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+         ch4DeplyDtTm = chamb_deply_date_time,
+         ch4RetDtTm = chamb_deply_date_time + (60*5))
+
+#1.2  Read in refined deployment and retrieval data from Excel files.
+# use .xls.  Can read file into R while file is open in Excel, which is convenient.
+# list of files containing deployment and retrieval data.  Here we read in data
+# curated for this demonstration, not the real data to be used for SuRGE.
+sdjDataList <- paste0(userPath, "data/chamberAdjustmentsDemo.xls")
+
+# Read data
+adjData <- map_df(sdjDataList, readxl::read_xls, sheet = "DATA",
+                            col_types = c("text", "numeric", rep("date", 4), rep("text", 5))) #lake_id is character
+str(adjData)
+
+#1.3. update deployment and retrieval times based on fixes above (see 3.1 and 3.2)
+gga_2 <- gga_2 %>% 
+  # remove co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, and ch4RetDtTm.  They will be replaced with
+  # data from adjData or derived from chamb_deply_date_time
+  select(-contains("DtTm")) %>%
+  # Remove these columns if present.  Won't be present first time through, but
+  # will in subsequent iterations.  Will be replaced with data from adjData.
+  # This won't throw error if specified columns are absent.
+  select_if(!names(.) %in% c("co2Notes", "ch4Notes", "co2Status", "ch4Status")) %>%
+  # Join with adjDataDf.
+  left_join(., adjData) %>%
+  # mutate ensures that all records have deployment and retrieval times for CO2 and CH4
+  mutate(co2DeplyDtTm = case_when(is.na(co2DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
+                            TRUE ~ co2DeplyDtTm), # if not na, then use data supplied from adjDataDf
+         co2RetDtTm = case_when(is.na(co2RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+                            TRUE ~ co2RetDtTm), # if not na, then use data supplied from adjDataDf
+         ch4DeplyDtTm = case_when(is.na(ch4DeplyDtTm) ~ chamb_deply_date_time, # if na, then use field sheet data
+                                  TRUE ~ ch4DeplyDtTm), # if not na, then use data supplied from adjDataDf
+         ch4RetDtTm = case_when(is.na(ch4RetDtTm) ~ chamb_deply_date_time + (60*5), # assume retrieval 5 minutes after deployment
+                                TRUE ~ ch4RetDtTm))  # if not na, then use data supplied from adjDataDf
+
+# GO BACK TO STEP 3.1 TO REVIEW TIME SERIES AFTER INCORPORATING NEW DEPLOYMENT AND RETRIEVAL TIMES
+# IF SATISFIED WITH PROFILES, MOVE ON TO STEP 4.
+```
+
+## Greenhouse Gas Analyzer (GGA) Profiles
+
+The SuRGE project uses short-term floating chamber deployments to measure diffusive CO2 and CH4 emissions.  During each floating chamber deployment, gas is recirculated between the chamber headspace and a greenhouse gas analyzer (GGA) which measures CO2 and CH4 concentrations every 5 seconds.   GGA concentration profiles must be manually inspected to determine the time window that will be used for modeling.  Ideally, the CH4 and CO2 concentrations will exhibit a smooth curve (linear or plateauing) during the modeling window, but this idealized behavior can be complicated by 1) spatial variation in emission rates (e.g. floating chamber passing over habitats with different emission rates), 2) temporal variation in emission rates (e.g. wind gusts that enhance gas transfer), 3) bubbles that emerge into chamber headspace, and 4) measurement artifacts (e.g. fluctuating headspace pressure).  
+
+SuRGE collaborators will develop standards for evaluating all GGA profiles.  Phase 1 of this process is to determine modeling windows for profiles that exhibit relatively ideal behavior.  Modeling windows will be entered in Excel spreadsheets and these profiles will be noted as "complete" in the spreadsheet.  Profiles that deviate from ideal behavior will be noted as "in progress" and the type of issue affecting these profiles will also be recorded in the spreadsheets.  To the extent possible, issues will be described using standardized terminology.  This will allow us to assess the relative frequency of different types of issues and will determine what issues to tackle in phase 2 of this effort.
+
+
+### Ideal Greenhouse Gas Analyzer (GGA) Profiles
+GGA profiles that exhibit ideal behavior will show a smooth curve during the chamber deployment.  Methane concentrations will nearly always increase during the chamber deployment.  The literature does contain reports of diffusive CH4 uptake, but I have never observed this phenomenon and think it unlikely to occur at SuRGE sites.  Carbon dioxide concentrations may increase or decrease, depending on the productivity of the waterbody.  An increasing CO2 profile indicates the waterbody is supersaturated with CO2, which is typically accompanied by undersaturated dissolved oxygen.  Below are examples of methane and CO2 profiles that are sufficiently well behaved to define the modeling window.  
+```{r ideal, echo=FALSE}
+
+## CH4 ####################
+lake_id.i <- "100" # ADA
+site_id.i <- 5
+plotCh4.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+lake_id.i <- "275" # USGS
+site_id.i <- 16
+plotCh4.2 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+
+## CO2 ##################
+lake_id.i <- "101" # CIN Hammertown
+site_id.i <- 13
+plotCo2.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+
+lake_id.i <- "54" # CIN spencer
+site_id.i <- 19
+plotCo2.2 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+## Plot #####################
+grid.arrange(plotCh4.1, plotCh4.2, plotCo2.1, plotCo2.2, ncol = 2, nrow=2, top=grid::textGrob("Nearly Ideal GGA Profiles"))
+
+```
+
+### Breakpoints
+GGA profiles sometimes exhibit "breakpoints", after which the slope of the CO2 and/or CH4 concentration markedly increases or decreases.  This could be caused by 1) changes in wind speed that affect the air-water gas exchange rate, 2) differences in emission rates as the floating chamber drifts across different habitat patches (e.g. sandy bottom versus macrophyte beds), or 3) other unknown reasons.  The SuRGE group has not decided how to address profiles that include breakpoints.  Options include:  
+
+1. Model the entire curve.
+2. Separately model data collected before and after the breakpoint(s).  Report emission rate as mean of the separate model estimates.
+3. Only model data collected before the breakpoint.
+
+I thnink one could make an argument for any of these three approaches, but I lean toward only modeling data collected prior to the breakpoint.  These data will have been collected closer (in space) to the intended sampling location and will better aligned with the intent of the underlying GRITS design (e.g. measurements at a point in space).
+
+For now, record the modeling window as the period prior to the breakpoint and note the profiles as "in progress".  Below are examples of GGA profiles with breakpoints.  Note that breakpoints can be subtle and may be nearly indistinguishable from 1) an "ideal" profile that is a bit noisy, or 2) a curve that is moving toward a plateau.  Don't stress too much on trying to distinguish these patterns.  If the patterns are that subtle, then they probably have little effect on the calculated emission rate. 
+
+```{r breakpoints, echo=FALSE, warning=FALSE}
+
+## CH4 ####################
+lake_id.i <- "208" #
+site_id.i <- 15
+plotCh4.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+lake_id.i <- "207" # 
+site_id.i <- 8
+plotCh4.2 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+
+## CO2 ##################
+lake_id.i <- "328" # 
+site_id.i <- 5
+plotCo2.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+
+lake_id.i <- "326" #
+site_id.i <- 10
+plotCo2.2 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > co2DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < co2RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  ylim(c(445, 470)) +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+## Plot #####################
+grid.arrange(plotCh4.1, plotCh4.2, plotCo2.1, plotCo2.2, ncol = 2, nrow=2, top=grid::textGrob("GGA Profiles with Breakpoints"))
+
+```
+
+### Bubbles
+
+Diffusive emissions are driven by the concentration gradient between the water and the chamber headspace.  During floating chamber deployments, the headspace concentration of CO2 and CH4 moves inexorably toward equilibrium with the dissolved concentration, at which point the diffusive emission rate is 0.  As a consequence of the this phenomenon, the presence of the floating chamber directly affects the process we are trying to measure.  To minimize this measurement artifact, we are using short-term chamber deployments.  This limits the change in headspace concentration, and therefore the change in the air-water concentration gradient, during the deployment.  Even during short-term deployments, however, rising bubbles can emerge into the chamber headspace and cause a large increase in CH4 concentration.  This increase in concentration decreases the air-water concentration gradient and it is standard procedure to discard data collected after a bubble has been detected when modeling diffusive emission rates.  Note that bubbles generally contain too little CO2 to affect the CO2 GGA profile.
+
+In most case it is easy to detect a bubble in the CH4 GGA profile.  There will be cases, however, where bubbles are nearly indistinguishable from short periods of elevated diffusive emissions.  In these case, it is best to be cautious and discard the questionable data.  For profiles affected by bubbles, we will 1) define the modeling window as the period prior to the emergence of the bubbles, 2) specify "bubble" in the ch4Notes column of the spreadsheet, and 3) mark the profile as "complete" in the ch4Status column of the spreadsheet.
+
+Below are several examples of GGA profiles that were affected by one or more bubbling events.
+
+
+```{r bubbles, echo=FALSE, warning=FALSE}
+
+## CH4 ####################
+lake_id.i <- "55" #
+site_id.i <- 1
+plotCh4.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  #geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  #geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+lake_id.i <- "83" # 
+site_id.i <- 15
+plotCh4.2 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  #geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  #geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+
+lake_id.i <- "205" # 
+site_id.i <- 6
+plotCh4.3 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  #geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  #geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+
+lake_id.i <- "210" #
+site_id.i <- 2
+plotCh4.4 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  #geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  #geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+## Plot #####################
+grid.arrange(plotCh4.1, plotCh4.2, plotCh4.3, plotCh4.4, ncol = 2, nrow=2, top=grid::textGrob("GGA Profiles with Bubbles"))
+
+```
+
+
+### Unstable Start
+
+Occasionally the GGA profile during the first 10 - 60 seconds of the deployment looks very different than during the balance of the deployment period.  This is particularly true for the CO2 profiles. For lack of a better term, I have been characterizing these profiles as having an "unstable start".  
+
+The example immediately below shows CH4 and CO2 profiles from a single deployment at Cottonwood Lake in Colorado.  Methane concentration begins to rise immediately after the chamber is deployed, but CO2 concentration first falls, and then climbs, before finally falling through the duration of the deployment.  The red vertical line in the CO2 plot is the chamber deployment time based on the CH4 data.  The vertical black lines in the CO2 plot define the window where the CO2 data are reasonably well behaved.  
+
+I am not sure why the CH4 profile looks very clean while the CO2 profile has an "unstable start".  My best guess is that CH4 is less sensitive to measurement artifacts than CO2 (e.g. pressure or temperature changes in the chamber headspace).  Dissolved CH4 concentration is typically 100-fold greater than the equilibrium concentration, resulting in a strong air-water concentration gradient.  This concentration gradient likely sets up a robust unidirectional flux from the water to the air that is relatively insensitive to pressure or temperature changes in the chamber headspace.  By contrast, dissolved CO2 concentration is typically within 50% of the equilibrium concentration, resulting in a much weaker air-water concentration gradient.  Perhaps this weak concentration gradient causes the air-water CO2 flux to be more sensitive to measurement artifacts, such as the falling headspace pressure that occurs during the first minute of the deployment.  
+
+My suggestion is that we record the period of time after the CO2 profile has stabilized as the modeling window, but mark the profile as "in progress" and note "unstable start".  We can revisit these as a group.
+<br> 
+<br>  
+
+#### Unstable Start: Cottonwood Lake
+```{r unsteady_start1, echo=FALSE, warning=FALSE, message = FALSE, fig.width=4, fig.height=8}
+
+## example 1 ####################
+lake_id.i <- "77" #
+site_id.i <- 8
+
+plotCh4.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+plotCo2.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  ylim(c(390, 420)) +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm)), color = "red") +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+return(grid.arrange(plotCh4.1, plotCo2.1, ncol = 1, nrow=2, heights = c(2,2))) 
+
+```
+<br> 
+<br>   
+<br> 
+<br>
+
+
+#### Unstable Start: Willow Lake
+
+This example from Willow Lake, AZ, is similar to lake 275 above.
+
+```{r unsteady_start2, echo=FALSE, warning=FALSE, message = FALSE, fig.width=4, fig.height=8}
+## example 1 ####################
+lake_id.i <- "275" #
+site_id.i <- 2
+
+plotCh4.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+plotCo2.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  #ylim(c(390, 420)) +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm)), color = "red") +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+return(grid.arrange(plotCh4.1, plotCo2.1, ncol = 1, nrow=2, heights = c(2,2))) 
+
+```
+<br> 
+<br>   
+<br> 
+<br> 
+
+
+#### Unstable Start: Lake Hannah
+
+In this example from Lake Hannah, MS, CO2 falls for approximately 30 seconds following deployment, then assumes a constant rate of increase during the duration of the deployment.
+
+```{r unsteady_start3, echo=FALSE, warning=FALSE, message = FALSE, fig.width=4, fig.height=8}
+# ## example 2 ###############  Less severe
+lake_id.i <- "100" #
+site_id.i <- 13
+
+plotCh4.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+plotCo2.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  #ylim(c(390, 420)) +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm)), color = "red") +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+return(grid.arrange(plotCh4.1, plotCo2.1, ncol = 1, nrow=2, heights = c(2,2))) 
+```
+<br> 
+<br>   
+<br> 
+<br>  
+
+
+#### Unstable Start: Stubblefield Reservoir
+In this example from Stubblefield Reservoir, NM CO2 falls throughout the chamber deployment, but at three distinct rates.
+
+
+```{r unsteady_start4, echo=FALSE, warning=FALSE, message = FALSE, fig.width=4, fig.height=8}
+# ## example 3 ###############  Less severe
+lake_id.i <- "188" #
+site_id.i <- 5
+
+plotCh4.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  ggplot(aes(RDateTime, CH4._ppm)) + 
+  geom_point() +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+plotCo2.1 <- gga_2 %>% 
+  filter(lake_id == lake_id.i, 
+         site_id == site_id.i, 
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 60, # extend plot 1 minute post deployment
+         CO2._ppm > 0) %>%
+  ggplot(aes(RDateTime, CO2._ppm)) + 
+  geom_point() +
+  #ylim(c(390, 420)) +
+  geom_vline(aes(xintercept = as.numeric(co2DeplyDtTm))) +
+  geom_vline(aes(xintercept = as.numeric(ch4DeplyDtTm)), color = "red") +
+  geom_vline(aes(xintercept = as.numeric(co2RetDtTm))) +
+  scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
+  ggtitle(paste("lake_id =", lake_id.i, "site_id = ", site_id.i))
+
+return(grid.arrange(plotCh4.1, plotCo2.1, ncol = 1, nrow=2, heights = c(2,2))) 
+```
+

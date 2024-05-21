@@ -57,17 +57,19 @@
 
 
 # Generalize to function----------------
+
 clean_chem <- function(data) {
-  data %>% 
+  data %>%
     rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores.
-    # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC ? 11/4/2022, no tteb.foo flags in df? -JB
-    mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
-                    ifelse(is.na(get(word(paste(cur_column(), .), sep = "_"))) == TRUE, 
-                           "no value", .))) %>%
+    # JB 4/4/2024 I don't think this is needed
+    # # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC ? 11/4/2022, no tteb.foo flags in df? -JB
+    # mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
+    #                 ifelse(is.na(get(word(paste(cur_column(), .), sep = "_"))) == TRUE, 
+    #                        "no value", .))) %>%
     group_by(lake_id, site_id, sample_depth, visit) %>%
     filter(!(sample_type == "blank")) %>% # remove blanks
     # site_id is numeric, but ignored below because it is a grouping variable.
-    mutate(across(where(is.numeric), mean, na.rm = TRUE),
+    summarize(across(where(is.numeric), mean, na.rm = TRUE),
            
            
            # across(contains("flag"), 
@@ -81,36 +83,42 @@ clean_chem <- function(data) {
            across(contains("flag"),
                  ~ case_when(
                    # Check for all combinations of flags
-                    all(.) == "ND H S" ~ "ND H S",
-                    all(.) == "L H S" ~ "L H S",
-                    all(str_detect(., "ND.*H")) ~ "ND H",
-                    all(str_detect(., "L.*H")) ~ "L H",
-                    all(str_detect(., "ND.*S")) ~ "ND S",
-                    all(str_detect(., "L.*S")) ~ "L S",
-                    all(str_detect(., "H.*S")) ~ "H S",
-                    all(str_detect(., "ND")) ~ "ND",
-                    all(str_detect(., "L")) ~ "L",
-                    all(str_detect(., "H")) ~ "H",
-                    all(str_detect(., "S")) ~ "S",
+                   all(str_detect(., "ND H S")) ~ "ND H S",
+                   all(str_detect(., "L H S")) ~ "L H S",
+                   all(str_detect(., "ND.*H")) ~ "ND H",
+                   all(str_detect(., "L.*H|H.*L")) ~ "L H",
+                   all(str_detect(., "ND.*S")) ~ "ND S",
+                   all(str_detect(., "L.*S")) ~ "L S",
+                   all(str_detect(., "H.*S")) ~ "H S",
+                   all(str_detect(., "ND")) ~ "ND",
+                   all(str_detect(., "L")) ~ "L",
+                   all(str_detect(., "H")) ~ "H",
+                   all(str_detect(., "S")) ~ "S",
                     # All other combinations should result in NA
-                    TRUE ~ NA_character_)),
-           
-           across(contains("units"),
-                  ~ ifelse(any(str_detect(., "_") == TRUE), 
-                           first(str_sort(.)), # if any group has units ("_" detected), use same units  
-                                  .))) %>% # if no units in group, no change (i.e., NA)
-    filter(!(sample_type == "duplicate")) %>% # now we can remove dups
-    rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
-    select(-sample_type) %>% # no longer need sample_type (all unknowns)
+                    TRUE ~ NA_character_)), 
+           # Retain units columns; look for any non-NA value
+           across(contains("unit"), 
+                  ~ min(., na.rm = TRUE))) %>%
+  # ,
+  #          
+  #          across(contains("units"),
+  #                 ~ ifelse(any(str_detect(., "_")), 
+  #                          first(str_sort(.)), # if any group has units ("_" detected), use same units  
+  #                                 .))) %>% # if no units in group, no change (i.e., NA)
+  #   filter(!(sample_type == "duplicate")) %>% # now we can remove dups
+  #   rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
+    # select(-sample_type) %>% # no longer need sample_type (all unknowns)
     ungroup() %>% # remove grouping
-    mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
-                  ~ ifelse(. == "no value", NA, .)))
-  
+    fill(contains("unit"), .direction = "updown") %>% # fill any NA in units columns 
+    select(lake_id:visit, order(colnames(.))) # reorder columns
+  #   mutate(across(contains("flag"), # "no value" text no longer needed; convert to NA
+  #                 ~ ifelse(. == "no value", NA, .)))
+  # 
 } 
 
 chemistry <- clean_chem(chemistry_all)
-dim(chemistry_all) # 278, 122 [1/5/2023]
-dim(chemistry) # 199, 121 [1/5/2023], good fewer rows, but one fewer column (-sample_type)
+dim(chemistry_all) # 374, 126 [5/19/2024]
+dim(chemistry) # 265, 124 [5/19/2024], lost analyte_group
 
 names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
 

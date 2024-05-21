@@ -154,7 +154,7 @@ dup_agg <- function(data) {
                 .cols = contains("value")) %>%
     mutate(across(ends_with("flags"), # make empty _flags = NA
                   ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
-                    str_squish(.))) # remove any extra white spaces
+                    str_squish())) # remove any extra white spaces
     
   return(e)
   

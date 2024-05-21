@@ -200,7 +200,7 @@ chem18 <- dup_agg(chem18) %>%
   # replace any blank _flags with NA
   mutate(across(ends_with("flags"),
                 ~ if_else(str_detect(., "\\w"), ., NA_character_) %>%
-                  str_squish(.))) # remove any extra white spaces
+                  str_squish())) # remove any extra white spaces
   
 # SAMPLE INVENTORY----------------------
 # Are all collected samples included?
