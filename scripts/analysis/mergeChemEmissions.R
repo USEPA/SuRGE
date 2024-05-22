@@ -13,7 +13,11 @@ chem_fld_wide <- chem_fld %>%
   # and strip depth reference from the other
   select(-(contains("units") & contains("shallow"))) %>% # strip shallow units
   rename_with(~sub("deep_", "", .), # strip "deep_
-              .cols = (contains("units") & contains("deep"))) 
+              .cols = (contains("units") & contains("deep"))) %>%
+  # convert values back to numeric
+  mutate(across(!matches(paste(c("lake_id", "site_id", "visit", "eval_status", "lat", "long", "sample_date", 
+                   "site_depth", "sample_depth", "units", "flag"), collapse = "|")),
+                as.numeric))
 
 
 
