@@ -61,7 +61,10 @@ get_data_sheet <- function(paths){
                                                  tz = "UTC"),
                chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
                                                   format = "%Y-%m-%d%H:%M:%S",
-                                                  tz = "UTC"))
+                                                  tz = "UTC")) %>%
+        # chemistry data uses "flags" rather than "flag".  be consistent
+        rename_with(~sub("flag", "flags", .),
+                    .cols = contains("flag"))
     }) %>%
     map_dfr(., bind_rows) # rbinds into one df
 }

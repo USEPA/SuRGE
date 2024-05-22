@@ -22,7 +22,7 @@ get_chla_data <- function(path, data, sheet) {
            lake_id = waterbody, 
            chla_lab_units = units, 
            chla_lab = value,
-           chla_lab_flag = chla_flag)  %>%
+           chla_lab_flags = chla_flag)  %>%
     
     # mutate(hold_time = collection_date - extraction_date) %>% # get hold time
     # mutate(chla_qual = case_when( # flag with "H" if hold time exceeded
@@ -40,7 +40,7 @@ get_chla_data <- function(path, data, sheet) {
                                        as.Date("2023-08-30")) ~ 2,
                              TRUE ~ 1)) %>%
     select(lake_id, site_id, sample_type, sample_depth, visit,
-           chla_lab, chla_lab_units, chla_lab_flag) 
+           chla_lab, chla_lab_units, chla_lab_flags) 
 
     # unite("chla_flags", chla_qual, chla_ship, sep = " ") %>% 
     #   mutate(chla_flags = if_else( # NA if there are no flags
@@ -66,7 +66,7 @@ get_phyco_data <- function(path, data, sheet) {
            lake_id = waterbody, 
            phycocyanin_lab_units = units, 
            phycocyanin_lab = value,
-           phycocyanin_lab_flag = phyco_flag)  %>%
+           phycocyanin_lab_flags = phyco_flag)  %>%
     
     # mutate(hold_time = collection_date - extraction_date) %>% # get hold time
     # mutate(chla_qual = case_when( # flag with "H" if hold time exceeded
@@ -85,7 +85,7 @@ get_phyco_data <- function(path, data, sheet) {
                              TRUE ~ 1)) %>%
     
     select(lake_id, site_id, sample_type, sample_depth, visit, 
-           phycocyanin_lab, phycocyanin_lab_units, phycocyanin_lab_flag) 
+           phycocyanin_lab, phycocyanin_lab_units, phycocyanin_lab_flags) 
     # variable names must be same for aggregateFieldDupsStripFieldBlanks.R
 
     
