@@ -16,9 +16,14 @@ eb_data <- full_join( # keep all data.  Will assume GC data if not present (e.g.
   left_join(., # keep all data from above, discard dg_sheet data that don't match up 
             dg_sheet %>% select(lake_id, site_id, visit,
                                 atm_pressure, air_temperature) %>%
-              distinct(.))
+              distinct(.) %>%
+              #lake_id == 275, site_id == 12, visit == 1 has two values for BP and air_temp
+              # because sampling was conducted across two days.  Must aggregate across these
+              # or unintend duplicates turn up in data frame.
+              summarise(across(c(atm_pressure, air_temperature), mean), .by= c(lake_id, site_id, visit))
+  )
 
-dim(eb_data) # 1799
+dim(eb_data) # 1798
 
 # 2. Calculate volumetric ebullition rate.  Straightforward operation
 # that can be vectorized across the entire df.
@@ -53,5 +58,5 @@ eb_results <- do.call("rbind", my_eb_list) %>%  # This coerces the list into a d
 
 
 
-str(eb_results)  # 1739 observations
+str(eb_results)  # 1738 observations
 

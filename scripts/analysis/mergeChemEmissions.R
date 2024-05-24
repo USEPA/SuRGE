@@ -10,7 +10,7 @@ chem_fld_wide <- chem_fld %>%
                    # chla_lab, chla_lab_units, chla_lab_flags), # only shallow samples
                 as.character)) %>% # enforce consistent type
   pivot_longer(!c(lake_id, site_id, eval_status, lat, long, sample_date, 
-                  site_depth, sample_depth, visit)) %>% # only shallow samples
+                  site_depth, sample_depth, visit)) %>% #
   pivot_wider(names_from = c(sample_depth, name), values_from = value) %>% # cast to wide
   # units are repeated for deep and shallow, not necessary.  Remove one of them
   # and strip depth reference from the other
@@ -45,8 +45,8 @@ all_obs <- full_join(chem_fld_wide, # keep all observations
          everything()) # then everything else, unchanged
 
 dim(chem_fld_wide) # 2057, 256
-dim(emissions) # 1867, 50
-dim(all_obs) # 2058, 270
+dim(emissions) # 1866, 50
+dim(all_obs) # 2057, 270
 
 # all observations from emissions are in chem
 emissions[!(with(emissions, paste(lake_id, site_id, visit)) %in% 
