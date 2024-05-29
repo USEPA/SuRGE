@@ -4,9 +4,23 @@
 # Function for calculating mass flux rate--                  
 mass.rate <- function(X1, choice1){
   # trap gas data to use if measured values aren't available
-  trap_ch4.ppm <- ifelse(is.na(X1$ch4_ppm), mean(X1$ch4_ppm, na.rm=TRUE), X1$ch4_ppm) 
-  trap_co2.ppm <- ifelse(is.na(X1$co2_ppm), mean(X1$co2_ppm, na.rm=TRUE), X1$co2_ppm)
-  trap_n2o.ppm <- ifelse(is.na(X1$n2o_ppm), mean(X1$n2o_ppm, na.rm=TRUE), X1$n2o_ppm)
+  trap_ch4.ppm <- X1 %>%
+    mutate(ch4_ppm = case_when(is.na(ch4_ppm) & any(!is.na(ch4_ppm)) ~ mean(ch4_ppm, na.rm=TRUE), # if ch4_ppm is missing for the site, but any others sites in lake have ch4, use lake mean
+                               is.na(ch4_ppm) & all(is.na(ch4_ppm)) ~ mean(gc_lakeid %>% filter(type == "trap") %>% pull(ch4_ppm), na.rm = TRUE), # if no trap samples collected from the lake, use project mean
+                               TRUE ~ ch4_ppm)) %>% # else use measured value
+    pull(ch4_ppm)
+  
+  trap_co2.ppm <- X1 %>%
+    mutate(co2_ppm = case_when(is.na(co2_ppm) & any(!is.na(co2_ppm)) ~ mean(co2_ppm, na.rm=TRUE), # if co2_ppm is missing for the site, but any others sites in lake have ch4, use lake mean
+                               is.na(co2_ppm) & all(is.na(co2_ppm)) ~ mean(gc_lakeid %>% filter(type == "trap") %>% pull(co2_ppm), na.rm = TRUE), # if no trap samples collected from the lake, use project mean
+                               TRUE ~ co2_ppm)) %>% # else use measured value
+    pull(co2_ppm)
+  
+  trap_n2o.ppm <- X1 %>%
+    mutate(n2o_ppm = case_when(is.na(n2o_ppm) & any(!is.na(n2o_ppm)) ~ mean(n2o_ppm, na.rm=TRUE), # if n2o_ppm is missing for the site, but any others sites in lake have ch4, use lake mean
+                               is.na(n2o_ppm) & all(is.na(n2o_ppm)) ~ mean(gc_lakeid %>% filter(type == "trap") %>% pull(n2o_ppm), na.rm = TRUE), # if no trap samples collected from the lake, use project mean
+                               TRUE ~ n2o_ppm)) %>% # else use measured value
+    pull(n2o_ppm)
   
   # barometric pressure needed: n=PV/RT
   bp <- ifelse(is.na(mean(X1$atm_pressure, na.rm=TRUE)),

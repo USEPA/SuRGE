@@ -52,9 +52,11 @@ for (i in 1:length(unique(eb_data$lake_id))) {
 }
 
 eb_results <- do.call("rbind", my_eb_list) %>%  # This coerces the list into a dataframe. Cool.
+  left_join(eb_data %>% select(lake_id, site_id, visit, eb_ml_hr_m2)) %>%
   rename(ch4_erate_mg_h = eb_ch4_mg_m2_h,
          co2_erate_mg_h = eb_co2_mg_m2_h,
          n2o_erate_mg_h = eb_n2o_mg_m2_h)
+  
 
 
 
