@@ -402,7 +402,7 @@ tteb.all <- tteb.all %>%
 # 8 CLEAN UP FINAL OBJECT, STEP 2
 tteb.all <- tteb.all %>%
   mutate(across(ends_with("flags"),
-                ~ if_else(str_detect(., "NA"), " ", .))) %>%
+                ~ str_remove_all(., "NA"))) %>%
   mutate(across(ends_with("flags"),
                 ~ if_else(str_detect(., "ND L"), "L", .))) %>%
   mutate(across(ends_with("flags"),   # replace any blank _flags with NA
