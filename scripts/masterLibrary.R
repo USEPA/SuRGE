@@ -18,6 +18,7 @@ library(minpack.lm) #for the exponential modeling of diffusive flux
 library(dttr2) # NA_Date_
 library(LAGOSUS)
 library(hydrolinks)
+library(corrplot)
 
 
 library(conflicted)
