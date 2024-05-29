@@ -36,7 +36,7 @@ eb_data <- mutate(eb_data,
 # by_group, ddply, and lapply.  I couldn't figure it out, resorted to for loop
 
 my_eb_list <- list()
-for (i in 1:length(unique(eb_data$lake_id))) {
+for (i in 1:nrow(eb_data %>% distinct(lake_id, visit))) {
   case.i <- eb_data %>% distinct(lake_id, visit) %>% slice(i)
   data.i <- filter(eb_data, lake_id == case.i$lake_id, visit == case.i$visit)
   out.ch4 <- mass.rate(data.i, choice1 = "ch4") 
