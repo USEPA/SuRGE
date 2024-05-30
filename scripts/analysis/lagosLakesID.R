@@ -67,4 +67,13 @@ lagos_links %>% filter(is.na(lagoslakeid)) %>% {dim(.)} # only two lakes w/out L
 # 
 # lagos_links <- read.csv(file=paste0(userPath,"data/siteDescriptors/lagos_links.csv")) %>%
 #   as_tibble
-          
+
+# Bridget added some LAGOS attributes and wrote the file to SharePoint.  Read in that file,
+# come back and update this code to reflect Bridget's work.
+lagos_links <- read.csv(file=paste0(userPath,"data/siteDescriptors/Surge_lagos_variables.csv")) %>%
+  as_tibble %>%
+  janitor::clean_names() %>%
+  select(-x) %>%
+  mutate(lake_id = str_extract(site_id, "(\\d+$)") %>% # extract numeric part of lake_id
+           as.numeric %>% # omit leading zeros)
+           as.character) # character to match other data sources
