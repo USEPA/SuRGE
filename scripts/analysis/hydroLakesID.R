@@ -8,7 +8,7 @@
 # library(readxl)
 # library(hydrolinks) # add to renv output
 
-# # read in SuRGE site information (lat/long required) and filter to sampled sites
+ # read in SuRGE site information (lat/long required) and filter to sampled sites
 # surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
 #   filter(`EvalStatus Code` == "S") %>%
 #   janitor::clean_names() %>%
@@ -21,20 +21,20 @@
 # # use lat/long to find associated hylak_id from hydrolinks package
 # # using a buffer of 20 m from shapefile boundaries
 # # NOTE: this piece of code will take  a little while to run
-# hydrolakes_surge <- link_to_waterbodies(surge_sites$lat_dd83, 
+# hydrolakes_surge <- link_to_waterbodies(surge_sites$lat_dd83,
 #                                        surge_sites$lon_dd83,
-#                                        surge_sites$lake_id, 
+#                                        surge_sites$lake_id,
 #                                        dataset = "hydrolakes", buffer = 20)
 # 
 # dim(hydrolakes_surge) # matched 123 SuRGE sites
 # 
 # # hardcode in additional SuRGE sites (i.e., from map viewer)
-# surge_additions <- data.frame("lake_id" = c(281, 
-#                                             69, 
+# surge_additions <- data.frame("lake_id" = c(281,
+#                                             69,
 #                                             207,
 #                                             98),
-#                               "hylak_id" = c(1030644, 
-#                                              65, 
+#                               "hylak_id" = c(1030644,
+#                                              65,
 #                                              1055540,
 #                                              112928))
 # 
@@ -44,7 +44,8 @@
 #   dplyr::select(-contains("pour"), -centroid_x, -lake_name, -country, - continent, -poly_src) %>%
 #   clean_names() %>%
 #   rename(lake_id = match_id) %>%
-#   relocate(lake_id, hylak_id, grand_id, lake_type)
+#   relocate(lake_id, hylak_id, grand_id, lake_type) %>%
+#   rename_with(.cols = -c(lake_id, hylak_id, grand_id), ~paste0("hylak_", .))
 # 
 # dim(hylak_link) #127 matches
 # 
