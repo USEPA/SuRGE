@@ -1,7 +1,7 @@
 # this script reads in the SuRGE survey design, including site weights.
 
 lake.list <- readxl::read_excel(paste0(userPath, 
-                                       "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
+                                       "surgeDsn/SuRGE_design_20191206_eval_status.xlsx"), na = c("", "NA")) %>%
   janitor::clean_names() %>%
   dplyr::rename(lake_id = site_id) %>%
   dplyr::rename(nla_id = site_id_2) %>%
