@@ -1,5 +1,5 @@
 # Jeff Hollister used lakeMorpho to generate morpho indices for SuRGE lakes.
-# Read in data.
+# Read in data.  All units are in m, m2, m3, or unitless  (i.e. ratio)
 
 morpho <- read.csv(paste0(userPath, "data/siteDescriptors/all_lakes_lakemorpho.csv")) %>%
   janitor::clean_names() %>%
