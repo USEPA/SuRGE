@@ -20,7 +20,8 @@ library(LAGOSUS)
 library(hydrolinks)
 library(corrplot)
 library(StreamCatTools) # read lakeCat
-
+library(jtools) # visualize regression models (effect_plot)
+library(StepReg) # stepwise selection based on p-value (`stepwise`)
 
 library(conflicted)
 conflicted::conflict_scout()

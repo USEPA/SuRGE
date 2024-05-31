@@ -119,49 +119,50 @@ dat <- dat %>%
 
 # 1.  Aggregate
 
-dat_agg <- all_obs %>%
-  select(-site_id) %>%
-  fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
-  group_by(lake_id, visit) %>%
-  summarise(across(where(is.numeric), mean, na.rm = TRUE), # calculate arithmetic mean
-            across(contains("flags"), ~ . %>% unique %>% pluck(1)), # If >1 flag present (e.g. sonde data) display first one
-            across(contains("unit"), ~ . %>% unique)) %>%
-  ungroup
+dat_agg <- dat %>%
+    select(-site_id, -eval_status, -trap_rtrvl_date_time, - trap_deply_date_time) %>%
+    fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
+    group_by(lake_id, visit) %>%
+    summarise(across(where(is.numeric), \(x) mean(x, na.rm = TRUE)), # calculate arithmetic mean
+              # NA in flags and units cause headaches.  If NA and non-NA values are present
+              # for any analyte in a unique lake x visit combination, "unique" returns
+              # multiple values (e.g. NA, mg/l) and the lake x visit combination is
+              # collapsed into 2 rows rather than 1.  Here we use na.omit to exlcude
+              # NA and return only the unit (e.g. mg/l).  This fails, however, when
+              # no units are present for any analyte in a unique lake x visit combination.
+              # under this condition, identified by length(na.omit(.)) == 0, we return
+              # NA.
+              across(contains("flags"), \(x) case_when(length(na.omit(x)) >= 1 ~ paste(unique(na.omit(x)), collapse = " "), # If >1 flag, then concatenate
+                                                    length(na.omit(x)) == 0 ~ NA_character_, # only NA present, return NA
+                                                          TRUE ~ "fly you fools!")), # look out for the Balrog!!
+              # `fill` above ensures no NA for units
+              across(contains("unit"), ~ unique(.) %>% pluck(1)), # If >1 unit present (e.g. cond, cond@25) display first one
+              sample_date = unique(na.omit(sample_date)) %>% pluck(1), # if multiple, choose earliest
+              lake_name = case_when(all(is.na(lake_name)) ~ NA_character_, # only NA present (Puerto Rico), return NAonly one nla_id per lake
+                                    !all(is.na(lake_name)) ~ unique(lake_name), # if any values, then grab one, only one nla_id per lake
+                                    TRUE ~ "fly you fools!"), # look out for the Balrog 
+              stratum = case_when(all(is.na(stratum)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+                                  !all(is.na(stratum)) ~ unique(stratum), # if any values, then grab one, only one stratum per lake
+                                    TRUE ~ "fly you fools!"), # look out for the Balrog
+              lab = case_when(all(is.na(lab)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+                              !all(is.na(lab)) ~ unique(lab), # if any values, then grab one, only one nla_id per lake, 
+                              TRUE ~ "fly you fools!"), # look out for the Balrog,
+              nla_id = case_when(all(is.na(nla_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+                                 !all(is.na(nla_id)) ~ unique(nla_id), # if any values, then grab one, only one nla_id per lake, 
+                                 TRUE ~ "fly you fools!"), # look out for the Balrog,
+              ag_eco9_nm = case_when(all(is.na(ag_eco9_nm)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+                                     !all(is.na(ag_eco9_nm)) ~ unique(ag_eco9_nm), # if any values, then grab one,  only one level per lake
+                                     TRUE ~ "fly you fools!"), # look out for the Balrog,
+              lake_nhdid = case_when(all(is.na(lake_nhdid)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+                                     !all(is.na(lake_nhdid)) == 0 ~ unique(lake_nhdid), # if any values, then grab one,  only one level per lake
+                                     TRUE ~ "fly you fools!")) %>% # look out for the Balrog
+    ungroup 
 
-####HERE STILL HAVE REPLICATES WTF!!!
-
-dat_agg_poo <- dat %>%
-  select(-site_id, -eval_status, -trap_rtrvl_date_time, - trap_deply_date_time) %>%
-  fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
-  group_by(lake_id, visit) %>%
-  summarise(across(where(is.numeric), mean, na.rm = TRUE), # calculate arithmetic mean
-            across(contains("flags"), ~ . %>% unique %>% pluck(1)), # If >1 flag present (e.g. sonde data) display first one
-            across(contains("unit"), ~ . %>% unique),
-            sample_date = unique(sample_date),
-            lake_name = unique(lake_name),
-            stratum = unique(stratum),
-            lab = unique(lab),
-            nla_id = unique(nla_id),
-            ag_eco9_nm = unique(ag_eco9_nm),
-            lake_nhdid = unique(lake_nhdid)) %>%
-  ungroup
 
 
-
-# 2. Merge lakeMorpho data (readMorpho.R)
-
-dat_agg <- dat_agg %>%
-  # # morpho currently missing data for Oahe and Francis Case
-  # when ready, data will be for entire reservoir, not lacustrine, riverine,
-  # transitional.  Need to figure out how to deal with this.  Ignoring for now.
-  # mutate(lake_id_simple = case_when(grepl("69", lake_id) ~ "69",
-  #                                   grepl("70", lake_id) ~ "70"))
-  left_join(.,
-            morpho %>% mutate(lake_id = as.character(lake_id)))
-
-dim(all_obs) #2057, 264
-dim(morpho) #156, 15
-dim(dat_agg) # 122, 273
+dim(all_obs) #2057
+dim(dat) #2057
+dim(dat_agg) # 122
 
 
 
