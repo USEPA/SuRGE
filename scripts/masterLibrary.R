@@ -19,6 +19,7 @@ library(dttr2) # NA_Date_
 library(LAGOSUS)
 library(hydrolinks)
 library(corrplot)
+library(StreamCatTools) # read lakeCat
 
 
 library(conflicted)
