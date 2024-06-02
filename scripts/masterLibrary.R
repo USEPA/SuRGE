@@ -26,7 +26,7 @@ library(cowplot) # arranging ggplot plots into grid
 library(ggh4x) # ggplot2 hacks
 
 
-# library(conflicted)
+ library(conflicted)
 conflicted::conflict_scout()
 conflict_prefer("select", "dplyr") # select() will call dplyr::select()
 conflict_prefer("filter", "dplyr") # filter() will call dplyr::filter()
