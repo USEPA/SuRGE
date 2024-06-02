@@ -42,7 +42,7 @@ fs_paths <- fs::dir_ls(path = paths, # see above
            type = "file") %>% # only retain file names, not directory names   
   sub('\\/[^\\/]*$', '',.) %>% # extract characters before final /
   unique(.) %>% # names of .gdb e.g. merc297.gdb
-  .[!(grepl(omit_gdb, .))] # omit random .gdb not needed here
+  .[!(grepl(omit_gdb, .))] # omit random .gdb not needed here #THIS ALSO EXCLUDES 188 AND 253 MUST FIX
 
 
 # 2. GET NAME OF LAKE POLYGON LAYER IN EACH .gdb

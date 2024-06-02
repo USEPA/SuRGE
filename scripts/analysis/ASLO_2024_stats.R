@@ -1,6 +1,9 @@
-names(emissions)
 
-# summarize all emissions by site_id
+
+
+# DESCRIPTIVE STATISTICS---------------------------
+
+## summarize all emissions by site_id----
 dat %>% 
   select(lake_id, site_id, visit, 
          ch4_ebullition, ch4_diffusion_best, ch4_total,
@@ -27,43 +30,121 @@ dat %>%
 # co2_erate_mg_h       1374     91        0         10.2    0.117   0.00549
 # co2_trate_mg_h        408     64        -282.     1702.   121.    54.6 
 
-# summarize all emissions by lake_id
+## summarize all emissions by lake_id, then across all lakes----
 dat %>% 
-  select(lake_id, site_id, visit, 
-         ch4_total) %>%
+  select(lake_id, matches("co2|ch4") & where(is.numeric)) %>%
   group_by(lake_id) %>%
-  summarize(mean_t_ch4 = mean(ch4_total)) %>%
-  arrange(mean_t_ch4)
+  summarize(across(everything(), \(x) mean(x, na.rm = TRUE))) %>% 
+  ungroup() %>%
+  select(-lake_id) %>%
+  mutate(across(-contains("ebullition"), \(x) na_if(x, 0))) %>%
+  summarize(mean = across(everything(), \(x) mean(x, na.rm = TRUE)),
+            min = across(everything(), \(x) min(x, na.rm = TRUE)),
+            max = across(everything(), \(x) max(x, na.rm = TRUE))) %>% 
+  pivot_longer(everything())
+
+## proportion of diffusion and ebullition-------
+
+dat_agg %>% 
+  mutate(ch4_prop_diff = ch4_diffusion_best / ch4_total) %>%
+  ggplot(aes("", ch4_prop_diff)) + 
+  geom_rect(aes(xmin = 0, xmax = 3, ymin = 0, ymax=0.5), fill = "lightskyblue4") +
+  geom_rect(aes(xmin = 0, xmax = 3, ymin = 0.5, ymax=1), fill = "deepskyblue4") +
+  #geom_point()
+  #geom_histogram(binwidth = 0.05)
+  #geom_boxplot(notch = TRUE)
+  geom_violin() +
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=1, binwidth = 0.01) +
+  #geom_jitter(position = position_jitter(0.2)) +
+  ylab(expression(diffusive~fraction~of~total~CH[4]~emissions)) +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_text(size = 24),
+        axis.text.y = element_text(size = 20)) 
+
+ggsave("output/figures/propDiffusionCh4.tiff",
+       width=6,height=14, units="in",
+       dpi=800,compression="lzw")
+
+dat_agg %>% 
+  mutate(ch4_prop_diff = ch4_diffusion_best / ch4_total) %>%
+  ggplot(aes(deep_so4, ch4_prop_diff)) + 
+  geom_rect(aes(xmin=550, xmax = 2500, ymin=0.75, ymax = 1), fill = "lightskyblue4") +
+  geom_point() +
+  geom_vline(xintercept = 550) +
+  xlab(expression(sulfate~(mg~L^{-1}))) +
+  ylab(expression(diffusive~fraction~of~total~CH[4]~emissions)) +
+  theme_bw() +
+  theme(axis.title = element_text(size = 12),
+        axis.text = element_text(size = 12))
 
 
-poo <- dat %>%
-  select(lake_id, visit, 
-         ch4_ebullition, ch4_diffusion_best, ch4_total,
-         co2_ebullition, co2_diffusion_best, co2_total) %>%
-  pivot_longer(!(c(lake_id, visit))) %>%
-  group_by(lake_id, visit, name) %>%
-  summarize(mean_e = mean(value, na.rm = T),
-            median_e = median(value, na.rm = T)) %>%
-  mutate(lake_id = gsub("_.*$", "", lake_id) %>% as.numeric) %>%
-  left_join(., 
-          lake.list %>% select(lake_id, lat_dd83, lon_dd83), #fld_sheet %>% select(lake_id, long, lat)
-          relationship = "many-to-many") %>%  
-  st_as_sf(coords=c("lon_dd83","lat_dd83"),crs=4269) %>%
-  ungroup()
 
-plot(st_geometry(poo))
+ggsave("output/figures/propDiffusionCh4BySulfate.tiff",
+       width=5, height=5, units="in",
+       dpi=800, compression="lzw")
 
-states <- USAboundaries::us_states() %>%
-  dplyr::filter(!state_name %in% c("Alaska", "District of Columbia", "Hawaii")) %>% # , "Puerto Rico"
-  st_transform(4269) # convert to CONUS Albers
+# EMISSION BAR AND WHISKER PLOTS-------------------
+# diffusion
+dat_agg %>%
+  filter(ch4_diffusion_best > 0) %>%
+  ggplot(aes(x = ch4_diffusion_best)) + 
+  geom_boxplot(notch = TRUE) + 
+  scale_x_log10(limits = c(0.00001, 50), 
+                labels = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100), 
+                breaks = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100)) +
+  xlab(expression(diffusive~CH[4]~(mg~CH[4]~m^{-2}~hr^{-1}))) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
 
-ggplot() + 
-  geom_sf(data = states) +
-  geom_sf(data = poo %>% filter(name == "ch4_total"), aes(size = mean_e))
+ggsave("output/figures/ch4diffusionBarWhisker.tiff",
+       width=4,height=1, units="in",
+       dpi=800,compression="lzw")
 
-  
-  
-  
+# ebullition
+dat_agg %>%
+  ggplot(aes(x = ch4_ebullition)) + 
+  geom_boxplot(notch = TRUE) + 
+  scale_x_log10(limits = c(0.00001, 50), 
+                labels = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100), 
+                breaks = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100)) +
+  xlab(expression(CH[4]~ebullition~(mg~CH[4]~m^{-2}~hr^{-1}))) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+
+ggsave("output/figures/ch4ebullitionBarWhisker.tiff",
+       width=4,height=1, units="in",
+       dpi=800,compression="lzw")
+
+
+# total
+dat_agg %>%
+  ggplot(aes(x = ch4_total)) + 
+  geom_boxplot(notch = TRUE) + 
+  scale_x_log10(limits = c(0.00001, 50), 
+                labels = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100), 
+                breaks = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100)) +
+  xlab(expression(CH[4]~total~(mg~CH[4]~m^{-2}~hr^{-1}))) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+
+ggsave("output/figures/ch4totalBarWhisker.tiff",
+       width=4,height=1, units="in",
+       dpi=800,compression="lzw")
+
   # what are main nutrient values?
   names(dat)
   dat %>%
@@ -76,8 +157,8 @@ ggplot() +
     geom_bar(stat = "identity")
   # op, no2_3, tp, tn, nh4, doc, toc
   
-  # CORRELATION PLOTS----------------
-  # ch4_diff
+# CORRELATION PLOTS----------------
+  ## ch4_diff----
   # 1.  nutrients.  a little, maybe
   list(dat, dat_agg) %>%
     map(function(x) {
@@ -107,7 +188,7 @@ ggplot() +
     })
   
   
-  # ch4_ebullition
+  ## ch4_ebullition-----
   # 1.  nutrients and ch4_ebullition.  OK, something here with dat and dat_agg
   list(dat, dat_agg) %>%
     map(function(x) {  
@@ -136,7 +217,153 @@ ggplot() +
       readline(prompt="Press [enter] to proceed")
     })
   
-
+  ## diffusion and ebullition combined plots-----
+  ### sulfate-------
+  # retained in linear model
+  f_labels <- c(ch4_diffusion_best = "diffusive emissions",
+                ch4_ebullition = "ebullitive emissions")
+  
+  # SET UP CUSTOM COLORS FOR ECOREGIONS
+  # use same colors for map and scatterplot
+  # Custom color pallette for ecoregion polygons. Attempted to mirror
+  # https://www.epa.gov/national-aquatic-resource-surveys/
+  # ecoregional-results-national-lakes-assessment-2012
+  cols <- c("Coastal Plains" = "orange1",
+            "Northern Appalachians" = "lightpink1",
+            "Northern Plains" = "darksalmon",
+            "Southern Appalachians" = "mediumturquoise",
+            "Southern Plains" = "khaki4",
+            "Temperate Plains" = "forestgreen", 
+            "Upper Midwest" = "deepskyblue4",
+            "Western Mountains" = "saddlebrown",
+            "Xeric" = "lightskyblue4")
+  
+  dat_agg %>%
+    select(ag_eco9_nm, ch4_ebullition, ch4_diffusion_best, shallow_so4) %>%
+    pivot_longer(contains("ch4")) %>%
+    ggplot(aes(shallow_so4, value)) +
+    geom_point(size = 3, aes(color = ag_eco9_nm)) +
+    scale_color_manual(values = cols, na.translate = F) + # remove NA from legend
+    geom_vline(xintercept = 60) +
+    facet_wrap(~name, ncol = 1, labeller = labeller(name = f_labels)) +
+    ylab(expression(mg~CH[4]~m^{2}~hr^{"-1"})) +
+    xlab(expression(sulfate~(mg~L^{-1}))) +
+    theme_bw() +
+    theme(axis.title = element_text(size = 16),
+          axis.text = element_text(size = 16),
+          strip.text = element_text(size = 16),
+          legend.title = element_blank(),
+          legend.text = element_text(size = 12))
+  
+  ggsave("output/figures/ch4DiffusionEbulBySulfate.tiff",
+                     width=10, height=8, units="in",
+                     dpi=800, compression="lzw")
+  
+  ## diffusive prop of ch4 flux-------
+  # 1.  nutrients and prop_diffusion.  SO4
+  list(dat_agg) %>%
+    map(function(x) {  
+      x %>% mutate(ch4_prop_diff = ch4_diffusion_best / ch4_total) %>%
+        select(ch4_prop_diff, matches("op|no2_3|tp|tn|nh4|doc|toc|so4") & where(is.numeric), -contains("pct"), -shoreline_development) %>% 
+        cor(use = "pairwise.complete.obs") %>% 
+        corrplot(method = "number")
+      readline(prompt="Press [enter] to proceed")
+    })
+  
+  # 2.  algal indicators.  ok, yes, dat and dat_agg
+  list(dat_agg) %>%
+    map(function(x) { 
+      x %>% mutate(ch4_prop_diff = ch4_diffusion_best / ch4_total) %>%
+        select(ch4_prop_diff, matches("chla|do_mg") & !matches("comment") & where(is.numeric), -contains("pct")) %>% 
+        cor(use = "pairwise.complete.obs") %>% 
+        corrplot(method = "number") 
+      readline(prompt="Press [enter] to proceed")
+    })
+  
+  # 3.  morpho.  nothing here.
+  list(dat_agg) %>%
+    map(function(x) {  
+      x %>% mutate(ch4_prop_diff = ch4_diffusion_best / ch4_total) %>%
+        select(ch4_ebullition, surface_area, volume, shoreline_development, 
+                   circularity, dynamic_ratio, mean_depth) %>% 
+        cor(use = "pairwise.complete.obs") %>% 
+        corrplot(method = "number") 
+      readline(prompt="Press [enter] to proceed")
+    })
+  
+  # 4. correlation with total emissions
+  cor(dat_agg %>%
+        mutate(ch4_prop_diff = ch4_diffusion_best / ch4_total) %>%
+        select(ch4_prop_diff),
+      dat_agg %>% select(ch4_total),
+      use = "pairwise.complete.obs")
+  
+  ## ch4 tot----
+  # 1. variables retained in linear model
+  list(dat_agg) %>%
+  map(function(x) {  
+    x %>% 
+      select(ch4_total, deep_do_mg, shallow_chla_lab, shallow_so4, 
+             shallow_doc, shallow_op, surface_area) %>% 
+      cor(use = "pairwise.complete.obs") %>% 
+      corrplot(method = "number") 
+    readline(prompt="Press [enter] to proceed")
+  })
+  
+ # ch4 total vs chla and surface area
+  dat_agg %>%
+    select(ag_eco9_nm, ch4_total, surface_area, shallow_chla_lab) %>%
+    pivot_longer(-c(ch4_total, ag_eco9_nm)) %>%
+    ggplot(aes(value, ch4_total)) +
+    geom_point(size = 3, aes(color = ag_eco9_nm)) +
+    scale_color_manual(values = cols, na.translate = F) + # remove NA from legend
+    facet_wrap(~name, ncol = 1, scales = "free",
+               labeller = as_labeller(
+                 c(shallow_chla_lab = "chla~(ug/L)", surface_area = "surface~area~(m^2)"),
+                 label_parsed), 
+               strip.position = "bottom") + 
+    # log x-axis for first facet (chla) but linear for second (SA)
+    ggh4x::facetted_pos_scales(x = list(scale_x_log10(),
+                                        scale_x_continuous())) +
+    # log y-axis for first facet (chla) but linear for second (SA)
+    ggh4x::facetted_pos_scales(y = list(scale_y_log10(breaks = c(0.01, 0.10, 1, 10, 100),
+                                                      labels = c(0.01, 0.10, 1, 10, 100)),
+                                        scale_y_continuous())) +
+    # linear trend on chl a plot.  Looks nonlinear due to log10 transformation
+    geom_smooth(data =  dat_agg %>%
+                  select(ag_eco9_nm, ch4_total, surface_area, shallow_chla_lab) %>%
+                  pivot_longer(-c(ch4_total, ag_eco9_nm)) %>%
+                  filter(name == "shallow_chla_lab") %>% # this limits the line to chla figure
+                  mutate(value = (value), # tried log10 transformation to make linear line but didn't work
+                         ch4_total = (ch4_total)),
+                aes(value, ch4_total),
+                method = "lm") +
+    ylab(expression(total~CH[4]~emission~rate~(mg~CH[4]~m^{2}~hr^{"-1"}))) +
+    theme_bw() +
+    theme(axis.title = element_text(size = 16),
+          axis.title.x = element_blank(),
+          axis.text = element_text(size = 16),
+          strip.text = element_text(size = 16),
+          strip.background = element_blank(), 
+          strip.placement = "outside",
+          legend.title = element_blank(),
+          legend.text = element_text(size = 12))
+  
+  ggsave("output/figures/ch4TotalByChlaSA.tiff",
+         width=10, height=8, units="in",
+         dpi=800, compression="lzw")
+  
+  
+  # ch4 total x trophic state
+  dat_agg %>%
+    mutate(trophic = case_when(shallow_chla_lab <= 2 ~ "oligotrophic",
+                               shallow_chla_lab > 2 & shallow_chla_lab <= 7 ~ "mesotrophic",
+                               shallow_chla_lab > 7 & shallow_chla_lab<= 30 ~ "eutrophic",
+                               shallow_chla_lab > 30 ~ "hypereutrophic")) %>%
+    ggplot(aes(x = reorder(trophic, ch4_total), ch4_total)) +
+    geom_boxplot() +
+    scale_y_log10()
+  
 # PLOTS OF PROMISING RELATIONSHIPS
   # 1. emission ~ nutrients
   # hit enter to scroll through figures
@@ -184,7 +411,7 @@ ggplot() +
     }) 
 
   
-# Assess data availability----
+# ASSESS DATA AVAILABILITY----
   
 # missing a fair number of deep chem values, mostly using shallow in stats
 # no DOC or anions in 2020/2018
@@ -216,7 +443,7 @@ ggplot() +
   morpho_vars <- c("surface_area", "volume", "shoreline_development", # see inspectMeasurementValues.R for correlations
                    "circularity", "dynamic_ratio")
   
-# ch4.ebullition------
+## ch4.ebullition-----------
 # select data with no missing values to enable stepwise model selection
   ch4.ebullition.dat <- dat_agg %>%
     select(ch4_ebullition, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
@@ -229,7 +456,7 @@ summary(m1)
 anova(m1)
 plot(m1)
 effect_plot(m1, pred = shallow_chla_lab, interval = TRUE, rug = TRUE, plot.points = TRUE)
-effect_plot(m1, pred = shallow_so4)
+effect_plot(m1, pred = shallow_so4, interval = TRUE, rug = TRUE, plot.points = TRUE)
 
   
 m1.log <- lm(as.formula(paste("ch4_ebullition ~ ", paste0("log(",c(algae_vars, chem_vars, morpho_vars),")", collapse = " + "))), data = ch4.ebullition.dat) %>%
@@ -259,11 +486,11 @@ res <- stepwise(formula = m_e_ch4,
 res # shallow_chla and shallow_so4
 # refit with lm for plotting
 m1 <- lm(m_e_ch4, data = ch4.ebullition.dat) %>% step
-effect_plot(m1, pred = shallow_chla_lab, interval = TRUE, rug = TRUE, plot.points = TRUE)
+effect_plot(m1, pred = shallow_chla_lab, interval = TRUE, plot.points = TRUE)
 
 
 
-# ch4.diffusion------
+## ch4.diffusion------
 # select data with no missing values to enable stepwise model selection
 ch4.diffusion.dat <- dat_agg %>%
   select(ch4_diffusion_best, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
@@ -296,9 +523,60 @@ plot(m1.log) # not so good
 effect_plot(m1.log, pred = shallow_chla_lab, interval = TRUE, rug = TRUE, plot.points = TRUE)
 effect_plot(m1, pred = shallow_so4)
 
+## CH4 total---------
+### by lake-----
+ch4.total.dat.agg <- dat_agg %>%
+  select(ch4_total, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
+  na.omit
+nrow(ch4.total.dat) # 101 observations
+
+m_t_ch4 <- as.formula(paste("ch4_total ~ ", paste(c(algae_vars, chem_vars, morpho_vars, 
+                                                    paste(c("shallow_so4", "shallow_doc"), collapse = ":")), # interaction term
+                                                  collapse = " + ")))
+res <- stepwise(formula = m_t_ch4, # not recognizing interaction?
+                data = ch4.total.dat,
+                type = "linear",
+                strategy = "bidirection",
+                metric = c("SL"),
+                sls = 0.05)
+res # shallow_chla, shallow_so4, deep_do_mg
+# refit with lm for plotting
+m1 <- lm(as.formula(paste("ch4_total ~ ", paste(c("deep_do_mg", "shallow_chla_lab", "shallow_so4", 
+                                                  "shallow_doc", "shallow_op", "surface_area", 
+                                                  paste(c("shallow_so4", "shallow_doc"), collapse = ":")), # interaction term
+                                                collapse = " + "))),
+         data = ch4.total.dat) %>%
+  step
+
+summary(m1)
+anova(m1)
+plot(m1)
+effect_plot(m1, pred = deep_do_mg, interval = TRUE, plot.points = TRUE)
+effect_plot(m1, pred = shallow_chla_lab, interval = TRUE, plot.points = TRUE)
+effect_plot(m1, pred = shallow_so4, interval = TRUE,  plot.points = TRUE)
+effect_plot(m1, pred = shallow_doc, interval = TRUE,  plot.points = TRUE)
+effect_plot(m1, pred = shallow_op, interval = TRUE, plot.points = TRUE)
+effect_plot(m1, pred = surface_area, interval = TRUE, plot.points = TRUE)
 
 
-# CO2 diffusion-------
+### by site----
+library(nlme)
+dat$f_lake_id <- factor(dat$lake_id)
+m_t_ch4 <- as.formula(paste("ch4_total ~ ", paste(c(algae_vars, chem_vars, morpho_vars, "deep_do_mg", "deep_temp"), collapse = " + ")))
+ch4.total.dat <- dat %>%
+  select(ch4_total, f_lake_id, deep_temp, deep_do_mg, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
+  na.omit
+nrow(ch4.total.dat) # 1172
+M1me1 <- lme(m_t_ch4, random = ~1 | f_lake_id, data = ch4.total.dat)
+summary(M1me1) # still only so4 and chla?  temp and do not significant
+
+F0 <- fitted(M1me1, level = 0)
+F1 <- fitted(M1me1, level = 1, )
+I <- order(ch4.total.dat$ch4_total); chla_s <- sort(ch4.total.dat$shallow_chla_lab)
+plot(chla_s, F0[I], lwd=4,  type = "l", ylab = "total ch4", xlab = "chl a")
+
+
+## CO2 diffusion-------
 co2.diffusion.dat <- dat_agg %>%
   select(co2_diffusion_best, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
   na.omit
@@ -324,5 +602,154 @@ effect_plot(m1, pred = surface_area, interval = TRUE, rug = TRUE, plot.points = 
 effect_plot(m1, pred = circularity, interval = TRUE, rug = TRUE, plot.points = TRUE)
 
 
-# map
+# MAPS--------------
+# sf for plotting
+dat_agg_sf <- st_as_sf(dat_agg, coords = c("long", "lat"), 
+                  crs = 4269) %>% # standard for lat/lon
+  st_transform(5070) # project to CONUS ALBERS for plotting
+
+
+# read in ecoregion polygons
+ecoR <- st_read(dsn = paste0(userPath, 
+                             "/data/spatial"),
+                layer = "aggr_ecoregions_simple",
+                quiet = TRUE)
+
+# Check CRS
+#st_crs(ecoR) # 3857
+ecoR <- st_transform(ecoR, 5070) # convert to CONUS Albers
+#st_crs(ecoR) # 5070
+
+# SET UP CUSTOM COLORS FOR ECOREGIONS
+# Custom color pallette for ecoregion polygons. Attempted to mirror
+# https://www.epa.gov/national-aquatic-resource-surveys/
+# ecoregional-results-national-lakes-assessment-2012
+cols <- c("Coastal Plains" = "orange1",
+          "Northern Appalachians" = "lightpink1",
+          "Northern Plains" = "darksalmon",
+          "Southern Appalachians" = "mediumturquoise",
+          "Southern Plains" = "khaki4",
+          "Temperate Plains" = "forestgreen", 
+          "Upper Midwest" = "deepskyblue4",
+          "Western Mountains" = "saddlebrown",
+          "Xeric" = "lightskyblue4")
+
+
+## Load state boundaries
+states <- USAboundaries::us_states() %>%
+  dplyr::filter(!state_name %in% c("Alaska", "District of Columbia", "Hawaii", "Puerto Rico")) %>%
+  st_transform(5070) # convert to CONUS Albers
+
+## CH4 diffusion
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME), alpha = 0.5) +
+  geom_sf(data = states, fill = NA, color = "cornsilk3", size = 0.1) +
+  geom_sf(data = dat_agg_sf %>% 
+            filter(visit == 1, lake_id != 1000), # exclude PR
+          aes(size = ch4_diffusion_best),
+          shape = 1,
+          show.legend = "point") +
+  # guide argument below removes points from the boxes in the ecoregion legend
+  # https://aosmith.rbind.io/2020/07/09/ggplot2-override-aes/
+  scale_fill_manual("Ecoregion", 
+                    values = cols,
+                    guide = guide_legend(override.aes = list(shape = NA))) +
+  scale_size(name = expression(diffusive~CH[4]~(mg~CH[4]~m^{-2}~hr^{-1})),
+             range = c(0.5, 8), # custom size range
+             breaks = c(1, 10, 20, 40)) + # custom breaks
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        #plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm"))
+
+# ggsave("output/figures/ch4diffusionBubblePlot.tiff",
+#        width=8,height=5.5, units="in",
+#        dpi=800,compression="lzw")
+
+## CH4 ebullition
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME), alpha = 0.5) +
+  # guide argument below removes points from the boxes in the ecoregion legend
+  # https://aosmith.rbind.io/2020/07/09/ggplot2-override-aes/
+  scale_fill_manual("Ecoregion", 
+                    values = cols,
+                    guide = guide_legend(override.aes = list(shape = NA))) +
+  geom_sf(data = states, fill = NA, color = "cornsilk3", size = 0.1) +
+  geom_sf(data = dat_agg_sf %>% 
+            filter(visit == 1, lake_id != 1000), # exclude PR
+          aes(size = ch4_ebullition),
+          shape = 1,
+          show.legend = "point") +
+  scale_size(name = expression(CH[4]~ebullition~(mg~CH[4]~m^{-2}~hr^{-1})),
+             range = c(0.5, 8), # custom size range
+             breaks = c(1, 10, 20, 40)) + # custom breaks
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position.inside = c(1, 1), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm"))
+
+# ggsave("output/figures/ch4ebullitionBubblePlot.tiff",
+#        width=8,height=5.5, units="in",
+#        dpi=800,compression="lzw")
+
+## CH4 total
+ggplot() +
+  geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME), alpha = 0.5) +
+  geom_sf(data = states, fill = NA, color = "cornsilk3", size = 0.1) +
+  geom_sf(data = dat_agg_sf %>% 
+            filter(visit == 1, lake_id != 1000), # exclude PR
+          aes(size = ch4_total),
+          shape = 1,
+          show.legend = "point") +
+  # guide argument below removes points from the boxes in the ecoregion legend
+  # https://aosmith.rbind.io/2020/07/09/ggplot2-override-aes/
+  scale_fill_manual("Ecoregion", 
+                    values = cols,
+                    guide = guide_legend(override.aes = list(shape = NA))) +
+  scale_size(name = expression(CH[4]~total~(mg~CH[4]~m^{-2}~hr^{-1})),
+             range = c(0.5, 8), # custom size range
+             breaks = c(1, 10, 25, 50)) + # custom breaks
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.margin = unit(c(0,40,0,0),"mm"), # extend right plot mar for legend 
+        legend.position.inside = c(1, 1), # move legend to immediate right of plot  
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.5, "cm"))
+
+# ggsave("output/figures/ch4totalBubblePlot.tiff",
+#        width=8,height=5.5, units="in",
+#        dpi=800,compression="lzw")
+
+
+
 

@@ -120,7 +120,8 @@ dat <- dat %>%
 # 1.  Aggregate
 
 dat_agg <- dat %>%
-    select(-site_id, -eval_status, -trap_rtrvl_date_time, - trap_deply_date_time) %>%
+    select(-site_id, -eval_status, -trap_rtrvl_date_time, - trap_deply_date_time, 
+           -co2_total, -ch4_total) %>% # recalc totals after aggregating by lake
     fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
     group_by(lake_id, visit) %>%
     summarise(across(where(is.numeric), \(x) mean(x, na.rm = TRUE)), # calculate arithmetic mean
@@ -156,6 +157,8 @@ dat_agg <- dat %>%
               lake_nhdid = case_when(all(is.na(lake_nhdid)) ~ NA_character_, # only NA present (Puerto Rico), return NA
                                      !all(is.na(lake_nhdid)) == 0 ~ unique(lake_nhdid), # if any values, then grab one,  only one level per lake
                                      TRUE ~ "fly you fools!")) %>% # look out for the Balrog
+  mutate(ch4_total = ch4_diffusion_best + ch4_ebullition,
+         co2_total = co2_diffusion_best + co2_ebullition) %>%
     ungroup 
 
 
