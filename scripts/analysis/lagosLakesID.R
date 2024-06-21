@@ -8,16 +8,16 @@
 #library(LAGOSUS)
 
 
-# [5/20/2024] not working on Rachel and Jake's machine!!  Skip to line 18
-# lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
-# lg <- lagosus_load(modules = c("locus"))
-# names(lg)
-# ll<-(lg$locus$lake_link)
+# [6/12/2024] working on Jake's machine!!  If acting up, skip to line 18
+lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
+lg <- lagosus_load(modules = c("locus"))
+names(lg)
+ll<-(lg$locus$lake_link)
 
 # Read lake_link from SharePoint or web if the above isn't working.
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
 #ll <- read.csv(paste0(userPath, "data/siteDescriptors/lake_link.csv")) # downloded locally
-ll <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.854.1&entityid=5488e333ce818597fa3dbfc9b4e0c131") # from web
+# ll <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.854.1&entityid=5488e333ce818597fa3dbfc9b4e0c131") # from web
 
 
 #Read in the SuRGE sites from the updated eval_status spreadsheet, created a .csv from excel file in share drive
