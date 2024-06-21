@@ -16,9 +16,14 @@ eb_data <- full_join( # keep all data.  Will assume GC data if not present (e.g.
   left_join(., # keep all data from above, discard dg_sheet data that don't match up 
             dg_sheet %>% select(lake_id, site_id, visit,
                                 atm_pressure, air_temperature) %>%
-              distinct(.))
+              distinct(.) %>%
+              #lake_id == 275, site_id == 12, visit == 1 has two values for BP and air_temp
+              # because sampling was conducted across two days.  Must aggregate across these
+              # or unintend duplicates turn up in data frame.
+              summarise(across(c(atm_pressure, air_temperature), mean), .by= c(lake_id, site_id, visit))
+  )
 
-dim(eb_data) # 1799
+dim(eb_data) # 1798
 
 # 2. Calculate volumetric ebullition rate.  Straightforward operation
 # that can be vectorized across the entire df.
@@ -31,7 +36,7 @@ eb_data <- mutate(eb_data,
 # by_group, ddply, and lapply.  I couldn't figure it out, resorted to for loop
 
 my_eb_list <- list()
-for (i in 1:length(unique(eb_data$lake_id))) {
+for (i in 1:nrow(eb_data %>% distinct(lake_id, visit))) {
   case.i <- eb_data %>% distinct(lake_id, visit) %>% slice(i)
   data.i <- filter(eb_data, lake_id == case.i$lake_id, visit == case.i$visit)
   out.ch4 <- mass.rate(data.i, choice1 = "ch4") 
@@ -47,11 +52,13 @@ for (i in 1:length(unique(eb_data$lake_id))) {
 }
 
 eb_results <- do.call("rbind", my_eb_list) %>%  # This coerces the list into a dataframe. Cool.
+  left_join(eb_data %>% select(lake_id, site_id, visit, eb_ml_hr_m2)) %>%
   rename(ch4_erate_mg_h = eb_ch4_mg_m2_h,
          co2_erate_mg_h = eb_co2_mg_m2_h,
          n2o_erate_mg_h = eb_n2o_mg_m2_h)
+  
 
 
 
-str(eb_results)  # 1739 observations
+str(eb_results)  # 1738 observations
 

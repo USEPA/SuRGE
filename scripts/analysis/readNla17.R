@@ -1,7 +1,7 @@
 # Read NLA 2017 data
 
 # Chemistry
-nla17.chem <- readr::read_csv(paste0(userPath, 
+nla17_chem <- readr::read_csv(paste0(userPath, 
                                 "data/nla17/nla_2017_water_chemistry_chla-data.csv"),
                               na = c("", " ")) %>%
   janitor::clean_names() %>%
@@ -20,7 +20,8 @@ nla17.chem <- readr::read_csv(paste0(userPath,
   ungroup() 
 
 # pivot to wide
-nla17.chem <- nla17.chem %>%
+nla17_chem <- nla17_chem %>%
   pivot_wider(names_from = nla_analyte, values_from = c(nla_result, nla_result_units)) %>%
-  rename_with(., ~ gsub("_result", "", .x)) # remove "-result" from column names
+  rename_with(., ~ gsub("_result", "", .x)) %>% # remove "-result" from column names
+  janitor::clean_names()
 

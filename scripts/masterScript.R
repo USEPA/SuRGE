@@ -26,11 +26,20 @@ source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and micro
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl18
 source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
+# Read other lake characteristics
+source("scripts/analysis/readMorpho.R") # morpho
+source("scripts/analysis/readNla17.R") # nla17_chem
+source("scripts/analysis/hydroLakesID.R") # hylak_link
+source("scripts/analysis/lagosLakesID.R") # lagos_links
+source("scripts/analysis/nidLakesID.R") #
+
+
+
 
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
 source("scripts/analysis/cincinnatiShippingNotes.R") # adding S flag
-source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates
+source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates.  chemistry
 #source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
 #source("scripts/analysis/mergeGc.R") # not written yet.  Need to add dissolved gas to gc_lakeid_agg
 
@@ -65,3 +74,10 @@ source("scripts/analysis/mergeChemEmissions.R") #all_obs
 
 # Project shapefiles
 source("scripts/writeSuRGElakesToGpkg.R")
+
+
+# Analysis
+source("scripts/analysis/inspectMeasurementValues.R")
+source("scripts/analysis/mergePredictorsPrepForStatistics.R") # dat
+
+
