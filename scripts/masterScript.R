@@ -55,7 +55,7 @@ source("scripts/analysis/calculateEbullition.R") # eb_results
 source("scripts/analysis/calculateTotalEmissions.R")
 
 # Merge emissions, chemistry, and field sheets
-source("scripts/analysis/mergeChemEmissions.R")
+source("scripts/analysis/mergeChemEmissions.R") #all_obs
 
 
 # Random

@@ -87,7 +87,7 @@ tteb.SURGE2023 <- read_excel(paste0(
 #          across(everything(), 
 #                 ~ if_else(. == 0, NA_real_, .))) 
 
-# anions ic preliminary data (13 Nov 2023) [not in formal data report 4/11/24]
+# anions ic preliminary data (13 Nov 2023) [not in formal data report 5/15/24]
 tteb.prelim.anions.ic <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_anions_ic.xlsx")) %>%
@@ -104,11 +104,12 @@ tteb.prelim.anions.ic <- read_excel(
          across(everything(), 
                 ~ if_else(. == 0, NA_real_, .))) 
 
-# toc preliminary data (18 Oct 2023) [not in formal data report 3/29/24]
+# toc preliminary data (18 Oct 2023) [not in formal data report 5/15/24]
 tteb.prelim.toc <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_toc.xlsx")) %>%
-  filter(str_detect(lab_id, "^[0-9]")) %>% # keep if lab_id starts w/ a number
+  filter(str_detect(lab_id, "^[0-9]"),  # keep if lab_id starts w/ a number
+           !grepl(c("spk|dup"), lab_id, ignore.case = TRUE)) %>% # omit lab dups and spikes
   mutate(lab_id = str_extract(lab_id, "[0-9]+") %>% # remove non-numeric
            as.numeric()) # make numeric
 
@@ -257,9 +258,9 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake data)
 dim(ttebCoc) #854
-dim(tteb) #1173
+dim(tteb) #1211 [5/18/2024]
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 827 records [4/11/2024] 
+nrow(tteb.all) # 847 records [5/18/2024] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
@@ -281,7 +282,6 @@ tteb.all <- tteb.all %>%
 # 6. SAMPLE INVENTORY REVIEW
 # Are all submitted samples in chemistry data?
 # missing samples, but four of them were due to instrument failure.
-# many are 2023 samples that haven't delivered data yet [4/11/2024]
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 # per Maily, 4/21/2022: During these weeks of running, the instrument was having 
@@ -312,9 +312,9 @@ ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>% arrange(lab_id)
 
 ttebCoc %>% filter(!(lab_id %in% tteb.all$lab_id)) %>%
   filter(!(lab_id %in% c(212510, 203606, 203165, 203642:203644))) %>% # instrument failure
-  filter(!grepl("2023", coc)) %>% # exclude 2023 samples where we are waiting for update
+  #filter(!grepl("2023", coc)) %>% # exclude 2023 samples where we are waiting for update
   select(-contains("notes")) #%>%
-  #write.table(paste0(userPath, "data/chemistry/tteb/missingTteb04012024.txt"), row.names = FALSE)
+  #write.table(paste0(userPath, "data/chemistry/tteb/missingTteb05152024.txt"), row.names = FALSE)
 
 
 # 7. UNIQUE IDs ARE DUPLICATED FOR EACH ANALYTE
@@ -343,7 +343,7 @@ tteb.all <- tteb.all %>%
     }) %>%
   reduce(., full_join) # merge on lake_id, site_id, sample_depth, sample_type, visit
 
-dim(tteb.all) #333 rows.  Good, reduced from 815 to 333.  [4/1/2024]
+dim(tteb.all) #333 rows.  Good, reduced from 847 to 335.  [5/18/2024]
 
 
 

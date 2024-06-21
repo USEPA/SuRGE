@@ -62,4 +62,3 @@ lake_char$lagoslakeid<-as.character(lake_char$lagoslakeid)
 SurGE_lagos_info<-left_join(SurGE_links,lake_char,by="lagoslakeid")
 
 write.csv(SurGE_lagos_info)   
-write.csv(SurGE_lagos_info,file=paste0(userPath,"data/siteDescriptors/Surge_lagos_variables.csv"))

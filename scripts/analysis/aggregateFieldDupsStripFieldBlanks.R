@@ -60,7 +60,7 @@
 
 clean_chem <- function(data) {
   data %>%
-    rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores.
+    rename(no23 = no2_3, no23_flags = no2_3_flags) %>% # temporarily rename the columns w/ 2 underscores.    #
     # JB 4/4/2024 I don't think this is needed
     # # 10/31/2022 Modified code; must ignore the tteb.foo_flags columns -JC ? 11/4/2022, no tteb.foo flags in df? -JB
     # mutate(across(contains("flag") & !contains("tteb."), ~ # convert all NA flags to "no value" if corresponding analyte is NA
@@ -106,7 +106,7 @@ clean_chem <- function(data) {
   #                          first(str_sort(.)), # if any group has units ("_" detected), use same units  
   #                                 .))) %>% # if no units in group, no change (i.e., NA)
   #   filter(!(sample_type == "duplicate")) %>% # now we can remove dups
-  #   rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
+     rename(no2_3 = no23, no2_3_flags = no23_flags) %>% # changes columns back to original names in wiki
     # select(-sample_type) %>% # no longer need sample_type (all unknowns)
     ungroup() %>% # remove grouping
     fill(contains("unit"), .direction = "updown") %>% # fill any NA in units columns 
@@ -117,9 +117,9 @@ clean_chem <- function(data) {
 } 
 
 chemistry <- clean_chem(chemistry_all)
-dim(chemistry_all) # 374, 126 [4/2/2024]
-dim(chemistry) # 265, 124 [4/4/2024], lost analyte_group
+dim(chemistry_all) # 374, 126 [5/19/2024]
+dim(chemistry) # 265, 124 [5/19/2024], lost analyte_group and sample_type
 
-names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # sample_type removed, good
-# lost analyte_group, do we care?
+names(chemistry_all)[!names(chemistry_all) %in% names(chemistry)] # analyte_group and sample_type
+
 

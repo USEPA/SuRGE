@@ -1,5 +1,5 @@
 # 3.6.2 -> 4.4.0
-library(devtools) # this was needed to install LAGOSUS from github.  Keeping this library call so
+library(devtools) # this was needed to install LAGOSUS and hydrolinkgs from github.  Keeping this library call so
                   # the package is captured by renv in case it is needed for fresh clones.
                   # might not be necessary
 library(sf)
@@ -17,6 +17,7 @@ library(lubridate) #for adjusting time offsets in readLGR
 library(minpack.lm) #for the exponential modeling of diffusive flux
 library(dttr2) # NA_Date_
 library(LAGOSUS)
+library(hydrolinks)
 
 
 library(conflicted)

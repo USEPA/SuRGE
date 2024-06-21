@@ -366,6 +366,7 @@ OUT2 <- mutate(OUT2,
               ch4.drate.mg.h.best = case_when(
                 # (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ NA_real_,
                 # (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ NA_real_,
+                # so this retains low r2 model fits, but assigns a rate of 0?
                 (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ 0,
                 (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ 0,
                 TRUE ~ ch4.drate.mg.h.best))
@@ -383,6 +384,7 @@ OUT2 <- janitor::clean_names(OUT2) %>%
   mutate(visit = as.numeric(visit))
 
 # Inspect r2 after scrubbing r2<0.9
+# revised code retains observations with r2<0.9 but assigns them a value of 0
 plot(with(OUT2[!is.na(OUT2$co2_drate_mg_h_best),], 
           ifelse(co2_best_model == "linear", co2_lm_r2, co2_ex_r2)))  # CO2: all > 0.9
 
@@ -407,91 +409,3 @@ bysco2<-OUT2 %>%
   summarise(lake_id[1],visit[1],co2_drate_mg_h=mean(co2_drate_mg_h_best))
 
 
-
-# STEP 3: MERGE DIFFUSION RATES WITH eqAreaData
-# First, strip NA from OUT
-
-# 
-# #OUT2 <- filter(OUT2, !is.na(Lake_Name)) # Just one NA slipped in
-# eqAreaData <- merge(eqAreaData, OUT2, by.x = c("Lake_Name", "siteID"), 
-#       by.y = c("Lake_Name", "site"), all=TRUE)
-# 
-# str(eqAreaData) # 1531 observations
-# 
-# # Any sites not have a diffusive rate?
-# # Only a subset of Cowan Lake sites were sampled due to water in LGR.
-# # Other sites had strong ebullition in LGR profile.
-# filter(eqAreaData, EvalStatus == "sampled", is.na(ch4.drate.mg.h.best)) %>%
-#   select(Lake_Name, siteID, 
-#          ch4.lm.drate.mg.h, ch4.ex.drate.mg.h, ch4.drate.mg.h.best,
-#          co2.lm.drate.mg.h, co2.ex.drate.mg.h, co2.drate.mg.h.best)
-# 
-# # Calculate diffusive CO2 emissions for Cowan Lake site where we 
-# # had diffusive CH4 and dissolved gases, but not diffusive CO2.  This
-# # is only site 04, but combined with the estimate from site 09, will provide
-# # sufficient observations (n=2) for grts function to work. Recall LGR got
-# # wet at Cowan and samples were manually collected
-# 
-# logInd <- with(eqAreaData, grepl(pattern = "Cowan", x = Lake_Name) & # cowan lake
-#                  !is.na(co2.sat.ratio) & # has dissolved co2
-#                  !is.na(ch4.sat.ratio) & # has dissolved ch4
-#                  !is.na(ch4.drate.mg.h.best) & # has diffusive CH4
-#                  is.na(co2.drate.mg.h.best)) # does not have diffusive CO2
-# 
-# dco2Tmp <- filter(eqAreaData, logInd) %>%
-#   # 10,000 L->m3; 1mol CH4 = 16 g CH4; 1000mgCH4 = 1g CH4
-#   mutate(excessCo2 = (dissolved.co2 - (dissolved.co2/co2.sat.ratio)) * 10000*44*1000, # mg/m3
-#          excessCh4 = (dissolved.ch4 - (dissolved.ch4/ch4.sat.ratio)) * 10000*16*1000, # mg/m3
-#          kCh4 = ch4.drate.mg.h.best / excessCh4, # m/h
-#          scCh4 = 1897.8 - (114.28*Tmp_C_S) + (3.2902*(Tmp_C_S^2)) - (0.039061*(Tmp_C_S^3)), # CH4 schmidt number
-#          scCo2 = 1911.1 - (118.11*Tmp_C_S) + (3.4527*(Tmp_C_S^2)) - (0.04132*(Tmp_C_S^3)), # CO2 schmidt number
-#          kCo2 = kCh4 * ((scCo2/scCh4)^-0.5), # k for CH4 converted to CO2 (m/h)
-#          co2.drate.mg.h.best = kCo2 * excessCo2) %>%
-#   select(co2.drate.mg.h.best) %>% as.numeric
-# 
-# eqAreaData[logInd, "co2.drate.mg.h.best"] = dco2Tmp
-
-
-# # STEP 3: MERGE DIFFUSION RATES WITH eqAreaData
-# # First, strip NA from OUT
-# 
-# 
-# #OUT2 <- filter(OUT2, !is.na(Lake_Name)) # Just one NA slipped in
-# eqAreaData <- merge(eqAreaData, OUT2, by.x = c("Lake_Name", "siteID"), 
-#       by.y = c("Lake_Name", "site"), all=TRUE)
-# 
-# str(eqAreaData) # 1531 observations
-# 
-# # Any sites not have a diffusive rate?
-# # Only a subset of Cowan Lake sites were sampled due to water in LGR.
-# # Other sites had strong ebullition in LGR profile.
-# filter(eqAreaData, EvalStatus == "sampled", is.na(ch4.drate.mg.h.best)) %>%
-#   select(Lake_Name, siteID, 
-#          ch4.lm.drate.mg.h, ch4.ex.drate.mg.h, ch4.drate.mg.h.best,
-#          co2.lm.drate.mg.h, co2.ex.drate.mg.h, co2.drate.mg.h.best)
-# 
-# # Calculate diffusive CO2 emissions for Cowan Lake site where we 
-# # had diffusive CH4 and dissolved gases, but not diffusive CO2.  This
-# # is only site 04, but combined with the estimate from site 09, will provide
-# # sufficient observations (n=2) for grts function to work. Recall LGR got
-# # wet at Cowan and samples were manually collected
-# 
-# logInd <- with(eqAreaData, grepl(pattern = "Cowan", x = Lake_Name) & # cowan lake
-#                  !is.na(co2.sat.ratio) & # has dissolved co2
-#                  !is.na(ch4.sat.ratio) & # has dissolved ch4
-#                  !is.na(ch4.drate.mg.h.best) & # has diffusive CH4
-#                  is.na(co2.drate.mg.h.best)) # does not have diffusive CO2
-# 
-# dco2Tmp <- filter(eqAreaData, logInd) %>%
-#   # 10,000 L->m3; 1mol CH4 = 16 g CH4; 1000mgCH4 = 1g CH4
-#   mutate(excessCo2 = (dissolved.co2 - (dissolved.co2/co2.sat.ratio)) * 10000*44*1000, # mg/m3
-#          excessCh4 = (dissolved.ch4 - (dissolved.ch4/ch4.sat.ratio)) * 10000*16*1000, # mg/m3
-#          kCh4 = ch4.drate.mg.h.best / excessCh4, # m/h
-#          scCh4 = 1897.8 - (114.28*Tmp_C_S) + (3.2902*(Tmp_C_S^2)) - (0.039061*(Tmp_C_S^3)), # CH4 schmidt number
-#          scCo2 = 1911.1 - (118.11*Tmp_C_S) + (3.4527*(Tmp_C_S^2)) - (0.04132*(Tmp_C_S^3)), # CO2 schmidt number
-#          kCo2 = kCh4 * ((scCo2/scCh4)^-0.5), # k for CH4 converted to CO2 (m/h)
-#          co2.drate.mg.h.best = kCo2 * excessCo2) %>%
-#   select(co2.drate.mg.h.best) %>% as.numeric
-# 
-# eqAreaData[logInd, "co2.drate.mg.h.best"] = dco2Tmp
-# 
