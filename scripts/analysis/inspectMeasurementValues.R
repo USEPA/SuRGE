@@ -98,7 +98,7 @@ all_obs %>% group_by(lake_id) %>%
   print(n=Inf)
 
 
-# 4. How many lakes have CH4 diffusion
+# 4. How many lakes don't have CH4 diffusion
 # only 4 lakes.  1000, 186, 253, 82
 all_obs %>% group_by(lake_id) %>%
   summarize(freq = sum(!is.na(ch4_diffusion_best))) %>% 
