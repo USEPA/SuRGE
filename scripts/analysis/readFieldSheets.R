@@ -14,7 +14,7 @@ get_data_sheet <- function(paths){
                regexp = 'surgeData', # file names containing this pattern
                recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
-    .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway
+    .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway (add visit number to file name)
     #.[100:101] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function

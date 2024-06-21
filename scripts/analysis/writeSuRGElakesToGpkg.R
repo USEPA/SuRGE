@@ -19,7 +19,6 @@ omit_gdb <- paste(c("2013 Lake Tschida Heart Butte Reservoir Sedimentation Surve
                     "lowMerc287.gdb", # low points not used
                     "highMerc265.gdb", "originalMerc265.gdb", # low point set used
                     "highMerc249", "lowMerc249", "originalMerc249", # used mid point set
-                    "merc188", # used high points
                     "merc326low", # used high points
                     "merc070lacustrine", # using polygon for entire reservoir
                     "merc070riverine",
@@ -42,7 +41,7 @@ fs_paths <- fs::dir_ls(path = paths, # see above
            type = "file") %>% # only retain file names, not directory names   
   sub('\\/[^\\/]*$', '',.) %>% # extract characters before final /
   unique(.) %>% # names of .gdb e.g. merc297.gdb
-  .[!(grepl(omit_gdb, .))] # omit random .gdb not needed here #THIS ALSO EXCLUDES 188 AND 253 MUST FIX
+  .[!(grepl(omit_gdb, .))] # omit random .gdb not needed here 
 
 
 # 2. GET NAME OF LAKE POLYGON LAYER IN EACH .gdb
@@ -206,16 +205,16 @@ dim(dat.2016.sf) #539, lots of rows with no trap data (e.g. oversample sites)
 
 
 # WRITE POLYGONS AND POINTS TO DISK-----------
-## POLYGONS
-# bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
-#   st_make_valid() %>%
-#   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
-#            layer = "all_lakes",
-#            append = FALSE)
+# POLYGONS
+bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
+  st_make_valid() %>%
+  st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+           layer = "all_lakes",
+           append = FALSE)
 
-dim(surge_lakes) #123
+dim(surge_lakes) #125
 dim(lakes_2016) #33
-33+123 #156
+33+125 #158
 
 ## POINTS
 # merge 2016 and SuRGE data

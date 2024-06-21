@@ -52,9 +52,9 @@ dat_agg %>%
   geom_rect(aes(xmin = 0, xmax = 3, ymin = 0.5, ymax=1), fill = "deepskyblue4") +
   #geom_point()
   #geom_histogram(binwidth = 0.05)
-  #geom_boxplot(notch = TRUE)
-  geom_violin() +
-  geom_dotplot(binaxis='y', stackdir='center', dotsize=1, binwidth = 0.01) +
+  geom_boxplot() +
+  #geom_violin() +
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=1, binwidth = 0.01) +
   #geom_jitter(position = position_jitter(0.2)) +
   ylab(expression(diffusive~fraction~of~total~CH[4]~emissions)) +
   theme_bw() +
@@ -86,7 +86,7 @@ ggsave("output/figures/propDiffusionCh4BySulfate.tiff",
        dpi=800, compression="lzw")
 
 # EMISSION BAR AND WHISKER PLOTS-------------------
-# diffusion
+## ch4 diffusion-----
 dat_agg %>%
   filter(ch4_diffusion_best > 0) %>%
   ggplot(aes(x = ch4_diffusion_best)) + 
@@ -106,7 +106,7 @@ ggsave("output/figures/ch4diffusionBarWhisker.tiff",
        width=4,height=1, units="in",
        dpi=800,compression="lzw")
 
-# ebullition
+## ch4_ebullition------
 dat_agg %>%
   ggplot(aes(x = ch4_ebullition)) + 
   geom_boxplot(notch = TRUE) + 
@@ -126,7 +126,7 @@ ggsave("output/figures/ch4ebullitionBarWhisker.tiff",
        dpi=800,compression="lzw")
 
 
-# total
+## ch4 total-----
 dat_agg %>%
   ggplot(aes(x = ch4_total)) + 
   geom_boxplot(notch = TRUE) + 
@@ -144,6 +144,43 @@ dat_agg %>%
 ggsave("output/figures/ch4totalBarWhisker.tiff",
        width=4,height=1, units="in",
        dpi=800,compression="lzw")
+
+
+## co2 diffusion------
+dat_agg %>%
+  ggplot(aes(x = co2_diffusion_best)) + 
+  geom_boxplot(notch = TRUE) + 
+  scale_x_continuous(trans = pseudolog10_trans,
+                     limits = c(-200, 1200),
+                     labels = c(-50, -5, 0, 5, 25, 100, 500), 
+                     breaks = c(-50, -5, 0, 5, 25, 100, 500)) +
+  geom_vline(xintercept = 0, color = "darkblue", linetype = "dashed") +
+  annotate(geom = "text", x=5, y=0, label="source \nn=68", size = 8, lineheight = 0.8) +
+  annotate(geom = "text", x=-5, y=0, label="sink \nn=40", size = 8, lineheight = 0.8) +
+  xlab(expression(diffusive~CO[2]~(mg~CO[2]~m^{-2}~hr^{-1}))) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+
+ggsave("output/figures/co2diffusionBarWhisker.tiff",
+       width=8,height=1.5, units="in",
+       dpi=800,compression="lzw")
+
+dat_agg %>% 
+  filter(visit == 1, 
+         lake_id != 1000, # exclude PR
+         co2_diffusion_best != 0,
+         !is.na(co2_diffusion_best)) %>%
+  # mutate(co2_status = case_when(is.na(co2_diffusion_best) ~ NA_character_,
+  #                              co2_diffusion_best < 0 ~ "sink",
+  #                              co2_diffusion_best > 0 ~ "source")) %>%
+  summarise(source = sum(co2_diffusion_best > 0, na.rm = TRUE),
+            sink = sum(co2_diffusion_best < 0, na.rm = TRUE))
 
   # what are main nutrient values?
   names(dat)
@@ -311,6 +348,16 @@ ggsave("output/figures/ch4totalBarWhisker.tiff",
   })
   
  # ch4 total vs chla and surface area
+  lm.1 <- dat_agg %>%
+    select(ch4_total, shallow_chla_lab) %>%
+    mutate(ch4_total_log = log10(ch4_total), 
+           shallow_chla_lab_log = log10(shallow_chla_lab)) %>%
+  lm(ch4_total_log ~ shallow_chla_lab_log, data = .)
+  
+  dat.1 <- data.frame(ch4_total = lm.1$fitted,
+               shallow_chla_lab = lm.1$model$shallow_chla_lab_log)
+  
+  
   dat_agg %>%
     select(ag_eco9_nm, ch4_total, surface_area, shallow_chla_lab) %>%
     pivot_longer(-c(ch4_total, ag_eco9_nm)) %>%
@@ -338,6 +385,7 @@ ggsave("output/figures/ch4totalBarWhisker.tiff",
                          ch4_total = (ch4_total)),
                 aes(value, ch4_total),
                 method = "lm") +
+    geom_line(data = dat.1, aes(shallow_chla_lab, ch4_total)) +
     ylab(expression(total~CH[4]~emission~rate~(mg~CH[4]~m^{2}~hr^{"-1"}))) +
     theme_bw() +
     theme(axis.title = element_text(size = 16),
@@ -411,6 +459,40 @@ ggsave("output/figures/ch4totalBarWhisker.tiff",
     }) 
 
   
+  ## diffusive CO2----
+  # 1.  nutrients.  a little, maybe
+  list(dat, dat_agg) %>%
+    map(function(x) {
+      x %>% select(co2_diffusion_best, 
+                   matches("op|no2_3|tp|tn|nh4|doc|toc|so4|ph") & where(is.numeric) & contains("shallow"), 
+                   -shoreline_development, -contains("pct"), -contains("comment")) %>% 
+        cor(use = "pairwise.complete.obs") %>% 
+        corrplot(method = "number") 
+      readline(prompt="Press [enter] to proceed")
+    })
+  
+  # 2.  algal indicators.  some stuff with dat_agg
+  list(dat, dat_agg) %>%
+    map(function(x) { 
+      x %>% select(co2_diffusion_best, matches("chla|do_mg") & !matches("comment") & where(is.numeric)) %>% 
+        cor(use = "pairwise.complete.obs") %>% 
+        corrplot(method = "number") 
+      readline(prompt="Press [enter] to proceed")
+    })
+  
+  
+  
+  # 3.  morpho and co2_diff.  weak correlations
+  list(dat, dat_agg) %>%
+    map(function(x) {  
+      x %>% select(co2_diffusion_best, surface_area, volume, shoreline_development, 
+                   circularity, dynamic_ratio) %>% 
+        cor(use = "pairwise.complete.obs") %>% 
+        corrplot(method = "number")  
+      readline(prompt="Press [enter] to proceed")
+    })
+  
+
 # ASSESS DATA AVAILABILITY----
   
 # missing a fair number of deep chem values, mostly using shallow in stats
@@ -528,13 +610,13 @@ effect_plot(m1, pred = shallow_so4)
 ch4.total.dat.agg <- dat_agg %>%
   select(ch4_total, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
   na.omit
-nrow(ch4.total.dat) # 101 observations
+nrow(ch4.total.dat.agg) # 101 observations
 
 m_t_ch4 <- as.formula(paste("ch4_total ~ ", paste(c(algae_vars, chem_vars, morpho_vars, 
                                                     paste(c("shallow_so4", "shallow_doc"), collapse = ":")), # interaction term
                                                   collapse = " + ")))
 res <- stepwise(formula = m_t_ch4, # not recognizing interaction?
-                data = ch4.total.dat,
+                data = ch4.total.dat.agg,
                 type = "linear",
                 strategy = "bidirection",
                 metric = c("SL"),
@@ -578,25 +660,61 @@ plot(chla_s, F0[I], lwd=4,  type = "l", ylab = "total ch4", xlab = "chl a")
 
 ## CO2 diffusion-------
 co2.diffusion.dat <- dat_agg %>%
-  select(co2_diffusion_best, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
+  filter(!is.na(shallow_ph), shallow_ph <15) %>%
+  select(co2_diffusion_best, shallow_ph, all_of(c(algae_vars, chem_vars, morpho_vars))) %>%
   na.omit
-nrow(co2.diffusion.dat) # 103 observations
+nrow(co2.diffusion.dat) # 102 observations
 
-m_d_co2 <- as.formula(paste("co2_diffusion_best ~ ", paste(c(algae_vars, chem_vars, morpho_vars), collapse = " + ")))
+m_d_co2 <- as.formula(paste("co2_diffusion_best ~ ", paste(c(algae_vars, chem_vars, morpho_vars, "shallow_ph"), collapse = " + ")))
 res <- stepwise(formula = m_d_co2,
+                #include = "shallow_ph",
                 data = co2.diffusion.dat,
                 type = "linear",
                 strategy = "bidirection",
                 metric = c("SL"),
                 sls = 0.05)
 res # shallow_chla and shoreline development
+summary(res)
 # refit with lm for plotting
-m1 <- lm(as.formula(paste("co2_diffusion_best ~ ", paste(c("shallow_do_mg", "shallow_no2_3", "dynamic_ratio", "surface_area", "circularity"), collapse = " + "))), data = co2.diffusion.dat) %>%
-  step
+m1 <- lm(as.formula(paste("co2_diffusion_best ~ ", paste(c("shallow_do_mg", "shallow_no2_3", "dynamic_ratio", "surface_area", "circularity", "shallow_ph"), collapse = " + "))), data = co2.diffusion.dat)
 summary(m1)
 anova(m1)
 plot(m1)
-effect_plot(m1, pred = shallow_do_mg, interval = TRUE, rug = TRUE, plot.points = TRUE)
+
+
+co2.p1 <- effect_plot(m1, pred = shallow_do_mg, interval = TRUE, plot.points = TRUE,
+                      x.label = expression(dissolved~oxygen~(mg~ L^{-1})),
+                      y.label = expression(diffusive~CO[2]~(mg~CO[2]~m^{-2}~hr^{-1}))) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 12))
+
+co2.p2 <- effect_plot(m1, pred = shallow_ph, interval = TRUE, plot.points = TRUE,
+                      x.label = "pH",
+                      y.label = element_blank()) +
+  ylim(-250, 750) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 12))
+
+co2.p3 <- effect_plot(m1, pred = surface_area, interval = TRUE, plot.points = TRUE,
+                      x.label = expression(surface~area~(m^{2})),
+                      y.label = element_blank()) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 12))
+
+cowplot::plot_grid(co2.p1, co2.p2, co2.p3, nrow = 1)
+
+ggsave("output/figures/co2diffusionMarginalEffects.tiff",
+       width=10,height=4, units="in",
+       dpi=800,compression="lzw")
+
+
+
 effect_plot(m1, pred = dynamic_ratio, interval = TRUE, rug = TRUE, plot.points = TRUE)
 effect_plot(m1, pred = surface_area, interval = TRUE, rug = TRUE, plot.points = TRUE)
 effect_plot(m1, pred = circularity, interval = TRUE, rug = TRUE, plot.points = TRUE)
