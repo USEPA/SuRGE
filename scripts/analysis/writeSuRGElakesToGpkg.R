@@ -10,23 +10,34 @@
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "lakeDsn/", labs)
 
-# 2. LIST OF .gdb TO IGNORE
-omit_gdb <- paste(c("2013 Lake Tschida Heart Butte Reservoir Sedimentation Survey.gdb",
-                    "069nhd.gdb", "randomPoints.gdb", "randomPoints.gdb", "annotation.gdb",
-                    "mercxxx.gdb", "WGSxxx.gdb", "mercharsha.gdb", "homeMerc.gdb",
-                    "homeWGS.gdb", "nasheville.gdb", "mercxxx.gdb", "path1.gdb",
-                    "merc318.gdb", # not sampled, dry 
-                    "lowMerc287.gdb", # low points not used
-                    "highMerc265.gdb", "originalMerc265.gdb", # low point set used
-                    "highMerc249", "lowMerc249", "originalMerc249", # used mid point set
-                    "merc326low", # used high points
-                    "merc070lacustrine", # using polygon for entire reservoir
-                    "merc070riverine",
-                    "merc070transitional",
-                    "merc069lacustrine", # using polygon for entire reservoir
-                    "merc069riverine",
-                    "merc069transitional"),                    
-                  collapse = "|")
+# 2. LIST OF .gdb TO READ
+gdb_list <- lake.list %>%
+  filter(eval_status_code == "S") %>%
+  select(lake_id) %>%
+  mutate(lake_id = as.character(lake_id),
+         lake_id = case_when(lake_id =="326" ~ "merc326high",
+                             lake_id =="287" ~ "originalMerc287",
+                             lake_id =="265" ~ "lowMerc265",
+                             lake_id =="249" ~ "midMerc249",
+                             lake_id == "326" ~ "merc326high",
+                             lake_id == "68" ~ "merc068", # need to exclude /CH4-068/2013 Lake Tschida Heart Butte Reservoir Sedimentation Survey.gdb"
+                             lake_id == "13" ~ "merc013", # need to remove "13" so we don't grab "2013 Lake Tschida Heart Butte Reservoir Sedimentation Survey.gdb"
+                             lake_id == "69" ~ NA_character_, # .shp of entire lake read below
+                             lake_id == "70" ~ NA_character_, # .shp of entire lake read below
+                             nchar(lake_id) == 1 ~ paste0("00", lake_id),
+                             nchar(lake_id) == 2 ~ paste0("0", lake_id),
+                             TRUE ~ lake_id)) %>%
+  filter(!is.na(lake_id)) %>% #69 and 70 set to NA (see above)
+  distinct # 4 revisits 
+  
+
+nrow(gdb_list) # 112 observations, lake.list includes 118, but this includes 4 revisits and two NA (69 and 70), remove those to get 112.
+
+# collapse to vector
+gdb_list <- gdb_list %>%
+  pull %>% paste(., collapse = "|")
+
+
 
 # 2018 R10 and 2020-2023 SuRGE data are formatted similarly
 get_surge <- function(paths){
@@ -41,8 +52,7 @@ fs_paths <- fs::dir_ls(path = paths, # see above
            type = "file") %>% # only retain file names, not directory names   
   sub('\\/[^\\/]*$', '',.) %>% # extract characters before final /
   unique(.) %>% # names of .gdb e.g. merc297.gdb
-  .[!(grepl(omit_gdb, .))] # omit random .gdb not needed here 
-
+  .[grepl(gdb_list, .)]
 
 # 2. GET NAME OF LAKE POLYGON LAYER IN EACH .gdb
 layers <- purrr::map(fs_paths, ~st_layers(.)) %>% # Read layers in each .gdb
@@ -163,13 +173,18 @@ dat.surge.sf <- fld_sheet %>%
   filter(eval_status == "TS", # only sampled sites
          !(is.na(long)|is.na(lat)), # only sites where lat and long were recorded
          !(is.na(trap_deply_date_time)|is.na(trap_rtrvl_date_time))) %>% # only rows with trap data
-  st_as_sf(., coords = c("long", "lat")) %>%
-  `st_crs<-` (4326) %>% # latitude and longitude
-  st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
-  st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
-  select(lake_id, site_id, (contains("trap") & contains("date_time")))
-
-dim(dat.surge.sf) #1819
+  mutate(lake_id = case_when(lake_id %in% c("69_lacustrine|69_riverine|69_transitional") ~ "069",
+                             lake_id %in% c("70_lacustrine|70_riverine|70_transitional") ~ "070",
+                             nchar(lake_id) == 1 ~ paste0("00", lake_id),
+                             nchar(lake_id) == 2 ~ paste0("0", lake_id),
+                             TRUE ~ lake_id)) %>%
+           st_as_sf(., coords = c("long", "lat")) %>%
+           `st_crs<-` (4326) %>% # latitude and longitude
+           st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
+           st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
+           select(lake_id, site_id, (contains("trap") & contains("date_time")))
+         
+         dim(dat.surge.sf) #1819
 
 
 ## 2016 data
@@ -212,16 +227,16 @@ bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
            layer = "all_lakes",
            append = FALSE)
 
-dim(surge_lakes) #125
+dim(surge_lakes) #114
 dim(lakes_2016) #33
-33+125 #158
+33+114 #147
 
 ## POINTS
 # merge 2016 and SuRGE data
 # [5/13/2024] missing Falls Lake
 # add point to all_lakes.gpkg
-# bind_rows(list(dat.2016.sf, dat.surge.sf)) %>% # merge polygons
-#   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
-#            layer = "points",
-#            append = FALSE)
+bind_rows(list(dat.2016.sf, dat.surge.sf)) %>% # merge polygons
+  st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+           layer = "points",
+           append = FALSE)
 
