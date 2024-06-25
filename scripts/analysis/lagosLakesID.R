@@ -62,7 +62,11 @@ lake_links <- left_join(surge_sites, llc, by = "nhdplusv2_comid") %>%
 
 lake_links %>% filter(is.na(lagoslakeid)) %>% {dim(.)} # only two lakes w/out LAGOS record!  One is PR.
 
-## So far the only variables we expect to use from Lagos are the remote sensing chlorophyll a
+#Setup file with lagos lake connectivity metrics
+lagos_lake_connectivity <- left_join(lake_links, lc, by = "lagoslakeid") %>%
+  select(lake_id,lagoslakeid,lake_connectivity_class,lake_connectivity_fluctuates,lake_connectivity_permanent,
+         lake_lakes4ha_upstream_ha,lake_lakes4ha_upstream_n,lake_lakes1ha_upstream_ha,lake_lakes1ha_upstream_n,
+         lake_lakes10ha_upstream_n,lake_lakes10ha_upstream_ha)
 
 # LAGOS-US
 # lagos productivity estimates
