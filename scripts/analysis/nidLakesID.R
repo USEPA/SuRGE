@@ -9,6 +9,6 @@ nid_link <- read_csv(paste0(userPath, "data/siteDescriptors/nid_links_and_dam_ag
 
 dim(nid_link_min) #147
   
-
-nid <- read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
-  janitor::clean_names()
+#Jake--Do we need this?  Do you want me to add script to create the link internally?
+# nid <- read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
+#   janitor::clean_names()
