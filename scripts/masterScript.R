@@ -32,7 +32,8 @@ source("scripts/analysis/readNla17.R") # nla17_chem
 source("scripts/analysis/hydroLakesID.R") # hylak_link
 source("scripts/analysis/lagosLakesID.R") # lagos_links
 source("scripts/analysis/nidLakesID.R") #
-
+source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Time data
+source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
 
 
 
