@@ -95,13 +95,24 @@ dim(dat) # 2057, 278
  # 5. Merge hydroLakes ID
  dat <- dat %>%
    left_join(hylak_link %>%
-               mutate(lake_id = as.character(lake_id)))
+               mutate(lake_id = as.character(lake_id))) # need to deal with 69/70
  
  # 6. Merge LAGOS
- # not many useful predictors now, revisit after reading in more lagos data
- dat <- dat %>%
-   left_join(lagos_links %>%
-               select(lake_id, lagoslakeid, lake_nhdid))
+  dat <- dat %>%
+   left_join(lagos_links %>% 
+               # need to expand records for 69 and 70 to encompass
+               # lacustrine, transitional, and riverine
+               filter(lake_id %in% 69:70) %>% # pull out 69 and 70
+               group_by(lake_id) %>%
+               slice(rep(1,3)) %>% # selects the first row (by group), 3 times, giving the repeated rows desired;
+               ungroup() %>%
+               # rename the duplicated records
+               mutate(lake_id = c("69_lacustrine", "69_transitional", "69_riverine",
+                                  "70_lacustrine", "70_transitional", "70_riverine")) %>%
+               # merge new records with original df
+               rbind(lagos_links) %>%
+               # remove records for 69 and 70
+               filter(!lake_id == c(69|70)))
  
 # 7. Merge NID
  dat <- dat %>%
