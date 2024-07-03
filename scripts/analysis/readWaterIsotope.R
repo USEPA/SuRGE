@@ -1,5 +1,5 @@
 ## Read In Renee Brook's Water Isotope Data and Match with Surge Links
-## Last Updated 6/26/2024
+## Last Updated 7/3/2024
 
 # MAKE SURE YOU HAVE RUN THE lagosLakesID.R TO CREATE THE
 # lake_links OBJECT
@@ -19,50 +19,93 @@
 # E_I	Evaporation to Inflow ratio (E:I) - the proportion of water entering the lake (inflow from surface and groundwater) that leaves the lake through evaporation (See Brooks et al. 2014 for details). 
 # RT_iso	Residence time estimated from (E:I) * (Lake volume)/ (potential evaporation PET from the lake surface area).  Units: years
 
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#- READ SURGE LAKES
+# Read in the SuRGE sites from the updated eval_status spreadsheet.
+surge_sites_nla <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.xlsx"), na = "NA") %>%
+  filter(`EvalStatus Code` == "S") %>% # only sampled
+  janitor::clean_names() %>%
+  dplyr::rename(lake_id = site_id) %>%
+  mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
+           as.numeric()) %>% # convert lake_id to numeric
+  rename(nla17_site_id = site_id_2) %>%
+  rename(nla_unique_id = unique_id)%>%
+  select(lake_id, sample_year, nla17_site_id,nla_unique_id)
+
 #Read in the water isotope data that Renee sent as three separate files for the different years
+#The NLA ID for a given year is different than the NLA ID across years, so pull 
+#both out and name them for the lake link
 waterisotope17<- read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
                                        sheet = "NLA_17_water_isotopes",na="NA")%>%
                   janitor::clean_names()
-#The NLA ID for a given year is different than the NLA ID across years, so pull 
-#both out and name them for the lake link
 waterisotope17$nla17_site_id<-waterisotope17$site_id
-waterisotope17$nla_unique_id<-waterisotope17$unique_id
 
 waterisotope12<-  read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
                             sheet = "NLA_12_water_isotopes",na = "NA")%>%
                   janitor::clean_names()
+waterisotope12$nla12_site_id<-waterisotope12$site_id
+waterisotope12$nla_unique_id<-waterisotope12$unique_id
+
 waterisotope07<- read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
                            sheet = "NLA_07_water isotopes",na = "NA")%>%
                    janitor::clean_names()
+waterisotope07$nla07_site_id<-waterisotope07$site_id_4
+waterisotope07$nla_unique_id<-waterisotope07$unique_id_1
 
-#Setup file with desired water isotope data
-#lake_links$nla17_site_id<-as.factor(lake_links$nla17_site_id)
-water_isotope_data_17 <- left_join(lake_links, waterisotope17, by ="nla17_site_id")%>% 
+#Setup file with desired water isotope data from each of 3 years
+water_isotope_data_17 <- left_join(surge_sites_nla, waterisotope17, by ="nla17_site_id")%>% 
   select(lake_id,nla17_site_id,nla_unique_id,visit_no,e_i,rt_iso)
-colnames(water_isotope_data_17)<-c("lake_id","nla_unique_id","site_id","visit_no","e_i","rt_iso")
+colnames(water_isotope_data_17)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
 water_isotope_data_17$surveyyear<-2017
 
-#create link from lake_id to the nla unique_id
-link<-water_isotope_data_17 %>%
-  select(lake_id,nla_unique_id)
-link<-unique(link)
-
-#I don't see any matches to our sites in the 2012 or 2007 data... I need to make
-#sure this is real and not just a coding error
-water_isotope_data_12<-filter(waterisotope12,unique_id %in% water_isotope_data_17$nla_unique_id)%>%
-  select(unique_id,site_id,visit_no,e_i,rt_iso)
-colnames(water_isotope_data_12)<-c("nla_unique_id","site_id","visit_no","e_i","rt_iso")
-water_isotope_data_12$site_id<-as.character(water_isotope_data_12$site_id)
+water_isotope_data_12<-left_join(surge_sites_nla, waterisotope12, by ="nla_unique_id")%>% 
+  select(lake_id, nla12_site_id, nla_unique_id,visit_no,e_i,rt_iso)
+colnames(water_isotope_data_12)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
 water_isotope_data_12$surveyyear<-2012
-wid12<-left_join(water_isotope_data_12,link,by="nla_unique_id")
 
-water_isotope_data_07<-filter(waterisotope07,unique_id_1 %in% water_isotope_data_17$nla_unique_id)%>%
-  select(unique_id_1,site_id_4,visit_no_5,e_i,rt_iso)
-colnames(water_isotope_data_07)<-c("nla_unique_id","site_id","visit_no","e_i","rt_iso")
+water_isotope_data_07<-left_join(surge_sites_nla, waterisotope07, by ="nla_unique_id")%>% 
+  select(lake_id,nla07_site_id,nla_unique_id,visit_no_5,e_i,rt_iso)
+colnames(water_isotope_data_07)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
 water_isotope_data_07$surveyyear<-2007
-wid07<-left_join(water_isotope_data_07,link,by="nla_unique_id")
 
-#This file contains all the water isotope data for SuRGE sites
-#with repeat rows for repeat visits and NAs for sites that don't
-#have an NLA id (my count is 37 sites)
-water_isotope_all_years<-bind_rows(wid07,wid12,water_isotope_data_17)
+#Check how many visits to each site in 2017
+#2017: Data for 110 sites, and repeat data for 17 sites
+water_isotope_data_17_agg<-water_isotope_data_17 %>%
+  filter(!is.na(e_i))%>%
+  group_by(nlaXX_site_id)%>%
+  summarise(n=n())
+nrow(filter(water_isotope_data_17_agg,n=="2"))
+
+#2012: Data from 80 sites, and repeat visits for 9 sites
+water_isotope_data_12_agg<-water_isotope_data_12 %>%
+  filter(!is.na(e_i))%>%
+  group_by(nlaXX_site_id)%>%
+  summarise(n=n())
+nrow(filter(water_isotope_data_12_agg,n=="2"))
+
+#2007: Data from 49 sites, and repeat visits for 7 sites
+water_isotope_data_07_agg<-water_isotope_data_07 %>%
+  filter(!is.na(e_i))%>%
+  group_by(nlaXX_site_id)%>%
+  summarise(n=n())
+nrow(filter(water_isotope_data_07_agg,n=="2"))
+
+#Create a long file with all the NLA data for Surge Sites across years
+
+water_isotope_long<-rbind(water_isotope_data_07,water_isotope_data_12,water_isotope_data_17)
+water_isotope_agg<- water_isotope_long %>%
+  filter(!is.na(e_i))%>%
+  group_by(nla_unique_id)%>%
+  summarise(lake_id=lake_id[1],E_I=mean(e_i,na.rm=TRUE),sdE_I=sd(e_i),RT=mean(rt_iso,na.rm=TRUE),sdRT=sd(rt_iso),n=n())
+summary(water_isotope_agg)
+
+#Fix lake_id to character so it will work with lake link
+water_isotope_agg$lake_id<-as.character(water_isotope_agg$lake_id)
+
+#look at total count of repeat visits
+nrow(filter(water_isotope_agg,n=="2")) # one of these repeats was missing a residence time estimate (lake id 999     )
+nrow(filter(water_isotope_agg,n=="3"))
+nrow(filter(water_isotope_agg,n=="4"))
+nrow(filter(water_isotope_agg,n=="5"))
+nrow(filter(water_isotope_agg,n=="6"))
+nrow(filter(water_isotope_agg,n=="1"))

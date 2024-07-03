@@ -227,8 +227,8 @@ dim(gc_lakeid) #1121
 
 # QA/QC GC REPS--------------
 
-pdf("output/figures/scatterplot3dTrap.pdf",
-    paper = "a4r", width = 11, height = 8)  # initiate landscape pdf file)
+#pdf("output/figures/scatterplot3dTrap.pdf",
+ #   paper = "a4r", width = 11, height = 8)  # initiate landscape pdf file)
 par(mfrow = c(1,2))
 
 uniqueCases <- filter(gc_lakeid, 

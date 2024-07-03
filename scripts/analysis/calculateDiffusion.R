@@ -304,11 +304,11 @@ c = case_when(is.na(OUTb$co2.ex.k)~ "linear")
 
 OUT2 <- mutate(OUTb, 
               co2.best.model = ifelse(!is.na(a)|!is.na(b)|!is.na(c),"linear","exponential"),
-              co2.drate.mg.h.best = if_else(co2.best.model == "linear",
+              co2_drate_mg_h_best = if_else(co2.best.model == "linear",
                                            co2.lm.drate.mg.h, co2.ex.drate.mg.h),
               ch4.best.model = if_else(ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic), 
                                       "linear", "exponential"),
-              ch4.drate.mg.h.best = ifelse(ch4.best.model == "linear",
+              ch4_drate_mg_h_best = ifelse(ch4.best.model == "linear",
                                            ch4.lm.drate.mg.h, ch4.ex.drate.mg.h),
               ch4.se.overlap = ifelse(ch4.best.model == "linear",
                                       ch4.lm.slope-ch4.lm.se,ch4.ex.k-ch4.ex.se),

@@ -123,6 +123,10 @@ dim(dat) # 2057, 278
 dat <- dat %>%
   left_join(lakeCat,  by = c("nhd_plus_waterbody_comid" = "comid"))
  
+# 9. Merge Waterisotope
+
+dat <- dat %>%
+  left_join(water_isotope_agg, by = "lake_id")
  
  ### AGGREGATED BY LAKE_ID----------
 # This should be done using grts algorithms and survey design weights.
