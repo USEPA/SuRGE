@@ -127,6 +127,11 @@ dat <- dat %>%
 
 dat <- dat %>%
   left_join(water_isotope_agg, by = "lake_id")
+
+# 10. National Wetland Inventory
+
+# dat <- dat %>%
+#   left_join(nwi,by="lake_id")
  
  ### AGGREGATED BY LAKE_ID----------
 # This should be done using grts algorithms and survey design weights.

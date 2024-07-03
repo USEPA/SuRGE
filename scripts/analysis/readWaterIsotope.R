@@ -109,3 +109,8 @@ nrow(filter(water_isotope_agg,n=="4"))
 nrow(filter(water_isotope_agg,n=="5"))
 nrow(filter(water_isotope_agg,n=="6"))
 nrow(filter(water_isotope_agg,n=="1"))
+
+#Create a threshold value for assigning "storage" vs. "run-of-river"
+water_isotope_agg$E_I_type<-ifelse(water_isotope_agg$E_I<0.2,"run-of-river","storage")
+nrow(filter(water_isotope_agg,E_I_type=="storage"))
+nrow(filter(water_isotope_agg,E_I_type=="run-of-river"))
