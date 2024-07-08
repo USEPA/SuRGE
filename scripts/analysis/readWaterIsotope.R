@@ -54,37 +54,37 @@ waterisotope07$nla_unique_id<-waterisotope07$unique_id_1
 
 #Setup file with desired water isotope data from each of 3 years
 water_isotope_data_17 <- left_join(surge_sites_nla, waterisotope17, by ="nla17_site_id")%>% 
-  select(lake_id,nla17_site_id,nla_unique_id,visit_no,e_i,rt_iso)
+  select(lake_id, nla17_site_id, nla_unique_id, visit_no, e_i, rt_iso)
 colnames(water_isotope_data_17)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
 water_isotope_data_17$surveyyear<-2017
 
 water_isotope_data_12<-left_join(surge_sites_nla, waterisotope12, by ="nla_unique_id")%>% 
-  select(lake_id, nla12_site_id, nla_unique_id,visit_no,e_i,rt_iso)
+  select(lake_id, nla12_site_id, nla_unique_id, visit_no, e_i, rt_iso)
 colnames(water_isotope_data_12)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
 water_isotope_data_12$surveyyear<-2012
 
 water_isotope_data_07<-left_join(surge_sites_nla, waterisotope07, by ="nla_unique_id")%>% 
-  select(lake_id,nla07_site_id,nla_unique_id,visit_no_5,e_i,rt_iso)
+  select(lake_id, nla07_site_id, nla_unique_id, visit_no_5, e_i, rt_iso)
 colnames(water_isotope_data_07)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
 water_isotope_data_07$surveyyear<-2007
 
 #Check how many visits to each site in 2017
-#2017: Data for 110 sites, and repeat data for 17 sites
+#2017: Data for 111 sites, and repeat data for 18 sites
 water_isotope_data_17_agg<-water_isotope_data_17 %>%
   filter(!is.na(e_i))%>%
   group_by(nlaXX_site_id)%>%
   summarise(n=n())
 nrow(filter(water_isotope_data_17_agg,n=="2"))
 
-#2012: Data from 80 sites, and repeat visits for 9 sites
-water_isotope_data_12_agg<-water_isotope_data_12 %>%
+#2012: Data from 81 sites, and repeat visits for 10 sites
+water_isotope_data_12_agg <- water_isotope_data_12 %>%
   filter(!is.na(e_i))%>%
   group_by(nlaXX_site_id)%>%
   summarise(n=n())
 nrow(filter(water_isotope_data_12_agg,n=="2"))
 
-#2007: Data from 49 sites, and repeat visits for 7 sites
-water_isotope_data_07_agg<-water_isotope_data_07 %>%
+#2007: Data from 56 sites, and repeat visits for 7 sites
+water_isotope_data_07_agg <- water_isotope_data_07 %>%
   filter(!is.na(e_i))%>%
   group_by(nlaXX_site_id)%>%
   summarise(n=n())
@@ -96,7 +96,12 @@ water_isotope_long<-rbind(water_isotope_data_07,water_isotope_data_12,water_isot
 water_isotope_agg<- water_isotope_long %>%
   filter(!is.na(e_i))%>%
   group_by(nla_unique_id)%>%
-  summarise(lake_id=lake_id[1],E_I=mean(e_i,na.rm=TRUE),sdE_I=sd(e_i),RT=mean(rt_iso,na.rm=TRUE),sdRT=sd(rt_iso),n=n())
+  summarise(lake_id=lake_id[1],
+            E_I=mean(e_i,na.rm=TRUE),
+            sdE_I=sd(e_i),
+            RT=mean(rt_iso,na.rm=TRUE),
+            sdRT=sd(rt_iso),
+            n=n())
 summary(water_isotope_agg)
 
 #Fix lake_id to character so it will work with lake link
