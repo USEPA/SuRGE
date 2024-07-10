@@ -7,12 +7,13 @@ lake_cat_vars <- lc_get_params(param='name') %>%
 
 
 # SuRGE comid
-surge_comid <- lake.list %>% 
+surge_comid <- rbind(lake.list, lake.list.2016) %>% 
   filter(!is.na(sample_year)) %>%
   select(nhd_plus_waterbody_comid) %>% 
   distinct %>% # values repeated for revisits
+  filter(!is.na(nhd_plus_waterbody_comid)) %>% # NA breaks lc_get_data
   pull
-length(surge_comid) # 116 unique values
+length(surge_comid) # 148 unique values
 
 # Get lakeCat data
 lake_cat <- lc_get_data(metric = paste(lake_cat_vars, collapse=","), 
@@ -23,7 +24,7 @@ lake_cat <- lc_get_data(metric = paste(lake_cat_vars, collapse=","),
 
 
 # Inventory records
-dim(lake_cat) # 115 rows.  which one is missing?  
+dim(lake_cat) # 147 rows.  which one is missing?  
 
 surge_comid[!(surge_comid %in% lake_cat$comid)] #800045123 is not in lakeCat
 
