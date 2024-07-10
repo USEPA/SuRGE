@@ -22,7 +22,7 @@ locus_link <- locus$locus$lake_link
 
 # Read lake_link from SharePoint or web if the above isn't working.
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
-# ll <- read.csv(paste0(userPath, "data/siteDescriptors/lake_link.csv")) # downloded locally
+# ll <- read.csv(paste0(userPath, "data/siteDescriptors/lake_link_lagos.csv")) # downloded locally
 # ll <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.854.1&entityid=5488e333ce818597fa3dbfc9b4e0c131") # from web
 
 # Now create single record for each lake
@@ -30,7 +30,10 @@ locus_link <- locus$locus$lake_link
 locus_link_aggregated <- locus_link %>%
   group_by(nhdplusv2_comid) %>% # unique per lake
   filter(row_number() == 1) %>% # first record for each comid. alternatives: slice_head(1) and  top_n(n = 1) 
-  select(lagoslakeid, lake_nhdid, lake_namegnis, nhdhr_gnisid, nhdplusv2_comid) # just keep what we need
+  select(lagoslakeid, nla2012_siteid, nla2007_siteid, lake_nhdid, lake_namegnis, 
+         nhdhr_gnisid, nhdplusv2_comid) %>% # just keep what we need
+  rename(nla07_site_id = nla2007_siteid, # per SuRGE convention
+         nla12_site_id = nla2012_siteid)
 
 # LOCUS-LAKE_CHARACTERISTICS
 locus_characteristics <- locus$locus$lake_characteristics
@@ -85,7 +88,7 @@ surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_s
            as.numeric()) %>% # convert lake_id to numeric
   rename(nla17_site_id = site_id_2) %>%
   mutate(nhdplusv2_comid = as.character(nhd_plus_waterbody_comid))%>%
-  select(lake_id, sample_year, nla17_site_id, nhdplusv2_comid, gnis_name, lat_dd83, lon_dd83)
+  select(lake_id, sample_year, nhdplusv2_comid, gnis_name)
 
 # We want to add sample month to enable more precise matching with LAGOS trophic status estimates.
 # LAGOS only covers 1984 - 2020, so we can only match specific months for surge
@@ -117,6 +120,7 @@ dim(surge_sites) # 153. only 147 lakes, but revisits for 4 plus 2 records for 69
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #-#- MERGE SURGE SITES AND LOCUS-LAKE_LINK$LAGOSLAKEID
 # Need to add lagoslakeid to surge_sites for use in trophic status processing.
+# Merge on nhdplusv2_comid
 # Add other locus-lake_link and locus-lake_characteristic data after trophic
 # status has been merged
 surge_sites_lagoslakeid <- left_join(surge_sites %>% 

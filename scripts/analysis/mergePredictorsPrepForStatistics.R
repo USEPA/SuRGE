@@ -49,23 +49,22 @@ dim(all_obs) #2057, 264
 dim(morpho) #156, 15
 dim(dat) # 2057, 278
 
-# 3. Merge lake list
+# 3. Merge SuRGE lake list
  dat <- dat %>%
-   left_join(lake.list %>% 
+   left_join(rbind(lake.list, lake.list.2016) %>% # all lakes
                filter(!is.na(sample_year)) %>%
-               select(lake_id, visit, stratum, sample_year, lab, nla_id, ag_eco9_nm,
-                                  nhd_plus_waterbody_comid) %>%
+               select(lake_id, visit, stratum, sample_year, lab, nla17_site_id, nla_unique_id,
+                      ag_eco9_nm, nhd_plus_waterbody_comid) %>%
                mutate(lake_id = as.character(lake_id)))
  dim(dat) # 2057
 
-
 # 4. Merge NLA chemistry 
  # common names
- names(nla17_chem)[names(nla17_chem) %in% names(dat)] # nla_id
+ names(nla17_chem)[names(nla17_chem) %in% names(dat)] # nla17_site_id
  
  # 1000 (Puerto Rico) and lacustrine/riverine/transitional not in nla17_chem
  # as expected
- dat$lake_id[!(dat$nla_id %in% nla17_chem$nla_id)] %>% unique
+ dat$lake_id[!(dat$nla17_site_id %in% nla17_chem$nla17_site_id)] %>% unique
  
  # merge
  dat <- dat %>%
@@ -76,20 +75,20 @@ dim(dat) # 2057, 278
  dat <- dat %>%
    # NLA  method measures ammonia and ammonium;the relative proportion between these
    # two analytes depends on pH. Typically, NLA (and other NARS) samples consist of mostly ammonium.
-   mutate(shallow_nh4 = case_when(is.na(shallow_nh4) ~ nla_ammonia_n * 1000, #mg N/L in NLA
+   mutate(shallow_nh4 = case_when(is.na(shallow_nh4) ~ nla17_ammonia_n * 1000, #mg N/L in NLA
                                   TRUE ~ shallow_nh4),
-          shallow_chla_lab = case_when(is.na(shallow_chla_lab) ~ nla_chla, #ug/L in NLA
+          shallow_chla_lab = case_when(is.na(shallow_chla_lab) ~ nla17_chla, #ug/L in NLA
                                        TRUE ~ shallow_chla_lab),
-          shallow_doc = case_when(is.na(shallow_doc) ~ nla_doc, #mg/L in NLA
+          shallow_doc = case_when(is.na(shallow_doc) ~ nla17_doc, #mg/L in NLA
                                   TRUE ~ shallow_doc),
           # NLA has very few no2_3 data.  Have to sum no2 and no3.
-          shallow_no2_3 = case_when(is.na(shallow_no2_3) ~ (nla_nitrate_n + nla_nitrite_n) * 1000, #mg/L in NLA
+          shallow_no2_3 = case_when(is.na(shallow_no2_3) ~ (nla17_nitrate_n + nla17_nitrite_n) * 1000, #mg/L in NLA
                                     TRUE ~ shallow_no2_3),
-          shallow_tp = case_when(is.na(shallow_tp) ~ nla_ptl, # assuming ptl = TP, ug/L in NLA
+          shallow_tp = case_when(is.na(shallow_tp) ~ nla17_ptl, # assuming ptl = TP, ug/L in NLA
                                  TRUE ~ shallow_tp),
-          shallow_tn = case_when(is.na(shallow_tn) ~ nla_ntl * 1000, # assuming ntl = TN, mg/L in NLA
+          shallow_tn = case_when(is.na(shallow_tn) ~ nla17_ntl * 1000, # assuming ntl = TN, mg/L in NLA
                                  TRUE ~ shallow_tn),
-          shallow_so4 = case_when(is.na(shallow_so4) ~ nla_sulfate, # mg/l in NLA
+          shallow_so4 = case_when(is.na(shallow_so4) ~ nla17_sulfate, # mg/l in NLA
                                   TRUE ~ shallow_so4))
  
  # 5. Merge hydroLakes ID
@@ -159,18 +158,27 @@ dat_agg <- dat %>%
               # `fill` above ensures no NA for units
               across(contains("unit"), ~ unique(.) %>% pluck(1)), # If >1 unit present (e.g. cond, cond@25) display first one
               sample_date = unique(na.omit(sample_date)) %>% pluck(1), # if multiple, choose earliest
-              lake_name = case_when(all(is.na(lake_name)) ~ NA_character_, # only NA present (Puerto Rico), return NAonly one nla_id per lake
-                                    !all(is.na(lake_name)) ~ unique(lake_name), # if any values, then grab one, only one nla_id per lake
+              lake_name = case_when(all(is.na(lake_name)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+                                    !all(is.na(lake_name)) ~ unique(lake_name), # if any values, then grab one, only one name per lake
                                     TRUE ~ "fly you fools!"), # look out for the Balrog 
-              stratum = case_when(all(is.na(stratum)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+              stratum = case_when(all(is.na(stratum)) ~ NA_character_, # only NA present (Puerto Rico, 2016 survey), return NA
                                   !all(is.na(stratum)) ~ unique(stratum), # if any values, then grab one, only one stratum per lake
                                     TRUE ~ "fly you fools!"), # look out for the Balrog
               lab = case_when(all(is.na(lab)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
-                              !all(is.na(lab)) ~ unique(lab), # if any values, then grab one, only one nla_id per lake, 
+                              !all(is.na(lab)) ~ unique(lab), # if any values, then grab one, only one lab per lake, 
                               TRUE ~ "fly you fools!"), # look out for the Balrog,
-              nla_id = case_when(all(is.na(nla_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
-                                 !all(is.na(nla_id)) ~ unique(nla_id), # if any values, then grab one, only one nla_id per lake, 
+              nla17_site_id = case_when(all(is.na(nla17_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+                                 !all(is.na(nla17_site_id)) ~ unique(nla17_site_id), # if any values, then grab one, only one nla_id per lake, 
                                  TRUE ~ "fly you fools!"), # look out for the Balrog,
+              nla07_site_id = case_when(all(is.na(nla07_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+                                        !all(is.na(nla07_site_id)) ~ unique(nla07_site_id), # if any values, then grab one, only one nla_id per lake, 
+                                        TRUE ~ "fly you fools!"), # look out for the Balrog,
+              nla12_site_id = case_when(all(is.na(nla12_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+                                        !all(is.na(nla12_site_id)) ~ unique(nla12_site_id), # if any values, then grab one, only one nla_id per lake, 
+                                        TRUE ~ "fly you fools!"), # look out for the Balrog,
+              nla_unique_id = case_when(all(is.na(nla_unique_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+                                        !all(is.na(nla_unique_id)) ~ unique(nla_unique_id), # if any values, then grab one, only one nla_id per lake, 
+                                        TRUE ~ "fly you fools!"), # look out for the Balrog,
               ag_eco9_nm = case_when(all(is.na(ag_eco9_nm)) ~ NA_character_, # only NA present (Puerto Rico), return NA
                                      !all(is.na(ag_eco9_nm)) ~ unique(ag_eco9_nm), # if any values, then grab one,  only one level per lake
                                      TRUE ~ "fly you fools!"), # look out for the Balrog,
@@ -188,5 +196,9 @@ dim(dat) #2057
 dim(dat_agg) # 122
 
 
-
+# write lake ID's to disk
+write_csv(x = dat_agg %>% 
+            select(lake_id, contains("site_id"), hylak_id, lagoslakeid, grand_id,
+                               lagoslakeid, nhd_plus_waterbody_comid),
+          file = paste0(userPath, "data/siteDescriptors/surge_master_crosswalk_wide_beaulieu.csv"))
 

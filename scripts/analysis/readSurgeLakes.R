@@ -4,7 +4,8 @@ lake.list <- readxl::read_excel(paste0(userPath,
                                        "surgeDsn/SuRGE_design_20191206_eval_status.xlsx"), na = c("", "NA")) %>%
   janitor::clean_names() %>%
   dplyr::rename(lake_id = site_id) %>%
-  dplyr::rename(nla_id = site_id_2) %>%
+  dplyr::rename(nla17_site_id = site_id_2) %>%
+  dplyr::rename(nla_unique_id = unique_id) %>%
   mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
            as.numeric(), # convert lake_id to numeric
          visit = 1) %>% # all lakes except 147, 148, 250, and 281 were only visited once.  see below
@@ -20,10 +21,11 @@ lake.list <- lake.list %>%
 
 
 lake.list.2016 <- readxl::read_excel(paste0(userPath, 
-                                       "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
+                                       "surgeDsn/SuRGE_design_20191206_eval_status.xlsx"), na = c("", "NA")) %>%
   janitor::clean_names() %>%
   dplyr::rename(lake_id = site_id) %>%
-  dplyr::rename(nla_id = site_id_2) %>%
+  dplyr::rename(nla17_site_id = site_id_2) %>%
+  dplyr::rename(nla_unique_id = unique_id) %>%
   mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
            as.numeric(), # convert lake_id to numeric
          visit = 1) %>% # all lakes except 147, 148, 250, and 281 were only visited once.  see below

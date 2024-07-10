@@ -171,20 +171,25 @@ lakes_2016 <- get_2016(paths)
 ## SuRGE sites
 dat.surge.sf <- fld_sheet %>%
   filter(eval_status == "TS", # only sampled sites
-         !(is.na(long)|is.na(lat)), # only sites where lat and long were recorded
-         !(is.na(trap_deply_date_time)|is.na(trap_rtrvl_date_time))) %>% # only rows with trap data
+         !(is.na(long)|is.na(lat))) %>% # only sites where lat and long were recorded
   mutate(lake_id = case_when(lake_id %in% c("69_lacustrine|69_riverine|69_transitional") ~ "069",
                              lake_id %in% c("70_lacustrine|70_riverine|70_transitional") ~ "070",
                              nchar(lake_id) == 1 ~ paste0("00", lake_id),
                              nchar(lake_id) == 2 ~ paste0("0", lake_id),
                              TRUE ~ lake_id)) %>%
-           st_as_sf(., coords = c("long", "lat")) %>%
-           `st_crs<-` (4326) %>% # latitude and longitude
-           st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
-           st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
-           select(lake_id, site_id, (contains("trap") & contains("date_time")))
+  st_as_sf(., coords = c("long", "lat")) %>%
+  `st_crs<-` (4326) %>% # latitude and longitude
+  st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
+  st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
+  select(lake_id, site_id, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%
+  # discard rows that don't have any useful data
+  filter(!is.na(trap_deply_date_time) | 
+           !is.na(trap_rtrvl_date_time) | 
+           !is.na(chamb_deply_date_time) | 
+           !is.na(site_depth)) 
          
-         dim(dat.surge.sf) #1819
+
+dim(dat.surge.sf) #1848
 
 
 ## 2016 data
@@ -200,9 +205,13 @@ dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>%
   `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
-  select(Lake_Name, siteID, (contains("trap") & contains("DtTm"))) %>%
-  filter(!(is.na(trapDeplyDtTm)|is.na(trapRtrvDtTm))) %>% # exclude sites with no trap deployment
-  rename(trap_deply_date_time = trapDeplyDtTm, trap_rtrvl_date_time = trapRtrvDtTm) %>% # change name to SuRGE convention
+  select(Lake_Name, siteID, wtrDpth, (matches(c("trap|chm")) & contains("DtTm"))) %>%
+  filter(!is.na(trapDeplyDtTm)|!is.na(trapRtrvDtTm)|!is.na(chmDeplyDtTm)) %>% # exclude sites with no trap or chamber deployment
+  # change names to SuRGE convention
+  rename(trap_deply_date_time = trapDeplyDtTm, 
+         trap_rtrvl_date_time = trapRtrvDtTm,
+         chamb_deply_date_time = chmDeplyDtTm,
+         site_depth = wtrDpth) %>% 
   # multiple deployments at Acton Lake have different names (e.g. Acton Aug).  Change them
   # all to Acton Lake
   mutate(Lake_Name = case_when(grepl("acton", Lake_Name, ignore.case = TRUE) ~ "Acton Lake",
@@ -216,7 +225,7 @@ dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>%
   relocate(lake_id, site_id) 
 
 dim(dat.2016) #1531
-dim(dat.2016.sf) #539, lots of rows with no trap data (e.g. oversample sites)
+dim(dat.2016.sf) #543, lots of rows with no trap data (e.g. oversample sites)
 
 
 # WRITE POLYGONS AND POINTS TO DISK-----------

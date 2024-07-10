@@ -101,7 +101,8 @@ water_isotope_agg<- water_isotope_long %>%
             sdE_I=sd(e_i),
             RT=mean(rt_iso,na.rm=TRUE),
             sdRT=sd(rt_iso),
-            n=n())
+            n=n()) %>%
+  select(-nla_unique_id) # get from SuRGE design file
 summary(water_isotope_agg)
 
 #Fix lake_id to character so it will work with lake link
