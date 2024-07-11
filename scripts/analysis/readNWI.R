@@ -41,7 +41,14 @@ nwi<-rbind(nwi_SuRGE,nwi_2016)%>%
          intermittentper=intermittent/(intermittent+lower_perennial+unknown_perennial+upper_perennial),
          lower_perennialper=lower_perennial/(intermittent+lower_perennial+unknown_perennial+upper_perennial),
          unknown_perennialper=unknown_perennial/(intermittent+lower_perennial+unknown_perennial+upper_perennial),
-         upper_perennialper=upper_perennial/(intermittent+lower_perennial+unknown_perennial+upper_perennial))
+         upper_perennialper=upper_perennial/(intermittent+lower_perennial+unknown_perennial+upper_perennial))%>%
+         #check if class specific data adds to less than 100
+         rowwise()%>%
+         mutate(totalclass=sum(aquatic_bed_x,emergent_x,forested_x,rocky_shore,scrub_shrub_x,
+                               streambed,unconsolidated_bottom_x,unconsolidated_bottom_x,unconsolidated_shore_x,
+                               aquatic_bed_y,emergent_y,forested_y,scrub_shrub_y,unconsolidated_bottom_y,
+                               unconsolidated_shore_y,broad_leaved_deciduous_y,na.rm=TRUE))
+
 
 #Now look at potential geographic bias for containing sub-system information
 
