@@ -31,7 +31,7 @@ source("scripts/analysis/readMorpho.R") # morpho
 source("scripts/analysis/readNla17.R") # nla17_chem
 source("scripts/analysis/hydroLakesID.R") # hylak_link
 source("scripts/analysis/lagosLakesID.R") # lagos_links
-source("scripts/analysis/nidLakesID.R") #
+source("scripts/analysis/nidLakesID.R") #national inventory of dams and manual age assignments
 source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Time data
 source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
 
@@ -62,7 +62,7 @@ source("scripts/analysis/ebullitionMassFluxFunction.R") # source function
 source("scripts/analysis/readGc.R")
 source("scripts/analysis/calculateEbullition.R") # eb_results
 
-# Merge diffusive and ebulitive rates --> calculate total
+# Merge diffusive and ebullitive rates --> calculate total
 source("scripts/analysis/calculateTotalEmissions.R")
 
 # Merge emissions, chemistry, and field sheets

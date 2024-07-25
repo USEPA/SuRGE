@@ -58,8 +58,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "136"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- "1" # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "65"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- "20" # numeric component of lake_id, no leading zero(s), formatted as numeric
 visit_id.i <- "1"
 # this code generates a 3 panel plot used to demonstrate relationship between
 # CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
@@ -276,48 +276,48 @@ gga_3 <- gga_2 %>%
 
 #5.  PLOT CO2 AND CH4 PROFILES FOR INSPECTION---------------
 # Plot all profiles on a single .pdf
-pdf("output/figures/ggaProfile.pdf", paper = "a4r") # landscape orientation
-tic()
-for (i in 1:with(gga_3[!is.na(gga_3$lake_id), ], # this eliminates observations without a Lake_Name (LGR data when chamber not deployed)
-                 length(unique(paste(site_id, lake_id))))) {  # each combination of site and lake
-  print(i)
-  site.lake.i <- with(gga_3[!is.na(gga_3$lake_id), ],  # extract unique lake x site combination
-                      unique(paste(site_id, lake_id)))[i]
-  site.i <- gsub(" .*$", "", site.lake.i)  # extract site.  regex allows for siteIDs of different lengths (i.e. S-01, SU-01)
-  lake.i <- substr(site.lake.i, start = nchar(site.i) + 2, stop = nchar(site.lake.i)) # extract lake name
-  data.i <- filter(gga_3, lake_id == lake.i, site_id == site.i) %>%  # Pull out GGA data chunk
-    select(-GasT_C) # No need to plot gas temperature
-  RDate.i <- unique(data.i$RDate)  # for panel title
-
-  plot.i <- ggplot(data.i,  aes(x = RDateTime, y = CH4._ppm)) + 
-          geom_point() +
-          geom_vline(data = data.i, aes(xintercept = as.numeric(ch4DeplyDtTm))) +
-          geom_vline(data = data.i, aes(xintercept = as.numeric(ch4RetDtTm))) +
-          scale_x_datetime(labels=date_format("%H:%M")) +
-          ggtitle(paste(lake.i, site.i, RDate.i)) +
-          theme(axis.text.x = element_text(size = 7),
-                plot.title = element_text(size = 11))
-  
-  plot.ii <- ggplot(data.i,  aes(x = RDateTime, y = CO2._ppm)) + 
-          geom_point() +
-          geom_vline(data = data.i, aes(xintercept = as.numeric(co2DeplyDtTm))) +
-          geom_vline(data = data.i, aes(xintercept = as.numeric(co2RetDtTm))) +
-          scale_x_datetime(labels=date_format("%H:%M")) +
-          ggtitle(paste(lake.i, site.i)) +
-          theme(axis.text.x = element_text(size = 7))
-  
-  grid.arrange(plot.i, plot.ii, ncol = 2) # use to put two plots per page
-}
-
-
-dev.off() #15 min, 911 pages, 1/6/23
-
-toc()
-
-
-
-
-
-
-
-
+# pdf("output/figures/ggaProfile.pdf", paper = "a4r") # landscape orientation
+# tic()
+# for (i in 1:with(gga_3[!is.na(gga_3$lake_id), ], # this eliminates observations without a Lake_Name (LGR data when chamber not deployed)
+#                  length(unique(paste(site_id, lake_id))))) {  # each combination of site and lake
+#   print(i)
+#   site.lake.i <- with(gga_3[!is.na(gga_3$lake_id), ],  # extract unique lake x site combination
+#                       unique(paste(site_id, lake_id)))[i]
+#   site.i <- gsub(" .*$", "", site.lake.i)  # extract site.  regex allows for siteIDs of different lengths (i.e. S-01, SU-01)
+#   lake.i <- substr(site.lake.i, start = nchar(site.i) + 2, stop = nchar(site.lake.i)) # extract lake name
+#   data.i <- filter(gga_3, lake_id == lake.i, site_id == site.i) %>%  # Pull out GGA data chunk
+#     select(-GasT_C) # No need to plot gas temperature
+#   RDate.i <- unique(data.i$RDate)  # for panel title
+# 
+#   plot.i <- ggplot(data.i,  aes(x = RDateTime, y = CH4._ppm)) + 
+#           geom_point() +
+#           geom_vline(data = data.i, aes(xintercept = as.numeric(ch4DeplyDtTm))) +
+#           geom_vline(data = data.i, aes(xintercept = as.numeric(ch4RetDtTm))) +
+#           scale_x_datetime(labels=date_format("%H:%M")) +
+#           ggtitle(paste(lake.i, site.i, RDate.i)) +
+#           theme(axis.text.x = element_text(size = 7),
+#                 plot.title = element_text(size = 11))
+#   
+#   plot.ii <- ggplot(data.i,  aes(x = RDateTime, y = CO2._ppm)) + 
+#           geom_point() +
+#           geom_vline(data = data.i, aes(xintercept = as.numeric(co2DeplyDtTm))) +
+#           geom_vline(data = data.i, aes(xintercept = as.numeric(co2RetDtTm))) +
+#           scale_x_datetime(labels=date_format("%H:%M")) +
+#           ggtitle(paste(lake.i, site.i)) +
+#           theme(axis.text.x = element_text(size = 7))
+#   
+#   grid.arrange(plot.i, plot.ii, ncol = 2) # use to put two plots per page
+# }
+# 
+# 
+# dev.off() #15 min, 911 pages, 1/6/23
+# 
+# toc()
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
