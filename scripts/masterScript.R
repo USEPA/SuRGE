@@ -34,7 +34,7 @@ source("scripts/analysis/lagosLakesID.R") # lagos_links
 source("scripts/analysis/nidLakesID.R") #national inventory of dams and manual age assignments
 source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Time data
 source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
-
+source("scripts/analysis/readIpccClimateZones.R") #surge_climate
 
 
 # Aggregate and review chemistry
