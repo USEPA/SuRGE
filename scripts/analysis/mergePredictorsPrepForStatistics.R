@@ -115,22 +115,22 @@ dim(dat) # 2057, 278
  
 # 7. Merge NID
  dat <- dat %>%
-   left_join(nid_link %>%
-               mutate(lake_id = as.character(lake_id)))
+   left_join(nid_link, by= "lake_id")
  
- # 8. Merge NHDPlusV2 - lakeCat 
-dat <- dat %>%
-  left_join(lakeCat,  by = c("nhd_plus_waterbody_comid" = "comid"))
+# 8. Merge NHDPlusV2 - lakeCat 
+ #not finding the lakeCat object, need to troubleshoot
+# dat <- dat %>%
+#   left_join(lakeCat,  by = c("nhd_plus_waterbody_comid" = "comid"))
  
 # 9. Merge Waterisotope
 
 dat <- dat %>%
-  left_join(water_isotope_agg, by = "lake_id")
+  left_join(water_isotope_agg)
 
 # 10. National Wetland Inventory
 
-# dat <- dat %>%
-#   left_join(nwi,by="lake_id")
+dat <- dat %>%
+  left_join(nwi_link)
  
  ### AGGREGATED BY LAKE_ID----------
 # This should be done using grts algorithms and survey design weights.

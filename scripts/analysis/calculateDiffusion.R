@@ -321,10 +321,11 @@ summary(OUT2)
 #Check the average number of independent site estimates in each lake (and min and max)
 test<-OUT2 %>%
   group_by(lake_id)%>%
-  summarise(a=length(!is.na(co2.drate.mg.h.best)),b=length(!is.na(ch4.drate.mg.h.best)))
+  summarise(a=length(!is.na(co2_drate_mg_h_best)),b=length(!is.na(ch4_drate_mg_h_best)),
+            sd_CO2=sd(!is.na(co2_drate_mg_h_best)),sd_CH4=sd(!is.na(ch4_drate_mg_h_best)))
 
 #Fraction of usable ch4 data
-(1646-(length(filter(OUT2,is.na(ch4.drate.mg.h.best)))))/1646
+(1646-(length(filter(OUT2,is.na(ch4_drate_mg_h_best)))))/1646
 #Fraction of usable co2 data
 (1646-40)/1646
 
@@ -352,32 +353,16 @@ OUT2 <- mutate(OUT2,
                 # (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ NA_real_,
                 (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ 0,
                 (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ 0,
-                TRUE ~ co2.drate.mg.h.best),
-              
-              # 
-              #               co2.drate.mg.h.best = ifelse((co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & 
-              #                                              co2.lm.r2 < 0.9, # if ex is best, but r2<0.9
-              #                                                 NA, # then NA
-              #                                            ifelse((co2.ex.aic < co2.lm.aic) & 
-              #                                                     co2.ex.r2 < 0.9, # if lm is best, but r2<0.9
-              #                                                   NA, # the NA
-              #                                                   co2.drate.mg.h.best)), # otherwise assume value defined above
-              #         
+                TRUE ~ co2_drate_mg_h_best),
+        
               ch4.drate.mg.h.best = case_when(
                 # (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ NA_real_,
                 # (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ NA_real_,
                 # so this retains low r2 model fits, but assigns a rate of 0?
                 (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ 0,
                 (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ 0,
-                TRUE ~ ch4.drate.mg.h.best))
-              
-              #                                    
-              # ch4.drate.mg.h.best = ifelse((ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9, # if ex is best, but r2<0.9
-              #                              NA, # then NA
-              #                              ifelse((ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9, # if lm is best, but r2<0.9
-              #                                     NA, # the NA
-              #                                     ch4.drate.mg.h.best))) # otherwise assume value defined above
-              # 
+                TRUE ~ ch4_drate_mg_h_best))
+
 
 # Run through janitor to enforce SuRGE name conventions
 OUT2 <- janitor::clean_names(OUT2) %>%
@@ -399,7 +384,24 @@ bysch4<-OUT2 %>%
   mutate(vID=paste(lake_id,visit))%>%
   group_by(vID)%>%
   summarise(lake_id[1],visit[1],ch4_drate_mg_h=mean(ch4_drate_mg_h_best),
-            length=length(ch4_drate_mg_h_best))
+            length=length(ch4_drate_mg_h_best),sd=sd(ch4_drate_mg_h_best))
+
+ch4varplot<-OUT2 %>%
+  filter(!is.na(ch4_drate_mg_h_best))%>%
+  mutate(vID=paste(lake_id,visit))%>%
+  mutate(ch4_drate_mg_d=24*ch4_drate_mg_h_best)%>%
+  group_by(vID)%>%
+  ggplot(aes(x=vID,y=ch4_drate_mg_d))+
+  geom_boxplot()+
+  scale_y_log10()+
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        axis.text.x=element_text(size=10,angle=90,vjust=1,hjust=1))+
+  ylab("CH4 Diffusion (mg m-2 d-1)")
+ch4varplot
 
 #You get an average of 70.3, median of 38.2, 3rd quartile of 100 mg m-2 h-1 
 bysco2<-OUT2 %>%
