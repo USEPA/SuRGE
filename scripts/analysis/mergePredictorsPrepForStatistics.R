@@ -131,6 +131,11 @@ dat <- dat %>%
 
 dat <- dat %>%
   left_join(nwi_link)
+
+# 11. Phytoplankton Composition from Avery
+
+dat<-dat %>%
+  left_join(phyto_SuRGE_link, by="lake_id")
  
  ### AGGREGATED BY LAKE_ID----------
 # This should be done using grts algorithms and survey design weights.

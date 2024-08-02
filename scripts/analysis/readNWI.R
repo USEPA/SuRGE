@@ -50,6 +50,7 @@ nwi<-rbind(nwi_SuRGE,nwi_2016)%>%
          #unconsolidated_shore=
          rocky_shore=ifelse(is.na(rocky_shore),0,rocky_shore/totper),
          #need to check on how to tease apart the riverine class from the lacustrine class data here
+         #rusty also suggested including all intermittent riverine
          riverine_unconsolidated_shore=ifelse(is.na(unconsolidated_shore_y),0,100*(unconsolidated_shore_y/totper)),
          shallow=100*(palustrineper+littoralper+riverine_unconsolidated_shore))
 
