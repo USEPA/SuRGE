@@ -95,7 +95,14 @@ locus_reservoir<- dt1 %>%
 #saved to the SuRGE site descriptors subfolder of the data folder
 
 ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_medres_LAGOS_NETWORKS.csv")))
-#emailed corresponding author (Katelyn King to ask about parsing issues on 8/6/2024)
+#received email from Katelyn King about parsing issues on 8/7/2024... she explained that
+#this is due to their being multiple dam ids associated with lake_nets_nearestdamup_id
+#if we decide we want to use this column she gave some script for pulling out each id
+# read_csv(file) %>% 
+#   tidyr:: separate(col= lake_nets_nearestdamup_id, 
+#                    into = c("dam1", "dam2" , "dam3"),
+#                    sep = ";")
+
 
 lagos_network<- ln %>%
   select(lagoslakeid,lake_nets_nearestdamup_km,lake_nets_totaldamup_n)
@@ -336,7 +343,7 @@ lagos_ts_agg_surge_sites_link_connectivity_network <- left_join(lagos_ts_agg_sur
 #-#- ADD LAGOS-RESERVOIR TO MERGE, not adding to final predictors yet 
 #-#- since not convinced it will be useful 
 
-lagos_ts_agg_surge_sites_link_connectivity_reservoir <- left_join(lagos_ts_agg_surge_sites_link_connectivity,
+lagos_ts_agg_surge_sites_link_connectivity_reservoir <- left_join(lagos_ts_agg_surge_sites_link_connectivity_network,
                                                                   locus_reservoir)
 dim(lagos_ts_agg_surge_sites_link_connectivity_reservoir)#151, good
 lagos_ts_agg_surge_sites_link_connectivity_reservoir %>% 

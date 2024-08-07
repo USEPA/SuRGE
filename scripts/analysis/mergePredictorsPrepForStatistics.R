@@ -119,8 +119,8 @@ dat <- dat %>%
  
 # 8. Merge NHDPlusV2 - lakeCat 
  #not finding the lakeCat object, need to troubleshoot
-# dat <- dat %>%
-#   left_join(lakeCat,  by = c("nhd_plus_waterbody_comid" = "comid"))
+dat <- dat %>%
+   left_join(lake_cat,  by = c("nhd_plus_waterbody_comid" = "comid"))
  
 # 9. Merge Waterisotope
 

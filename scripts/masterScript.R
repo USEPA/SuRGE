@@ -35,6 +35,7 @@ source("scripts/analysis/nidLakesID.R") #national inventory of dams and manual a
 source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Time data
 source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
 source("scripts/analysis/readIpccClimateZones.R") #surge_climate
+source("scripts/analysis/readLakeCat.R")#read in LakeCat 
 
 
 # Aggregate and review chemistry
