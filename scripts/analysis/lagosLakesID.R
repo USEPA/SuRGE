@@ -87,6 +87,19 @@ unlink(infile1)
 
 locus_reservoir<- dt1 %>%
   select(lagoslakeid,lake_rsvr_probrsvr,lake_rsvr_classmethod,lake_rsvr_class)
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#- READ LAGOS NETWORKS FILE
+
+#downloaded the nets_networkmetrics_medres file from https://doi.org/10.6073/pasta/98c9f11df55958065985c3e84a4fe995
+#saved to the SuRGE site descriptors subfolder of the data folder
+
+ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_medres_LAGOS_NETWORKS.csv")))
+#emailed corresponding author (Katelyn King to ask about parsing issues on 8/6/2024)
+
+lagos_network<- ln %>%
+  select(lagoslakeid,lake_nets_nearestdamup_km,lake_nets_totaldamup_n)
+
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #-#- READ LAGOS TROPHIC STATUS
 
@@ -316,6 +329,10 @@ lagos_ts_agg_surge_sites_link_connectivity %>%
 lagos_ts_agg_surge_sites_link_connectivity %>% filter(is.na(lake_connectivity_class))
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#- ADD LAGOS-NETWORK TO MERGE, not adding to final predictors yet
+lagos_ts_agg_surge_sites_link_connectivity_network <- left_join(lagos_ts_agg_surge_sites_link_connectivity, lagos_network)
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #-#- ADD LAGOS-RESERVOIR TO MERGE, not adding to final predictors yet 
 #-#- since not convinced it will be useful 
 
@@ -329,5 +346,5 @@ lagos_ts_agg_surge_sites_link_connectivity_reservoir %>% filter(is.na(lake_rsvr_
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #-#- RENAME FINAL MERGED OBJECT
-lagos_links <- lagos_ts_agg_surge_sites_link_connectivity
+lagos_links <- lagos_ts_agg_surge_sites_link_connectivity_network
 rm(lagos_ts_agg_surge_sites_link_connectivity)
