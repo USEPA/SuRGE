@@ -97,8 +97,8 @@ map(~if(.$lake_id == "317") { #  .shp has two separate polygons, only one was sa
   bind_rows() # collapse to one sf object
  
 
-# Missouri rive impoundments split into riverine, transitional, and lacustrine.
-# Here we read in .shp for entire reservoir to be used for  morpho and gridded
+# Missouri river impoundments split into riverine, transitional, and lacustrine.
+# Here we read in .shp for entire reservoir to be used for morpho and gridded
 # data
 missouri_river <- map(list(paste0(userPath, "lakeDsn/CIN/CH4-070/merc070dissolve.shp"),
                            paste0(userPath, "lakeDsn/CIN/CH4-069/merc069dissolve.shp")),
@@ -172,11 +172,12 @@ lakes_2016 <- get_2016(paths)
 dat.surge.sf <- fld_sheet %>%
   filter(eval_status == "TS", # only sampled sites
          !(is.na(long)|is.na(lat))) %>% # only sites where lat and long were recorded
-  mutate(lake_id = case_when(lake_id %in% c("69_lacustrine|69_riverine|69_transitional") ~ "069",
-                             lake_id %in% c("70_lacustrine|70_riverine|70_transitional") ~ "070",
-                             nchar(lake_id) == 1 ~ paste0("00", lake_id),
-                             nchar(lake_id) == 2 ~ paste0("0", lake_id),
-                             TRUE ~ lake_id)) %>%
+  # remove lacustrine etc from Missouri river
+  # retain character class initially, then convert to numeric. 
+  mutate(lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                             lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                             TRUE ~ lake_id),
+         lake_id = as.numeric(lake_id)) %>%
   st_as_sf(., coords = c("long", "lat")) %>%
   `st_crs<-` (4326) %>% # latitude and longitude
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
@@ -212,6 +213,10 @@ dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>%
          trap_rtrvl_date_time = trapRtrvDtTm,
          chamb_deply_date_time = chmDeplyDtTm,
          site_depth = wtrDpth) %>% 
+  # deal with time zones
+  mutate(across(contains("date_time"), ~ .x %>% 
+                  force_tz(tzone = "America/New_York") %>% # set local time_zone. all 2016 sites are in eastern
+                  with_tz("UTC"))) %>% # display in UTC
   # multiple deployments at Acton Lake have different names (e.g. Acton Aug).  Change them
   # all to Acton Lake
   mutate(Lake_Name = case_when(grepl("acton", Lake_Name, ignore.case = TRUE) ~ "Acton Lake",
@@ -220,12 +225,42 @@ dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>%
             by = c("Lake_Name" = "eval_status_code_comment")) %>%
   select(-Lake_Name) %>% # lake_name no longer needed
   rename(site_id = siteID) %>%
-  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)), # format site_id
-         lake_id = as.character(lake_id)) %>%
+  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # format site_id
   relocate(lake_id, site_id) 
 
 dim(dat.2016) #1531
 dim(dat.2016.sf) #543, lots of rows with no trap data (e.g. oversample sites)
+
+
+## Falls lake
+# data maintained at: "C:\Users\JBEAULIE\OneDrive - Environmental Protection Agency (EPA)\gitRepository\fallsLakeCH4"
+# sf object of sites
+falls_lake_sf <- rbind(
+  # sf object for sites 991 and 992. these were sampled once but not in survey design file (?)
+  tribble(
+    ~lat, ~lon, ~site_id,
+    36.07039, -78.79043, 991,
+    36.07016, -78.78858, 992) %>%
+    st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+    st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
+    st_transform(3857), # web meractor, consistent with surge_lakes
+  
+  # read in and merge .shp containing survey design
+  st_read(paste0("C:\\Users\\JBEAULIE\\OneDrive - Environmental Protection Agency (EPA)\\",
+                 "gitRepository\\fallsLakeCH4\\inputData\\",
+                 "grtsInputOutput\\fallsLakeSitesEqArea.shp")) %>%
+    st_transform(., 3857) %>% # web mercator, consistent with surge_lakes
+    st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
+    select(siteID) %>%
+    rename(site_id = siteID) %>%
+    mutate(site_id = substr(site_id, 4,5) %>% as.numeric)
+) %>%
+  # merge with deployment and retrieval date_time
+  right_join(
+    readRDS(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/falls_lake_fld_sheet.rds")) %>%
+      select(lake_id, site_id, contains("date_time"))
+  ) %>%
+  st_make_valid()
 
 
 # WRITE POLYGONS AND POINTS TO DISK-----------
