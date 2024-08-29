@@ -15,7 +15,7 @@ get_data_sheet <- function(paths){
                recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway (add visit number to file name)
-    #.[100:101] %>%
+    #.[53] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
@@ -53,15 +53,23 @@ get_data_sheet <- function(paths){
         # Format date and time objects
         mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
                across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
-               trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
-                                                 format = "%Y-%m-%d%H:%M:%S",
-                                                 tz = "UTC"),
+               tz = lutz::tz_lookup_coords(lat, long, warn = FALSE)) %>% # this gets tz based on location
+        # need to replace NA with a value, else force_tz throws error
+        # `fill` will replace NA with non-NA value in column. Code assumes only one tz per lake
+        # check that assumption for Missouri River impoundments
+        fill(tz, .direction = "updown") %>% 
+        # referencing tz via the tz argument in as.POSIXct throws an error. I don't really
+        # understand why. Here we create date_time object without time zone, then enforce
+        # local time zone with `force_tz`, finally display in UTC via `with_tz`
+        mutate(trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                                 format = "%Y-%m-%d%H:%M:%S"),
                trap_rtrvl_date_time = as.POSIXct(x = paste0(trap_rtrvl_date, trap_rtrvl_time),
-                                                 format = "%Y-%m-%d%H:%M:%S",
-                                                 tz = "UTC"),
+                                                 format = "%Y-%m-%d%H:%M:%S"),
                chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
-                                                  format = "%Y-%m-%d%H:%M:%S",
-                                                  tz = "UTC")) %>%
+                                                  format = "%Y-%m-%d%H:%M:%S"),
+               across(contains("date_time"), ~  force_tz(.x, tzone = tz) %>%
+                        with_tz(., tzone = "UTC"))) %>%
+        select(-tz) %>% # remove unneeded tz variable
         # chemistry data uses "flags" rather than "flag".  be consistent
         rename_with(~sub("flag", "flags", .),
                     .cols = contains("flag"))
