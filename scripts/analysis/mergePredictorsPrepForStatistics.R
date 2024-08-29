@@ -136,8 +136,13 @@ dat <- dat %>%
 
 dat<-dat %>%
   left_join(phyto_SuRGE_link, by="lake_id")
+
+# 12. Reservoir Sedimentaion
+
+dat<-dat %>%
+  left_join(RESSED_link,by="lake_id")
  
- ### AGGREGATED BY LAKE_ID----------
+### AGGREGATED BY LAKE_ID----------
 # This should be done using grts algorithms and survey design weights.
 # Under a time crunch, so ignoring that step for now.
 

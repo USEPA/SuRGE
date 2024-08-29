@@ -42,6 +42,7 @@ locus_characteristics <- locus$locus$lake_characteristics
 locus_connectivity <- locus_characteristics %>% 
   select(lagoslakeid, lake_connectivity_class, lake_connectivity_fluctuates, lake_connectivity_permanent, 
          lake_lakes4ha_upstream_ha, lake_lakes4ha_upstream_n, lake_lakes1ha_upstream_ha, lake_lakes1ha_upstream_n, 
+         lake_waterarea_ha, #placeholder for surface area
          lake_lakes10ha_upstream_n, lake_lakes10ha_upstream_ha)
 
 #LAGOS NETWORKS 

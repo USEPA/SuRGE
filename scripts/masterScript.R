@@ -36,7 +36,8 @@ source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Ti
 source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
 source("scripts/analysis/readIpccClimateZones.R") #surge_climate
 source("scripts/analysis/readLakeCat.R")#read in LakeCat 
-
+source("scripts/analysis/readRESSED.R")#read in reservoir sedimentation data
+source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
 
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
