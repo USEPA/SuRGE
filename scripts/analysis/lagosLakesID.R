@@ -44,8 +44,68 @@ locus_connectivity <- locus_characteristics %>%
          lake_lakes4ha_upstream_ha, lake_lakes4ha_upstream_n, lake_lakes1ha_upstream_ha, lake_lakes1ha_upstream_n, 
          lake_lakes10ha_upstream_n, lake_lakes10ha_upstream_ha)
 
+#LAGOS NETWORKS 
+#emailed lead author of networks paper, Katelyn King
+
+#LAGOS RESERVOIR PACKAGE
+inUrl1  <- "https://pasta.lternet.edu/package/data/eml/edi/1016/2/dac3a0d7e34070639f4894ccc316cbd1" 
+infile1 <- tempfile()
+try(download.file(inUrl1,infile1,method="curl"))
+if (is.na(file.size(infile1))) download.file(inUrl1,infile1,method="auto")
 
 
+dt1 <-read.csv(infile1,header=F 
+               ,skip=1
+               ,sep=","  
+               ,quot='"' 
+               , col.names=c(
+                 "lagoslakeid",     
+                 "lake_rsvr_nidid",     
+                 "lake_nhdid",     
+                 "neon_zoneid",     
+                 "lake_rsvr_model_class",     
+                 "lake_lat_decdeg",     
+                 "lake_lon_decdeg",     
+                 "lake_connectivity_class",     
+                 "lake_rsvr_probnl",     
+                 "lake_rsvr_probrsvr",     
+                 "lake_rsvr_probdiff",     
+                 "lake_rsvr_model",     
+                 "lake_rsvr_nlneardam_flag",     
+                 "lake_rsvr_rsvrisolated_flag",     
+                 "lake_rsvr_classmethod",     
+                 "lake_centroidstate",     
+                 "lake_namelagos",     
+                 "lake_shorelinedevfactor",     
+                 "lake_rsvr_nidlat_decdeg",     
+                 "lake_rsvr_nidlon_decdeg",     
+                 "lake_shape",     
+                 "FType",     
+                 "lake_rsvr_class"    ), check.names=TRUE)
+
+unlink(infile1)
+
+locus_reservoir<- dt1 %>%
+  select(lagoslakeid,lake_rsvr_probrsvr,lake_rsvr_classmethod,lake_rsvr_class)
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#- READ LAGOS NETWORKS FILE
+
+#downloaded the nets_networkmetrics_medres file from https://doi.org/10.6073/pasta/98c9f11df55958065985c3e84a4fe995
+#saved to the SuRGE site descriptors subfolder of the data folder
+
+ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_medres_LAGOS_NETWORKS.csv")))
+#received email from Katelyn King about parsing issues on 8/7/2024... she explained that
+#this is due to their being multiple dam ids associated with lake_nets_nearestdamup_id
+#if we decide we want to use this column she gave some script for pulling out each id
+# read_csv(file) %>% 
+#   tidyr:: separate(col= lake_nets_nearestdamup_id, 
+#                    into = c("dam1", "dam2" , "dam3"),
+#                    sep = ";")
+
+
+lagos_network<- ln %>%
+  select(lagoslakeid,lake_nets_nearestdamup_km,lake_nets_totaldamup_n)
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #-#- READ LAGOS TROPHIC STATUS
@@ -275,10 +335,23 @@ lagos_ts_agg_surge_sites_link_connectivity %>%
   filter(is.na(lake_connectivity_class)) %>% {dim(.)} # 3 missing connectivity, the 2 above + New Melones
 lagos_ts_agg_surge_sites_link_connectivity %>% filter(is.na(lake_connectivity_class))
 
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#- ADD LAGOS-NETWORK TO MERGE, not adding to final predictors yet
+lagos_ts_agg_surge_sites_link_connectivity_network <- left_join(lagos_ts_agg_surge_sites_link_connectivity, lagos_network)
 
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#- ADD LAGOS-RESERVOIR TO MERGE, not adding to final predictors yet 
+#-#- since not convinced it will be useful 
 
+lagos_ts_agg_surge_sites_link_connectivity_reservoir <- left_join(lagos_ts_agg_surge_sites_link_connectivity_network,
+                                                                  locus_reservoir)
+dim(lagos_ts_agg_surge_sites_link_connectivity_reservoir)#151, good
+lagos_ts_agg_surge_sites_link_connectivity_reservoir %>% 
+  filter(is.na(lake_rsvr_class)) %>% {dim(.)} #3 missing, the 2 above + Cloud
+lagos_ts_agg_surge_sites_link_connectivity_reservoir %>% filter(is.na(lake_rsvr_class))
+#LAGOS incorrectly predicts 10 reservoirs as lakes
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #-#- RENAME FINAL MERGED OBJECT
-lagos_links <- lagos_ts_agg_surge_sites_link_connectivity
+lagos_links <- lagos_ts_agg_surge_sites_link_connectivity_network
 rm(lagos_ts_agg_surge_sites_link_connectivity)

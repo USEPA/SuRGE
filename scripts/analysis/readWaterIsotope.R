@@ -95,8 +95,8 @@ nrow(filter(water_isotope_data_07_agg,n=="2"))
 water_isotope_long<-rbind(water_isotope_data_07,water_isotope_data_12,water_isotope_data_17)
 water_isotope_agg<- water_isotope_long %>%
   filter(!is.na(e_i))%>%
-  group_by(nla_unique_id)%>%
-  summarise(lake_id=lake_id[1],
+  group_by(lake_id)%>%
+  summarise(nla_unique_id=nla_unique_id[1],
             E_I=mean(e_i,na.rm=TRUE),
             sdE_I=sd(e_i),
             RT=mean(rt_iso,na.rm=TRUE),
