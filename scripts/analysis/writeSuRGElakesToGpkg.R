@@ -5,7 +5,7 @@
 
 # COLLECT LAKE POLYGONS------------------------
 
-## SuRGE, including R10 2018, polygons
+## SuRGE, including R10 2018, polygons--------
 # 1. CREATE A LIST FILE PATHS WHERE THE SURGE LAKE POLYGONS ARE STORED.  
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "lakeDsn/", labs)
@@ -74,7 +74,8 @@ surge_lakes <- map2(fs_paths, layers,  st_read, stringsAsFactors = FALSE) %>% # 
   map(~rename(., lake_id = lakeSiteID) %>% 
         rename(lake_name = lakeName) %>% 
         mutate(lake_id = gsub("ch4-", "", lake_id, ignore.case = TRUE) %>% # remove "ch4-"
-                 str_remove("^0+")) |> # remove leading zeroes
+                 str_remove("^0+") %>% # remove leading zeroes
+                 as.numeric) |> # no lacustrine, etc
         st_set_geometry("geom")) %>% # make sure geometry column name is geom (it is Shape, geometry, .... across objects)
   
   # dissolve sections and strata (e.g., trib, open_water), but keep
@@ -103,7 +104,9 @@ map(~if(.$lake_id == "317") { #  .shp has two separate polygons, only one was sa
 missouri_river <- map(list(paste0(userPath, "lakeDsn/CIN/CH4-070/merc070dissolve.shp"),
                            paste0(userPath, "lakeDsn/CIN/CH4-069/merc069dissolve.shp")),
                       st_read) %>%
-  bind_rows() %>% rename(geom = geometry)
+  bind_rows() %>% 
+  mutate(lake_id = as.numeric(lake_id)) %>% # no lacustrine, etc
+  rename(geom = geometry)
 
 
 return(bind_rows(surge_lakes, missouri_river))
@@ -115,7 +118,7 @@ surge_lakes <- get_surge(paths)
 # In st_cast.sf(., "POLYGON") :
 #   repeating attributes for all sub-geometries for which they may not be constant
 
-# 2016 AND FALLS LAKE POLYGONS
+## 2016 AND FALLS LAKE POLYGONS------------------------
 
 # 1. file paths where the 2016 lake polygons are stored.  
 paths <- paste0(userPath,  "lakeDsn/", "2016_survey")
@@ -123,7 +126,7 @@ paths <- paste0(userPath,  "lakeDsn/", "2016_survey")
 get_2016 <- function(paths){
 
   # 1. READ IN FILE NAMES FOR 2016 RESERVOIR SURVEY AND FALLS LAKE POLYGONS
-  # d <- 
+   #d <- 
   fs::dir_ls(path = paths, 
              regexp = '..shp', # file names containing this pattern
              recurse = TRUE, # look in all subdirectories
@@ -155,26 +158,38 @@ get_2016 <- function(paths){
           ungroup() %>% # remove grouping
           st_make_valid()) %>% # clean up objects
     # this bit assigns lake_id values (e.g. 1000)
-    map(function(x) {
+     #d[1] %>%
+   map(function(x) {
       x.lake_name <- x$lake_name # get the Lake_Name
       # find corresponding lakeSiteID from lake.list.2016 (see readSurgeLakes.R)
-      x.lake_id <- lake.list.2016[lake.list.2016$eval_status_code_comment %in% x.lake_name, "lake_id"]
-      x %>% mutate(lake_id = gsub("CH4-", "", x.lake_id))
+      x.lake_id <- lake.list.2016[lake.list.2016$eval_status_code_comment %in% x.lake_name, "lake_id"] %>% pull
+      x %>% mutate(lake_id = x.lake_id)
     }) %>%
     bind_rows() # collapse to one sf object with multiple polygons
 }
 
 lakes_2016 <- get_2016(paths)
-  
+dim(lakes_2016) #33 lakes (32 from 2016 + Falls Lake)
 
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 # GET POINTS AND TRAP DEPOLYMENT/RETRIEVAL TIMES-----------------
 ## SuRGE sites
-dat.surge.sf <- fld_sheet %>%
+dat_surge_sf <- fld_sheet %>%
   filter(eval_status == "TS", # only sampled sites
          !(is.na(long)|is.na(lat))) %>% # only sites where lat and long were recorded
-  # remove lacustrine etc from Missouri river
-  # retain character class initially, then convert to numeric. 
-  mutate(lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+  # deal with lacustrine etc from Missouri river
+ 
+  mutate( # move transitional, lacustrine, riverine from lake_id to site_id
+    site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                             grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                             grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                             TRUE ~ as.character(site_id)),
+    # remove transitional, lacustrine, riverine from lake_id
+    # retain character class initially, then convert to numeric.
+    lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
                              lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
                              TRUE ~ lake_id),
          lake_id = as.numeric(lake_id)) %>%
@@ -190,19 +205,16 @@ dat.surge.sf <- fld_sheet %>%
            !is.na(site_depth)) 
          
 
-dim(dat.surge.sf) #1848
+dim(dat_surge_sf) #1848
 
 
 ## 2016 data
-# load 2016 data
-load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaData
-
-dat.2016 <- eqAreaData # rename to dat.2016
-remove(eqAreaData) # remove original object
+# dat_2016 loaded via read2016data.R
+dat_2016
 
 # Format and coerce to spatial object
 
-dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>% 
+dat_2016_sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>% 
   `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
@@ -225,15 +237,20 @@ dat.2016.sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>%
             by = c("Lake_Name" = "eval_status_code_comment")) %>%
   select(-Lake_Name) %>% # lake_name no longer needed
   rename(site_id = siteID) %>%
-  mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # format site_id
+  mutate(site_id = as.character(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # format site_id
   relocate(lake_id, site_id) 
 
-dim(dat.2016) #1531
-dim(dat.2016.sf) #543, lots of rows with no trap data (e.g. oversample sites)
+dim(dat_2016) #1531
+dim(dat_2016_sf) #543, lots of rows with no trap data (e.g. oversample sites)
 
 
 ## Falls lake
 # data maintained at: "C:\Users\JBEAULIE\OneDrive - Environmental Protection Agency (EPA)\gitRepository\fallsLakeCH4"
+# 1. create sf object for sites 991 and 992 that were sampled one. These sites
+#    are not included in official survey design.
+# 2. merge above with official survey design sf object
+# 3. merge sf object above with deployment and retrieval times
+
 # sf object of sites
 falls_lake_sf <- rbind(
   # sf object for sites 991 and 992. these were sampled once but not in survey design file (?)
@@ -258,13 +275,16 @@ falls_lake_sf <- rbind(
   # merge with deployment and retrieval date_time
   right_join(
     readRDS(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/falls_lake_fld_sheet.rds")) %>%
-      select(lake_id, site_id, contains("date_time"))
+      select(lake_id, site_id, site_depth, contains("date_time"))
   ) %>%
-  st_make_valid()
+  st_make_valid() %>%
+  mutate(site_id = as.character(site_id),
+         lake_id = as.numeric(lake_id))
 
-
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 # WRITE POLYGONS AND POINTS TO DISK-----------
-# POLYGONS
+## POLYGONS----
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_make_valid() %>%
   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
@@ -275,11 +295,12 @@ dim(surge_lakes) #114
 dim(lakes_2016) #33
 33+114 #147
 
-## POINTS
-# merge 2016 and SuRGE data
-# [5/13/2024] missing Falls Lake
+## POINTS----
+# merge 2016, SuRGE, and Falls Lake data
+# [8/29/2024] missing Falls Lake data from Sept 2017, Sept 2018, and Oct. 2018
 # add point to all_lakes.gpkg
-bind_rows(list(dat.2016.sf, dat.surge.sf)) %>% # merge polygons
+bind_rows(list(dat_2016_sf, dat_surge_sf, falls_lake_sf)) %>% # merge points
+  mutate(tz = "UTC") %>%
   st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
            layer = "points",
            append = FALSE)
