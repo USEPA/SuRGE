@@ -19,9 +19,26 @@ nla17_chem <- readr::read_csv(paste0(userPath,
   mutate(across(nla17_result, ~replace(., is.nan(.), NA))) %>%
   ungroup() 
 
+# Sediment Chemistry
+
+nla17_sedchem <- readr::read_csv(paste0(userPath,"data/nla17/nla_2017_sediment_chemistry-data.csv"),
+                                 na = c("", " ")) %>%
+  janitor::clean_names()%>%
+  select(site_id, visit_no, analyte, result, units) %>%
+  dplyr::rename_with(~paste0("nla17_", .)) %>%
+  filter(nla17_analyte=="SED_C")%>%
+  # Need to aggregate across visits 1 and 2.  Group by nla_id and analyte
+  dplyr::group_by(nla17_site_id, nla17_analyte) %>% # group to aggregate visits 1 and 2
+  summarize(nla17_result = mean(nla17_result, na.rm = TRUE), # aggregate results across visits
+            nla17_units = unique(nla17_units)) %>% # retain units
+  mutate(across(nla17_result, ~replace(., is.nan(.), NA))) %>%
+  ungroup()
+
+colnames(nla17_sedchem)<-c("nla17_site_id","nla17_analyte","nla17_result","nla17_result_units")
+nla17_chemmerge<-rbind(nla17_chem,nla17_sedchem)
+
 # pivot to wide
-nla17_chem <- nla17_chem %>%
+nla17_chem <- nla17_chemmerge %>%
   pivot_wider(names_from = nla17_analyte, values_from = c(nla17_result, nla17_result_units)) %>%
   rename_with(., ~ gsub("_result", "", .x)) %>% # remove "-result" from column names
   janitor::clean_names()
-
