@@ -38,6 +38,12 @@ source("scripts/analysis/readIpccClimateZones.R") #surge_climate
 source("scripts/analysis/readLakeCat.R")#read in LakeCat 
 source("scripts/analysis/readRESSED.R")#read in reservoir sedimentation data
 source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
+source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
+
+
+# Calculate derived quantities
+source("scripts/analysis/calculateStratification.R") # stratification indices
+source("scripts/analysis/getIndexSite.R") # extract index site location from depth_profiles_all
 
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
@@ -67,9 +73,9 @@ source("scripts/analysis/calculateEbullition.R") # eb_results
 # Merge diffusive and ebullitive rates --> calculate total
 source("scripts/analysis/calculateTotalEmissions.R")
 
-# Merge emissions, chemistry, and field sheets
+# Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs
-
+source("scripts/analysis/mergePredictorsPrepForStatistics.R") # dat
 
 # Random
 #source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 
@@ -82,6 +88,6 @@ source("scripts/writeSuRGElakesToGpkg.R")
 
 # Analysis
 source("scripts/analysis/inspectMeasurementValues.R")
-# source("scripts/analysis/mergePredictorsPrepForStatistics.R") # dat
+
 
 

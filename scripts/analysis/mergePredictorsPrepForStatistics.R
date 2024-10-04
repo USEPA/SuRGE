@@ -5,9 +5,9 @@
 
 
 
-### ALL DATA--------------
+### ALL DATA
 
-# 1. Fill chemistry variables
+# 1. Fill chemistry variables----
 # chemistry variables measured at one location.  NA reported
 # for all other sites in lake.  Here we fill all NAs using
 # the one measured value.
@@ -35,7 +35,7 @@ dat <- all_obs %>%
   ungroup 
 
 
-# 2. Merge lakeMorpho data (readMorpho.R)
+# 2. Merge lakeMorpho data (readMorpho.R)----
 dat <- dat %>%
   # # morpho currently missing data for Oahe and Francis Case
   # when ready, data will be for entire reservoir, not lacustrine, riverine,
@@ -49,7 +49,7 @@ dim(all_obs) #2057, 264
 dim(morpho) #156, 15
 dim(dat) # 2057, 278
 
-# 3. Merge SuRGE lake list
+# 3. Merge SuRGE lake list----
 dat <- dat %>%
    left_join(rbind(lake.list, lake.list.2016) %>% # all lakes
                filter(!is.na(sample_year)) %>%
@@ -58,7 +58,7 @@ dat <- dat %>%
                mutate(lake_id = as.character(lake_id)))
  dim(dat) # 2057
 
-# 4. Merge NLA chemistry 
+# 4. Merge NLA chemistry----
  # common names
  names(nla17_chem)[names(nla17_chem) %in% names(dat)] # nla17_site_id
  
@@ -91,12 +91,12 @@ dat <- dat %>%
           shallow_so4 = case_when(is.na(shallow_so4) ~ nla17_sulfate, # mg/l in NLA
                                   TRUE ~ shallow_so4))
  
- # 5. Merge hydroLakes ID
+ # 5. Merge hydroLakes ID----
  dat <- dat %>%
    left_join(hylak_link %>%
                mutate(lake_id = as.character(lake_id))) # need to deal with 69/70
  
- # 6. Merge LAGOS
+ # 6. Merge LAGOS----
   dat <- dat %>%
    left_join(lagos_links %>% 
                # need to expand records for 69 and 70 to encompass
@@ -113,34 +113,40 @@ dat <- dat %>%
                # remove records for 69 and 70
                filter(!lake_id == c(69|70)))
  
-# 7. Merge NID
+# 7. Merge NID----
  dat <- dat %>%
    left_join(nid_link, by= "lake_id")
  
-# 8. Merge NHDPlusV2 - lakeCat 
+# 8. Merge NHDPlusV2 - lakeCat----
  #not finding the lakeCat object, need to troubleshoot
 dat <- dat %>%
    left_join(lake_cat,  by = c("nhd_plus_waterbody_comid" = "comid"))
  
-# 9. Merge Waterisotope
+# 9. Merge Waterisotope----
 
 dat <- dat %>%
   left_join(water_isotope_agg)
 
-# 10. National Wetland Inventory
+# 10. National Wetland Inventory----
 
 dat <- dat %>%
   left_join(nwi_link)
 
-# 11. Phytoplankton Composition from Avery
+# 11. Phytoplankton Composition from Avery----
 
 dat<-dat %>%
   left_join(phyto_SuRGE_link, by="lake_id")
 
-# 12. Reservoir Sedimentaion
+# 12. Reservoir Sedimentaion----
 
 dat<-dat %>%
   left_join(RESSED_link,by="lake_id")
+ 
+# 13. Index site location----
+ 
+ dat <- dat %>%
+   left_join(index_site, 
+             by = c("lake_id", "site_id", "visit")) # default, but specifying for clarity
  
 ### AGGREGATED BY LAKE_ID----------
 # This should be done using grts algorithms and survey design weights.
