@@ -6,6 +6,7 @@ library(sf)
 library(tidyverse)
 library(readxl)
 library(janitor) # format dataframe names
+library(stringi) # character manipulation
 library(scales) # for ggplot2 datetime formatting 
 library(lutz) # time zones from coordinates
 library(plotly) # interactive plots (readLgr.R)
