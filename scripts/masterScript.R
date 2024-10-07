@@ -38,6 +38,7 @@ source("scripts/analysis/readIpccClimateZones.R") #surge_climate
 source("scripts/analysis/readLakeCat.R")#read in LakeCat 
 source("scripts/analysis/readRESSED.R")#read in reservoir sedimentation data
 source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
+source("scripts/analysis/readNWIS.R")#read water level data for subset of reservoirs
 
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
@@ -82,6 +83,6 @@ source("scripts/writeSuRGElakesToGpkg.R")
 
 # Analysis
 source("scripts/analysis/inspectMeasurementValues.R")
-# source("scripts/analysis/mergePredictorsPrepForStatistics.R") # dat
+source("scripts/analysis/mergePredictorsPrepForStatistics.R") # dat
 
 
