@@ -141,6 +141,11 @@ dat<-dat %>%
 
 dat<-dat %>%
   left_join(RESSED_link,by="lake_id")
+
+# 13. Water level change indices
+
+dat<- dat %>%
+  left_join(walev_link,by="lake_id")
  
 # 13. Index site location----
  
