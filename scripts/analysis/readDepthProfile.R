@@ -7,7 +7,8 @@ labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "data/", labs)
 
 
-# Function for reading depth profile for SuRGE sites
+# Function for reading depth profile for SuRGE sites except Oahe (069) and Francis-Case 
+# (070) lacustrine
 
 get_depth_profile <- function(paths){
   #d <-  
@@ -87,13 +88,53 @@ get_depth_profile <- function(paths){
     map_dfr(., bind_rows) # rbinds into one df
 }
 
-
-
 # Get data
 depth_profile_surge <- get_depth_profile(paths) 
 
+# 2. OAHE (069) AND FRANCIS-CASE (070) LACUSTRINE DEPTH PROFILES-----
+# data collected by USACE at same time we were sampling! Data delivered by
+# John Hargrave on 10/8/2024 and a copy of the data put in 69_lacustrine
+# and 70_lacustrine folders. Could read from either, arbitrarily chose
+# 70 here.
 
-# 2. 2016 DEPTH PROFILES----
+depth_profile_69_70 <- read_excel(path = paste0(userPath, 
+                                                "data/CIN/CH4_070_francis_case_lacustrine/dataSheets/OAHFTR_LakeProfiles_2021_Jake.xlsx"),
+                                  skip = 9) %>%
+  # fix names
+  janitor::clean_names() %>%
+  rename(ph = units_00400) %>%
+  rename(sample_depth = depth_m) %>%
+  rename(temp = deg_c_00010) %>%
+  rename(do = mg_l_00299) %>%
+  rename(sp_cond = umho_cm_00094) %>%
+  rename(turbidity = ntu_00078) %>%
+  
+  # create units column for each analyte
+  mutate(across(c("sample_depth", "temp", "do", "sp_cond", "turbidity"), 
+                ~ case_when(
+                  str_detect(paste(cur_column()), "depth") ~ "m",
+                  str_detect(paste(cur_column()), "temp") ~ "c",
+                  str_detect(paste(cur_column()), "do") ~ "mg_l",
+                  str_detect(paste(cur_column()), "sp_cond") ~ "us_cm",
+                  str_detect(paste(cur_column()), "turb") ~ "ntu",
+                  TRUE ~ "FLY UOU FOOLS"), # 
+                .names = "{col}_units"),
+         site_id = case_when(station == "FTRLK0911DW" ~ 6, # U-23 is closest, but using index site
+                             station == "OAHLK1153DW" ~ 4, # U-04 is closest to USACE monitoring site and is index site
+                             TRUE ~ NA_integer_),
+         lake_id = case_when(station == "FTRLK0911DW" ~ "69_lacustrine", 
+                             station == "OAHLK1153DW" ~ "70_lacustrine", 
+                             TRUE ~ NA_character_),
+         visit = 1,
+         date_time = as.POSIXct(date_time, format = "%Y%m%d, %H%M"),
+         date = as.Date(date_time)) %>%
+  filter(lake_id %in% c("69_lacustrine", "70_lacustrine") & # lakes of interest
+           date %in% c(as.Date("2021/06/23"), as.Date("2021/06/24"))) %>% # dates, these perfectly align with SuRGE sampling
+  filter(sample_depth != 0) %>% # depth 0 is for calibration check
+  select(-station, -contains("date"), -x3_01, -m_v_00090, -m_00000, -ft_00062, -m_00077)
+
+
+# 3. 2016 DEPTH PROFILES----
 # data curated in mulitResSurvey repo and written to SuRGE SharePoint
 depth_profile_2016 <- read_csv(paste0(userPath, "data/2016regionalSurvey/depthProfiles2016.csv")) %>%
   janitor::clean_names(replace = c("\u00b5" = "u")) %>% # ensure mu (micro) is converted properly
@@ -126,13 +167,13 @@ depth_profile_2016 <- read_csv(paste0(userPath, "data/2016regionalSurvey/depthPr
 
   
  
-# 3. FALLS LAKE DEPTH PROFILES----
+# 4. FALLS LAKE DEPTH PROFILES----
 depth_profile_falls <- read_csv(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/falls_lake_depth_profiles.csv"))
 
 
 
-# 4. MERGE DEPTH PROFILES----
-depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_profile_falls),
+# 5. MERGE DEPTH PROFILES----
+depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_profile_falls, depth_profile_69_70),
                           ~.x %>% mutate(lake_id = as.character(lake_id))) %>% # 69_lacustrine, etc
   map_dfr(., bind_rows) # rbinds into one df
 
