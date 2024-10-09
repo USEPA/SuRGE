@@ -137,7 +137,7 @@ dat <- dat %>%
 dat<-dat %>%
   left_join(phyto_SuRGE_link, by="lake_id")
 
-# 12. Reservoir Sedimentaion----
+# 12. Reservoir Sedimentation----
 
 dat<-dat %>%
   left_join(RESSED_link,by="lake_id")
