@@ -31,7 +31,7 @@ locus_link_aggregated <- locus_link %>%
   group_by(nhdplusv2_comid) %>% # unique per lake
   filter(row_number() == 1) %>% # first record for each comid. alternatives: slice_head(1) and  top_n(n = 1) 
   select(lagoslakeid, nla2012_siteid, nla2007_siteid, lake_nhdid, lake_namegnis, 
-         nhdhr_gnisid, nhdplusv2_comid) %>% # just keep what we need
+         nhdhr_gnisid, nhdplusv2_comid, lake_reachcode) %>% # just keep what we need
   rename(nla07_site_id = nla2007_siteid, # per SuRGE convention
          nla12_site_id = nla2012_siteid)
 
@@ -149,7 +149,14 @@ surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_s
            as.numeric()) %>% # convert lake_id to numeric
   rename(nla17_site_id = site_id_2) %>%
   mutate(nhdplusv2_comid = as.character(nhd_plus_waterbody_comid))%>%
-  select(lake_id, sample_year, nhdplusv2_comid, gnis_name)
+  select(lake_id, sample_year, nhdplusv2_comid, gnis_name, gnis_id)
+
+## Create a link for the Clow sedimentation dataset by pulling the reach code associated with 
+## each SuRGE site
+surge_sites_reach_codes <- left_join(surge_sites %>% 
+                                       select(lake_id, nhdplusv2_comid,gnis_name,gnis_id), # only keep minimum needed variables
+                                     locus_link_aggregated %>% select(lagoslakeid, nhdplusv2_comid, lake_reachcode), # only keep merge variable and lagoslakeid 
+                                     by = "nhdplusv2_comid") 
 
 # We want to add sample month to enable more precise matching with LAGOS trophic status estimates.
 # LAGOS only covers 1984 - 2020, so we can only match specific months for surge

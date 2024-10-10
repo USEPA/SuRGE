@@ -102,6 +102,7 @@ dim(dat) # 2057
           shallow_so4 = case_when(is.na(shallow_so4) ~ nla17_sulfate, # mg/l in NLA
                                   TRUE ~ shallow_so4))
 
+
  # 4. Index site location----
  dat <- dat %>%
    left_join(index_site, 
