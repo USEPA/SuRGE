@@ -31,39 +31,50 @@ analytes_to_fill <-  expand.grid(c("deep_", "shallow_"),
 # Fill
 dat <- all_obs %>%
   group_by(lake_id) %>% # for each lake
-  fill(all_of(analytes_to_fill)) %>% # fill these analytes using only value present per group/analyte
+  fill(all_of(analytes_to_fill)) %>% # fill when only 1 value present per group/analyte
   ungroup 
 
 
-# 2. Merge lakeMorpho data (readMorpho.R)----
+
+# 2. Merge SuRGE lake list----
 dat <- dat %>%
-  # # morpho currently missing data for Oahe and Francis Case
-  # when ready, data will be for entire reservoir, not lacustrine, riverine,
-  # transitional.  Need to figure out how to deal with this.  Ignoring for now.
-  # mutate(lake_id_simple = case_when(grepl("69", lake_id) ~ "69",
-  #                                   grepl("70", lake_id) ~ "70"))
-  left_join(.,
-            morpho %>% mutate(lake_id = as.character(lake_id)))
+  left_join(
+    # expand lake.list to include lacustrine, riverine, and transitional
+    lake.list %>% # Surge sites
+      select(-eval_status) %>% # this is for lake-scale. same variable in dat is for each point.
+      filter(lake_id %in% 69:70) %>% # pull out 69 and 70
+      group_by(lake_id) %>%
+      slice(rep(1,3)) %>% # selects the first row (by group), 3 times, giving the repeated rows desired;
+      ungroup() %>%
+      # rename the duplicated records
+      mutate(lake_id = c("69_lacustrine", "69_transitional", "69_riverine",
+                         "70_lacustrine", "70_transitional", "70_riverine"),
+             # Associating NLA17 ID with appropriate river section based on 
+             # lat long of NLA17 Index site. This is necessary to match NLA17
+             # chem values with appropriate river section.
+             nla17_site_id = case_when(lake_id == "70_transitional" ~ "NLA17_SD-10053", # NLA 43.39241 -99.13541
+                                       lake_id == "69_lacustrine" ~ "NLA17_SD-10001", # NLA 45.01971 -100.26474 
+                                       TRUE ~ NA_character_)) %>%
+      # merge new records with original df and 2016 sites
+      # eval_status from lake lists pertains to the entire reservoir. eval_status
+      # in dat (derived from all_obs) pertains to each site. To prevent the left_join
+      # from joining on these column, I'll omit eval_status from lake lists.
+      rbind(., # oahe and FC from above
+            lake.list %>% select(-eval_status), # omit lake-scale eval_status
+            lake.list.2016 %>% select(-eval_status)) %>% # omit lake-scale eval_status 
+      # remove records for 69 and 70
+      filter(!lake_id == c(69|70)))
 
-dim(all_obs) #2057, 264
-dim(morpho) #156, 15
-dim(dat) # 2057, 278
+dim(dat) # 2057
 
-# 3. Merge SuRGE lake list----
-dat <- dat %>%
-   left_join(rbind(lake.list, lake.list.2016) %>% # all lakes
-               filter(!is.na(sample_year)) %>%
-               select(lake_id, visit, stratum, sample_year, lab, nla17_site_id, nla_unique_id,
-                      ag_eco9_nm, nhd_plus_waterbody_comid) %>%
-               mutate(lake_id = as.character(lake_id)))
- dim(dat) # 2057
 
-# 4. Merge NLA chemistry----
+# 3. Merge NLA chemistry----
  # common names
  names(nla17_chem)[names(nla17_chem) %in% names(dat)] # nla17_site_id
  
- # 1000 (Puerto Rico) and lacustrine/riverine/transitional not in nla17_chem
- # as expected
+ # 1000 (Puerto Rico), 69_riverine, 69_transitional, 70_lacustrine, 
+ # 70_riverine not in nla17_chem as expected. 
+# 69_lacustrine and 70_transitional are included. See above.
  dat$lake_id[!(dat$nla17_site_id %in% nla17_chem$nla17_site_id)] %>% unique
  
  # merge
@@ -90,70 +101,108 @@ dat <- dat %>%
                                  TRUE ~ shallow_tn),
           shallow_so4 = case_when(is.na(shallow_so4) ~ nla17_sulfate, # mg/l in NLA
                                   TRUE ~ shallow_so4))
- 
- # 5. Merge hydroLakes ID----
- dat <- dat %>%
-   left_join(hylak_link %>%
-               mutate(lake_id = as.character(lake_id))) # need to deal with 69/70
- 
- # 6. Merge LAGOS----
-  dat <- dat %>%
-   left_join(lagos_links %>% 
-               # need to expand records for 69 and 70 to encompass
-               # lacustrine, transitional, and riverine
-               filter(lake_id %in% 69:70) %>% # pull out 69 and 70
-               group_by(lake_id) %>%
-               slice(rep(1,3)) %>% # selects the first row (by group), 3 times, giving the repeated rows desired;
-               ungroup() %>%
-               # rename the duplicated records
-               mutate(lake_id = c("69_lacustrine", "69_transitional", "69_riverine",
-                                  "70_lacustrine", "70_transitional", "70_riverine")) %>%
-               # merge new records with original df
-               rbind(lagos_links) %>%
-               # remove records for 69 and 70
-               filter(!lake_id == c(69|70)))
- 
-# 7. Merge NID----
- dat <- dat %>%
-   left_join(nid_link, by= "lake_id")
- 
-# 8. Merge NHDPlusV2 - lakeCat----
- #not finding the lakeCat object, need to troubleshoot
-dat <- dat %>%
-   left_join(lake_cat,  by = c("nhd_plus_waterbody_comid" = "comid"))
- 
-# 9. Merge Waterisotope----
 
-dat <- dat %>%
-  left_join(water_isotope_agg)
-
-# 10. National Wetland Inventory----
-
-dat <- dat %>%
-  left_join(nwi_link)
-
-# 11. Phytoplankton Composition from Avery----
-
-dat<-dat %>%
-  left_join(phyto_SuRGE_link, by="lake_id")
-
-# 12. Reservoir Sedimentaion----
-
-dat<-dat %>%
-  left_join(RESSED_link,by="lake_id")
-
-# 13. Water level change indices
-
-dat<- dat %>%
-  left_join(walev_link,by="lake_id")
- 
-# 13. Index site location----
- 
+ # 4. Index site location----
  dat <- dat %>%
    left_join(index_site, 
              by = c("lake_id", "site_id", "visit")) # default, but specifying for clarity
+ dim(dat) # 2057
  
-### AGGREGATED BY LAKE_ID----------
+ 
+# 5. Merge Waterisotope----
+ dat <- dat %>%
+   left_join(water_isotope_agg %>%
+               # water isotope samples collected at NLA Index site. Here we 
+               # associate the values with the correct river segment based
+               # on index site lat long.
+               mutate(lake_id = case_when(lake_id == "70" ~ "70_transitional", # NLA 43.39241 -99.13541
+                                          lake_id == "69" ~ "69_lacustrine", # NLA 45.01971 -100.26474 
+                                          TRUE ~ lake_id)))
+ 
+ dim(dat) # 2057
+ 
+# 6. Phytoplankton Composition from Avery----
+ dat <- dat %>%
+   left_join(phyto_SuRGE_link, by="lake_id")
+ 
+ 
+# 7. Move lacustrine, transitional, and riverine to site_id.----
+ # this will facilitate merging with variables the pertain to 
+ # entire lake
+ dat <- dat %>%
+   mutate( # move transitional, lacustrine, riverine from lake_id to site_id
+     site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                         grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                         grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                         TRUE ~ as.character(site_id)),
+     # remove transitional, lacustrine, riverine from lake_id
+     # retain character class initially, then convert to numeric.
+     lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                         lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                         TRUE ~ lake_id),
+     lake_id = as.numeric(lake_id)) 
+ 
+ dim(dat) # 2057
+ 
+# 8. Merge lakeMorpho data (readMorpho.R)----
+ dat <- dat %>%
+   left_join(.,
+             morpho)
+
+ dim(morpho) #156, 15
+ dim(dat) # 2057, 278
+
+# 9. Merge hydroLakes ID----
+ dat <- dat %>%
+   left_join(hylak_link)
+ 
+ dim(hylak_link) #127, 16
+ dim(dat) # 2057, 278
+ 
+# 10. Merge LAGOS----
+  dat <- dat %>%
+   left_join(lagos_links)
+ 
+ dim(lagos_links) #151, 16
+ dim(dat) # 2057, 278
+ 
+# 11. Merge NID----
+ dat <- dat %>%
+   left_join(nid_link)
+ 
+ dim(nid_link) #147, 16
+ dim(dat) # 2057, 278
+ 
+# 12. Merge NHDPlusV2 - lakeCat----
+dat <- dat %>%
+   left_join(lake_cat,  by = c("nhd_plus_waterbody_comid" = "comid", "lake_id" = "lake_id"))
+ 
+ dim(lake_cat) #147, 16
+ dim(dat) # 2057, 278
+
+# 13. National Wetland Inventory----
+dat <- dat %>%
+  left_join(nwi_link)
+
+ dim(nwi_link) #148, 16
+ dim(dat) # 2057, 278
+ 
+# 14. Reservoir Sedimentaion----
+dat <- dat %>%
+  left_join(RESSED_link, by = "lake_id")
+
+ dim(RESSED_link) #16
+ dim(dat) # 2057, 278
+ 
+ # 15. Water level change indices
+dat<- dat %>%
+  left_join(walev_link, by = "lake_id")
+ 
+dim(walev_link) #18
+dim(dat) # 2057, 278
+ 
+### AGGREGATE BY LAKE_ID----------
+# 10/10/2024 NOT WORKING, IN PROGRESS....
 # This should be done using grts algorithms and survey design weights.
 # Under a time crunch, so ignoring that step for now.
 
