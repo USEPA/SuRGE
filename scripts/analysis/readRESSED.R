@@ -1,15 +1,23 @@
+
 ## Link SuRGE Lakes to RESSED
 ## August 29, 2024
 
-# Can't figure out how to connect to the access database through R
+# CODE BELOW WORKS ON JAKES MACHINE, BUT NOT BRIDGET'S
+#### Libraries =================================================================
+# library(RODBC)
+# library(dplyr)
+# library(dbplyr)
+# 
+# #### Import database ===========================================================
+# # Define connection strings
 # dbq_string <- paste0("DBQ=", paste0(userPath, "data/siteDescriptors/"),"RESSED_v1.2.mdb")
-# #dbq_string <- paste0("DBQ=", paste0(userPath, "data/siteDescriptors/RESSED_v1.2.mdb"))
 # driver_string <- "Driver={Microsoft Access Driver (*.mdb, *.accdb)};"
 # db_connect_string <- paste0(driver_string, dbq_string)
 # 
+# # Create .accdb connection
 # con <- odbcDriverConnect(db_connect_string)
-
-# See Tables
+# 
+# # See Tables
 # sqlTables(con)
 # 
 # #### Extract tables to data.frames
@@ -17,9 +25,22 @@
 # sqlFetch(con, "RSED06")
 # sqlFetch(con, "RSED09")
 
-#manually linked SuRGE sites with RESSED here
 
-RESSEDl<-read.csv(paste0(userPath,"data/siteDescriptors/RESSED_links.csv"))
+# manually linked SuRGE sites with RESSED here
+
+RESSEDl <- read.csv(paste0(userPath, "data/siteDescriptors/RESSED_links.csv"))
+
+RESSED_link <- RESSEDl %>%
+  filter(!is.na(period_yrs)) %>%
+  group_by(RESSED) %>%
+  summarise(
+    siteID = siteID[1],
+    tot_per_seddep = sum(tot_per_seddep),
+    period_yrs = sum(period_yrs),
+    acre.feet.per.yr = tot_per_seddep / period_yrs
+  ) %>%
+  mutate(lake_id = str_extract(siteID, "(\\d+$)") %>% as.numeric) %>% # extract numeric part of lake_id)
+  select(RESSED, lake_id, acre.feet.per.yr)
 
 RESSED_link<-RESSEDl %>%
   filter(!is.na(period_yrs))%>%
@@ -32,7 +53,12 @@ RESSED_link<-RESSEDl %>%
 
 RESSED_link$lake_id<-as.character(RESSED_link$lake_id)
 
+
 #Read in CONUS reservoir data provided by David Clow
+lake_cat$OCburialrate <- 0.34 +
+  0.046 * lake_cat$tmean8110cat +
+  2.020 * lake_cat$kffactcat +
+  0.184 * +0.766 * (sum(lake_cat$pctwdwet2019cat, lake_cat$pcthbwet2019cat))
 
 #Forced read-in of everything as a character class to preserve the leading zeros in the Reach Code
 conus_res<-read.csv(paste0(userPath,"data/siteDescriptors/CONUS_Reservoirs_from_FM_Clow_clipped_Morris_Kirwan.csv"),colClasses="character")
@@ -45,10 +71,12 @@ conus_res$Mean_SOC_0_5_cm<-as.numeric(conus_res$Mean_SOC_0_5_cm)
 conus_res$Wetland_pct<-as.numeric(conus_res$Wetland_pct)
 conus_res$Mean_Kfact<-as.numeric(conus_res$Mean_Kfact)
 
+
 conus_res$log_sedimentation<--1.520+ 0.925*conus_res$Area_sq_m_recalc+
                         0.043*conus_res$Mean_Slope+
                         -0.379*conus_res$Forest_pct+
                         0.263*conus_res$Crop_pct
+
 
 conus_res<-conus_res %>%
   mutate(sedimentOC=ifelse(Wetland_pct<0,NA, 17.170 + 
@@ -58,6 +86,7 @@ conus_res<-conus_res %>%
                         -14.098 * Mean_Kfact +
                         -1.275 *log10(Area_sq_m_recalc)+
                         -2.055))
+
 conus_res$lake_reachcode<-conus_res$Reach_Code
 #Make GNIS ID a numeric field so that the leading zeros are dropped & it 
 #matches the GNIS ID in the surge link
@@ -81,8 +110,6 @@ clow_links<-clow_link %>%
   mutate(log_sedimentation=ifelse(is.na(log_sedimentation.x),log_sedimentation.y,log_sedimentation.x))%>%
   mutate(sedimentOC=ifelse(is.na(sedimentOC.x),sedimentOC.y,sedimentOC.x))%>%
   select(lake_id,log_sedimentation,sedimentOC)
-
-clow_links$lake_id<-as.character(clow_links$lake_id)
 
 RESSED_link <- left_join(clow_links,RESSED_link, by="lake_id")
 

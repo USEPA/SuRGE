@@ -54,9 +54,8 @@ nwi<-rbind(nwi_SuRGE,nwi_2016)%>%
          riverine_unconsolidated_shore=ifelse(is.na(unconsolidated_shore_y),0,100*(unconsolidated_shore_y/totper)),
          shallow=100*(palustrineper+littoralper+riverine_unconsolidated_shore))
 
-nwi_link<-nwi %>%
-  select(lake_id,shallow,emergent,aquatic_bed)
-nwi_link$lake_id<-as.character(nwi_link$lake_id)
+nwi_link <- nwi %>%
+  select(lake_id, shallow, emergent, aquatic_bed)
 
 #link nwi to surge site info
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-

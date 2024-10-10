@@ -19,6 +19,16 @@ lake.list <- lake.list %>%
          visit = 2) %>% # change visit to vist == 2
   bind_rows(lake.list) # add two new rows to original df
 
+# create a list of all sampled SuRGE lakes, including Missouri River subsampling
+lake.list.surge <- lake.list %>%
+  filter(lake_id %in% 69:70) %>% # extract these two lakes
+  slice(rep(1:n(), each = 3)) %>% # create three replicates of each
+  mutate(lake_id = paste(lake_id, # change lake_id to reflect reservoir zone
+                         c("lacustrine", "transitional", "riverine"),
+                         sep = "_")) %>%
+  bind_rows(lake.list %>% mutate(lake_id = as.character(lake_id))) %>% # add lac, etc to lake.list
+  filter(!(lake_id %in% 69:70)) %>% # exclude oahe and Francis Case
+  filter(eval_status_code == "S") # only sampled
 
 lake.list.2016 <- readxl::read_excel(paste0(userPath, 
                                        "surgeDsn/SuRGE_design_20191206_eval_status.xlsx"), na = c("", "NA")) %>%
@@ -30,3 +40,6 @@ lake.list.2016 <- readxl::read_excel(paste0(userPath,
            as.numeric(), # convert lake_id to numeric
          visit = 1) %>% # all lakes except 147, 148, 250, and 281 were only visited once.  see below
   filter(lake_id > 1000) # 1001 - 1032 are the 2016 multireservoir survey lakes + Falls Lake
+
+
+lake.list.all <- bind_rows(lake.list.surge, lake.list.2016 %>% mutate(lake_id = as.character(lake_id)))

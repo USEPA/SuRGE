@@ -9,23 +9,26 @@ lake_cat_vars <- lc_get_params(param='name') %>%
 # SuRGE comid
 surge_comid <- rbind(lake.list, lake.list.2016) %>% 
   filter(!is.na(sample_year)) %>%
-  select(nhd_plus_waterbody_comid) %>% 
+  select(nhd_plus_waterbody_comid, lake_id) %>% 
   distinct %>% # values repeated for revisits
   filter(!is.na(nhd_plus_waterbody_comid)) %>% # NA breaks lc_get_data
-  pull
-length(surge_comid) # 148 unique values
+  rename(comid = nhd_plus_waterbody_comid)
+
+dim(surge_comid) # 148 unique values
 
 # Get lakeCat data
 lake_cat <- lc_get_data(metric = paste(lake_cat_vars, collapse=","), 
                        aoi = 'catchment,watershed', 
-                       comid = surge_comid) %>%
-  janitor::clean_names()
+                       comid = surge_comid$comid) %>%
+  janitor::clean_names() %>%
+  # add lake_id
+  left_join(surge_comid)
 
 
 
 # Inventory records
 dim(lake_cat) # 147 rows.  which one is missing?  
 
-surge_comid[!(surge_comid %in% lake_cat$comid)] #800045123 is not in lakeCat
+surge_comid[!(surge_comid$comid %in% lake_cat$comid), ] #800045123 is not in lakeCat
 
 lake.list %>% filter(nhd_plus_waterbody_comid == 800045123) # Puerto Rico

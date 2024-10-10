@@ -99,7 +99,7 @@ depth_profile_surge <- get_depth_profile(paths)
 
 depth_profile_69_70 <- read_excel(path = paste0(userPath, 
                                                 "data/CIN/CH4_070_francis_case_lacustrine/dataSheets/OAHFTR_LakeProfiles_2021_Jake.xlsx"),
-                                  skip = 9) %>%
+                                  sheet = "data", skip = 9) %>%
   # fix names
   janitor::clean_names() %>%
   rename(ph = units_00400) %>%
@@ -136,7 +136,7 @@ depth_profile_69_70 <- read_excel(path = paste0(userPath,
 
 # 3. 2016 DEPTH PROFILES----
 # data curated in mulitResSurvey repo and written to SuRGE SharePoint
-depth_profile_2016 <- read_csv(paste0(userPath, "data/2016regionalSurvey/depthProfiles2016.csv")) %>%
+depth_profile_2016 <- read_csv(paste0(userPath, "data/CIN/2016_survey/depthProfiles2016.csv")) %>%
   janitor::clean_names(replace = c("\u00b5" = "u")) %>% # ensure mu (micro) is converted properly
   filter(!grepl(c("July|Aug|Oct"), lake_name)) %>% # omit Acton Lake repeat visits
   
