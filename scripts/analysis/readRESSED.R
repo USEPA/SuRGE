@@ -35,7 +35,7 @@ RESSED_link$lake_id<-as.character(RESSED_link$lake_id)
 #Read in CONUS reservoir data provided by David Clow
 
 #Forced read-in of everything as a character class to preserve the leading zeros in the Reach Code
-conus_res<-read.csv(paste0(userPath,"data/siteDescriptors/CONUS_Reservoirs_from_FM_Clow.csv"),colClasses="character")
+conus_res<-read.csv(paste0(userPath,"data/siteDescriptors/CONUS_Reservoirs_from_FM_Clow_clipped_Morris_Kirwan.csv"),colClasses="character")
 conus_res$Area_sq_m_recalc<-as.numeric(conus_res$Area_sq_m_recalc)
 conus_res$Barren_pct<-as.numeric(conus_res$Barren_pct)
 conus_res$Mean_Slope<-as.numeric(conus_res$Mean_Slope)
@@ -68,7 +68,7 @@ conus_res$gnis_id<-as.numeric(conus_res$GNIS_ID)
 #first link the clow dataset to SurGE IDs using the NHD reach code
 clow_link <- left_join(surge_sites_reach_codes %>% 
                                        select(lake_id, lake_reachcode,gnis_name,gnis_id), # only keep minimum needed variables
-                                     conus_res %>% select(log_sedimentation,sedimentOC,lake_reachcode,GNIS_ID), # only keep merge variable and lagoslakeid 
+                                     conus_res %>% select(log_sedimentation,sedimentOC,lake_reachcode,GNIS_ID,Area_sq_m_recalc), # only keep merge variable and lagoslakeid 
                                      by = "lake_reachcode",na_matches="never")
 
 #next link the clow dataset to SuRGE IDs using the GNIS ID
@@ -76,12 +76,12 @@ clow_link<- left_join(clow_link %>%
   select(lake_id,lake_reachcode,gnis_name,gnis_id,log_sedimentation,sedimentOC,lake_reachcode),
 conus_res %>% select(log_sedimentation,sedimentOC,gnis_id,GNIS_Name),
 by= "gnis_id",na_matches="never")
-   
+
 clow_links<-clow_link %>%
   mutate(log_sedimentation=ifelse(is.na(log_sedimentation.x),log_sedimentation.y,log_sedimentation.x))%>%
   mutate(sedimentOC=ifelse(is.na(sedimentOC.x),sedimentOC.y,sedimentOC.x))%>%
-  group_by(lake_id)%>%
-  summarise(log_sedimentation=mean(log_sedimentation,na.rm=TRUE),sedimentOC=mean(sedimentOC,na.rm=TRUE),gnis_name=gnis_name[1])
+  select(lake_id,log_sedimentation,sedimentOC)
+
 clow_links$lake_id<-as.character(clow_links$lake_id)
 
 RESSED_link <- left_join(clow_links,RESSED_link, by="lake_id")
