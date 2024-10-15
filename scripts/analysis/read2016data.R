@@ -5,26 +5,40 @@ load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaDa
 dat_2016 <- eqAreaData # rename to dat_2016
 remove(eqAreaData) # remove original object
 
-dat_2016 <- dat_2016 %>% janitor::clean_names()
-
-dat_2016 %>% select(lake_name, site_id, chla_sample, pheo_sample, tn, tnh4, tno2)
+dat_2016 <- dat_2016 %>% 
+  janitor::clean_names() %>% 
+  # remove extra Acton Lake observations
+  filter(!(lake_name %in% c("Acton Lake Aug", "Acton Lake July", "Acton Lake Oct"))) %>%
+  # grab required variables
+  select(lake_name, site_id, 
+         chla_sample, tn, tnh4, tno2, tno2_3, toc, tp, trp, 
+         ch4_drate_mg_h_best, ch4_erate_mg_h, ch4_trate_mg_h, #ch4_best_model,
+         co2_drate_mg_h_best, co2_erate_mg_h, co2_trate_mg_h, #co2_best_model,
+         n2o_erate_mg_h, 
+         chla_d, chla_s,
+         do_l_d, do_l_s,
+         p_h_d, p_h_s,
+         sp_cn_d, sp_cn_s,
+         tmp_c_d, tmp_c_s,
+         tr_ntu_d, tr_ntu_s,
+         sm_dpth_d, sm_dpth_s)
 
 # site depth wasn't measured in first few lakes (oops) but we have bathymetry data
 # for those lakes.
 
 # Rename variables to be consistent with SuRGE
-dat_2016_ <- dat_2016 %>%
+dat_2016 <- dat_2016 %>%
   rename(
     
     # emission rates
     ch4_diffusion_best = ch4_drate_mg_h_best,
     ch4_ebullition = ch4_erate_mg_h,
     ch4_total = ch4_trate_mg_h,
-    ch4_best_model = ch4_best_model,
+    #ch4_best_model = ch4_best_model,
     co2_diffusion_best = co2_drate_mg_h_best,
     co2_ebullition = co2_erate_mg_h,
     co2_total = co2_trate_mg_h,
-    co2_best_model = co2_best_model,
+    #co2_best_model = co2_best_model,
     n2o_ebullition = n2o_erate_mg_h,
     
     # chemistry
@@ -38,22 +52,22 @@ dat_2016_ <- dat_2016 %>%
     shallow_op = trp,
     
     # sonde
-    deep_chla_sonde = "chla_d",
-    shallow_chla_sonde = "chla_s",
-    deep_do_mg = "do_l_d",
-    shallow_do_mg = "do_l_s",
-    deep_ph = "p_h_d",
-    shallow_ph = "p_h_s",
-    deep_sp_cond = "sp_cn_d",
-    shallow_sp_cond = "sp_cn_s",
-    deep_temp = "tmp_c_d",
-    shallow_temp = "tmp_c_s",
-    deep_turb = "tr_ntu_d",
-    shallow_turb = "tr_ntu_s",
+    deep_chla_sonde = chla_d,
+    shallow_chla_sonde = chla_s,
+    deep_do_mg = do_l_d,
+    shallow_do_mg = do_l_s,
+    deep_ph = p_h_d,
+    shallow_ph = p_h_s,
+    deep_sp_cond = sp_cn_d,
+    shallow_sp_cond = sp_cn_s,
+    deep_temp = tmp_c_d,
+    shallow_temp = tmp_c_s,
+    deep_turb = tr_ntu_d,
+    shallow_turb = tr_ntu_s,
     
     # sample depths
-    deep_sample_depth_m = "sm_dpth_d",
-    shallow_sample_depth_m = "sm_dpth_s"
+    deep_sample_depth_m = sm_dpth_d,
+    shallow_sample_depth_m = sm_dpth_s
     
   ) %>%
   mutate(
@@ -87,51 +101,57 @@ dat_2016_ <- dat_2016 %>%
   # deep site for SuRGE. set `index_site = TRUE for deep sampling site, but keep
   # deep and shallow chemistry in this file, it might come in handy for the 
   # point by point analysis. Can filter out shallow site when merging with SuRGE
-  # at the lake scale
-  left_join( # hard code 2016 index site locations.
-    tribble(~lake_id, ~site_id, ~index_site,
-                    1001, 4, TRUE,
-                    1002, 4, TRUE, 
-                    1003, 6, TRUE, 
-                    1004, 3, TRUE, 
-                    1005, 7, TRUE, 
-                    1006, 3, TRUE, 
-                    1007, 5, TRUE, 
-                    1008, 12, TRUE, 
-                    1009, 4, TRUE, 
-                    1010, 7, TRUE, 
-                    1011, 16, TRUE, 
-                    1012, 4, TRUE, 
-                    1013, 8, TRUE, 
-                    1014, 2, TRUE, 
-                    1015, 15, TRUE, 
-                    1016, 2, TRUE, 
-                    1017, 1, TRUE, 
-                    1018, 2, TRUE, 
-                    1019, 4, TRUE, 
-                    1020, 1, TRUE, 
-                    1021, 3, TRUE, 
-                    1022, 9, TRUE, 
-                    1023, 1, TRUE, 
-                    1024, 34, TRUE, 
-                    1025, 4, TRUE, 
-                    1026, 10, TRUE, 
-                    1027, 7, TRUE, 
-                    1028, 7, TRUE, 
-                    1029, 4, TRUE, 
-                    1030, 7, TRUE, 
-                    1031, 3, TRUE, 
-                    1032, 16, TRUE))
+  # at the lake scale. No deep samples were collected.
+  # OK, THIS WAS DUMB. INDEX SITE IS ALREADY DEFINED IN getIndexSite.R and merged
+  # with these data in mergePredictorsAndPrepForStatistics.R
+  # left_join( # hard code 2016 index site locations.
+  #   tribble(~lake_id, ~site_id, ~index_site,
+  #                   1001, 4, TRUE,
+  #                   1002, 4, TRUE, 
+  #                   1003, 6, TRUE, 
+  #                   1004, 3, TRUE, 
+  #                   1005, 7, TRUE, 
+  #                   1006, 3, TRUE, 
+  #                   1007, 5, TRUE, 
+  #                   1008, 12, TRUE, 
+  #                   1009, 4, TRUE, 
+  #                   1010, 7, TRUE, 
+  #                   1011, 16, TRUE, 
+  #                   1012, 4, TRUE, 
+  #                   1013, 8, TRUE, 
+  #                   1014, 2, TRUE, 
+  #                   1015, 15, TRUE, 
+  #                   1016, 2, TRUE, 
+  #                   1017, 1, TRUE, 
+  #                   1018, 2, TRUE, 
+  #                   1019, 4, TRUE, 
+  #                   1020, 1, TRUE, 
+  #                   1021, 3, TRUE, 
+  #                   1022, 9, TRUE, 
+  #                   1023, 1, TRUE, 
+  #                   1024, 34, TRUE, 
+  #                   1025, 4, TRUE, 
+  #                   1026, 10, TRUE, 
+  #                   1027, 7, TRUE, 
+  #                   1028, 7, TRUE, 
+  #                   1029, 4, TRUE, 
+  #                   1030, 7, TRUE, 
+  #                   1031, 3, TRUE, 
+  #                   1032, 16, TRUE)) %>%
+  
+  # restrict to fields present in SuRGE data
+  select(-lake_name)
+
+
 
 # Read in lake-scale aggregated data
-load(paste0(userPath, "data/CIN/2016_survey/meanVariance.c.lake.lu.agg.Rdata"))
-
-dat_2016_agg <-  meanVariance.c.lake.lu.agg # rename to dat_2016_agg
-remove(meanVariance.c.lake.lu.agg) # remove original object
+# not certain what we want from here yet, so hold off for now.
+# load(paste0(userPath, "data/CIN/2016_survey/meanVariance.c.lake.lu.agg.Rdata"))
+# 
+# dat_2016_agg <-  meanVariance.c.lake.lu.agg # rename to dat_2016_agg
+# remove(meanVariance.c.lake.lu.agg) # remove original object
   
-# dat_2016
-# morpho
-"area_km2""perim_km" "wtr_dpth"
+
 
 
 

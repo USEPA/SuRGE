@@ -108,9 +108,8 @@ by= "gnis_id",na_matches="never")
 
 clow_links<-clow_link %>%
   mutate(log_sedimentation=ifelse(is.na(log_sedimentation.x),log_sedimentation.y,log_sedimentation.x))%>%
-  mutate(sedimentOC=ifelse(is.na(sedimentOC.x),sedimentOC.y,sedimentOC.x))
-
-clow_links$lake_id<-as.character(clow_links$lake_id)
+  mutate(sedimentOC=ifelse(is.na(sedimentOC.x),sedimentOC.y,sedimentOC.x))%>%
+  select(lake_id,log_sedimentation,sedimentOC)
 
 RESSED_link <- left_join(clow_links,RESSED_link, by="lake_id")
 
