@@ -75,6 +75,9 @@ source("scripts/analysis/calculateEbullition.R") # eb_results
 # Merge diffusive and ebullitive rates --> calculate total
 source("scripts/analysis/calculateTotalEmissions.R")
 
+# Get 2016 data
+source("scripts/analysis/read2016data.R")
+
 # Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs
 source("scripts/analysis/mergePredictorsPrepForStatistics.R") # dat
