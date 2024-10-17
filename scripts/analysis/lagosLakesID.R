@@ -155,7 +155,7 @@ surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_s
 ## each SuRGE site
 surge_sites_reach_codes <- left_join(surge_sites %>% 
                                        select(lake_id, nhdplusv2_comid,gnis_name,gnis_id), # only keep minimum needed variables
-                                     locus_link_aggregated %>% select(lagoslakeid, nhdplusv2_comid, lake_reachcode), # only keep merge variable and lagoslakeid 
+                                     locus_link_aggregated %>% select(lagoslakeid, nhdplusv2_comid, lake_nhdid,lake_reachcode), # only keep merge variable and lagoslakeid 
                                      by = "nhdplusv2_comid") 
 
 # We want to add sample month to enable more precise matching with LAGOS trophic status estimates.
