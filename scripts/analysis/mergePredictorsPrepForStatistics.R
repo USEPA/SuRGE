@@ -188,7 +188,7 @@ dim(dat) # 3483
  
 # 12. Merge NHDPlusV2 - lakeCat----
 dat <- dat %>%
-   left_join(lake_cat,  by = c("nhd_plus_waterbody_comid" = "comid", "lake_id" = "lake_id"))
+   left_join(lake_cat_abbv,  by = c("nhd_plus_waterbody_comid" = "comid", "lake_id" = "lake_id"))
  
  dim(lake_cat) #147, 16
  dim(dat) # 3483
