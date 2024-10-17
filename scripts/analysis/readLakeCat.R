@@ -24,6 +24,10 @@ lake_cat <- lc_get_data(metric = paste(lake_cat_vars, collapse=","),
   # add lake_id
   left_join(surge_comid)
 
+lake_cat_abbv<-lake_cat %>%
+  mutate(NitrogenCat=sum(manurecat,cbnfcat,fertcat))%>%
+  select(comid, lake_id, kffactcat,runoffcat,omcat,scat,pctcrop2019cat,catareasqkm,NitrogenCat,
+         npdesdenscat,agkffactcat,damnidstorcat,elevcat)
 
 
 # Inventory records
