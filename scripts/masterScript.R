@@ -26,6 +26,9 @@ source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and micro
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl18
 source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
+# Get 2016 data
+source("scripts/analysis/read2016data.R")
+
 # Read other lake characteristics
 source("scripts/analysis/readMorpho.R") # morpho
 source("scripts/analysis/readNla17.R") # nla17_chem
@@ -36,7 +39,7 @@ source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Ti
 source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
 source("scripts/analysis/readIpccClimateZones.R") #surge_climate
 source("scripts/analysis/readLakeCat.R")#read in LakeCat 
-source("scripts/analysis/readRESSED.R")#read in reservoir sedimentation data
+source("scripts/analysis/readRESSED.R")#read in reservoir sedimentation data (requires lagosLakesID.R)
 source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
 source("scripts/analysis/readNWIS.R")#read water level data for subset of reservoirs
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
@@ -75,8 +78,6 @@ source("scripts/analysis/calculateEbullition.R") # eb_results
 # Merge diffusive and ebullitive rates --> calculate total
 source("scripts/analysis/calculateTotalEmissions.R")
 
-# Get 2016 data
-source("scripts/analysis/read2016data.R")
 
 # Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs

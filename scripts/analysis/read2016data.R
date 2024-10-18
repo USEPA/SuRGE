@@ -5,6 +5,7 @@ load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaDa
 dat_2016 <- eqAreaData # rename to dat_2016
 remove(eqAreaData) # remove original object
 
+
 dat_2016 <- dat_2016 %>% 
   janitor::clean_names() %>% 
   # remove extra Acton Lake observations
@@ -15,13 +16,18 @@ dat_2016 <- dat_2016 %>%
          ch4_drate_mg_h_best, ch4_erate_mg_h, ch4_trate_mg_h, #ch4_best_model,
          co2_drate_mg_h_best, co2_erate_mg_h, co2_trate_mg_h, #co2_best_model,
          n2o_erate_mg_h, 
+         eb_ml_hr_m2, # volumetric_ebullition and volumetric_ebullition_units
+         lat_samp, long_smp, # site coordinates lat and long
+         trap_deply_dt_tm, # trap_deply_date_time
+         trap_rtrv_dt_tm, # trap_rtrvl_date_time
          chla_d, chla_s,
          do_l_d, do_l_s,
          p_h_d, p_h_s,
          sp_cn_d, sp_cn_s,
          tmp_c_d, tmp_c_s,
          tr_ntu_d, tr_ntu_s,
-         sm_dpth_d, sm_dpth_s)
+         sm_dpth_d, sm_dpth_s,
+         wtr_dpth) # site_depth
 
 # site depth wasn't measured in first few lakes (oops) but we have bathymetry data
 # for those lakes.
@@ -40,6 +46,15 @@ dat_2016 <- dat_2016 %>%
     co2_total = co2_trate_mg_h,
     #co2_best_model = co2_best_model,
     n2o_ebullition = n2o_erate_mg_h,
+    volumetric_ebullition  = eb_ml_hr_m2,
+    
+    # dates
+    trap_deply_date_time = trap_deply_dt_tm, 
+    trap_rtrvl_date_time = trap_rtrv_dt_tm, 
+    
+    # coordinates
+    lat = lat_samp,
+    long = long_smp,
     
     # chemistry
     shallow_chla_lab = chla_sample,
@@ -67,13 +82,15 @@ dat_2016 <- dat_2016 %>%
     
     # sample depths
     deep_sample_depth_m = sm_dpth_d,
-    shallow_sample_depth_m = sm_dpth_s
+    shallow_sample_depth_m = sm_dpth_s,
+    site_depth = wtr_dpth
     
   ) %>%
   mutate(
     # identifiers
     visit = 1,
     site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
+    sample_date = as.Date(trap_deply_date_time), # grab earliest date
     
     # emission units
     ch4_diffusion_units = "mg_ch4_m2_h",
@@ -83,6 +100,7 @@ dat_2016 <- dat_2016 %>%
     co2_ebullition_units = "mg_co2_m2_h",
     co2_total_units = "mg_co2_m2_h",
     n2o_ebullition_units = "mg_n2o_m2_h",
+    volumetric_ebullition_units = "ml_m2_h",
     
     # chemistry units
     chla_lab_units = "ug_l",
