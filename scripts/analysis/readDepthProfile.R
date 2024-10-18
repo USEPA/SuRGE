@@ -16,7 +16,7 @@ get_depth_profile <- function(paths){
                regexp = 'DepthProfile', # file names containing this pattern
                ignore.case = TRUE, # DepthProfile or depthProfile, Depthprofile, etc
                recurse = TRUE) %>% # look in all subdirectories
-    .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
+    .[!grepl(c(".pdf|.docx|2016"), .)] %>% # remove pdf and .docx review files & 2016 profiles
     .[!grepl(c("Falls"), .)] %>% # Falls Lake worked up in fallsLakeCH4.proj
     #.[54] %>%
     # map will read each file in fs_path list generated above

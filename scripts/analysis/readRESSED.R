@@ -51,14 +51,13 @@ RESSED_link<-RESSEDl %>%
   mutate(lake_id = str_extract(siteID, "(\\d+$)"))%>% # extract numeric part of lake_id)
   select(RESSED,lake_id,cubic_meters_per_yr)
 
-RESSED_link$lake_id<-as.character(RESSED_link$lake_id)
-
+RESSED_link$lake_id<-as.numeric(RESSED_link$lake_id)
 
 #Read in CONUS reservoir data provided by David Clow
-lake_cat$OCburialrate <- 0.34 +
-  0.046 * lake_cat$tmean8110cat +
-  2.020 * lake_cat$kffactcat +
-  0.184 * +0.766 * (sum(lake_cat$pctwdwet2019cat, lake_cat$pcthbwet2019cat))
+# lake_cat$OCburialrate <- 0.34 +
+#   0.046 * lake_cat$tmean8110cat +
+#   2.020 * lake_cat$kffactcat +
+#   0.184 * +0.766 * (sum(lake_cat$pctwdwet2019cat, lake_cat$pcthbwet2019cat))
 
 #Forced read-in of everything as a character class to preserve the leading zeros in the Reach Code
 conus_res<-read.csv(paste0(userPath,"data/siteDescriptors/CONUS_Reservoirs_from_FM_Clow_clipped_Morris_Kirwan.csv"),colClasses="character")
@@ -88,30 +87,51 @@ conus_res<-conus_res %>%
                         -2.055))
 
 conus_res$lake_reachcode<-conus_res$Reach_Code
+conus_res$lake_nhdid<-conus_res$Permanent_ID
+conus_res$hylak_id<-as.numeric(conus_res$Unique_ID)
 #Make GNIS ID a numeric field so that the leading zeros are dropped & it 
 #matches the GNIS ID in the surge link
 conus_res$gnis_id<-as.numeric(conus_res$GNIS_ID)
 
 #Select relevant info to pass to SurGE link
 
+#test out Hydrolakes links
+cl_link<- left_join(hylak_link %>%
+                      select(lake_id,hylak_id),
+                    conus_res %>% select (log_sedimentation,sedimentOC,lake_reachcode,GNIS_ID,Area_sq_m_recalc,Permanent_ID,hylak_id),
+                    by="hylak_id")
+
 #first link the clow dataset to SurGE IDs using the NHD reach code
-clow_link <- left_join(surge_sites_reach_codes %>% 
-                                       select(lake_id, lake_reachcode,gnis_name,gnis_id), # only keep minimum needed variables
-                                     conus_res %>% select(log_sedimentation,sedimentOC,lake_reachcode,GNIS_ID,Area_sq_m_recalc), # only keep merge variable and lagoslakeid 
-                                     by = "lake_reachcode",na_matches="never")
+# swapped surge_sites_reach_code from lagosLakesID.R for lagos_links. A little cleaner, one less objects to manage. JB 10/18/2024
+clow_link <- left_join(lagos_links %>% 
+                         select(lake_id,lake_nhdid,lake_reachcode,lake_namegnis,nhdhr_gnisid), # only keep minimum needed variables
+                       conus_res %>% select(log_sedimentation,sedimentOC,lake_reachcode,GNIS_ID,Area_sq_m_recalc,Permanent_ID), # only keep merge variable and lagoslakeid 
+                       by = "lake_reachcode",na_matches="never")
 
 #next link the clow dataset to SuRGE IDs using the GNIS ID
 clow_link<- left_join(clow_link %>%
-  select(lake_id,lake_reachcode,gnis_name,gnis_id,log_sedimentation,sedimentOC,lake_reachcode),
+  select(lake_id,lake_nhdid,lake_reachcode,gnis_name,gnis_id,log_sedimentation,sedimentOC),
 conus_res %>% select(log_sedimentation,sedimentOC,gnis_id,GNIS_Name),
 by= "gnis_id",na_matches="never")
 
+#next link the clow dataset to SuRGE IDs using the NHDPlusV2 COMID
+clow_link<- left_join(clow_link %>%
+                        select(lake_id,lake_nhdid,lake_reachcode,gnis_name,gnis_id,log_sedimentation.x,log_sedimentation.y,
+                               sedimentOC.x,sedimentOC.y,lake_reachcode),
+                      conus_res %>% select(log_sedimentation,sedimentOC,lake_nhdid),
+                      by= "lake_nhdid",na_matches="never")
+
+#now try to figure out if the hydro
+
 clow_links<-clow_link %>%
-  mutate(log_sedimentation=ifelse(is.na(log_sedimentation.x),log_sedimentation.y,log_sedimentation.x))%>%
-  mutate(sedimentOC=ifelse(is.na(sedimentOC.x),sedimentOC.y,sedimentOC.x))%>%
+  mutate(log_sedimentation=ifelse(!is.na(log_sedimentation.x),log_sedimentation.x,
+                                  ifelse(!is.na(log_sedimentation.y),log_sedimentation.y,log_sedimentation)))%>%
+  mutate(sedimentOC=ifelse(!is.na(sedimentOC.x),sedimentOC.x,
+                           ifelse(!is.na(sedimentOC.y),sedimentOC.y, sedimentOC)))%>%
   select(lake_id,log_sedimentation,sedimentOC)
 
 RESSED_link <- left_join(clow_links,RESSED_link, by="lake_id")
+RESSED_link$C_sedimentation<-RESSED_link$log_sedimentation*RESSED_link$sedimentOC
 
 
 # READ CLOW RAW DATA

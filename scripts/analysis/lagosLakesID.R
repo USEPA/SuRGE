@@ -153,23 +153,6 @@ lake_list_for_lagos_merge <- lake.list.all %>% # see readSurgeLakes.R
   select(lake_id, visit, nhdplusv2_comid) %>% # gnis_name, gnis_id included earlier. needed?
   distinct() # this collapses 69, 70, into one record each
 
-  
-# surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.xlsx"), na = "NA") %>%
-#   filter(`EvalStatus Code` == "S") %>% # only sampled
-#   janitor::clean_names() %>%
-#   dplyr::rename(lake_id = site_id) %>%
-#   mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
-#            as.numeric()) %>% # convert lake_id to numeric
-#   rename(nla17_site_id = site_id_2) %>%
-#   mutate(nhdplusv2_comid = as.character(nhd_plus_waterbody_comid))%>%
-#   select(lake_id, sample_year, nhdplusv2_comid, gnis_name, gnis_id)
-# 
-# ## Create a link for the Clow sedimentation dataset by pulling the reach code associated with 
-# ## each SuRGE site
-# surge_sites_reach_codes <- left_join(surge_sites %>% 
-#                                        select(lake_id, nhdplusv2_comid,gnis_name,gnis_id), # only keep minimum needed variables
-#                                      locus_link_aggregated %>% select(lagoslakeid, nhdplusv2_comid, lake_reachcode), # only keep merge variable and lagoslakeid 
-#                                      by = "nhdplusv2_comid") 
 
 # We want to add sample month to enable more precise matching with LAGOS trophic status estimates.
 # LAGOS only covers 1984 - 2020, so we can only match specific months for surge

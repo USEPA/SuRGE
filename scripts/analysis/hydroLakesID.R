@@ -1,5 +1,5 @@
 # LINK HYDRO-LAKES ID WITH SURGE SITES BASED ON LATITUDE/LONGITUDE
-
+#
 # devtools::install_github("https://github.com/lawinslow/hydrolinks")
 # # or install from hydrolinks archive can be found here:
 # # https://cran.r-project.org/src/contrib/Archive/hydrolinks/
@@ -7,7 +7,7 @@
 # library(tidyverse)
 # library(readxl)
 # library(hydrolinks) # add to renv output
-
+#
 #  # read in SuRGE site information (lat/long required) and filter to sampled sites
 # surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.xlsx")) %>%
 #   filter(`EvalStatus Code` == "S") %>%
@@ -17,7 +17,7 @@
 #            as.numeric()) # convert lake_id to numeric
 # 
 # dim(surge_sites) # 147 sites
-# # 
+# #
 # # # use lat/long to find associated hylak_id from hydrolinks package
 # # # using a buffer of 20 m from shapefile boundaries
 # # # NOTE: this piece of code will take  a little while to run
@@ -38,17 +38,18 @@
 #                                           1055540,
 #                                           112928))
 # 
-# surge_additions = get_shape_by_id(match_id = surge_manual$hylak_id, 
+# surge_additions = get_shape_by_id(match_id = surge_manual$hylak_id,
 #                                   feature_type = "waterbody", dataset = "hydrolakes") %>%
 #   as.data.frame() %>%
 #   select(-geometry) %>%
-#   mutate(MATCH_ID = surge_manual$lake_id)
+#   full_join(surge_manual) %>%
+#   rename(MATCH_ID = lake_id)
 # 
 # 
 # # merge final dataset with hylak_id
 # hylak_link <- full_join(hydrolakes_surge, surge_additions) %>%
 #   dplyr::select(-contains("pour"), -centroid_x, -lake_name, -country, - continent, -poly_src) %>%
-#   clean_names() %>%
+#   janitor::clean_names() %>%
 #   rename(lake_id = match_id) %>%
 #   relocate(lake_id, hylak_id, grand_id, lake_type) %>%
 #   rename_with(.cols = -c(lake_id, hylak_id, grand_id), ~paste0("hylak_", .)) %>%
