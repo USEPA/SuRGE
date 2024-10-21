@@ -1,40 +1,43 @@
-# For the 2020 JGR paper, I used the following script to calculate stratification
-# indices. My notes indicate that I started by working with rLakeAnalyzer but
-# pivoted to these custom functions.
-
-# 
+# Stratification Index 
+# 10/20/2024
 # Going to try with RLakeAnalyzer
 
-depth_profiles_all$uniqueid=paste(depth_profiles_all$lake_id,depth_profiles_all$visit)
 
-sites<- depth_profiles_all %>%
-  group_by(uniqueid)%>%
-  summarise(site_id=site_id[1],visit=visit[1])
+depth_profiles_all$uniqueid = paste(depth_profiles_all$lake_id, depth_profiles_all$visit)
 
-buoyf<-NULL
+sites <- depth_profiles_all %>%
+  group_by(uniqueid) %>%
+  summarise(lake_id = lake_id[1], visit = visit[1])
 
-for (i in 1:165){
-  prol<-filter(depth_profiles_all,uniqueid==sites$uniqueid[i])
-  wtr<-as.vector(prol$temp)
-  depths<-as.vector(prol$sample_depth)
-  buoyf[i]<-center.buoyancy(wtr,depths)
+buoyf <- NULL
+
+for (i in 1:165) {
+  prol <- filter(depth_profiles_all, uniqueid == sites$uniqueid[i])
+  wtr <- as.vector(prol$temp)
+  depths <- as.vector(prol$sample_depth)
+  buoyf[i] <- center.buoyancy(wtr, depths)
 }
 
-thermdep<-NULL
+thermdep <- NULL
 
-for (i in 1:165){
-  prol<-filter(depth_profiles_all,uniqueid==sites$uniqueid[i])
-  temp<-c(prol$temp)
-  dep<-c(prol$sample_depth)
-  thermdep[i]<-thermo.depth(temp,dep, Smin = 0.1,)
+for (i in 1:165) {
+  prol <- filter(depth_profiles_all, uniqueid == sites$uniqueid[i])
+  temp <- c(prol$temp)
+  dep <- c(prol$sample_depth)
+  thermdep[i] <- thermo.depth(temp, dep, Smin = 0.1, )
 }
 
 #Make a link for stratification indices
-#I didn't include a depth to hypoxia since we have oxygen data at 
-#each site where we have methane but we can revisit this depending 
+#I didn't include a depth to hypoxia since we have oxygen data at
+#each site where we have methane but we can revisit this depending
 #on the modeling approach we land on
 
-strat_link<-data.frame(sites$site_id,sites$visit,buoyf,thermdep)
+strat_link <- data.frame(sites$lake_id, sites$visit, buoyf, thermdep)
+colnames(strat_link)<-c("lake_id","visit","buoyf","thermdep")
+
+# For the 2020 JGR paper, I used the following script to calculate stratification
+# indices. My notes indicate that I started by working with rLakeAnalyzer but
+# pivoted to these custom functions.
 
 # # CALCULATE DEPTH TO THERMOCLINE--------------
 # # Calculate water temp rate of change

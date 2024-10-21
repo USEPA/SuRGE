@@ -9,8 +9,7 @@
 # library(httr) #for reading trophic status lagos data, only necessary for first run
 
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- READ AND FORMAT LAGOS LOCUS-LAKE_LINK AND LOCUS-LAKE_CHARACTERISTICS
+# 1. READ LOCUS-LAKE_LINK--------
 
 # LOCUS-LAKE_LINK
 # [6/12/2024] working on Jake's machine!!  If acting up, skip to line 18
@@ -30,25 +29,27 @@ locus_link <- locus$locus$lake_link
 locus_link_aggregated <- locus_link %>%
   group_by(nhdplusv2_comid) %>% # unique per lake
   filter(row_number() == 1) %>% # first record for each comid. alternatives: slice_head(1) and  top_n(n = 1) 
-  select(lagoslakeid, nla2012_siteid, nla2007_siteid, lake_nhdid, lake_namegnis, 
-         nhdhr_gnisid, nhdplusv2_comid, lake_reachcode) %>% # just keep what we need
+  select(lagoslakeid, nla2012_siteid, nla2007_siteid, 
+         lake_nhdid, # this is NHD HR Permanent ID
+         lake_namegnis, nhdhr_gnisid, # I believe these are both from NHD HR
+         nhdplusv2_comid, 
+         lake_reachcode) %>% # in at least one istance I checked: lake_reachcode = NHDHD REACHCODE = NHDPlusV2 REACHCODE
   rename(nla07_site_id = nla2007_siteid, # per SuRGE convention
          nla12_site_id = nla2012_siteid)
 
-# LOCUS-LAKE_CHARACTERISTICS
+# 2. READ LOCUS-LAKE_CHARACTERISTICS------------
 locus_characteristics <- locus$locus$lake_characteristics
 # object contains many variables we will get from other sources (e.g. morphometry from Jeff,
-# watershed from Alex).  Subset to those unique to lagos
+# watershed from Alex).  Subset to connectivity variables unique to lagos
 locus_connectivity <- locus_characteristics %>% 
   select(lagoslakeid, lake_connectivity_class, lake_connectivity_fluctuates, lake_connectivity_permanent, 
          lake_lakes4ha_upstream_ha, lake_lakes4ha_upstream_n, lake_lakes1ha_upstream_ha, lake_lakes1ha_upstream_n, 
          lake_waterarea_ha, #placeholder for surface area
          lake_lakes10ha_upstream_n, lake_lakes10ha_upstream_ha)
 
-#LAGOS NETWORKS 
+# 3. READ LAGOS RESERVOIRS----------
 #emailed lead author of networks paper, Katelyn King
 
-#LAGOS RESERVOIR PACKAGE
 inUrl1  <- "https://pasta.lternet.edu/package/data/eml/edi/1016/2/dac3a0d7e34070639f4894ccc316cbd1" 
 infile1 <- tempfile()
 try(download.file(inUrl1,infile1,method="curl"))
@@ -86,11 +87,13 @@ dt1 <-read.csv(infile1,header=F
 
 unlink(infile1)
 
-locus_reservoir<- dt1 %>%
-  select(lagoslakeid,lake_rsvr_probrsvr,lake_rsvr_classmethod,lake_rsvr_class)
+locus_reservoir <- dt1 %>%
+  select(lagoslakeid,
+         lake_rsvr_probrsvr,
+         lake_rsvr_classmethod,
+         lake_rsvr_class)
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- READ LAGOS NETWORKS FILE
+# 4. READ LAGOS NETWORKS FILE-----------
 
 #downloaded the nets_networkmetrics_medres file from https://doi.org/10.6073/pasta/98c9f11df55958065985c3e84a4fe995
 #saved to the SuRGE site descriptors subfolder of the data folder
@@ -108,8 +111,8 @@ ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_me
 lagos_network<- ln %>%
   select(lagoslakeid,lake_nets_nearestdamup_km,lake_nets_totaldamup_n)
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- READ LAGOS TROPHIC STATUS
+
+# 5. READ LAGOS TROPHIC STATUS-----
 
 # lagos productivity estimates
 # preprint link is: https://www.biorxiv.org/content/10.1101/2024.05.10.593626v1
@@ -136,85 +139,92 @@ lagos_network<- ln %>%
 lagos_ts <- readRDS(paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
 
 
+# 6. READ SURGE LAKES-------
+# Prepare a list of SuRGE lakes (+2016, Falls Lake) to merge with LAGOS data
+# Want a unique record for each lake + visit. 147, 148, 250, 281 sampled twice
+lake_list_for_lagos_merge <- lake.list.all %>% # see readSurgeLakes.R
+  # collapse lacustrine/riverine/transitional into one lake
+  mutate(lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                             lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                             TRUE ~ lake_id),
+         lake_id = as.numeric(lake_id)) %>%
+  filter(lake_id != 1033) %>% # exclude Falls Lake, too complicated right now [10/18/2024]
+  mutate(nhdplusv2_comid = as.character(nhd_plus_waterbody_comid)) %>% # not sure why this is necessary
+  select(lake_id, visit, nhdplusv2_comid) %>% # gnis_name, gnis_id included earlier. needed?
+  distinct() # this collapses 69, 70, into one record each
 
-
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- READ SURGE LAKES
-# Read in the SuRGE sites from the updated eval_status spreadsheet.
-surge_sites <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_eval_status.xlsx"), na = "NA") %>%
-  filter(`EvalStatus Code` == "S") %>% # only sampled
-  janitor::clean_names() %>%
-  dplyr::rename(lake_id = site_id) %>%
-  mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
-           as.numeric()) %>% # convert lake_id to numeric
-  rename(nla17_site_id = site_id_2) %>%
-  mutate(nhdplusv2_comid = as.character(nhd_plus_waterbody_comid))%>%
-  select(lake_id, sample_year, nhdplusv2_comid, gnis_name, gnis_id)
-
-## Create a link for the Clow sedimentation dataset by pulling the reach code associated with 
-## each SuRGE site
-surge_sites_reach_codes <- left_join(surge_sites %>% 
-                                       select(lake_id, nhdplusv2_comid,gnis_name,gnis_id), # only keep minimum needed variables
-                                     locus_link_aggregated %>% select(lagoslakeid, nhdplusv2_comid, lake_nhdid,lake_reachcode), # only keep merge variable and lagoslakeid 
-                                     by = "nhdplusv2_comid") 
 
 # We want to add sample month to enable more precise matching with LAGOS trophic status estimates.
 # LAGOS only covers 1984 - 2020, so we can only match specific months for surge
-# sites sampled in during that time frame.  Falls Lake (2014), R10 (2018, 2020), CIN (2020).
-# Get sample months for those lakes, but not Falls Lake.  data entry not complete [6/25/2024]
+# sites sampled during that time frame: Falls Lake (2014), R10 (2018, 2020), CIN (2016/2020).
+
+# 69 and 70 sampled in June and July, so 2 rows for each lake
+# June conditions are likely more related to observed emissions,
+# so only keep June record for merging with LAGOS TS.
+# 147, 148, 250, 281 were resampled, so 2 rows for each lake
 surge_sample_month_year <- fld_sheet %>%
   mutate(sample_year = lubridate::year(trap_deply_date),
          sample_month = lubridate::month(trap_deply_date),
          # convert 69/70 lacustrine.. from the missouri river to just 69/70
          lake_id = case_when(grepl("69_", lake_id) ~ "69",
                              grepl("70_", lake_id) ~ "70",
-                             TRUE ~ lake_id)) %>%
-  filter(!is.na(sample_year)) %>% # omits 2016 survey data.  not yet included in fld_sheet [6/25/2024]
-  distinct(lake_id, visit, sample_year, sample_month) %>% # 69 and 70 sampled in June and July, so 2 rows for each lake
-  mutate(lake_id = as.numeric(lake_id)) %>%
-  # sample_year not needed because it is contained in surge_sites. Keeping in both screws up 
-  # join because 147 and 148 were sampled in 2021 and 2023, but surge_sites only 
-  # contains 2021 record
-  select(-sample_year) 
+                             TRUE ~ lake_id),
+         lake_id = as.numeric(lake_id)) %>%
+  filter(!is.na(sample_year), # exclude empty rows (eval_status == PI/NS/TS) 
+         !(lake_id %in% 69:70 & sample_month == 7)) %>% # exclude July for 69/70 (see above) 
+  distinct(lake_id, visit, sample_year, sample_month) # collapse 69/70 into one record each
+
+
+sample_month_year_2016 <- dat_2016 %>%
+  mutate(sample_year = lubridate::year(trap_deply_date_time),
+         sample_month = lubridate::month(trap_deply_date_time)) %>% 
+  select(lake_id, visit, sample_year, sample_month) %>%
+  distinct %>%
+  filter(complete.cases(.)) 
+  
 
 # merge sample months with surge_sites
-surge_sites <- left_join(surge_sites, surge_sample_month_year, by = "lake_id", 
-                         relationship = "many-to-many") # visit 1 and 2 in surge_sample_month_year matches to one record in surge_sites 
-
-dim(surge_sites) # 153. only 147 lakes, but revisits for 4 plus 2 records for 69 and 70 which were sampled over two months. Need to be careful with these below.
-
+# naively joins on lake_id and visit
+lake_list_for_lagos_merge_ts <- full_join(lake_list_for_lagos_merge, 
+                         bind_rows(surge_sample_month_year, sample_month_year_2016))
 
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- MERGE SURGE SITES AND LOCUS-LAKE_LINK$LAGOSLAKEID
+dim(lake_list_for_lagos_merge_ts) # 150. only 146 lakes (falls lake excluded), but revisits for 4 
+
+
+
+# 7. ADD LAGOS LAKE ID TO LIST OF SURGE SAMPLE MONTH AND YEAR-----
 # Need to add lagoslakeid to surge_sites for use in trophic status processing.
-# Merge on nhdplusv2_comid
+# lagoslakeid and nhdplusv2 are in locus-lake_link$lagoslakeid
+# nhdplusv2_comid is in lake_list_for_lagos_merge_ts
+# therefore merge on nhdplusv2_comid
+
 # Add other locus-lake_link and locus-lake_characteristic data after trophic
 # status has been merged
-surge_sites_lagoslakeid <- left_join(surge_sites %>% 
-                                       select(lake_id, visit, sample_month, sample_year, nhdplusv2_comid), # only keep minimum needed variables
-                                     locus_link_aggregated %>% select(lagoslakeid, nhdplusv2_comid), # only keep merge variable and lagoslakeid 
-                                     by = "nhdplusv2_comid") %>%
+lake_list_for_lagos_merge_ts_lagoslakeid <- left_join(lake_list_for_lagos_merge_ts,
+                                                      locus_link_aggregated %>% # dervied from locus-lake_link$lagoslakeid
+                                                        select(lagoslakeid, nhdplusv2_comid), # only keep merge variable and lagoslakeid
+                                                      by = "nhdplusv2_comid") %>% # will naively join on this, specifying for clarity
   #  add the Lagos link for 10, 1009, and 1010 since lagos lacked the comid ID to link to SuRGE
   mutate(lagoslakeid = case_when(lake_id == 10 ~ 201797,
                                  lake_id == 1009 ~ 260194,
                                  lake_id == 1010 ~ 260193,
                                  TRUE ~ lagoslakeid)) %>%
-  select(-nhdplusv2_comid) # remove grouping variable, no longer needed
-dim(surge_sites_lagoslakeid ) # 153
-surge_sites_lagoslakeid %>% filter(is.na(lagoslakeid)) %>% {dim(.)} # only two lakes w/out LAGOS record!  One is PR.
+  select(-nhdplusv2_comid) # remove merging variable, no longer needed
+dim(lake_list_for_lagos_merge_ts_lagoslakeid) # 150. only 146 lakes (falls lake excluded), but revisits for 4 
+
+# any missing lagos_id
+lake_list_for_lagos_merge_ts_lagoslakeid %>% 
+  filter(is.na(lagoslakeid)) %>% {dim(.)} # only two lakes w/out LAGOS record!  One is PR.
 
 
-
-
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- MERGE LAGOS TROPHIC STATUS
+# 8. MERGE LAGOS TROPHIC STATUS-------
 # lagos_ts is a big file, largely because it contains a time series of observations
 # for 187,000 lakes. Lets see how many surge lakes have a lagos trophic status value.
 
 # pull out observations for SuRGE lakes
 lagos_ts_small <- lagos_ts %>%
-  filter(lagoslakeid %in% surge_sites_lagoslakeid$lagoslakeid) %>%
+  filter(lagoslakeid %in% lake_list_for_lagos_merge_ts_lagoslakeid$lagoslakeid) %>%
   # the columns specified below have variable values across the time series and would need to be condensed
   # to a single value when predicted chl a is aggregated by month or season. It doesn't
   # make sense to compute a summary stat for these (e.g. mean, median), and unique()
@@ -223,7 +233,8 @@ lagos_ts_small <- lagos_ts %>%
 
 # lakes 1000 (Puerto Rico) and 14 don't have lagos ID. lake 166 has lagos ID, but no
 # trophic status records
-lagos_ts_small %>% distinct(lagoslakeid) # 144 SuRGE sites with trophic status records, 3 without
+lake_list_for_lagos_merge_ts_lagoslakeid %>%
+  filter(!(lagoslakeid %in% lagos_ts_small$lagoslakeid)) # only 3 lakes without lagos trophic status records
 dim(lagos_ts_small) # 77,802 observations
 
 # inspect the trophic status data
@@ -240,13 +251,12 @@ ggplot(lagos_ts_small, aes(as.factor(lagoslakeid), chl_predicted)) +
 # Merge and aggregate trophic status time series
 
 # 1. merge trophic status with lake IDs
-lagos_ts_agg <- left_join(surge_sites_lagoslakeid, lagos_ts_small, na_matches = "never", 
-                         relationship = "many-to-many") %>% # lake w/multiple visits, or sampling that spanned two months (69/70) have multiple records in surge_locus_links_connectivity
-  # 81,806, including two surge lakes without lagoslakeid match to lagos_ts. These
+lagos_ts_agg <- left_join(lake_list_for_lagos_merge_ts_lagoslakeid, lagos_ts_small, na_matches = "never", 
+                         relationship = "many-to-many") %>% # lake w/multiple visits have multiple records
+  # 79,296, including three surge lakes without lagoslakeid match to lagos_ts. These
   # single observations are appended to end of record of matched observations.
-  #dim %>%
   # create variable to uniquely identify each 'lake x sample_month x visit'. 
-  mutate(split_variable = paste(lake_id, sample_month, visit)) %>%
+  mutate(split_variable = paste(lake_id, sample_month, visit)) %>% # 148 sampled on month 8 is 21 and 23, but visit uniquely IDs these
   split(.$split_variable) %>% # split into named list elements: format = (lake_id sample_month visit)
   
   # 2. create logicals to define aggregation periods. See github issue 106:
@@ -256,16 +266,15 @@ lagos_ts_agg <- left_join(surge_sites_lagoslakeid, lagos_ts_small, na_matches = 
   # years (as a measure of overall productivity that gets integrated into the sediment?"
   # for troubleshooting: '69 7 1' sampled in 2021  '239 7 1' sampled in 2018
   map_df(~mutate(., 
-                 filter_month = case_when(month == sample_month ~ TRUE, # TRUE if remote sensing data collected same month as SuRGE sampling
-                                          lagoslakeid %in% c(6445, 6573) & month == 8 ~ TRUE, # sampled in month 9, but no data available for that month
-                                          lagoslakeid == 2039 & month == 7 ~ TRUE, # sampled in month 6, but no data available for that month
+                 filter_month = case_when(month == sample_month ~ TRUE, # TRUE if lagos data collected same month as SuRGE sampling (not necessarily same year)
+                                          # lagoslakeid %in% c(6445, 6573) & month == 8 ~ TRUE, # sampled in month 9, but no data available for that month
+                                          # lagoslakeid == 2039 & month == 7 ~ TRUE, # sampled in month 6, but no data available for that month
                                           TRUE ~ FALSE), # else FALSE
-                 filter_season = case_when(month %in% 6:9 ~ TRUE, # SuRGE season (June - September)
+                 filter_season = case_when(month %in% 6:9 ~ TRUE, # SuRGE season (June - September of al years)
                                            TRUE ~ FALSE), # else FALSE
-                 filter_year = case_when(sample_year == year ~ TRUE, # TRUE if remote sensing data collected same year as SuRGE sampling, else 
-                                         # if surge sampling conducted outside remote sensing time series, use 3 most recent years
-                                         sample_year >= 2021 & year %in% (2018:2020) ~ TRUE, 
-                                         TRUE ~ FALSE)) %>% # FALSE for all other conditions
+                 filter_year = case_when(year %in% (unique(sample_year) - 3):unique(sample_year) ~ TRUE, # true within 3 years of sampling (e.g. 2020,2021,2022,2023 for 2023 lakes)
+                                         TRUE ~ FALSE)# FALSE for all other conditions
+         ) %>% 
            # 3. calculate means for the aggregation periods defined above
            summarize(
              # First for the sampling month
@@ -280,38 +289,22 @@ lagos_ts_agg <- left_join(surge_sites_lagoslakeid, lagos_ts_small, na_matches = 
              # need to retain unique identifiers
              distinct(across(c(lake_id, lagoslakeid, visit)))) %>%
            rename_with(~str_replace(., "_predict_", "_predicted_"), contains("_predict_")) # change 'predict' back to 'predicted'
-  ) %>%
-  # 5. aggregate values for lake sampled across multiple months (69 and 70)
-  group_by(lake_id, visit, lagoslakeid) %>% # including lagoslakeid so the value is preserved in aggregation below
-  summarize(across(everything(), mean)) %>%
-  ungroup
+  )
 
-dim(lagos_ts_agg) # 151 observations    
-lagos_ts_agg %>% distinct(lake_id, visit) # 151 lake_id X visit records
-lagos_ts_agg %>% distinct(lake_id) # 147 unique lakes, good
+dim(lagos_ts_agg) # 150 observations    
+lagos_ts_agg %>% distinct(lake_id, visit) # 150 lake_id X visit records
+lagos_ts_agg %>% distinct(lake_id) # 146 unique lakes, good (Falls lake omitted)
 
 
+# 9. ADD NHDPLUSV2 COMID-----------
+lagos_ts_agg <- lagos_ts_agg %>%
+  inner_join(lake_list_for_lagos_merge %>% select(lake_id, visit, nhdplusv2_comid))
+# merges on lagoslakeid and visit
+dim(lake_list_for_lagos_merge) #150
+dim(lagos_ts_agg) #150
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- MERGE TROPHIC STATUS AND SURGE_SITES
-lagos_ts_agg_surge_sites <- full_join(lagos_ts_agg,
-                                      # lakes 69 and 70 have two records each in surge_site, with each
-                                      # record representing one of the two months over which the sampling
-                                      # was distributed. Remove sample_month (which uniquely defines these
-                                      # records) and sample_year (no longer needed), then filter down to 
-                                      # unique records. This get us back down to 151 records (147 lakes
-                                      # pluss 4 revisits)
-                                      surge_sites %>% select(-sample_year, -sample_month) %>% distinct(),  
-                                     by = c("lake_id", "visit"))
-dim(lagos_ts_agg) # 151 observations
-dim(surge_sites) # 153 observations (contains extra 69 and 70 records, see full_join comment)
-dim(lagos_ts_agg_surge_sites) # 151 observations, good
-
-
-
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- ADD LAGOS-LOCUS TO MERGE
-lagos_ts_agg_surge_sites_link <- left_join(lagos_ts_agg_surge_sites,
+# 9. MERGE LAGOS-LOCUS-------------
+lagos_ts_agg_link <- left_join(lagos_ts_agg,
                                            locus_link_aggregated,
                                            # lagoslakeid was previously assigned to trophic
                                            # status data. nhdplusv2_comid comes from 'surge_sites'.
@@ -329,37 +322,43 @@ lagos_ts_agg_surge_sites_link <- left_join(lagos_ts_agg_surge_sites,
 # mutate(nhd_plus_waterbody_comid = case_when(lake_id == 1009 ~ 456124
 #                                             TRUE ~ nhd_plus_waterbody_comid))
 
-dim(lagos_ts_agg_surge_sites_link ) # 151, good
-lagos_ts_agg_surge_sites_link %>% filter(is.na(lagoslakeid)) %>% {dim(.)} # only two lakes w/out LAGOS record!  One is PR.
+dim(lagos_ts_agg_link ) # 150, good
+lagos_ts_agg_link %>% filter(is.na(lagoslakeid)) %>% {dim(.)} # only two lakes w/out LAGOS record!  One is PR.
 
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- ADD LAGOS-LAKE CONNECTIVITY TO MERGE
-lagos_ts_agg_surge_sites_link_connectivity <- left_join(lagos_ts_agg_surge_sites_link,
+
+# 10. MERGE LAGOS-LAKE CONNECTIVITY-------------
+lagos_ts_agg_link_connectivity <- left_join(lagos_ts_agg_link,
                                                         locus_connectivity)
 
-dim(lagos_ts_agg_surge_sites_link_connectivity) # 151, good
-lagos_ts_agg_surge_sites_link_connectivity %>% 
-  filter(is.na(lake_connectivity_class)) %>% {dim(.)} # 3 missing connectivity, the 2 above + New Melones
-lagos_ts_agg_surge_sites_link_connectivity %>% filter(is.na(lake_connectivity_class))
+dim(lagos_ts_agg_link_connectivity) # 150, good
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- ADD LAGOS-NETWORK TO MERGE, not adding to final predictors yet
-lagos_ts_agg_surge_sites_link_connectivity_network <- left_join(lagos_ts_agg_surge_sites_link_connectivity, lagos_network)
+# how many missing
+lagos_ts_agg_link_connectivity %>% 
+  filter(is.na(lake_connectivity_class)) %>% {dim(.)} # 3 missing connectivity, PR, New Melones, and 14
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- ADD LAGOS-RESERVOIR TO MERGE, not adding to final predictors yet 
-#-#- since not convinced it will be useful 
+# which missing
+lagos_ts_agg_link_connectivity %>% 
+  filter(is.na(lake_connectivity_class)) %>%
+  select(lagoslakeid, lake_id, visit)
 
-lagos_ts_agg_surge_sites_link_connectivity_reservoir <- left_join(lagos_ts_agg_surge_sites_link_connectivity_network,
+# 11. ADD LAGOS-NETWORK TO MERGE, not adding to final predictors yet----------
+lagos_ts_agg_link_connectivity_network <- left_join(lagos_ts_agg_link_connectivity, lagos_network)
+
+
+# 12. MERGE LAGOS-RESERVOIR-------------  
+#-#- not adding to final predictors yet since not convinced it will be useful 
+lagos_ts_agg_link_connectivity_network_reservoir <- left_join(lagos_ts_agg_link_connectivity_network,
                                                                   locus_reservoir)
-dim(lagos_ts_agg_surge_sites_link_connectivity_reservoir)#151, good
-lagos_ts_agg_surge_sites_link_connectivity_reservoir %>% 
+dim(lagos_ts_agg_link_connectivity_network_reservoir) # 150, good
+lagos_ts_agg_link_connectivity_network_reservoir %>% 
   filter(is.na(lake_rsvr_class)) %>% {dim(.)} #3 missing, the 2 above + Cloud
-lagos_ts_agg_surge_sites_link_connectivity_reservoir %>% filter(is.na(lake_rsvr_class))
+
+lagos_ts_agg_link_connectivity_network_reservoir %>% 
+  filter(is.na(lake_rsvr_class)) %>%
+  select(lagoslakeid, lake_id, visit)
 #LAGOS incorrectly predicts 10 reservoirs as lakes
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#- RENAME FINAL MERGED OBJECT
-lagos_links <- lagos_ts_agg_surge_sites_link_connectivity_network
+# 13. RENAME FINAL MERGED OBJECT---------
+lagos_links <- lagos_ts_agg_link_connectivity_network
 rm(lagos_ts_agg_surge_sites_link_connectivity)

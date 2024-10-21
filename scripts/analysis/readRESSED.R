@@ -102,10 +102,11 @@ cl_link<- left_join(hylak_link %>%
                     by="hylak_id")
 
 #first link the clow dataset to SurGE IDs using the NHD reach code
-clow_link <- left_join(surge_sites_reach_codes %>% 
-                                       select(lake_id,lake_nhdid,lake_reachcode,gnis_name,gnis_id), # only keep minimum needed variables
-                                     conus_res %>% select(log_sedimentation,sedimentOC,lake_reachcode,GNIS_ID,Area_sq_m_recalc,Permanent_ID), # only keep merge variable and lagoslakeid 
-                                     by = "lake_reachcode",na_matches="never")
+# swapped surge_sites_reach_code from lagosLakesID.R for lagos_links. A little cleaner, one less objects to manage. JB 10/18/2024
+clow_link <- left_join(lagos_links %>% 
+                         select(lake_id,lake_nhdid,lake_reachcode,lake_namegnis,nhdhr_gnisid), # only keep minimum needed variables
+                       conus_res %>% select(log_sedimentation,sedimentOC,lake_reachcode,GNIS_ID,Area_sq_m_recalc,Permanent_ID), # only keep merge variable and lagoslakeid 
+                       by = "lake_reachcode",na_matches="never")
 
 #next link the clow dataset to SuRGE IDs using the GNIS ID
 clow_link<- left_join(clow_link %>%
@@ -131,4 +132,34 @@ clow_links<-clow_link %>%
 
 RESSED_link <- left_join(clow_links,RESSED_link, by="lake_id")
 RESSED_link$C_sedimentation<-RESSED_link$log_sedimentation*RESSED_link$sedimentOC
+
+
+# READ CLOW RAW DATA
+clow <- read_csv(paste0(userPath,"data/siteDescriptors/CONUS_Reservoirs_from_FM_Clow.csv")) %>%
+  janitor::clean_names()
+
+# match to lagos_links
+# we get 113 matches on nhdid
+lagos_links[(lagos_links$lake_nhdid %in% clow$permanent_id), "lake_nhdid"] %>%
+  distinct # collapse revisits
+
+# of those not matched on nhdid, 16 have a nhdhr_gnisid value in lagos_links which corresponds to gnis_id in clow
+gnis_match <- lagos_links[!(lagos_links$lake_nhdid %in% clow$permanent_id), "nhdhr_gnisid"] %>%
+  filter(!is.na(nhdhr_gnisid)) %>%
+  distinct
+
+# gnis doesn't grab any additional matches!
+clow[clow$gnis_id %in% gnis_match$nhdhr_gnisid,]
+
+# of those not matched on nhdid, 30 have a reachcode in lagos_links which corresponds to reach_code in clow
+reach_match <- lagos_links[!(lagos_links$lake_nhdid %in% clow$permanent_id), "lake_reachcode"] %>%
+  filter(!is.na(lake_reachcode)) %>%
+  mutate(lake_reachcode = as.numeric(lake_reachcode)) %>% # strip leading zeroes
+  distinct
+
+# reach code doesn't grab any additional matches!
+clow[as.numeric(clow$reach_code) %in% reach_match$lake_reachcode,]
+
+# this join matches 117 records, representing 113 lakes
+left_join(lagos_links, clow, by = c("lake_nhdid" = "permanent_id"))
 

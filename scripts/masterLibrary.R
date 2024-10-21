@@ -30,6 +30,7 @@ library(ggallin) # pseudolog10_trans
 #library(httr) #this is needed for downloading Lagos trophic status data
 library(RODBC) #RESSED
 library(dataRetrieval) #NWIS data retrieval for water levels
+library(rLakeAnalyzer) #for center buoyancy and thermocline depth
 
 library(conflicted)
 conflicted::conflict_scout()

@@ -7,6 +7,8 @@
 
 # 1. merge 2016 and SuRGE data
 names(dat_2016)[!(names(dat_2016) %in% names(all_obs))]
+names(all_obs)[!(names(all_obs) %in% names(dat_2016))] 
+
 dat <- bind_rows(dat_2016 %>% 
                    mutate(lake_id = as.character(lake_id)), # converted to numeric below
                  all_obs)
@@ -136,7 +138,9 @@ dim(dat) # 3483
 
 # 6. Stratification Indices
  dat <- dat %>%
-   left_join(strat_link, by=c("site_id","visit"))
+   left_join(strat_link, by=c("lake_id","visit"))
+ 
+ dim(dat) #3483
  
 # 7. Phytoplankton Composition from Avery----
  dat <- dat %>%
