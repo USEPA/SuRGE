@@ -133,13 +133,17 @@ dim(dat) # 3483
                                           TRUE ~ lake_id)))
  
  dim(dat) # 3483
+
+# 6. Stratification Indices
+ dat <- dat %>%
+   left_join(strat_link, by=c("site_id","visit"))
  
-# 6. Phytoplankton Composition from Avery----
+# 7. Phytoplankton Composition from Avery----
  dat <- dat %>%
    left_join(phyto_SuRGE_link, by="lake_id")
  dim(dat) # 3483
  
-# 7. Move lacustrine, transitional, and riverine to site_id.----
+# 8. Move lacustrine, transitional, and riverine to site_id.----
  # this will facilitate merging with variables the pertain to 
  # entire lake
  dat <- dat %>%
@@ -157,7 +161,7 @@ dim(dat) # 3483
  
  dim(dat) # 3483
  
-# 8. Merge lakeMorpho data (readMorpho.R)----
+# 9. Merge lakeMorpho data (readMorpho.R)----
  dat <- dat %>%
    left_join(.,
              morpho)
@@ -165,49 +169,49 @@ dim(dat) # 3483
  dim(morpho) #156, 15
  dim(dat) # 3483
 
-# 9. Merge hydroLakes ID----
+# 10. Merge hydroLakes ID----
  dat <- dat %>%
    left_join(hylak_link)
  
  dim(hylak_link) #127, 16
  dim(dat) # 3483
  
-# 10. Merge LAGOS----
+# 11. Merge LAGOS----
   dat <- dat %>%
    left_join(lagos_links)
  
  dim(lagos_links) #151, 16
  dim(dat) # 3483
  
-# 11. Merge NID----
+# 12. Merge NID----
  dat <- dat %>%
    left_join(nid_link)
  
  dim(nid_link) #147, 16
  dim(dat) # 3483
  
-# 12. Merge NHDPlusV2 - lakeCat----
+# 13. Merge NHDPlusV2 - lakeCat----
 dat <- dat %>%
    left_join(lake_cat_abbv,  by = c("nhd_plus_waterbody_comid" = "comid", "lake_id" = "lake_id"))
  
  dim(lake_cat) #147, 16
  dim(dat) # 3483
 
-# 13. National Wetland Inventory----
+# 14. National Wetland Inventory----
 dat <- dat %>%
   left_join(nwi_link)
 
  dim(nwi_link) #148, 16
  dim(dat) # 3483
  
-# 14. Reservoir Sedimentaion----
+# 15. Reservoir Sedimentaion----
 dat <- dat %>%
   left_join(RESSED_link, by = "lake_id")
 
  dim(RESSED_link) #16
  dim(dat) # 3483
  
- # 15. Water level change indices
+ # 16. Water level change indices
 dat<- dat %>%
   left_join(walev_link, by = "lake_id")
  
