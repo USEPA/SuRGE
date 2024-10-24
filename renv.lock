@@ -2647,6 +2647,21 @@
       ],
       "Hash": "c0626a04f3021a24f05ab211280209ab"
     },
+    "rLakeAnalyzer": {
+      "Package": "rLakeAnalyzer",
+      "Version": "1.11.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "graphics",
+        "plyr",
+        "stats",
+        "utils"
+      ],
+      "Hash": "1659889dab2930db46661d0d4dbf37c1"
+    },
     "ragg": {
       "Package": "ragg",
       "Version": "1.3.1",
