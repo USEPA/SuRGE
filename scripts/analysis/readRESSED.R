@@ -24,8 +24,7 @@
 # sqlFetch(con, "Lat_Lon_New")
 # sqlFetch(con, "RSED06")
 # sqlFetch(con, "RSED09")
-
-
+#
 # manually linked SuRGE sites with RESSED here-- doesn't give us any
 # additional sedimentation data 
 # 
