@@ -102,6 +102,6 @@ clow_links <- unique(clow_link) %>%
   filter(!is.na(log_sedimentation))
 
 #There are no additional sedimentation estimates in RESSED that aren't already in Clow
-RESSED_link <- clow_link
+RESSED_link <- clow_links
 # RESSED_link <- left_join(clow_link,RESSED_link, by="lake_id")
 # RESSED_link$C_sedimentation<-RESSED_link$log_sedimentation*RESSED_link$sedimentOC
