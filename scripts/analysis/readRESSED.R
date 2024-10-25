@@ -1,14 +1,15 @@
 
-## Link SuRGE Lakes to RESSED
+## Link SuRGE Lakes to RESSED/CLOW
 ## August 29, 2024
 
+# LEGACY CODE TO READ RESSED-----------------------
 # CODE BELOW WORKS ON JAKES MACHINE, BUT NOT BRIDGET'S
-#### Libraries =================================================================
+#### Libraries
 # library(RODBC)
 # library(dplyr)
 # library(dbplyr)
 # 
-# #### Import database ===========================================================
+# #### Import database
 # # Define connection strings
 # dbq_string <- paste0("DBQ=", paste0(userPath, "data/siteDescriptors/"),"RESSED_v1.2.mdb")
 # driver_string <- "Driver={Microsoft Access Driver (*.mdb, *.accdb)};"
@@ -53,7 +54,11 @@
 # 
 # RESSED_link$lake_id<-as.numeric(RESSED_link$lake_id)
 
-#Forced read-in of everything as a character class to preserve the leading zeros in the Reach Code
+
+# 1. READ SEDIMENTATION DATA FROM DAVID CLOW-----------
+# provided by email on 10/8/2024
+
+# Forced read-in of everything as a character class to preserve the leading zeros in the Reach Code
 conus_res <- read.csv(paste0(userPath,
     "data/siteDescriptors/CONUS_Reservoirs_from_FM_Clow.csv"),
   colClasses = "character")
@@ -68,6 +73,7 @@ conus_res$Wetland_pct <- as.numeric(conus_res$Wetland_pct)
 conus_res$Mean_Kfact <- as.numeric(conus_res$Mean_Kfact)
 
 
+# 2. CALCULATE SEDIMENTATION RATES-------------
 conus_res$log_sedimentation <- -1.520 + 0.925 * conus_res$Area_sq_m_recalc +
   0.043 * conus_res$Mean_Slope+-0.379 * conus_res$Forest_pct +
   0.263 * conus_res$Crop_pct
@@ -87,6 +93,8 @@ conus_res <- conus_res %>%
 
 conus_res$lake_nhdid <- conus_res$Permanent_ID
 
+
+# 3. MATCH SEDIMENTATION RECORDS TO SURGE SITES------------------
 #GNIS ID and reachcode don't help obtain any additional matches
 #Use NHD ID to link the clow dataset to SuRGE IDs 
 clow_link <- left_join(
@@ -105,3 +113,29 @@ clow_links <- unique(clow_link) %>%
 RESSED_link <- clow_links
 # RESSED_link <- left_join(clow_link,RESSED_link, by="lake_id")
 # RESSED_link$C_sedimentation<-RESSED_link$log_sedimentation*RESSED_link$sedimentOC
+
+
+# 4. CAN WE GET PREDICTOR VARIABLES FOR MISSING LAKES------------
+# Clow worked at huc12 scale. Step 1 is to identify huc12 code(s) associated with
+# the unmatched lakes. nhdplustools has handy functions for this.
+
+# load example lake polygon
+lake_poly <- st_read(paste0(userPath, "lakeDsn/2016_survey/acton/actonEqArea.shp"))
+
+# use nhdplustools to identify associated polygons
+lake_huc <- nhdplusTools::get_huc(lake_poly, type = "huc12") # get associated huc12 boundaries
+plot(sf::st_geometry(lake_huc)) # plot huc12
+plot(sf::st_geometry(lake_poly), col = "blue", add = TRUE) # add lake
+
+# This is a good start, but includes a HUC that extends far downstream of lake and
+# misses an upstream HUC. Probably need to evaluate on a lake by lake basis.
+
+
+
+
+
+
+
+
+
+

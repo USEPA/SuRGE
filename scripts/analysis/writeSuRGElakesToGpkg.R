@@ -240,7 +240,7 @@ dat_2016_sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>%
   mutate(site_id = as.character(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # format site_id
   relocate(lake_id, site_id) 
 
-dim(dat_2016) #1531
+dim(dat_2016) #1426
 dim(dat_2016_sf) #543, lots of rows with no trap data (e.g. oversample sites)
 
 
@@ -287,7 +287,7 @@ falls_lake_sf <- rbind(
 ## POLYGONS----
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_make_valid() %>%
-  st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+  st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "all_lakes",
            append = FALSE)
 
@@ -301,7 +301,7 @@ dim(lakes_2016) #33
 # add point to all_lakes.gpkg
 bind_rows(list(dat_2016_sf, dat_surge_sf, falls_lake_sf)) %>% # merge points
   mutate(tz = "UTC") %>%
-  st_write(., file.path( "../../../lakeDsn", "all_lakes.gpkg"), # write to .gpkg
+  st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "points",
            append = FALSE)
 
