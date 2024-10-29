@@ -105,13 +105,16 @@ clow_link <- left_join(
   na_matches = "never"
 )
 
+#Make list of lakes with missing sedimentation data
+clow_missing <- filter(clow_link, is.na(clow_link$log_sedimentation))
+
 #113 matches
 clow_links <- unique(clow_link) %>%
   filter(!is.na(log_sedimentation))
 
 #There are no additional sedimentation estimates in RESSED that aren't already in Clow
 RESSED_link <- clow_links
-# RESSED_link <- left_join(clow_link,RESSED_link, by="lake_id")
+# RESSED_link <- left_join(RESSED_link,clow_links, by="lake_id")
 # RESSED_link$C_sedimentation<-RESSED_link$log_sedimentation*RESSED_link$sedimentOC
 
 
