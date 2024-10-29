@@ -361,4 +361,4 @@ lagos_ts_agg_link_connectivity_network_reservoir %>%
 
 # 13. RENAME FINAL MERGED OBJECT---------
 lagos_links <- lagos_ts_agg_link_connectivity_network
-rm(lagos_ts_agg_surge_sites_link_connectivity)
+#rm(lagos_ts_agg_surge_sites_link_connectivity)

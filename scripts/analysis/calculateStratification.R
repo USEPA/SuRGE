@@ -27,13 +27,18 @@ for (i in 1:165) {
   thermdep[i] <- thermo.depth(temp, dep, Smin = 0.1, )
 }
 
+#Now make thermocline depth zero for NA values (excluding lake 207 where we don't have profile data)
+
+thermdep2<-ifelse(is.na(thermdep),0,thermdep)
+thermdep2[86]<-"NA"
+
 #Make a link for stratification indices
 #I didn't include a depth to hypoxia since we have oxygen data at
 #each site where we have methane but we can revisit this depending
 #on the modeling approach we land on
 
 strat_link <- data.frame(sites$lake_id, sites$visit, buoyf, thermdep)
-colnames(strat_link)<-c("lake_id","visit","buoyf","thermdep")
+colnames(strat_link)<-c("lake_id","visit","buoyf","thermdep2")
 
 # For the 2020 JGR paper, I used the following script to calculate stratification
 # indices. My notes indicate that I started by working with rLakeAnalyzer but
