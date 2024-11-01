@@ -27,10 +27,9 @@ for (i in 1:165) {
   thermdep[i] <- thermo.depth(temp, dep, Smin = 0.1, )
 }
 
-#Now make thermocline depth zero for NA values (excluding lake 207 where we don't have profile data)
+#Now make thermocline depth zero for NA values 
 
 thermdep2<-ifelse(is.na(thermdep),0,thermdep)
-thermdep2[86]<-"NA"
 
 #Make a link for stratification indices
 #I didn't include a depth to hypoxia since we have oxygen data at
