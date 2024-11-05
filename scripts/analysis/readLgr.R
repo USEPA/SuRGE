@@ -160,15 +160,48 @@ fix <- fix %>% select(lab, visit, lake_id, RDate, RDateTime, CH4.d_ppm, CO2.d_pp
 
 gga<-rbind(gga,fix)
 
+#Add another fix for 69_lacustrine second file
+fix2 <- read.table(paste(userPath, "data/CIN/CH4_069_oahe_lacustrine/GGA/sicro_2021-06-23_f0000.txt" , sep=""),
+                  sep=",",  # comma separate
+                  quote="\"",
+                  skip=1,  # Skip first line of file.  Header info
+                  # colClasses = c("character", rep("numeric", 25), rep("character", 2)),
+                  as.is=TRUE, # Prevent conversion to factor
+                  header=TRUE, # Import column names
+                  fill=TRUE) %>% # Needed to deal with empty cells in last column
+  # assign data to particular field crew
+  mutate(lab="CIN",visit="1",lake_id = "69_lacustrineb")#label this b for now to distinguish from first gga file from same lake with broken clock
+
+
+fix2$Time <- gsub("^\\s+|\\s+$", "", fix2$Time)  #  Strip white spaces
+fix2$Date <- substr(fix2$Time, start=1, stop=10)  # Extract date
+fix2$Second <- round(  # extract second, round to integer
+  as.numeric(
+    substr(fix2$Time, start=nchar(fix2$Time) - 5, stop=nchar(fix2$Time))
+  ), 
+  digits=0)
+fix2$Second <- ifelse(fix2$Second == 60, 59, fix2$Second)  # POSIXcr can't handle 60 seconds
+fix2$hms <- paste(substr(fix2$Time, start=12, stop=17), fix2$Second, sep="")  # time vector
+fix2$RDateTime <- as.POSIXct(paste(fix2$Date, fix2$hms,sep=""),
+                            format="%m/%d/%Y%H:%M:%S",
+                            tz = "UTC")  # POSIXct
+fix2$RDate <- as.Date(fix2$Date, format = "%m/%d/%Y")  # format as R Date object
+names(fix2)[grep("ppm", names(fix2))] = gsub("^X.", "", names(fix2)[grep("X", names(fix2))]) # replace "X." with ""
+fix2 <- fix2 %>% select(lab, visit, lake_id, RDate, RDateTime, CH4.d_ppm, CO2.d_ppm, H2O._ppm, GasT_C) %>% # select columns of interest
+  rename(CH4._ppm = CH4.d_ppm, CO2._ppm = CO2.d_ppm)
+
+gga<-rbind(gga,fix2)
+
 # FIX DATES------
 # summer 2021 MGGA internal battery died, causing date to default to 2001-12-31
 # load .csv file with records from CIN lab 
 
-CIN_adjustments<-read.csv(paste0(userPath,"data/CIN/Time_Adjustments.csv"))
+CIN_adjustments<-read.csv(paste0(userPath,"data/CIN/Time_Adjustments_241104.csv"))
 CIN_adjustments$wrong.datetime<-as.POSIXct(CIN_adjustments$wrong.datetime,format="%m/%d/%Y %H:%M",tz = "UTC")
 CIN_adjustments$right.datetime<-as.POSIXct(CIN_adjustments$right.datetime,format="%m/%d/%Y %H:%M",tz = "UTC")
 CIN_adjustments$TO<-difftime(CIN_adjustments$right.datetime, CIN_adjustments$wrong.datetime, tz="UTC",
                                       units =  "mins")
+#Check this
 CIN_adjustments$Time.Offset<-time_length(CIN_adjustments$TO,unit="second")
 
 gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[1]),
@@ -185,11 +218,12 @@ gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustmen
                                                                                          ifelse(gga$lake_id=="232b",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[15]),
                                                                                          ifelse(gga$lake_id=="236",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[12]),
                                                                                                 ifelse(gga$lake_id=="237",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[13]),
-                                                                                                       ifelse(gga$lake_id=="69_lacustrine",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[14]),gga$RDateTime)))))))))))))))
-
+                                                                                                       ifelse(gga$lake_id=="69_lacustrine",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[16]),
+                                                                                                              ifelse(gga$lake_id=="69_lacustrineb",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[14]),gga$RDateTime))))))))))))))))
 gga$RDateTime<-as_datetime(gga$RDateTime_adj)
 
-gga$lake_id<-ifelse(gga$lake_id=="232b","232",gga$lake_id) #collapse the two sets of data from lake 232 back together now that they can be distinguished
+gga$lake_id<-ifelse(gga$lake_id=="232b","232",
+                    ifelse(gga$lake_id=="69_lacustrineb","69_lacustrine",gga$lake_id)) #collapse the two sets of data from lake 232 & 69_lacustrine back together now that they can be distinguished
 
 # BASIC PLOTS-----------------
 # ggplot(gga, aes(RDateTime, CH4._ppm)) + geom_point() +

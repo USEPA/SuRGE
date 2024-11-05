@@ -58,8 +58,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "65"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- "20" # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "232"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- "5" # numeric component of lake_id, no leading zero(s), formatted as numeric
 visit_id.i <- "1"
 # this code generates a 3 panel plot used to demonstrate relationship between
 # CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
@@ -178,7 +178,8 @@ tem<-ifelse(adjDataB$lake_id=="67",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustment
                                                                                                 ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
                                                                                                 ifelse(adjDataB$lake_id=="236",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
                                                                                                        ifelse(adjDataB$lake_id=="237",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
-                                                                                                              ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[14]),adjDataB$co2DeplyDtTm)))))))))))))))
+                                                                                                              ifelse(adjDataB$lake_id=="69_lacustrine"& adjDataB$site_id %in%c("23","10","6","17","14","20","15","2","7","18","12","30","26"),adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[14]),
+                                                                                                                     ifelse(adjDataB$lake_id=="69_lacustrine" & adjDataB$site_id %in% c("5","1","22","9","19","8","16","4","11","21","24","3"),adjDataB$co2DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[16]), adjDataB$co2DeplyDtTm))))))))))))))))
 adjDataB$co2DeplyDtTm<-as_datetime(tem)
 
 ten<-ifelse(adjDataB$lake_id=="67",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
@@ -195,7 +196,8 @@ ten<-ifelse(adjDataB$lake_id=="67",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$
                                                                                   ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
                                                                                   ifelse(adjDataB$lake_id=="236",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
                                                                                          ifelse(adjDataB$lake_id=="237",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
-                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[14]), adjDataB$co2RetDtTm)))))))))))))))
+                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine"& adjDataB$site_id %in%c("23","10","6","17","14","20","15","2","7","18","12","30","26"),adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[14]),
+                                                                                                       ifelse(adjDataB$lake_id=="69_lacustrine" & adjDataB$site_id %in% c("5","1","22","9","19","8","16","4","11","21","24","3"),adjDataB$co2RetDtTm+dseconds(CIN_adjustments$Time.Offset[16]), adjDataB$co2RetDtTm))))))))))))))))
 adjDataB$co2RetDtTm<-as_datetime(ten)
 
 teo<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
@@ -212,7 +214,8 @@ teo<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$
                                                                                   ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
                                                                                   ifelse(adjDataB$lake_id=="236",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
                                                                                          ifelse(adjDataB$lake_id=="237",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
-                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[14]),adjDataB$ch4RetDtTm)))))))))))))))
+                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine"& adjDataB$site_id %in%c("23","10","6","17","14","20","15","2","7","18","12","30","26"),adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[14]),
+                                                                                                       ifelse(adjDataB$lake_id=="69_lacustrine"& adjDataB$site_id %in% c("5","1","22","9","19","8","16","4","11","21","24","3"),adjDataB$ch4RetDtTm+dseconds(CIN_adjustments$Time.Offset[16]),adjDataB$ch4RetDtTm))))))))))))))))
 adjDataB$ch4RetDtTm<-as_datetime(teo)
 
 tep<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[1]),
@@ -229,7 +232,8 @@ tep<-ifelse(adjDataB$lake_id=="67",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustment
                                                                                   ifelse(adjDataB$lake_id=="232" & adjDataB$site_id %in% c("2","5","13","1","9"),adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[15]),
                                                                                   ifelse(adjDataB$lake_id=="236",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[12]),
                                                                                          ifelse(adjDataB$lake_id=="237",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[13]),
-                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine",adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[14]), adjDataB$ch4DeplyDtTm)))))))))))))))
+                                                                                                ifelse(adjDataB$lake_id=="69_lacustrine"& adjDataB$site_id %in%c("23","10","6","17","14","20","15","2","7","18","12","30","26"),adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[14]), 
+                                                                                                       ifelse(adjDataB$lake_id=="69_lacustrine"& adjDataB$site_id %in% c("5","1","22","9","19","8","16","4","11","21","24","3"),adjDataB$ch4DeplyDtTm+dseconds(CIN_adjustments$Time.Offset[16]) ,adjDataB$ch4DeplyDtTm))))))))))))))))
 adjDataB$ch4DeplyDtTm<-as_datetime(tep)
 
 # Combine CIN and other data
