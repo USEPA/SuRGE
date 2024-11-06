@@ -30,7 +30,8 @@ dat_2016 <- dat_2016 %>%
          wtr_dpth) # site_depth
 
 # site depth wasn't measured in first few lakes (oops) but we have bathymetry data
-# for those lakes.
+# for those lakes. need to add depth estimates for 2016 lakes missing this measurement 
+# (1001, 1002, 1012, 1013, 1016, 1017)
 
 # Rename variables to be consistent with SuRGE
 dat_2016 <- dat_2016 %>%
