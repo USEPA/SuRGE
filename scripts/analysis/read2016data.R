@@ -1,11 +1,12 @@
 ## 2016 data
-# load 2016 data
+# load 2016 data-----------
 load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaData
 
 dat_2016 <- eqAreaData # rename to dat_2016
 remove(eqAreaData) # remove original object
 
 
+# Format-------------
 dat_2016 <- dat_2016 %>% 
   janitor::clean_names() %>% 
   # remove extra Acton Lake observations
@@ -17,7 +18,8 @@ dat_2016 <- dat_2016 %>%
          co2_drate_mg_h_best, co2_erate_mg_h, co2_trate_mg_h, #co2_best_model,
          n2o_erate_mg_h, 
          eb_ml_hr_m2, # volumetric_ebullition and volumetric_ebullition_units
-         lat_samp, long_smp, # site coordinates lat and long
+         lat_samp, long_smp, # sample site coordinates lat and long
+         xcoord, ycoord, # survey design site coordinates
          trap_deply_dt_tm, # trap_deply_date_time
          trap_rtrv_dt_tm, # trap_rtrvl_date_time
          chla_d, chla_s,
@@ -29,9 +31,6 @@ dat_2016 <- dat_2016 %>%
          sm_dpth_d, sm_dpth_s,
          wtr_dpth) # site_depth
 
-# site depth wasn't measured in first few lakes (oops) but we have bathymetry data
-# for those lakes. need to add depth estimates for 2016 lakes missing this measurement 
-# (1001, 1002, 1012, 1013, 1016, 1017)
 
 # Rename variables to be consistent with SuRGE
 dat_2016 <- dat_2016 %>%
@@ -93,6 +92,9 @@ dat_2016 <- dat_2016 %>%
     site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
     sample_date = as.Date(trap_deply_date_time), # grab earliest date
     
+    # coordinates
+    long = long * -1, # longitude should be negative
+    
     # emission units
     ch4_diffusion_units = "mg_ch4_m2_h",
     ch4_ebullition_units = "mg_ch4_m2_h",
@@ -116,54 +118,73 @@ dat_2016 <- dat_2016 %>%
   # add lake_id
   left_join(lake.list.2016 %>% select(lake_id, eval_status_code_comment), by = c("lake_name" = "eval_status_code_comment")) %>%
   
-  # define index site. Chemistry sampled at deep and shallow sites, but only
-  # deep site for SuRGE. set `index_site = TRUE for deep sampling site, but keep
-  # deep and shallow chemistry in this file, it might come in handy for the 
-  # point by point analysis. Can filter out shallow site when merging with SuRGE
-  # at the lake scale. No deep samples were collected.
-  # OK, THIS WAS DUMB. INDEX SITE IS ALREADY DEFINED IN getIndexSite.R and merged
-  # with these data in mergePredictorsAndPrepForStatistics.R
-  # left_join( # hard code 2016 index site locations.
-  #   tribble(~lake_id, ~site_id, ~index_site,
-  #                   1001, 4, TRUE,
-  #                   1002, 4, TRUE, 
-  #                   1003, 6, TRUE, 
-  #                   1004, 3, TRUE, 
-  #                   1005, 7, TRUE, 
-  #                   1006, 3, TRUE, 
-  #                   1007, 5, TRUE, 
-  #                   1008, 12, TRUE, 
-  #                   1009, 4, TRUE, 
-  #                   1010, 7, TRUE, 
-  #                   1011, 16, TRUE, 
-  #                   1012, 4, TRUE, 
-  #                   1013, 8, TRUE, 
-  #                   1014, 2, TRUE, 
-  #                   1015, 15, TRUE, 
-  #                   1016, 2, TRUE, 
-  #                   1017, 1, TRUE, 
-  #                   1018, 2, TRUE, 
-  #                   1019, 4, TRUE, 
-  #                   1020, 1, TRUE, 
-  #                   1021, 3, TRUE, 
-  #                   1022, 9, TRUE, 
-  #                   1023, 1, TRUE, 
-  #                   1024, 34, TRUE, 
-  #                   1025, 4, TRUE, 
-  #                   1026, 10, TRUE, 
-  #                   1027, 7, TRUE, 
-  #                   1028, 7, TRUE, 
-  #                   1029, 4, TRUE, 
-  #                   1030, 7, TRUE, 
-  #                   1031, 3, TRUE, 
-  #                   1032, 16, TRUE)) %>%
-  
   # restrict to fields present in SuRGE data
   select(-lake_name)
 
 
 
-# Read in lake-scale aggregated data
+# Data fixes-----------------
+# We have a few sites where emissions were measured but lat/long were not.
+# Lets assume the measurements were made at the locations specified by the
+# survey design coordinates. These coordinates are in "xcoord" and "ycoord"
+# in Conus Albers. Below we 1) get the lat and long of these xcoord and ycoord
+# values, then 2) replace the missing lat long values.
+missing_coord <-  dat_2016 %>% 
+  # observations with no lat long of sample site, but trap was deployed (4 observations)
+  filter((is.na(lat)|is.na(long))&!is.na(trap_deply_date_time)) %>%
+  st_as_sf(coords = c("xcoord", "ycoord")) %>% # convert to sf based on survey design
+  `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
+  st_transform(crs="EPSG:4326") %>% # lat/long
+  mutate(long = st_coordinates(.)[,1], # extract long from sf coordinates (column 1)
+         lat = st_coordinates(.)[,2]) %>% # extract lat from sf coordinates (column 2)
+  st_drop_geometry %>% # convert to df
+  select(lake_id, site_id, visit, lat, long)
+
+# Super cool dplyr function for updating values, rather than joining, then
+# dealing with lat.x and lat.y, etc.
+dat_2016 <- rows_update(dat_2016, # object to be updated
+                        missing_coord, # new values taken from here
+                        # join on these. unspecified variables (lat long) will be updated in x
+                        by = c("lake_id", "site_id", "visit")) 
+
+
+# recorded lat for Acton (1001) site_id == 11 is too far east
+# replace with survey design value
+acton_11 <- dat_2016 %>%
+  filter(lake_id == 1001,
+         site_id == 11) %>%
+  st_as_sf(coords = c("xcoord", "ycoord")) %>% # convert to sf based on survey design
+  `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
+  st_transform(crs="EPSG:4326") %>% # lat/long
+  mutate(long = st_coordinates(.)[,1], # extract long from sf coordinates (column 1)
+         lat = st_coordinates(.)[,2]) %>% # extract lat from sf coordinates (column 2)
+  st_drop_geometry %>% # convert to df
+  select(lake_id, site_id, visit, lat, long)
+
+# Super cool dplyr function for updating values, rather than joining, then
+# dealing with lat.x and lat.y, etc.
+dat_2016 <- rows_update(dat_2016, # object to be updated
+                        acton_11, # new values taken from here
+                        # join on these. unspecified variables (lat long) will be updated in x
+                        by = c("lake_id", "site_id", "visit")) %>%
+  select(-xcoord, -ycoord) # no longer need these columns
+
+
+# One site where longitude was entered as -93 (invalid value) rather than
+# -83. Need to fix
+dat_2016 <- dat_2016 %>%
+  mutate(long = replace(long, 
+                        lake_id == 1016 & site_id == 10 & visit == 1, 
+                        -83.97523)) # just this one instance
+  
+
+# site depth wasn't measured in first few lakes (oops) but we have bathymetry data
+# for those lakes. need to add depth estimates for 2016 lakes missing this measurement 
+# (1001, 1002, 1012, 1013, 1016, 1017). See estimateDepth2016.R
+
+
+
+# Read in lake-scale aggregated data---------
 # not certain what we want from here yet, so hold off for now.
 # load(paste0(userPath, "data/CIN/2016_survey/meanVariance.c.lake.lu.agg.Rdata"))
 # 

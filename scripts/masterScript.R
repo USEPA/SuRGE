@@ -28,6 +28,7 @@ source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
 # Get 2016 data
 source("scripts/analysis/read2016data.R")
+source("scripts/analysis/estimateDepth2016.R")
 
 # Read other lake characteristics
 source("scripts/analysis/readMorpho.R") # morpho
