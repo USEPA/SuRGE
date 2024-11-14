@@ -23,7 +23,7 @@ dat_2016_missing_depth <- dat_2016 %>%
   st_transform(., st_crs(bathy_2016$bathy_act))  # consistent with bathy
 
 # make sure coordinate systems are consistent
-st_crs(bathy_act) == st_crs(dat_2016_poo)
+st_crs(bathy_2016$bathy_act) == st_crs(dat_2016_missing_depth)
 
 # overlay points on rasters and extract depth
 depth_estimates <- map(bathy_2016, # list of bathymetry files
