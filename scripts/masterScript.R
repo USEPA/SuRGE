@@ -73,7 +73,6 @@ source("scripts/analysis/calculateDiffusion.R") # diffusive emission rates.
 
 # Ebullition rates
 source("scripts/analysis/ebullitionMassFluxFunction.R") # source function
-source("scripts/analysis/readGc.R")
 source("scripts/analysis/calculateEbullition.R") # eb_results
 
 # Merge diffusive and ebullitive rates --> calculate total
