@@ -5,7 +5,7 @@
 
 
 
-# 1. merge 2016 and SuRGE data
+# 1. Merge 2016 and SuRGE data----------
 names(dat_2016)[!(names(dat_2016) %in% names(all_obs))]
 names(all_obs)[!(names(all_obs) %in% names(dat_2016))] 
 
@@ -184,7 +184,7 @@ dim(dat) # 3483
   dat <- dat %>%
    left_join(lagos_links)
  
- dim(lagos_links) #151, 16
+ dim(lagos_links) #150, 16
  dim(dat) # 3483
  
 # 12. Merge NID----
@@ -215,13 +215,20 @@ dat <- dat %>%
  dim(RESSED_link) #16
  dim(dat) # 3483
  
- # 16. Water level change indices
+# 16. Water level change indices----
 dat<- dat %>%
   left_join(walev_link, by = "lake_id")
  
 dim(walev_link) #18
 dim(dat) # 3483
- 
+
+# 17. IPCC Climate Zone
+dat <- dat %>%
+  left_join(surge_climate, by = "lake_id")
+
+dim(surge_climate) #149
+dim(dat) #3483
+
 ### AGGREGATE BY LAKE_ID----------
 # 10/10/2024 NOT WORKING, IN PROGRESS....
 # This should be done using grts algorithms and survey design weights.
