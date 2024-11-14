@@ -229,12 +229,11 @@ dat <- dat %>%
 dim(surge_climate) #149
 dim(dat) #3483
 
-### AGGREGATE BY LAKE_ID----------
+# 17. Aggregate by lake_id----------
 # 10/10/2024 NOT WORKING, IN PROGRESS....
 # This should be done using grts algorithms and survey design weights.
 # Under a time crunch, so ignoring that step for now.
 
-# 1.  Aggregate
 
 dat_agg <- dat %>%
     select(-site_id, -eval_status, -trap_rtrvl_date_time, - trap_deply_date_time, 
