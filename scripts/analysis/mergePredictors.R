@@ -222,14 +222,21 @@ dat<- dat %>%
 dim(walev_link) #18
 dim(dat) # 3483
 
-# 17. IPCC Climate Zone
+# 17. IPCC Climate Zone-----
 dat <- dat %>%
   left_join(surge_climate, by = "lake_id")
 
 dim(surge_climate) #149
 dim(dat) #3483
 
-# 17. Aggregate by lake_id----------
+# 18. ERA5 Water and Air Temperature---
+dat <- dat %>%
+  left_join(met_temp, by = "lake_id") # values are identical for multiple visits
+
+dim(met_temp) #146
+dim(dat) #3483
+
+# 19. Aggregate by lake_id----------
 # 10/10/2024 NOT WORKING, IN PROGRESS....
 # This should be done using grts algorithms and survey design weights.
 # Under a time crunch, so ignoring that step for now.
