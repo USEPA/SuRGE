@@ -124,6 +124,7 @@ RESSED_link <- clow_links
 
 # load example lake polygon
 lake_poly <- st_read(paste0(userPath, "lakeDsn/2016_survey/acton/actonEqArea.shp"))
+lake_hl <- st_read(paste0(userPath, "lakeDsn/2016_survey/harsha/harshaEqArea.shp"))
 
 # use nhdplustools to identify associated polygons
 lake_huc <- nhdplusTools::get_huc(lake_poly, type = "huc12") # get associated huc12 boundaries
@@ -134,11 +135,80 @@ plot(sf::st_geometry(lake_poly), col = "blue", add = TRUE) # add lake
 # misses an upstream HUC. Probably need to evaluate on a lake by lake basis.
 
 
+### THIS WORKS IF WE HAVE A NWIS STATION NEAR DAM
+# https://gis.stackexchange.com/questions/346303/accessing-watershed-boundary-for-lakes-in-r
+# Harsha lake dam
+site_id <-  "USGS-03247041" #"USGS-03246500" east fork little miami at Williamsburg
+site <- list(featureSource = "nwissite",
+             featureID = "USGS-03247041")
+site_feature <- nhdplusTools::get_nldi_feature(site)
+site_basin <- nhdplusTools::get_nldi_basin(site)
+st_crs(site_basin)
+lake_hl_wgs <- lake_hl %>% st_transform(4326)
+
+# gets huge basin. Is this what we want? probably.
+plot(st_geometry(site_basin))
+plot(st_geometry(site_feature), add=TRUE)
+plot(st_geometry(lake_hl_wgs), add = TRUE)
 
 
+# WHAT IF NO NWIS FEATURE. CAN WE USE DAM LAT/LONG?
+# YES, THIS WORKS TOO.
+# Harsha Lake Pour Points
+PLon<- -84.1509940
+PLat<- 39.0224387
+
+#Step 1
+point <- sf::st_sfc(sf::st_point(c(PLon, PLat)), crs = 4326)
+#Get nhdplus flow line comid from point
+ID <- nhdplusTools::discover_nhdplus_id(point)
 
 
+#Get Basin 
+nldi <- list(featureSource = "comid", featureID = ID)
+basin <- nhdplusTools::get_nldi_basin(nldi_feature = nldi)
 
 
+leaflet() %>%
+  addPolygons(data = basin) %>%
+  addCircleMarkers(data = point,
+                   #lat = ~lat, lng = ~long,
+                   color = "red",
+                   radius = 2) %>%
+  addTiles() #Add tiles adds defualt map 
+
+# NEXT STEP IS TO CUT RASTER TO WATERSHED BOUNDARY AND AGGREGATE SOIL DATA
+st_layers("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/SURGO/gSSURGO/gSSURGO_OH/gSSURGO_OH.gdb")
+surgo <- raster::raster("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/SURGO/gSSURGO/gSSURGO_OH/gSSURGO_OH.gdb")
+surgo_soc <- st_read("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/SURGO/gSSURGO/gSSURGO_OH/gSSURGO_OH.gdb", 
+                     layer = "Valu1") %>%
+  as_tibble() %>%
+  dplyr::select(mukey, soc0_5) %>%
+  mutate(mukey = as.numeric(mukey))
+  
+table(surgo_soc$mukey)
+class(surgo)
+str(surgo)
+dim(surgo) # 42173 36989     1
+surgo
+names(surgo) # why only mukey and not soc0_5?
+nlayers(surgo) # 1
+st_crs(surgo) # 9001
+st_crs(basin) #4326
+
+basin <- basin %>% 
+  st_transform(st_crs(surgo)) %>%
+  st_zm()
+st_crs(basin) == st_crs(surgo) # TRUE
+plot(st_geometry(basin))
 
 
+basin_surgo <- raster::extract(surgo, basin)
+length(unlist(basin_surgo)) #8875622, double
+tibble(mukey = unlist(basin_surgo)) %>%
+  left_join(surgo_soc) %>%
+  summarize(mean_soc = mean(soc0_5, na.rm = TRUE)) # 791 gC/m2
+
+# this should work, but can't get it to calculate mean of soc0_5,
+# rather it calculates mean mukey
+raster::extract(surgo, basin, fun = mean) # calculate mean

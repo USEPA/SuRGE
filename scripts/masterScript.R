@@ -28,6 +28,7 @@ source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
 # Get 2016 data
 source("scripts/analysis/read2016data.R")
+source("scripts/analysis/estimateDepth2016.R")
 
 # Read other lake characteristics
 source("scripts/analysis/readMorpho.R") # morpho
@@ -43,7 +44,7 @@ source("scripts/analysis/readRESSED.R")#read in reservoir sedimentation data (re
 source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
 source("scripts/analysis/readNWIS.R")#read water level data for subset of reservoirs
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
-
+source("scripts/analysis/readGriddedTemp.R") # ERA5 derived estimates of air, shallow, and deep temperature
 
 # Calculate derived quantities
 source("scripts/analysis/calculateStratification.R") # stratification indices
@@ -72,7 +73,6 @@ source("scripts/analysis/calculateDiffusion.R") # diffusive emission rates.
 
 # Ebullition rates
 source("scripts/analysis/ebullitionMassFluxFunction.R") # source function
-source("scripts/analysis/readGc.R")
 source("scripts/analysis/calculateEbullition.R") # eb_results
 
 # Merge diffusive and ebullitive rates --> calculate total
@@ -81,7 +81,7 @@ source("scripts/analysis/calculateTotalEmissions.R")
 
 # Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs
-source("scripts/analysis/mergePredictorsPrepForStatistics.R") # dat
+source("scripts/analysis/mergePredictors.R") # dat
 
 # Random
 #source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 
@@ -94,6 +94,7 @@ source("scripts/writeSuRGElakesToGpkg.R")
 
 # Analysis
 source("scripts/analysis/inspectMeasurementValues.R")
+#source("scripts/analysis/reviewMetTemp.R") # ERA5 bias corrections
 
 
 
