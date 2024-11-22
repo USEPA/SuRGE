@@ -188,7 +188,8 @@ gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustmen
                                                                                          ifelse(gga$lake_id=="232b",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[14]),
                                                                                          ifelse(gga$lake_id=="236",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[12]),
                                                                                                 ifelse(gga$lake_id=="237",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[13]),
-                                                                                                       gga$RDateTime))))))))))))))
+                                                                                                       ifelse(gga$lake_id=="75",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[15]),
+                                                                                                       gga$RDateTime)))))))))))))))
 gga$RDateTime<-as_datetime(gga$RDateTime_adj)
 
 gga$lake_id<-ifelse(gga$lake_id=="232b","232", gga$lake_id)#collapse the two sets of data from lake 232 back together now that they can be distinguished

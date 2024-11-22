@@ -217,9 +217,9 @@ dat <- dat %>%
  
  # 16. Water level change indices
 dat<- dat %>%
-  left_join(walev_link, by = "lake_id")
+  left_join(walev_link, by = c("lake_id","visit"))
  
-dim(walev_link) #18
+dim(walev_link) #21
 dim(dat) # 3483
  
 ### AGGREGATE BY LAKE_ID----------
