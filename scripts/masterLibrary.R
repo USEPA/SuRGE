@@ -3,6 +3,9 @@ library(devtools) # this was needed to install LAGOSUS and hydrolinkgs from gith
                   # the package is captured by renv in case it is needed for fresh clones.
                   # might not be necessary
 library(sf)
+library(elevatr) # fro Digital Elevation Maps
+library(raster) # working with rasters
+library(terra) # working with rasters
 library(tidyverse)
 library(readxl)
 library(janitor) # format dataframe names
