@@ -325,6 +325,8 @@ clow_predictors <- inner_join(lake_area, basin_lu) %>%
          crop_pct=crop_pct/100,
          forest_pct=forest_pct/100)
 
+
+
 # 3. MERGE PREDICTORS FOR MISSING SITES WITH THE LARGER----------
 #    CLOW - SURGE DATAFRAME
 clow_surge <- bind_rows(clow_surgel, clow_predictors)
@@ -363,7 +365,7 @@ ocplot<-clow_surge %>%
 ocplot
 
 ocplot<-clow_surge %>%
-  ggplot(aes(x=area_sq_m_recalc,y=forest_pct))+
+  ggplot(aes(x=area_sq_m_recalc,y=sedimentOC))+
   geom_point(aes(color=type,alpha=0.4))+
   scale_y_log10()+
   scale_x_log10()
