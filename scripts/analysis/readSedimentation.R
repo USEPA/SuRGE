@@ -278,7 +278,7 @@ basin_slope <- map(slope, ~terra::global(.x, fun = "mean", na.rm = TRUE)) %>%
 #   select(-rowname, - name)
 # 
 # saveRDS(basin_soc, paste0(userPath, "data/siteDescriptors/basin_soc.rds"))
-load(paste0(userPath, "data/siteDescriptors/basin_soc.rds")) # loads basin_soc
+readRDS(paste0(userPath, "data/siteDescriptors/basin_soc.rds")) # loads basin_soc
 
 
 # 2.4. BASIN LANDUSE AND KFACT------------
