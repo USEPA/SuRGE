@@ -69,7 +69,25 @@ clow_surge <- conus_res %>%
          barren_pct, crop_pct, forest_pct, wetland_pct,
          mean_kfact, mean_slope, mean_soc_0_5_cm) %>%
   filter(lake_nhdid %in% unique(lagos_links$lake_nhdid)) # unique to eliminate revisist
-  
+
+#link conus_res data to the associated lake_id
+sl<-lagos_links%>%
+  select(lake_nhdid,lake_id)%>%
+  distinct()%>%
+  left_join(clow_surge)
+
+#make object match clow_predictors below
+clow_surgel<- sl %>%
+  mutate(soc0_5=as.double(mean_soc_0_5_cm),basin_slope=as.numeric(mean_slope))%>%
+  select(lake_id,area_sq_m_recalc,barren_pct,crop_pct,forest_pct,wetland_pct,mean_kfact,
+         soc0_5,basin_slope) %>%
+  filter(!is.na(barren_pct)) %>%
+  mutate(type="clow")
+
+# colnames(clow_surgel)<-c("lake_id","area_sq_m_recalc","barren_pct","crop_pct",
+#                          "forest_pct","forest_pct","wetland_pct","mean_kfact",
+#                          "soc0_5","basin_slope")
+
   
 # Any SuRGE sites missing?
 clow_missing <- lagos_links %>%
@@ -278,7 +296,7 @@ basin_slope <- map(slope, ~terra::global(.x, fun = "mean", na.rm = TRUE)) %>%
 #   select(-rowname, - name)
 # 
 # saveRDS(basin_soc, paste0(userPath, "data/siteDescriptors/basin_soc.rds"))
-readRDS(paste0(userPath, "data/siteDescriptors/basin_soc.rds")) # loads basin_soc
+basin_soc<-readRDS(paste0(userPath, "data/siteDescriptors/basin_soc.rds")) # loads basin_soc
 
 
 # 2.4. BASIN LANDUSE AND KFACT------------
@@ -300,30 +318,45 @@ lake_area <- left_join(clow_missing %>% select(lake_id),
 # 2.6. AGGREGATE CLOW PREDICTORS------
 clow_predictors <- inner_join(lake_area, basin_lu) %>%
   inner_join(., basin_soc) %>%
-  inner_join(., basin_slope)
+  inner_join(., basin_slope)%>%
+  mutate(type="beaulieu")
 
 # 3. MERGE PREDICTORS FOR MISSING SITES WITH THE LARGER----------
 #    CLOW - SURGE DATAFRAME
-clow_surge <- bind_rows(clow_surge, clow_predictors)
+clow_surge <- bind_rows(clow_surgel, clow_predictors)
 
 # 4. CALCULATE SEDIMENTATION RATES-------------
 clow_surge <- clow_surge %>%
   mutate(log_sedimentation = -1.520 + 
            0.925 * area_sq_m_recalc +
-           0.043 * mean_slope +
+           0.043 * basin_slope +
            -0.379 * forest_pct +
            0.263 * crop_pct,
          sedimentOC = case_when(wetland_pct < 0 ~ NA_real_,
                                 TRUE ~ 17.170 +
-                                  0.0013 * mean_soc_0_5_cm +
+                                  0.0013 * soc0_5 +
                                   19.197 * log10(wetland_pct + 1) +
                                   -26.494 * barren_pct +
                                   -14.098 * mean_kfact +
                                   -1.275 *
                                   log10(area_sq_m_recalc) +
                                   -2.055))
+clow_surge$sedimentOC<-ifelse(clow_surge$sedimentOC<0,0.1,clow_surge$sedimentOC)
+#Check derived values against clow values
 
-    
+sedplot<-clow_surge %>%
+  ggplot(aes(x=area_sq_m_recalc,y=log_sedimentation))+
+  geom_point(aes(color=type,alpha=0.4))+
+  scale_y_log10()+
+  scale_x_log10()
+sedplot
+
+ocplot<-clow_surge %>%
+  ggplot(aes(x=area_sq_m_recalc,y=sedimentOC))+
+  geom_point(aes(color=type,alpha=0.4))+
+  scale_y_log10()+
+  scale_x_log10()
+ocplot
 
 
 #There are no additional sedimentation estimates in RESSED that aren't already in Clow
