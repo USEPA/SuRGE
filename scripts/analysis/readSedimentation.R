@@ -371,6 +371,13 @@ ocplot<-clow_surge %>%
   scale_x_log10()
 ocplot
 
+#Create sedimentation link
+
+sedimentation_link<-clow_surge %>%
+  mutate(sedimentation_m3y=log_sedimentation)%>%
+  select(lake_id,sedimentation_m3y,sedimentOC)%>%
+  mutate(C_sedimentation_m3y=sedimentOC*sedimentation_m3y)%>%
+  mutate(log_sedimentation=log10(sedimentation_m3y))
 
 #There are no additional sedimentation estimates in RESSED that aren't already in Clow
 # RESSED_link <- left_join(RESSED_link,clow_links, by="lake_id")

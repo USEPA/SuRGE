@@ -30,8 +30,37 @@ chem_fld_wide <- chem_fld %>%
          across(contains("trap_"),
                 as.POSIXct)) # deployment and retrieval times back to posixct
 
-
-
+#Replace deep sonde NA values with shallow measurements for sites less than 1 meter deep
+chem_fld_wide$deep_do_mg <- ifelse(
+  chem_fld_wide$site_depth < 1 &
+    is.na(chem_fld_wide$deep_do_mg),
+  chem_fld_wide$shallow_do_mg,
+  chem_fld_wide$deep_do_mg
+)
+chem_fld_wide$deep_temp <- ifelse(
+  chem_fld_wide$site_depth < 1 &
+    is.na(chem_fld_wide$deep_temp),
+  chem_fld_wide$shallow_temp,
+  chem_fld_wide$deep_temp
+)
+chem_fld_wide$deep_sp_cond <- ifelse(
+  chem_fld_wide$site_depth < 1 &
+    is.na(chem_fld_wide$deep_sp_cond),
+  chem_fld_wide$shallow_sp_cond,
+  chem_fld_wide$deep_sp_cond
+)
+chem_fld_wide$deep_chla_sonde <- ifelse(
+  chem_fld_wide$site_depth < 1 &
+    is.na(chem_fld_wide$deep_chla_sonde),
+  chem_fld_wide$shallow_chla_sonde,
+  chem_fld_wide$deep_chla_sonde
+)
+chem_fld_wide$deep_turb <- ifelse(
+  chem_fld_wide$site_depth < 1 &
+    is.na(chem_fld_wide$deep_turb),
+  chem_fld_wide$shallow_turb,
+  chem_fld_wide$deep_turb
+)
 
 # Now merge with emissions
 all_obs <- full_join(chem_fld_wide, # keep all observations

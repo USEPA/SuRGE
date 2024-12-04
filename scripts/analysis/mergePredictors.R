@@ -210,9 +210,9 @@ dat <- dat %>%
  
 # 15. Reservoir Sedimentaion----
 dat <- dat %>%
-  left_join(RESSED_link, by = "lake_id")
+  left_join(sedimentation_link, by = "lake_id")
 
- dim(RESSED_link) #16
+ dim(sedimentation_link) #5
  dim(dat) # 3483
  
 # 16. Water level change indices----
@@ -235,6 +235,7 @@ dat <- dat %>%
 
 dim(met_temp) #146
 dim(dat) #3483
+
 
 # 19. Aggregate by lake_id----------
 # 10/10/2024 NOT WORKING, IN PROGRESS....

@@ -44,4 +44,36 @@ depth_estimates <- map(bathy_2016, # list of bathymetry files
 # replace missing depth_values in dat_2016 with estimated depths
 dat_2016 <- rows_update(dat_2016,
                         depth_estimates,
-                        by = c("lake_id", "site_id", "visit")) 
+                        by = c("lake_id", "site_id", "visit"))
+
+#Replace deep sonde NA values with shallow measurements for sites less than 1 meter deep
+dat_2016$deep_do_mg <- ifelse(
+  dat_2016$site_depth < 1 &
+    is.na(dat_2016$deep_do_mg),
+  dat_2016$shallow_do_mg,
+  dat_2016$deep_do_mg
+)
+dat_2016$deep_temp <- ifelse(
+  dat_2016$site_depth < 1 &
+    is.na(dat_2016$deep_temp),
+  dat_2016$shallow_temp,
+  dat_2016$deep_temp
+)
+dat_2016$deep_sp_cond <- ifelse(
+  dat_2016$site_depth < 1 &
+    is.na(dat_2016$deep_sp_cond),
+  dat_2016$shallow_sp_cond,
+  dat_2016$deep_sp_cond
+)
+dat_2016$deep_chla_sonde <- ifelse(
+  dat_2016$site_depth < 1 &
+    is.na(dat_2016$deep_chla_sonde),
+  dat_2016$shallow_chla_sonde,
+  dat_2016$deep_chla_sonde
+)
+dat_2016$deep_turb <- ifelse(
+  dat_2016$site_depth < 1 &
+    is.na(dat_2016$deep_turb),
+  dat_2016$shallow_turb,
+  dat_2016$deep_turb
+)
