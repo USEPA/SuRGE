@@ -35,12 +35,12 @@ source("scripts/analysis/readMorpho.R") # morpho
 source("scripts/analysis/readNla17.R") # nla17_chem
 source("scripts/analysis/hydroLakesID.R") # hylak_link
 source("scripts/analysis/lagosLakesID.R") # lagos_links
-source("scripts/analysis/nidLakesID.R") #national inventory of dams and manual age assignments
+source("scripts/analysis/readNid.R") #national inventory of dams and manual age assignments
 source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Time data
 source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
 source("scripts/analysis/readIpccClimateZones.R") #surge_climate
 source("scripts/analysis/readLakeCat.R")#read in LakeCat 
-source("scripts/analysis/readRESSED.R")#read in reservoir sedimentation data (requires lagosLakesID.R)
+source("scripts/analysis/readSedimentation.R")#read in reservoir sedimentation data (requires lagosLakesID.R)
 source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
 source("scripts/analysis/readNWIS.R")#read water level data for subset of reservoirs
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile

@@ -129,12 +129,13 @@ get_2016 <- function(paths){
    #d <- 
   fs::dir_ls(path = paths, 
              regexp = '..shp', # file names containing this pattern
-             recurse = TRUE, # look in all subdirectories
+             recurse = 1, # one level into subdirectories (avoid bathymetry files)
              type = "file") %>% # only retain file names, not directory names  
     .[!(grepl("xml|lock", .))] %>% # omit .shp.xml and .lock files
     #.[8] %>% # subset for code development
     #imap: .x is object piped into impap, .y is object index (name of list element)
     imap(~st_read(.x, stringsAsFactors = FALSE) %>% # read shapefiles
+           st_make_valid() %>% # fix any spatial issues
            st_transform(., 3857) |>  # web meractor, consistent with surge_lakes
            st_set_geometry("geom") %>% # make sure geometry column name is geom (it is Shape, geometry, .... across objects)
            # Each .shp must have a lake_name attribute.  All but 5 do.  Below
@@ -172,16 +173,13 @@ lakes_2016 <- get_2016(paths)
 dim(lakes_2016) #33 lakes (32 from 2016 + Falls Lake)
 
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 # GET POINTS AND TRAP DEPOLYMENT/RETRIEVAL TIMES-----------------
 ## SuRGE sites
 dat_surge_sf <- fld_sheet %>%
   filter(eval_status == "TS", # only sampled sites
          !(is.na(long)|is.na(lat))) %>% # only sites where lat and long were recorded
+  
   # deal with lacustrine etc from Missouri river
- 
   mutate( # move transitional, lacustrine, riverine from lake_id to site_id
     site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
                              grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
@@ -197,15 +195,82 @@ dat_surge_sf <- fld_sheet %>%
   `st_crs<-` (4326) %>% # latitude and longitude
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
-  select(lake_id, site_id, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%
-  # discard rows that don't have any useful data
-  filter(!is.na(trap_deply_date_time) | 
-           !is.na(trap_rtrvl_date_time) | 
-           !is.na(chamb_deply_date_time) | 
-           !is.na(site_depth)) 
-         
+  select(lake_id, site_id, site_depth, (matches(c("trap")) & contains("date_time")))
 
-dim(dat_surge_sf) #1848
+
+## SuRGE chamber deployment times 
+# Pull from gga_3 which contains corrections for deployments where internal
+# GGA clock was wrong
+
+chm_deply <- gga_3 %>%
+  # deal with lacustrine etc from Missouri river
+  mutate( # move transitional, lacustrine, riverine from lake_id to site_id
+    site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                        grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                        grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                        TRUE ~ as.character(site_id)),
+    # remove transitional, lacustrine, riverine from lake_id
+    # retain character class initially, then convert to numeric.
+    lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                        lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                        TRUE ~ lake_id),
+    lake_id = as.numeric(lake_id)) %>%
+  select(lake_id, site_id, co2DeplyDtTm) %>%
+  rename(chamb_deply_date_time = co2DeplyDtTm)
+
+# unique id's in field sheets
+dat_surge_sf_distinct <- dat_surge_sf %>% 
+  st_drop_geometry %>% 
+  select(lake_id, site_id) %>%
+  distinct %>% 
+  unite(id, c("lake_id", "site_id"))
+dim(dat_surge_sf_distinct) # 1815 unique id
+
+# unique id's in diffusive emission rate calcs
+chm_deply_distinct <- chm_deply %>% 
+  select(lake_id, site_id) %>%
+  distinct %>% 
+  unite(id, c("lake_id", "site_id"))
+dim(chm_deply_distinct) # 1742
+
+# why do the field sheets contain 1815 - 1742 = 73 more values
+# than the diffusion calcs?
+
+# which values are in gga, but not the field sheets?
+# none, good
+chm_deply_distinct %>% filter(!(id %in% dat_surge_sf_distinct$id))
+
+# which values are in field_sheets, but not gga?
+# 1000, check status with Abdel
+# 146_4 - no data
+# 1_21 - no data
+# 210 (23, 6, 8) - no good gga data
+# 211_16 - no good gga data
+# 253 not in chamber adjustments
+# 317_3- no good gga data
+# 326_10 no good gga data
+# 44 (11, 19, 8) - add to chamber adjustments
+# 4_5 -  no good gga data
+# 70 riverine (11, 5) - no data
+# 71 (1, 10, 6) no data
+# 72_23 - no data        
+# 76_13 - add to chamber adjustments
+# 78 (11, 12, 18, 24, 29, 3, 4, 7, 8) - LGR battery died, no data
+# 82 (all) - add to chamber adjustments          
+
+dat_surge_sf_distinct %>% 
+  filter(!(id %in% chm_deply_distinct$id)) %>%
+  arrange(id) %>% 
+  arrange(id) %>% 
+  print(n=Inf)
+
+
+#################### NEED TO MERGE GGA DERIVED CHAMBER DEPLOYMENT TIMES
+#################### WITH SuRGE POINTS.................................
+#################### CHAMBER DEPLOYMENT TIMES ARE IN EASTERN IN gga_3.
+#################### CONVERT TO UTC FOR JEREMY, LIKE THIS
+#chamb_deply_date_time = force_tz(chamb_deply_date_time, tzone = "America/New_York") %>% 
+#  with_tz(., tzone = "UTC")) %>%
 
 
 ## 2016 data
@@ -213,9 +278,13 @@ dim(dat_surge_sf) #1848
 dat_2016
 
 # Format and coerce to spatial object
+###NEED TO UPDATE VARIABLE NAMES. BELOW IS BASED ON FORMATTING FROM
+###EQUAL AREA DATA. SEE read2016data.R
+###### ALSO NEED TO MAKE SURE TIME ZONES ARE IN UTC
 
-dat_2016_sf <- st_as_sf(dat.2016, coords = c("xcoord", "ycoord")) %>% 
-  `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
+dat_2016_sf <- dat_2016 %>%
+  filter(!is.na(lat), !is.na(long)) %>%
+  st_as_sf(., coords = c("lat", "long"), crs = "EPSG:4326") %>% # lat/long
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
   select(Lake_Name, siteID, wtrDpth, (matches(c("trap|chm")) & contains("DtTm"))) %>%
