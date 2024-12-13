@@ -8,7 +8,6 @@ nid_link <- read_csv(paste0(userPath, "data/siteDescriptors/nid_links_and_dam_ag
   distinct(year_completed)
 
 dim(nid_link) #147
-nid_link$lake_id<-as.character(nid_link$lake_id)  
 
 #Jake--Do we need this?  Do you want me to add script to create the link internally?
 # Bridget--At this point [6/28/2024] I don't think we do. Keeping this code

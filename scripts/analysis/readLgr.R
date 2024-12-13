@@ -57,7 +57,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txt
       # assign data to particular field crew
       mutate(lab = str_split(txtFiles[i], "/")[[1]][2], # extract 2nd element from 1st list element 
              visit= ifelse(grepl("visit2",str_split(txtFiles[i],"/")[[1]][3]),"2","1"),
-             instrument= substr(str_split(txtFiles[i],"/")[[1]][5],1,3),
+             instrument = "gga",
              # extract lake_id 
              # sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]) works for most, but not R10 2018 lakes.  below is more general 
              # case_when accomodates the inclusion of lacustrine, transitional, and riverine where needed.
@@ -84,7 +84,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txt
     # assign data to particular field crew
       mutate(lab = str_split(txtFiles[i], "/")[[1]][2], # extract 2nd element from 1st list element 
              visit= ifelse(grepl("visit2",str_split(txtFiles[i],"/")[[1]][3]),"2","1"),
-             instrument= substr(str_split(txtFiles[i],"/")[[1]][5],1,3),
+             instrument= "mic",
              # extract lake_id 
              # sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]) works for most, but not R10 2018 lakes.  below is more general 
              # case_when accomodates the inclusion of lacustrine, transitional, and riverine where needed.

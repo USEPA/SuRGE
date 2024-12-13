@@ -869,5 +869,8 @@ ggplot() +
 #        dpi=800,compression="lzw")
 
 
+mod <- lm(ch4_diffusion_best ~ site_depth * shoreline_development, data = dat)
+summary(mod)
+
 
 
