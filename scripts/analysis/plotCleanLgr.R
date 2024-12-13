@@ -272,8 +272,8 @@ gga_2 <- gga_2 %>%
 # of modeling window.
 gga_3 <- gga_2 %>%
   group_by(lake_id, site_id, visit, instrument) %>% # for each lake and site....
-  filter(RDateTime > (min(c(co2DeplyDtTm, ch4DeplyDtTm)) - 60) & 
-           RDateTime < (max(c(co2RetDtTm, ch4RetDtTm)) + 60)) %>%
+  filter(RDateTime > (min(c(co2DeplyDtTm, ch4DeplyDtTm), na.rm = TRUE) - 60) & 
+           RDateTime < (max(c(co2RetDtTm, ch4RetDtTm), na.rm = TRUE) + 60)) %>%
   ungroup()
 
 
