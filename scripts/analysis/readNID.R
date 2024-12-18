@@ -10,8 +10,11 @@ nid_link <- read_csv(paste0(userPath, "data/siteDescriptors/nid_links_and_dam_ag
 dim(nid_link) #147
 nid_link$lake_id<-as.character(nid_link$lake_id)  
 
-#Jake--Do we need this?  Do you want me to add script to create the link internally?
-# Bridget--At this point [6/28/2024] I don't think we do. Keeping this code
-# snippet in case we change our mind.
-# nid <- read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
-#   janitor::clean_names()
+#Pull Dam Latitudes and Longitudes
+nid <- read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
+   janitor::clean_names()%>%
+  select(federal_id,dam_name,latitude,longitude)
+
+colnames(nid)<-c("nid_id","dam_name","dam_latitude","dam_longitude")
+nid_link<- left_join(nid_link,nid, by= "nid_id")
+nid_link$lake_id<-as.numeric(nid_link$lake_id)
