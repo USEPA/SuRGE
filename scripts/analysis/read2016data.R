@@ -22,6 +22,7 @@ dat_2016 <- dat_2016 %>%
          xcoord, ycoord, # survey design site coordinates
          trap_deply_dt_tm, # trap_deply_date_time
          trap_rtrv_dt_tm, # trap_rtrvl_date_time
+         chm_deply_dt_tm,
          chla_d, chla_s,
          do_l_d, do_l_s,
          p_h_d, p_h_s,
@@ -51,6 +52,7 @@ dat_2016 <- dat_2016 %>%
     # dates
     trap_deply_date_time = trap_deply_dt_tm, 
     trap_rtrvl_date_time = trap_rtrv_dt_tm, 
+    chamb_deply_date_time = chm_deply_dt_tm,
     
     # coordinates
     lat = lat_samp,
