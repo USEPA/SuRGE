@@ -129,13 +129,12 @@ get_2016 <- function(paths){
    #d <- 
   fs::dir_ls(path = paths, 
              regexp = '..shp', # file names containing this pattern
-             recurse = 1, # one level into subdirectories (avoid bathymetry files)
+             recurse = TRUE, # look in all subdirectories
              type = "file") %>% # only retain file names, not directory names  
     .[!(grepl("xml|lock", .))] %>% # omit .shp.xml and .lock files
     #.[8] %>% # subset for code development
     #imap: .x is object piped into impap, .y is object index (name of list element)
     imap(~st_read(.x, stringsAsFactors = FALSE) %>% # read shapefiles
-           st_make_valid() %>% # fix any spatial issues
            st_transform(., 3857) |>  # web meractor, consistent with surge_lakes
            st_set_geometry("geom") %>% # make sure geometry column name is geom (it is Shape, geometry, .... across objects)
            # Each .shp must have a lake_name attribute.  All but 5 do.  Below
@@ -173,13 +172,16 @@ lakes_2016 <- get_2016(paths)
 dim(lakes_2016) #33 lakes (32 from 2016 + Falls Lake)
 
 
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 # GET POINTS AND TRAP DEPOLYMENT/RETRIEVAL TIMES-----------------
 ## SuRGE sites
 dat_surge_sf <- fld_sheet %>%
   filter(eval_status == "TS", # only sampled sites
          !(is.na(long)|is.na(lat))) %>% # only sites where lat and long were recorded
-  
   # deal with lacustrine etc from Missouri river
+ 
   mutate( # move transitional, lacustrine, riverine from lake_id to site_id
     site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
                              grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
@@ -195,7 +197,14 @@ dat_surge_sf <- fld_sheet %>%
   `st_crs<-` (4326) %>% # latitude and longitude
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
-  select(lake_id, site_id, site_depth, (matches(c("trap")) & contains("date_time")))
+  select(lake_id, site_id, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%
+  # discard rows that don't have any useful data
+  filter(!is.na(trap_deply_date_time) | 
+           !is.na(trap_rtrvl_date_time) | 
+           !is.na(chamb_deply_date_time) | 
+           !is.na(site_depth)) 
+         
+
 
 
 ## SuRGE chamber deployment times 
@@ -273,6 +282,9 @@ dat_surge_sf_distinct %>%
 #################### WITH SuRGE POINTS.................................
 # dat_surge_sf <- (dat_surge_sf, chm_deply) something like this
 
+dim(dat_surge_sf) #1848
+
+
 
 ## 2016 data
 # dat_2016 loaded via read2016data.R --> estimateDepth2016.R
@@ -282,6 +294,7 @@ dat_2016
 dat_2016_sf <- dat_2016 %>%
   filter(!is.na(lat), !is.na(long)) %>%
   st_as_sf(., coords = c("lat", "long"), crs = "EPSG:4326") %>% # lat/long
+
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
   select(lake_id, site_id, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%

@@ -32,8 +32,10 @@ densplot<-dieb%>%
   xlab(expression(paste("Methane Flux (mg CH"[4]*" m"^"-2"*"d"^"-1"*")")))+
   ylab("Density")
 densplot
+library(RColorBrewer)
+myPal <- brewer.pal(2,"Dark2")
 
-#ggsave("densityplot.jpg",width=6,height=2.25,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("densityplot.jpg",width=6,height=2.25,units="in",dpi=300,path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 #Make a density plot that shows the percent emission as diffusion
 
@@ -61,7 +63,7 @@ densplotper<-percentdiffusive%>%
   ylab("Density")
 densplotper
 
-#ggsave("percent_ebullition.jpg",width=6,height=2.25,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("percent_ebullition.jpg",width=6,height=2.25,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 #List of predictors examined:
 
@@ -260,7 +262,8 @@ tropd_plot<-tropew %>%
   annotate("text", label =expression(paste("185 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =1, y = 10000)+
   annotate("text", label =expression(paste("79 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =2, y = 10000)+
   annotate("text", label =expression(paste("46 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =3, y = 10000)+
-  scale_y_log10()+
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
         axis.line=element_line(colour="black"),legend.title=element_blank(),
@@ -271,10 +274,33 @@ tropd_plot<-tropew %>%
   xlab("")
 tropd_plot
 
-#ggsave("trophic_status.jpg",width=6,height=3.5,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("trophic_status.jpg",width=6,height=3.5,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 s<-filter(tropew,trophic=="Oligotrophic")
 summary(s$ch4_ebullition)
+
+tropt_plot<-dat %>%
+  mutate(ch4tot=ch4_total*24)%>%
+  mutate(trophicpred=as.numeric(ifelse(!is.na(shallow_chla_lab),shallow_chla_lab,
+                            ifelse(!is.na(nla17_chla),nla17_chla,
+                                   ifelse(!is.na(chl_predicted_sample_month),chl_predicted_sample_month,"NA")))))%>%
+  mutate(trophic=ifelse(trophicpred<12,"Oligotrophic",ifelse(trophicpred>24,"Eutrophic","Mesotrophic")))%>%
+  ggplot(aes(x=trophic,y=ch4tot))+
+  scale_color_manual(values=c("green4", "coral4", "#0077b6"))+
+  geom_boxplot(aes(color=trophic))+
+  # annotate("text", label =expression(paste("185 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =1, y = 10000)+
+  # annotate("text", label =expression(paste("79 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =2, y = 10000)+
+  # annotate("text", label =expression(paste("46 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =3, y = 10000)+
+  scale_y_log10()+
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),legend.title=element_blank(),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16),
+        legend.position="none")+
+  ylab(expression(paste("Ebullition (mg CH"[4]*" m"^"-2"*"d"^"-1"*")")))+
+  xlab("")
+tropt_plot
 
 tplot<- trope %>%
   ggplot(aes(x=ebu,color=trophic,fill=trophic))+
@@ -451,34 +477,15 @@ llll<-lm(lll~site_depth,data=sd2)
 summary(kkkk)
 summary(llll)
 #Plot of depth versus both ebullition and diffusion
-options(scipen = 999)
 
-depebuplot<-morpe %>%
-  mutate(ebu=ch4_ebullition*24)%>%
-  ggplot(aes(x=site_depth,y=ebu,color=shoreline_development))+
-  geom_point(aes(color=shoreline_development,alpha=0.1))+
-  # geom_abline(yintercept=3.311,slope=-0.20656, color='blue')+
-  # geom_abline(yintercept=3.311,slope=-0.20656, color='blue')+
-  scale_color_gradient2()+
-  scale_y_log10()+
-  scale_x_log10(breaks=c(0.001,0.1,10,1000),labels=c("0.001","0.1","10","1000"))+
-  ylab(expression(paste("Ebullition (mg CH"[4]*" m"^"-2"*"d"^"-1"*")")))+
-  theme_bw()+
-  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
-        axis.line=element_line(colour="black"),legend.title=element_blank(),
-        legend.position="none")+
-  xlab("Site Depth (m)")
-depebuplot
-
-options(scipen=999)
 depdifplot<-dat %>%
   filter(!is.na(shoreline_development))%>%
   filter(!is.na(site_depth))%>%
   filter(!is.na(ch4_diffusion_best))%>%
   mutate(dif=ch4_diffusion_best*24)%>%
-  ggplot(aes(x=site_depth,y=dif, color=shoreline_development))+
-  geom_point(aes(color=shoreline_development,alpha=0.1))+
-  scale_color_gradient2()+
+  ggplot(aes(x=site_depth,y=dif))+
+  geom_point(aes(alpha=0.4,color="#1B9E77"))+
+  scale_color_manual(values="#1B9E77")+
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x)))+
   scale_x_log10()+
@@ -494,7 +501,7 @@ depdifplot<-dat %>%
   xlab("Site Depth (m)")
 depdifplot
 
-#ggsave("diffusive_depth.jpg",width=3,height=3,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("diffusive_depth.jpg",width=3,height=3,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 #ggsave("sc_legend.jpg",width=6,height=3,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 dat$surface_area_bin= ifelse(dat$surface_area<5000000,"small",ifelse(dat$surface_area>5000000,"large","NA"))
@@ -524,16 +531,16 @@ surface_area_plot<-dat %>%
   xlab("Surface Area")
 surface_area_plot
 
-#ggsave("surface_area.jpg",width=6,height=3,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("surface_area.jpg",width=6,height=3,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 sAebu<-dat %>%
   filter(!is.na(shoreline_development))%>%
   filter(!is.na(site_depth))%>%
   filter(!is.na(ch4_ebullition))%>%
   mutate(ebu=ch4_ebullition*24)%>%
-  ggplot(aes(x=site_depth,y=ebu,color=shoreline_development))+
-  geom_point(aes(color=shoreline_development,alpha=0.1))+
-  scale_color_gradient2()+
+  ggplot(aes(x=site_depth,y=ebu))+
+  geom_point(aes(alpha=0.4,color="#D95F02"))+
+  scale_color_manual(values="#D95F02")+
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x)))+
   scale_x_log10()+
@@ -547,7 +554,7 @@ sAebu<-dat %>%
   xlab("Site Depth (m)")
 sAebu
 
-#ggsave("ebullitive_depth.jpg",width=3,height=3,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("ebullitive_depth.jpg",width=3,height=3,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 ## Now examine sediment characteristics
 
@@ -737,8 +744,10 @@ buodiffplot<-dat %>%
   filter(!is.na(ch4_diffusion_best))%>%
   mutate(diff=ch4_diffusion_best*24)%>%
   ggplot(aes(x=buoyf,y=diff))+
-  geom_point()+
-  scale_y_log10()+
+  geom_point(aes(alpha=0.4,color="#1B9E77"))+
+  scale_color_manual(values="#1B9E77")+
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))+
   scale_x_log10()+
   ylab(expression(paste("Diffusion (mg CH"[4]*" m"^"-2"*"d"^"-1"*")")))+
   theme_bw()+
@@ -750,7 +759,7 @@ buodiffplot<-dat %>%
   xlab("Buoyancy Frequency")
 buodiffplot
 
-ggsave("buoyancy_frequency.jpg",width=3,height=3,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("buoyancy_frequency.jpg",width=3,height=3,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 
 #now ebullition
@@ -816,8 +825,10 @@ temebuplot<-dat %>%
   filter(deep_temp>4.5)%>%
   mutate(ebu=ch4_ebullition*24)%>%
   ggplot(aes(x=deep_temp,y=ebu))+
-  geom_point()+
-  scale_y_log10()+
+  geom_point(aes(alpha=0.4,color="#D95F02"))+
+  scale_color_manual(values="#D95F02")+
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))+
   scale_x_log10()+
   ylab(expression(paste("Ebullition (mg CH"[4]*" m"^"-2"*"d"^"-1"*")")))+
   theme_bw()+
@@ -829,19 +840,23 @@ temebuplot<-dat %>%
   xlab("Bottom Temp (C)")
 temebuplot
 
-ggsave("ebullition_temp.jpg",width=3,height=3,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("ebullition_temp.jpg",width=3,height=3,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 ## Let's check out total methane emission by sulfate per Jake's suggestion
 
+#try for diffusion
 sulfur<-dat%>%
-  filter(!is.na(ch4_total))%>%
+  filter(!is.na(ch4_diffusion_best))%>%
   filter(!is.na(deep_s))%>%
-  mutate(ch4tot=ch4_total*24)%>%
-  mutate(sulfur=ifelse(deep_s<300,"low sulfate","high sulfate"))%>%
-  ggplot(aes(x=sulfur,y=ch4tot))+
+  mutate(ch4dif=ch4_diffusion_best*24)%>%
+  mutate(sulfur=ifelse(deep_s<70,"Low Sulfate","High Sulfate"))%>%
+  ggplot(aes(x=sulfur,y=ch4dif))+
   geom_boxplot()+
-  scale_y_log10()+
-  ylab(expression(paste("Total (mg CH"[4]*" m"^"-2"*"d"^"-1"*")")))+
+  annotate("text", label =expression(paste("49 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =1, y = 10000)+
+  annotate("text", label =expression(paste("106 mg CH"[4]*" m"^"-2"*"d"^"-1"*"")), size = 4, x =2, y = 10000)+
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))+
+  ylab(expression(paste("Diffusion (mg CH"[4]*" m"^"-2"*"d"^"-1"*")")))+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
         axis.line=element_line(colour="black"),legend.title=element_blank(),
@@ -851,7 +866,7 @@ sulfur<-dat%>%
   xlab("")
 sulfur
 
-ggsave("sulfate.jpg",width=5,height=3,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
+ggsave("sulfate.jpg",width=5,height=3,dpi=300,units="in",path="~/National_Reservoir_GHG_Survey/AGU_Poster")
 
 ### Best Model For Diffusion
 
@@ -1004,6 +1019,48 @@ g<-lmer(ch4_ebullition~shallow_chla_lab*deep_temp+(1|lake_id),REML=FALSE,data=be
 summary(g)
 #11260.4
 
+shallow_chla_lab<-c(0.146,2.666,5.892,20.209,19.387,236.47)
+deep_temp<-c(18,18,18,18,18,18)
+fakedata<-data.frame(shallow_chla_lab,deep_temp)
+
+gg<-predict(g,newdata=fakedata,random.only=FALSE,re.form=NA)
+fakedata$predch4<-gg
+ggg<-lm(fakedata$predch4~fakedata$shallow_chla_lab)
+
+
+deep_temp2<-c(24,24,24,24,24,24)
+fakedata2<-data.frame(shallow_chla_lab,deep_temp2)
+
+gg2<-predict(g,newdata=fakedata2,random.only=FALSE,re.form=NA)
+fakedata2$predch4<-gg2
+ggg2<-lm(fakedata2$predch4~fakedata2$shallow_chla_lab)
+summary(ggg2)
+
+k<-lmer(ch4_ebullition~shallow_chla_lab+deep_temp+(1|lake_id),REML=FALSE,data=beste)
+summary(k)
+#11273.1-- interactive is 13 AIC better than additive
+
+interplot<-dat %>%
+  filter(!is.na(shallow_chla_lab))%>%
+  filter(!is.na(deep_temp))%>%
+  filter(!is.na(ch4_ebullition))%>%
+  ggplot(aes(x=shallow_chla_lab,y=ch4_ebullition))+
+  geom_point(aes())+
+  geom_abline(intercept=1.3469,slope=0.0185,color="blue")+
+  scale_y_log10()+
+  scale_x_log10()
+interplot
+
+predict(g,)
+
+# #Plot interaction from best model
+# library(effects)
+# 
+# #cut temperature into categorical variable
+# beste$tempcut<-cut(beste$deep_temp, breaks=10)
+# 
+# effect(beste$shallow_chla_lab_log:beste$tempcut)
+
 #Now build up best model
 
 h<-lmer(beste$ch4_ebullition~beste$site_depth+beste$shallow_chla_lab*beste$deep_temp+(1|beste$lake_id),REML=FALSE)
@@ -1014,7 +1071,7 @@ i<-lmer(beste$ch4_ebullition~beste$shoreline_development+beste$shallow_chla_lab*
 summary(i)
 #11262.4- shoreline development doesn't really add much here
 
-i<-lmer(beste$ch4_ebullition~beste$kffactcat+beste$shallow_chla_lab*beste$deep_temp+(1|beste$lake_id),REML=FALSE)
-summary(i)
+j<-lmer(beste$ch4_ebullition~beste$kffactcat+beste$shallow_chla_lab*beste$deep_temp+(1|beste$lake_id),REML=FALSE)
+summary(j)
 #11258.5- k factor doesn't quite improve this by 2 AIC
 

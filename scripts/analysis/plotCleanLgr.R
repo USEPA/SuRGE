@@ -53,8 +53,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "210"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- "11" # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "82"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- "1" # numeric component of lake_id, no leading zero(s), formatted as numeric
 visit_id.i <- "1"
 # this code generates a 3 panel plot used to demonstrate relationship between
 # CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
@@ -138,7 +138,7 @@ adjDataList <- paste0(userPath,
 
 adjDataListb<-paste0(userPath, 
                      c("data/CIN/chamberAdjustmentsCIN_241201.xls","data/NAR/chamberAdjustmentsNAR.xls", "data/RTP/chamberAdjustmentsRTP.xls",
-                       "data/R10/chamberAdjustmentsR10.xls"), sep="")
+                       "data/R10/chamberAdjustmentsR10.xls","data/PR/chamberAdjustmentsPR.xls"), sep="")
 # Read data, but not CIN
 adjData <- map_df(adjDataList, # exclude CIN, RTP, R10, and NAR, different formatting
                   readxl::read_xls, 

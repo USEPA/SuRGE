@@ -8,11 +8,7 @@
 # Read in data
 surgeDsn <- readxl::read_xlsx("../../../surgeDsn/SuRGE_design_20191206_eval_status.xlsx") %>%
   select(-xcoord_1, -ycoord_1) %>% # remove xcoord and ycoord, holdover from Tony's .shp
-  janitor::clean_names() %>% # GIS is picky about names
-  filter(!(site_id %in% c("CH4-1033", "CH4-1000"))) %>% # exclude Falls Lake and Puerto Rico
-  mutate(study = case_when(sample_year == 2016 ~ "2016 Regional Study",
-                           sample_year == 2018 ~ "2018 Regional Study",
-                           TRUE ~ "SuRGE"))
+  janitor::clean_names() # GIS is picky about names
 
 unique(surgeDsn$lab)
 
@@ -76,7 +72,7 @@ cols <- c("Coastal Plains" = "orange1",
 # sf APPROACH----------------
 # Get states map
 states <- USAboundaries::us_states() %>%
-  dplyr::filter(!name %in% c('Alaska','Hawaii','Puerto Rico')) %>% # CONUS
+  dplyr::filter(!name %in% c('Alaska','Hawaii', 'Puerto Rico')) %>% # CONUS
   st_transform(5070)
 
 # # All manmade-sampled 2017 NLA
@@ -143,12 +139,12 @@ ggsave(filename="output/figures/surgeMainSitesByLab.tiff",
 
 ggplot() +
   geom_sf(data = ecoR, color = NA, aes(fill = WSA9_NAME)) +
-  scale_fill_manual("Ecoregion", values = cols) +
   geom_sf(data = states, color = "cornsilk3", fill = NA, size = 0.5) +
-  geom_sf(data = surgeDsnSampled, aes(shape = study, color = study), size = 2) +  
-  scale_color_manual(values = c("darkred", "grey10", "darkblue")) +
-  guides(color=guide_legend(title=NULL)) + # Suppress "study" legend title
-  guides(shape=guide_legend(title=NULL)) + # Suppress "study" legend title
+  geom_sf(data = filter(surgeDsn.sf, 
+                        eval_status_code == "S", # only sampled sites 
+                        !grepl(pattern = c("253|331|302|308|999"), site_id)), #remove extra R10 sites.  See wiki 
+          size = 2) + # see dsgn.R. 
+  scale_fill_manual("Ecoregion", values = cols) +
   #ggtitle("SuRGE Sample Sites") +
 theme_bw() +
   theme(panel.grid.major = element_blank(), 
@@ -168,7 +164,7 @@ theme_bw() +
         legend.key.size = unit(0.5, "cm")) 
 
 
-ggsave(filename="output/figures/surgeMainSitesByStudy.tiff",
+ggsave(filename="output/figures/surgeMainSites.tiff",
        width=8,height=5.5, units="in",
        dpi=800,compression="lzw")
 
