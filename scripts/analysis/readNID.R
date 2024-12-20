@@ -8,7 +8,6 @@ nid_link <- read_csv(paste0(userPath, "data/siteDescriptors/nid_links_and_dam_ag
   distinct(year_completed)
 
 dim(nid_link) #147
-nid_link$lake_id<-as.character(nid_link$lake_id)  
 
 #Pull Dam Latitudes and Longitudes
 nid <- read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
