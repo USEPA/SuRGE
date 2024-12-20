@@ -28,6 +28,8 @@ lake_cat_abbv<-lake_cat %>%
   mutate(NitrogenCat=manurecat+cbnfcat+fertcat)%>%
   select(comid, lake_id, kffactcat,runoffcat,omcat,scat,pctcrop2019cat,catareasqkm,NitrogenCat,
          npdesdenscat,agkffactcat,damnidstorcat,elevcat)
+lake_cat_abbv$comid<-as.character(lake_cat_abbv$comid)
+lake_cat_abbv$lake_id<-as.numeric(lake_cat_abbv$lake_id)
 
 
 # Inventory records
