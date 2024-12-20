@@ -171,7 +171,7 @@ dim(dat) # 3483
    left_join(.,
              morpho)
 
- dim(morpho) #156, 15
+ dim(morpho) # 145, 20
  dim(dat) # 3483
 
 # 10. Merge hydroLakes ID----
@@ -213,7 +213,7 @@ dat <- dat %>%
 dat <- dat %>%
   left_join(sedimentation_link, by = "lake_id")
 
- dim(sedimentation_link) #5
+ dim(sedimentation_link) # 139, 5
  dim(dat) # 3483
  
 # 16. Water level change indices----
