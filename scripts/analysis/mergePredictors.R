@@ -230,7 +230,7 @@ dat <- dat %>%
 dim(surge_climate) #149
 dim(dat) #3483
 
-# 18. ERA5 Water and Air Temperature---
+# 18. ERA5 Water and Air Temperature----
 dat <- dat %>%
   left_join(met_temp, by = "lake_id") # values are identical for multiple visits
 
