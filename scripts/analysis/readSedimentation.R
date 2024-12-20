@@ -219,7 +219,7 @@ elev_dem <- map(site_basin, ~get_elev_raster(.x, z=9, clip = "locations") %>% # 
 # preview DEMs
 map(elev_dem,  function(x) {
   plot(x)
-  readline(prompt="Press [enter] to continue")
+  #readline(prompt="Press [enter] to continue")
 })
 
 # write DEM to disk if desired
@@ -230,7 +230,7 @@ slope <- map(elev_dem, ~terra::terrain(x = .x, v = 'slope', unit = 'degrees'))
 # preview slope
 map(slope,  function(x) {
   plot(x)
-  readline(prompt="Press [enter] to continue")
+  #readline(prompt="Press [enter] to continue")
 })
 
 # calculate mean slope per basin

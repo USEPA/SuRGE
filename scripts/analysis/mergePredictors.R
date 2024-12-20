@@ -6,11 +6,12 @@
 
 
 # 1. Merge 2016 and SuRGE data----------
-names(dat_2016)[!(names(dat_2016) %in% names(all_obs))]
+names(dat_2016)[!(names(dat_2016) %in% names(all_obs))] # remove "chamb_deply_date_time" from dat_2016
 names(all_obs)[!(names(all_obs) %in% names(dat_2016))] 
 
 dat <- bind_rows(dat_2016 %>% 
-                   mutate(lake_id = as.character(lake_id)), # converted to numeric below
+                   mutate(lake_id = as.character(lake_id)) %>% # converted to numeric below
+                   select(-chamb_deply_date_time),
                  all_obs)
 dim(dat_2016) # 1426
 dim(all_obs) # 2057
@@ -297,7 +298,7 @@ dat_agg <- dat %>%
 
 
 dim(all_obs) #2057
-dim(dat) #2057
+dim(dat) #3486
 dim(dat_agg) # 122
 
 
