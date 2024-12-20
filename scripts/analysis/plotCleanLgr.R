@@ -53,8 +53,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "82"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- "1" # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "1000"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- "35" # numeric component of lake_id, no leading zero(s), formatted as numeric
 visit_id.i <- "1"
 # this code generates a 3 panel plot used to demonstrate relationship between
 # CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
