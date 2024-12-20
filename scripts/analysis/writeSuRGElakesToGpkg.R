@@ -216,7 +216,11 @@ chm_deply <- gga_3 %>%
                         TRUE ~ lake_id),
     lake_id = as.numeric(lake_id)) %>%
   select(lake_id, site_id, co2DeplyDtTm) %>%
-  rename(chamb_deply_date_time = co2DeplyDtTm)
+  # arbitrarily set to UTC in readLgr.R, but is actually eastern time zone
+  # either: 1) redefine as eastern here (but don't change the times) then convert to UTC, or
+  # 2) assign appropriate time zone in readLgr.R (America/NewYork) then convert 
+  #    to UTC here, or in readLgr.R. Probably here.
+  rename(chamb_deply_date_time = co2DeplyDtTm) 
 
 # unique id's in field sheets
 dat_surge_sf_distinct <- dat_surge_sf %>% 
@@ -267,50 +271,29 @@ dat_surge_sf_distinct %>%
 
 #################### NEED TO MERGE GGA DERIVED CHAMBER DEPLOYMENT TIMES
 #################### WITH SuRGE POINTS.................................
-#################### CHAMBER DEPLOYMENT TIMES ARE IN EASTERN IN gga_3.
-#################### CONVERT TO UTC FOR JEREMY, LIKE THIS
-#chamb_deply_date_time = force_tz(chamb_deply_date_time, tzone = "America/New_York") %>% 
-#  with_tz(., tzone = "UTC")) %>%
+# dat_surge_sf <- (dat_surge_sf, chm_deply) something like this
 
 
 ## 2016 data
-# dat_2016 loaded via read2016data.R
+# dat_2016 loaded via read2016data.R --> estimateDepth2016.R
 dat_2016
 
 # Format and coerce to spatial object
-###NEED TO UPDATE VARIABLE NAMES. BELOW IS BASED ON FORMATTING FROM
-###EQUAL AREA DATA. SEE read2016data.R
-###### ALSO NEED TO MAKE SURE TIME ZONES ARE IN UTC
-
 dat_2016_sf <- dat_2016 %>%
   filter(!is.na(lat), !is.na(long)) %>%
   st_as_sf(., coords = c("lat", "long"), crs = "EPSG:4326") %>% # lat/long
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
-  select(Lake_Name, siteID, wtrDpth, (matches(c("trap|chm")) & contains("DtTm"))) %>%
-  filter(!is.na(trapDeplyDtTm)|!is.na(trapRtrvDtTm)|!is.na(chmDeplyDtTm)) %>% # exclude sites with no trap or chamber deployment
-  # change names to SuRGE convention
-  rename(trap_deply_date_time = trapDeplyDtTm, 
-         trap_rtrvl_date_time = trapRtrvDtTm,
-         chamb_deply_date_time = chmDeplyDtTm,
-         site_depth = wtrDpth) %>% 
+  select(lake_id, site_id, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%
+  filter(!is.na(trap_deply_date_time)|!is.na(trap_rtrvl_date_time)|!is.na(chamb_deply_date_time)) %>% # exclude sites with no trap or chamber deployment
   # deal with time zones
   mutate(across(contains("date_time"), ~ .x %>% 
                   force_tz(tzone = "America/New_York") %>% # set local time_zone. all 2016 sites are in eastern
                   with_tz("UTC"))) %>% # display in UTC
-  # multiple deployments at Acton Lake have different names (e.g. Acton Aug).  Change them
-  # all to Acton Lake
-  mutate(Lake_Name = case_when(grepl("acton", Lake_Name, ignore.case = TRUE) ~ "Acton Lake",
-                               TRUE ~ Lake_Name)) %>%
-  left_join(lake.list.2016 %>% select(lake_id, eval_status_code_comment), 
-            by = c("Lake_Name" = "eval_status_code_comment")) %>%
-  select(-Lake_Name) %>% # lake_name no longer needed
-  rename(site_id = siteID) %>%
-  mutate(site_id = as.character(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%  # format site_id
   relocate(lake_id, site_id) 
 
 dim(dat_2016) #1426
-dim(dat_2016_sf) #543, lots of rows with no trap data (e.g. oversample sites)
+dim(dat_2016_sf) #498, lots of rows with no trap data (e.g. oversample sites)
 
 
 ## Falls lake
@@ -341,7 +324,7 @@ falls_lake_sf <- rbind(
     rename(site_id = siteID) %>%
     mutate(site_id = substr(site_id, 4,5) %>% as.numeric)
 ) %>%
-  # merge with deployment and retrieval date_time
+  # merge with deployment and retrieval date_time from fallsLakeCH4 RStudio project (readFieldSheets.R)
   right_join(
     readRDS(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/falls_lake_fld_sheet.rds")) %>%
       select(lake_id, site_id, site_depth, contains("date_time"))
@@ -369,7 +352,6 @@ dim(lakes_2016) #33
 # [8/29/2024] missing Falls Lake data from Sept 2017, Sept 2018, and Oct. 2018
 # add point to all_lakes.gpkg
 bind_rows(list(dat_2016_sf, dat_surge_sf, falls_lake_sf)) %>% # merge points
-  mutate(tz = "UTC") %>%
   st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "points",
            append = FALSE)
