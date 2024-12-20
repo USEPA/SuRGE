@@ -9,7 +9,7 @@
 
 # READ DATA -----------------
 # List of .txt files containing data 
-labs <- c("CIN", "RTP", "NAR", "USGS", "ADA", "R10", "DOE") # data directory for each lab
+labs <- c("CIN", "RTP", "NAR", "USGS", "ADA", "R10", "DOE","PR") # data directory for each lab
 txtFiles <- character(0) # vector to catch file names
 for (i in 1:length(labs)) {
   txtFiles.i <- list.files(paste0(userPath,"data/", labs[i]), 

@@ -23,20 +23,15 @@ gga <- filter(gga, !is.na(RDateTime)) # strip out missing RDateTime which compli
 
 
 #2.  ASSIGN site_id, AND chamb_deply_date_time TO LGR OBSERVATIONS.------------------------
-# Many rows in fld_sheet have NA for chamb_deply_date_time.  For example, at all oversample
-# sites where chambers were not deployed.  We want to remove these rows, or the missing
-# values complicate the loop.
-
-
-missing_chamb_deply_date_time <- is.na(fld_sheet$chamb_deply_date_time) # logical for missing chamber deployment times
-
 # Join with fld_sheet to get site_id and chamb_deply_date_time
 # This join duplicates the time series for each station within
 # each lake
 gga$visit<-as.numeric(gga$visit)
 gga_2 <- gga %>%
   left_join(fld_sheet %>% 
-                       filter(!missing_chamb_deply_date_time) %>%
+              # Remove any sites that were included in fld_sheet, but weren't 
+              # sampled (e.g. eval_status == PI). Restrict to sites that were sampled
+                       filter(eval_status == "TS") %>%
                        select(lake_id, site_id, visit, chamb_deply_date_time), 
                      by = c("lake_id","visit"), relationship = "many-to-many")
 
@@ -58,8 +53,8 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "65"  # numeric component of lake_id without leading zero(s), formatted as character
-site_id.i <- "25" # numeric component of lake_id, no leading zero(s), formatted as numeric
+lake_id.i <- "82"  # numeric component of lake_id without leading zero(s), formatted as character
+site_id.i <- "1" # numeric component of lake_id, no leading zero(s), formatted as numeric
 visit_id.i <- "1"
 # this code generates a 3 panel plot used to demonstrate relationship between
 # CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
@@ -143,7 +138,7 @@ adjDataList <- paste0(userPath,
 
 adjDataListb<-paste0(userPath, 
                      c("data/CIN/chamberAdjustmentsCIN_241201.xls","data/NAR/chamberAdjustmentsNAR.xls", "data/RTP/chamberAdjustmentsRTP.xls",
-                       "data/R10/chamberAdjustmentsR10.xls"), sep="")
+                       "data/R10/chamberAdjustmentsR10.xls","data/PR/chamberAdjustmentsPR.xls"), sep="")
 # Read data, but not CIN
 adjData <- map_df(adjDataList, # exclude CIN, RTP, R10, and NAR, different formatting
                   readxl::read_xls, 
@@ -268,12 +263,23 @@ gga_2 <- gga_2 %>%
 
 
 #4. PREPARE DATA TO PLOT ALL TIME SERIES----------------
+# gga_2 contains some sites where the data was deemed unusable for diffusive
+# emission rate calculations. For example, lake_id == 210, site_id == 23.
+# Multiple attempts were made but all were corrupted by bubbles and no
+# chamber deployment time was recorded in field. adjData contains no deployment
+# times for this deployment (not included because no good data). As a result,
+# all chamber deployments times are set to NA. Lets remove these.
+
+gga_3 <- gga_2 %>%
+  # keep if co2 or ch4 deployment time is populated
+  filter(!(is.na(co2DeplyDtTm) & is.na(ch4DeplyDtTm)))
+
 # Trim data to only those we plan to model, plus 60 second buffer on either side
 # of modeling window.
 gga_3 <- gga_2 %>%
   group_by(lake_id, site_id, visit, instrument) %>% # for each lake and site....
-  filter(RDateTime > (min(c(co2DeplyDtTm, ch4DeplyDtTm)) - 60) & 
-           RDateTime < (max(c(co2RetDtTm, ch4RetDtTm)) + 60)) %>%
+  filter(RDateTime > (min(c(co2DeplyDtTm, ch4DeplyDtTm), na.rm = TRUE) - 60) & 
+           RDateTime < (max(c(co2RetDtTm, ch4RetDtTm), na.rm = TRUE) + 60)) %>%
   ungroup()
 
 
