@@ -67,8 +67,11 @@ get_data_sheet <- function(paths){
                                                  format = "%Y-%m-%d%H:%M:%S"),
                chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
                                                   format = "%Y-%m-%d%H:%M:%S"),
-               across(contains("date_time"), ~  force_tz(.x, tzone = tz) %>%
-                        with_tz(., tzone = "UTC"))) %>%
+               across(c(trap_deply_date_time, trap_rtrvl_date_time), ~  force_tz(.x, tzone = tz) %>%
+                        with_tz(., tzone = "UTC")),
+               # chamber time read from LGR which is set to eastern in lab.
+               chamb_deply_date_time = force_tz(chamb_deply_date_time, tzone = "America/New_York") %>% 
+                 with_tz(., tzone = "UTC")) %>%
         select(-tz) %>% # remove unneeded tz variable
         # chemistry data uses "flags" rather than "flag".  be consistent
         rename_with(~sub("flag", "flags", .),
