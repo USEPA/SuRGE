@@ -217,11 +217,29 @@ chm_deply <- gga_3 %>%
                         TRUE ~ lake_id),
     lake_id = as.numeric(lake_id)) %>%
   select(lake_id, site_id, co2DeplyDtTm) %>%
-  # arbitrarily set to UTC in readLgr.R, but is actually eastern time zone
-  # either: 1) redefine as eastern here (but don't change the times) then convert to UTC, or
-  # 2) assign appropriate time zone in readLgr.R (America/NewYork) then convert 
-  #    to UTC here, or in readLgr.R. Probably here.
-  rename(chamb_deply_date_time = co2DeplyDtTm) 
+  rename(chamb_deply_date_time = co2DeplyDtTm) %>% # arbitrarily use CO2
+  # time zones arbitrarily defined as UTC in readLgr.R, but are eastern for all 
+  # lakes except Region 10 where LGR clock was set to Pacific. Here we 1) split
+  # the R10 data into one list element and all other data into another, 2) redefine
+  # time zone as Pacific or Eastern, 3) recast as UTC, 4) recombine data.
+  mutate(tz = case_when(lake_id %in% c(238, 239, 249, 253, 263, 265, 287, 302,
+                                       308, 323, 331, 999) ~ "America/Los_Angeles", #all R10 are Pacific
+                        TRUE ~ "America/New_York")) %>% # all others eastern
+  group_split(tz) %>% # split by time zone
+  map_dfr(~.x %>% mutate(
+    # enforce time zone used in LGR, then cast to UTC
+    chamb_deply_date_time = case_when(tz == "America/Los_Angeles" ~ 
+                                        force_tz(chamb_deply_date_time, "America/Los_Angeles") %>%
+                                        with_tz(., tzone = "UTC"),
+                                      tz == "America/New_York" ~ 
+                                        force_tz(chamb_deply_date_time, "America/New_York") %>%
+                                        with_tz(., tzone = "UTC"),
+                                      TRUE ~ as.POSIXct("1900-01-01 01:30:00", "%Y-%m-%d %H:%M:%S", tz = "UTC")))
+    )
+
+# check for error flag
+chm_deply %>% 
+  filter(chamb_deply_date_time == as.POSIXct("1900-01-01 01:30:00", "%Y-%m-%d %H:%M:%S", tz = "UTC"))
 
 # unique id's in field sheets
 dat_surge_sf_distinct <- dat_surge_sf %>% 
@@ -236,9 +254,9 @@ chm_deply_distinct <- chm_deply %>%
   select(lake_id, site_id) %>%
   distinct %>% 
   unite(id, c("lake_id", "site_id"))
-dim(chm_deply_distinct) # 1742
+dim(chm_deply_distinct) # 1788
 
-# why do the field sheets contain 1815 - 1742 = 73 more values
+# why do the field sheets contain 1815 - 1788 = 27 more values
 # than the diffusion calcs?
 
 # which values are in gga, but not the field sheets?
@@ -246,22 +264,18 @@ dim(chm_deply_distinct) # 1742
 chm_deply_distinct %>% filter(!(id %in% dat_surge_sf_distinct$id))
 
 # which values are in field_sheets, but not gga?
-# 1000, check status with Abdel
 # 146_4 - no data
 # 1_21 - no data
 # 210 (23, 6, 8) - no good gga data
 # 211_16 - no good gga data
-# 253 not in chamber adjustments
+# 253 (4, 6, 7) no good gga data
 # 317_3- no good gga data
 # 326_10 no good gga data
-# 44 (11, 19, 8) - add to chamber adjustments
 # 4_5 -  no good gga data
 # 70 riverine (11, 5) - no data
 # 71 (1, 10, 6) no data
 # 72_23 - no data        
-# 76_13 - add to chamber adjustments
 # 78 (11, 12, 18, 24, 29, 3, 4, 7, 8) - LGR battery died, no data
-# 82 (all) - add to chamber adjustments          
 
 dat_surge_sf_distinct %>% 
   filter(!(id %in% chm_deply_distinct$id)) %>%
@@ -270,15 +284,7 @@ dat_surge_sf_distinct %>%
   print(n=Inf)
 
 
-#################### NEED TO MERGE GGA DERIVED CHAMBER DEPLOYMENT TIMES
-#################### WITH SuRGE POINTS.................................
-#################### CHAMBER DEPLOYMENT TIMES ARE IN EASTERN IN gga_3.
-#################### CONVERT TO UTC FOR JEREMY, LIKE THIS
-#chamb_deply_date_time = force_tz(chamb_deply_date_time, tzone = "America/New_York") %>% 
-#  with_tz(., tzone = "UTC")) %>%
-# dat_surge_sf <- (dat_surge_sf, chm_deply) something like this
-
-dim(dat_surge_sf) #1848
+dim(dat_surge_sf) #1869
 
 
 

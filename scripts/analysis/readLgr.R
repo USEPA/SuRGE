@@ -40,7 +40,7 @@ txtFiles <- txtFiles[grepl(pattern = c("_f|-f"), x = txtFiles) & # grab only lgr
 ggaList <- list()  # Empty list to hold results
 
 tic() # 25 seconds 9/28/2023
-for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txtFiles) 92 is tab delimited.  must convert to comma
+for (i in 1:length(txtFiles)) {  # loop to read and format each file
   print(i)
   if (grepl(pattern = "gga", x = txtFiles[i])) { 
     # I think this will work for all UGGA files.  The colClasses argument skips the final 71 columns of data.
@@ -57,7 +57,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txt
       # assign data to particular field crew
       mutate(lab = str_split(txtFiles[i], "/")[[1]][2], # extract 2nd element from 1st list element 
              visit= ifelse(grepl("visit2",str_split(txtFiles[i],"/")[[1]][3]),"2","1"),
-             instrument= substr(str_split(txtFiles[i],"/")[[1]][5],1,3),
+             instrument= "gga",
              # extract lake_id 
              # sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]) works for most, but not R10 2018 lakes.  below is more general 
              # case_when accomodates the inclusion of lacustrine, transitional, and riverine where needed.
@@ -84,7 +84,7 @@ for (i in 1:length(txtFiles)) {  # loop to read and format each file #length(txt
     # assign data to particular field crew
       mutate(lab = str_split(txtFiles[i], "/")[[1]][2], # extract 2nd element from 1st list element 
              visit= ifelse(grepl("visit2",str_split(txtFiles[i],"/")[[1]][3]),"2","1"),
-             instrument= substr(str_split(txtFiles[i],"/")[[1]][5],1,3),
+             instrument= "mic",
              # extract lake_id 
              # sub("(.*_)(\\d+)_.+", "\\2", txtFiles[i]) works for most, but not R10 2018 lakes.  below is more general 
              # case_when accomodates the inclusion of lacustrine, transitional, and riverine where needed.
