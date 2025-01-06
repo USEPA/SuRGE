@@ -92,5 +92,5 @@ chem_fld_wide[!(with(chem_fld_wide, paste(lake_id, site_id, visit)) %in%
   print(n=Inf)
 
 # write to disk
-save(all_obs, file = paste0("output/all_obs_", Sys.Date(), ".RData"))
+save(all_obs, file = paste0(userPath, "data/all_obs_", Sys.Date(), ".RData"))
 #write.table(all_obs, file = paste0(userPath, "data/all_obs_",  Sys.Date(),".txt"), row.names = F, col.names = T)

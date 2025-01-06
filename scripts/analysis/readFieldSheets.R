@@ -69,10 +69,11 @@ get_data_sheet <- function(paths){
                                                   format = "%Y-%m-%d%H:%M:%S"),
                across(c(trap_deply_date_time, trap_rtrvl_date_time), ~  force_tz(.x, tzone = tz) %>%
                         with_tz(., tzone = "UTC")),
-               # chamber time read from LGR which is set to eastern in lab.
-               # except for R10 which is pacific, need to address
-               chamb_deply_date_time = force_tz(chamb_deply_date_time, tzone = "America/New_York") %>% 
-                 with_tz(., tzone = "UTC")) %>%
+               # chamber time read from LGR which is set to eastern in lab except for R10 which is pacific
+               # define local time zone then cast to UTC
+               chamb_deply_date_time = case_when(lake_id %in% c(238, 239, 249, 253, 263, 265, 287, 302, # if a R10 site
+                                                                308, 323, 331, 999) ~ force_tz(chamb_deply_date_time, "America/Los_Angeles") %>% with_tz(., tzone = "UTC"),
+                                                 TRUE ~ force_tz(chamb_deply_date_time, "America/New_York") %>% with_tz(., tzone = "UTC"))) %>%
         select(-tz) %>% # remove unneeded tz variable
         # chemistry data uses "flags" rather than "flag".  be consistent
         rename_with(~sub("flag", "flags", .),
