@@ -10,7 +10,8 @@ remove(eqAreaData) # remove original object
 dat_2016 <- dat_2016 %>% 
   janitor::clean_names() %>% 
   # remove extra Acton Lake observations
-  filter(!(lake_name %in% c("Acton Lake Aug", "Acton Lake July", "Acton Lake Oct"))) %>%
+  filter(!(lake_name %in% c("Acton Lake Aug", "Acton Lake July", "Acton Lake Oct")),
+         eval_status == "sampled") %>% # only sampled sites
   # grab required variables
   select(lake_name, site_id, 
          chla_sample, tn, tnh4, tno2, tno2_3, toc, tp, trp, 

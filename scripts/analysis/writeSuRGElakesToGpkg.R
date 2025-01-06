@@ -5,7 +5,7 @@
 
 # COLLECT LAKE POLYGONS------------------------
 
-## SuRGE, including R10 2018, polygons--------
+## SuRGE and R10 2018 polygons--------
 # 1. CREATE A LIST FILE PATHS WHERE THE SURGE LAKE POLYGONS ARE STORED.  
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "lakeDsn/", labs)
@@ -31,7 +31,7 @@ gdb_list <- lake.list %>%
   distinct # 4 revisits 
   
 
-nrow(gdb_list) # 112 observations, lake.list includes 118, but this includes 4 revisits and two NA (69 and 70), remove those to get 112.
+nrow(gdb_list) # 112 observations, lake.list includes 118, but this includes 4 revisits and two NA (69 and 70), remove those to get 112
 
 # collapse to vector
 gdb_list <- gdb_list %>%
@@ -52,7 +52,7 @@ fs_paths <- fs::dir_ls(path = paths, # see above
            type = "file") %>% # only retain file names, not directory names   
   sub('\\/[^\\/]*$', '',.) %>% # extract characters before final /
   unique(.) %>% # names of .gdb e.g. merc297.gdb
-  .[grepl(gdb_list, .)]
+  .[grepl(gdb_list, .)] # extract only desired .gdb
 
 # 2. GET NAME OF LAKE POLYGON LAYER IN EACH .gdb
 layers <- purrr::map(fs_paths, ~st_layers(.)) %>% # Read layers in each .gdb
@@ -131,8 +131,8 @@ get_2016 <- function(paths){
              regexp = '..shp', # file names containing this pattern
              recurse = 1, # one level into subdirectories (avoid bathymetry files)
              type = "file") %>% # only retain file names, not directory names  
-    .[!(grepl("xml|lock", .))] %>% # omit .shp.xml and .lock files
-    #.[8] %>% # subset for code development
+    .[!(grepl("xml|lock|basin|fallsLakeSitesEqArea", .))] %>% # omit .shp, .xml, .lock, and basin shapefiles
+    #.[17] %>% # subset for code development
     #imap: .x is object piped into impap, .y is object index (name of list element)
     imap(~st_read(.x, stringsAsFactors = FALSE) %>% # read shapefiles
            st_make_valid() %>% # fix any spatial issues
@@ -145,7 +145,7 @@ get_2016 <- function(paths){
              # if_else and case_when, but they broke when encountering list elements
              # that didn't contain the lake_name attribute.  This if else combo works.
              lake_name = if(!any("Lake_Name" %in% names(.))) {.y} else {unique(Lake_Name)},
-             # second mutate replaces the lake_name, taken from .y, with the appropriate lake_lame
+             # second mutate replaces the lake_name, taken from .y, with the appropriate lake_name
              # for the 5 lakes.
              lake_name = case_when(grepl("brookville", lake_name, ignore.case = TRUE) ~ "Brookville Lake",
                                    grepl("buckhorn", lake_name, ignore.case = TRUE) ~ "Buckhorn Lake",
@@ -174,7 +174,7 @@ dim(lakes_2016) #33 lakes (32 from 2016 + Falls Lake)
 
 
 # GET POINTS AND TRAP DEPOLYMENT/RETRIEVAL TIMES-----------------
-## SuRGE sites
+## SuRGE sites---------
 dat_surge_sf <- fld_sheet %>%
   filter(eval_status == "TS", # only sampled sites
          !(is.na(long)|is.na(lat))) %>% # only sites where lat and long were recorded
@@ -195,11 +195,11 @@ dat_surge_sf <- fld_sheet %>%
   `st_crs<-` (4326) %>% # latitude and longitude
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>% # ensure consistent geometry column names across all sf objects
-  select(lake_id, site_id, site_depth, (matches(c("trap")) & contains("date_time")))
+  select(lake_id, site_id, visit, site_depth, (matches(c("trap")) & contains("date_time")))
 
 
 
-## SuRGE chamber deployment times 
+## SuRGE chamber deployment times------
 # Pull from gga_3 which contains corrections for deployments where internal
 # GGA clock was wrong
 
@@ -216,7 +216,7 @@ chm_deply <- gga_3 %>%
                         lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
                         TRUE ~ lake_id),
     lake_id = as.numeric(lake_id)) %>%
-  select(lake_id, site_id, co2DeplyDtTm) %>%
+  select(lake_id, site_id, visit, co2DeplyDtTm) %>%
   rename(chamb_deply_date_time = co2DeplyDtTm) %>% # arbitrarily use CO2
   # time zones arbitrarily defined as UTC in readLgr.R, but are eastern for all 
   # lakes except Region 10 where LGR clock was set to Pacific. Here we 1) split
@@ -226,6 +226,9 @@ chm_deply <- gga_3 %>%
                                        308, 323, 331, 999) ~ "America/Los_Angeles", #all R10 are Pacific
                         TRUE ~ "America/New_York")) %>% # all others eastern
   group_split(tz) %>% # split by time zone
+  # R can't support different time zones in one column. split eastern and pacific
+  # into separate list elements, define local time zone, cast to UTC, then join
+  # back to df
   map_dfr(~.x %>% mutate(
     # enforce time zone used in LGR, then cast to UTC
     chamb_deply_date_time = case_when(tz == "America/Los_Angeles" ~ 
@@ -235,28 +238,32 @@ chm_deply <- gga_3 %>%
                                         force_tz(chamb_deply_date_time, "America/New_York") %>%
                                         with_tz(., tzone = "UTC"),
                                       TRUE ~ as.POSIXct("1900-01-01 01:30:00", "%Y-%m-%d %H:%M:%S", tz = "UTC")))
-    )
+    ) %>%
+  select(-tz) %>% # no longer need tz field
+  # time series repeated for each deployment. Filter down to unique values for each site.
+  distinct
 
 # check for error flag
 chm_deply %>% 
   filter(chamb_deply_date_time == as.POSIXct("1900-01-01 01:30:00", "%Y-%m-%d %H:%M:%S", tz = "UTC"))
 
+# Check for missing values
 # unique id's in field sheets
 dat_surge_sf_distinct <- dat_surge_sf %>% 
   st_drop_geometry %>% 
-  select(lake_id, site_id) %>%
+  select(lake_id, site_id, visit) %>%
   distinct %>% 
-  unite(id, c("lake_id", "site_id"))
-dim(dat_surge_sf_distinct) # 1815 unique id
+  unite(id, c("lake_id", "site_id", "visit"))
+dim(dat_surge_sf_distinct) # 1869 unique id
 
 # unique id's in diffusive emission rate calcs
 chm_deply_distinct <- chm_deply %>% 
-  select(lake_id, site_id) %>%
+  select(lake_id, site_id, visit) %>%
   distinct %>% 
-  unite(id, c("lake_id", "site_id"))
-dim(chm_deply_distinct) # 1788
+  unite(id, c("lake_id", "site_id", "visit"))
+dim(chm_deply_distinct) # 1836
 
-# why do the field sheets contain 1815 - 1788 = 27 more values
+# why do the field sheets contain 1869 - 1836 = 33 more values
 # than the diffusion calcs?
 
 # which values are in gga, but not the field sheets?
@@ -265,6 +272,9 @@ chm_deply_distinct %>% filter(!(id %in% dat_surge_sf_distinct$id))
 
 # which values are in field_sheets, but not gga?
 # 146_4 - no data
+# 147, visit 1, sites 1, 15 - no good gga data
+# 148, visit 2, sites 10, 14 - no good gga data
+# 148, visit 1, sites 6, 13 - no good gga data 
 # 1_21 - no data
 # 210 (23, 6, 8) - no good gga data
 # 211_16 - no good gga data
@@ -283,34 +293,34 @@ dat_surge_sf_distinct %>%
   arrange(id) %>% 
   print(n=Inf)
 
+# Merge chamber deployment times with point layer
+dat_surge_sf <- left_join(dat_surge_sf,
+                          chm_deply)
 
 dim(dat_surge_sf) #1869
 
 
 
-## 2016 data
+## 2016 data----------
 # dat_2016 loaded via read2016data.R --> estimateDepth2016.R
 dat_2016
 
 # Format and coerce to spatial object
+# data in correct UTC time zone. See issue 134
 dat_2016_sf <- dat_2016 %>%
   filter(!is.na(lat), !is.na(long)) %>%
   st_as_sf(., coords = c("lat", "long"), crs = "EPSG:4326") %>% # lat/long
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
-  select(lake_id, site_id, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%
+  select(lake_id, site_id, visit, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%
   filter(!is.na(trap_deply_date_time)|!is.na(trap_rtrvl_date_time)|!is.na(chamb_deply_date_time)) %>% # exclude sites with no trap or chamber deployment
-  # deal with time zones
-  mutate(across(contains("date_time"), ~ .x %>% 
-                  force_tz(tzone = "America/New_York") %>% # set local time_zone. all 2016 sites are in eastern
-                  with_tz("UTC"))) %>% # display in UTC
-  relocate(lake_id, site_id) 
+  relocate(lake_id, site_id) %>%
+  mutate(site_id = as.character(site_id))
 
-dim(dat_2016) #1426
-dim(dat_2016_sf) #498, lots of rows with no trap data (e.g. oversample sites)
+dim(dat_2016_sf) #498
 
 
-## Falls lake
+## Falls lake-----------
 # data maintained at: "C:\Users\JBEAULIE\OneDrive - Environmental Protection Agency (EPA)\gitRepository\fallsLakeCH4"
 # 1. create sf object for sites 991 and 992 that were sampled one. These sites
 #    are not included in official survey design.
@@ -318,7 +328,7 @@ dim(dat_2016_sf) #498, lots of rows with no trap data (e.g. oversample sites)
 # 3. merge sf object above with deployment and retrieval times
 
 # sf object of sites
-falls_lake_sf <- rbind(
+dat_falls_lake_sf <- rbind(
   # sf object for sites 991 and 992. these were sampled once but not in survey design file (?)
   tribble(
     ~lat, ~lon, ~site_id,
@@ -329,9 +339,7 @@ falls_lake_sf <- rbind(
     st_transform(3857), # web meractor, consistent with surge_lakes
   
   # read in and merge .shp containing survey design
-  st_read(paste0("C:\\Users\\JBEAULIE\\OneDrive - Environmental Protection Agency (EPA)\\",
-                 "gitRepository\\fallsLakeCH4\\inputData\\",
-                 "grtsInputOutput\\fallsLakeSitesEqArea.shp")) %>%
+  st_read(paste0(userPath,  "lakeDsn/2016_survey/fallsLake/FallsLakeSitesEqArea.shp")) %>%
     st_transform(., 3857) %>% # web mercator, consistent with surge_lakes
     st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
     select(siteID) %>%
@@ -339,16 +347,16 @@ falls_lake_sf <- rbind(
     mutate(site_id = substr(site_id, 4,5) %>% as.numeric)
 ) %>%
   # merge with deployment and retrieval date_time from fallsLakeCH4 RStudio project (readFieldSheets.R)
+  # times were defined based on local time zone, then converted to UTC in fallsLakeCH4 RStudio project (readFieldSheets.R)
   right_join(
     readRDS(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/falls_lake_fld_sheet.rds")) %>%
-      select(lake_id, site_id, site_depth, contains("date_time"))
+      select(lake_id, site_id, visit, site_depth, contains("date_time"))
   ) %>%
   st_make_valid() %>%
   mutate(site_id = as.character(site_id),
          lake_id = as.numeric(lake_id))
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
 # WRITE POLYGONS AND POINTS TO DISK-----------
 ## POLYGONS----
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
@@ -363,10 +371,10 @@ dim(lakes_2016) #33
 
 ## POINTS----
 # merge 2016, SuRGE, and Falls Lake data
-# [8/29/2024] missing Falls Lake data from Sept 2017, Sept 2018, and Oct. 2018
 # add point to all_lakes.gpkg
-bind_rows(list(dat_2016_sf, dat_surge_sf, falls_lake_sf)) %>% # merge points
+bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
   st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "points",
            append = FALSE)
 
+bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% dim #2816 observations

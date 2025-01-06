@@ -70,6 +70,7 @@ get_data_sheet <- function(paths){
                across(c(trap_deply_date_time, trap_rtrvl_date_time), ~  force_tz(.x, tzone = tz) %>%
                         with_tz(., tzone = "UTC")),
                # chamber time read from LGR which is set to eastern in lab.
+               # except for R10 which is pacific, need to address
                chamb_deply_date_time = force_tz(chamb_deply_date_time, tzone = "America/New_York") %>% 
                  with_tz(., tzone = "UTC")) %>%
         select(-tz) %>% # remove unneeded tz variable
