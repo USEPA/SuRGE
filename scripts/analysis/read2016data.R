@@ -151,11 +151,18 @@ dat_2016 <- rows_update(dat_2016, # object to be updated
                         by = c("lake_id", "site_id", "visit")) 
 
 
-# recorded lat for Acton (1001) site_id == 11 is too far east
+# recorded lat and long for some site were clearly erroneous.
 # replace with survey design value
-acton_11 <- dat_2016 %>%
-  filter(lake_id == 1001,
-         site_id == 11) %>%
+new_coords <- dat_2016 %>%
+  filter(lake_id == 1001 & site_id == 11 | # Acton
+           lake_id == 1006 & site_id %in% c(29, 33) | 
+           lake_id == 1009 & site_id %in% c(6, 29, 30, 33, 34) | 
+           lake_id == 1010 & site_id == 48 | 
+           lake_id == 1013 & site_id == 30 | 
+           lake_id == 1015 & site_id %in% c(7, 16) | 
+           lake_id == 1019 & site_id %in% c(31, 32) | 
+           lake_id == 1021 & site_id %in% c(2, 3, 6) | 
+           lake_id == 1023 & site_id %in% c(25, 28)) %>%
   st_as_sf(coords = c("xcoord", "ycoord")) %>% # convert to sf based on survey design
   `st_crs<-`("ESRI:102008") %>% # original 2016 data in Conus Albers. (5070)
   st_transform(crs="EPSG:4326") %>% # lat/long
@@ -167,7 +174,7 @@ acton_11 <- dat_2016 %>%
 # Super cool dplyr function for updating values, rather than joining, then
 # dealing with lat.x and lat.y, etc.
 dat_2016 <- rows_update(dat_2016, # object to be updated
-                        acton_11, # new values taken from here
+                        new_coords, # new values taken from here
                         # join on these. unspecified variables (lat long) will be updated in x
                         by = c("lake_id", "site_id", "visit")) %>%
   select(-xcoord, -ycoord) # no longer need these columns

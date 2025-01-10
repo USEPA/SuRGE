@@ -88,7 +88,7 @@ surge_lakes <- map2(fs_paths, layers,  st_read, stringsAsFactors = FALSE) %>% # 
         st_make_valid()) %>% # clean up objects
 
 map(~if(.$lake_id == "317") { #  .shp has two separate polygons, only one was sampled.  omit one not sampled
-  st_cast(., "POLYGON") %>% # breaks single multipolygon into two separate ploygons
+  st_cast(., "POLYGON") %>% # breaks single multipolygon into two separate polygons
     mutate(area_m = st_area(.)) %>% # calculate area of each polygon
     top_n(1, area_m) %>% # pick largest polygon
     select(-area_m) # no longer need area.m field
@@ -124,20 +124,25 @@ surge_lakes <- get_surge(paths)
 paths <- paste0(userPath,  "lakeDsn/", "2016_survey")
 
 get_2016 <- function(paths){
-
+  
   # 1. READ IN FILE NAMES FOR 2016 RESERVOIR SURVEY AND FALLS LAKE POLYGONS
-   #d <- 
+  #d <- 
   fs::dir_ls(path = paths, 
              regexp = '..shp', # file names containing this pattern
              recurse = 1, # one level into subdirectories (avoid bathymetry files)
              type = "file") %>% # only retain file names, not directory names  
-    .[!(grepl("xml|lock|basin|fallsLakeSitesEqArea", .))] %>% # omit .shp, .xml, .lock, and basin shapefiles
-    #.[17] %>% # subset for code development
-    #imap: .x is object piped into impap, .y is object index (name of list element)
+    .[!(grepl("xml|lock|basin", .))] %>% # omit .shp, .xml, .lock, and basin shapefiles
+    # I couldn't dissolve intra-reservoir boundaries for these lakes in R. dissolved in Pro. Ignore original .shp
+    # and read in dissolved polygons. Specified lake name below.
+    .[!(grepl("fallsLakeSitesEqArea|fallsLakeEqArea.shp|miltonEqArea.shp|senecavilleEqArea.shp|caesarCreekEqArea.shp", .))] %>%
+    #.[15] %>% # subset for code development
+    #imap: .x is object piped into imap, .y is object index (name of list element)
     imap(~st_read(.x, stringsAsFactors = FALSE) %>% # read shapefiles
+           #st_cast(., "POLYGON") %>%
            st_make_valid() %>% # fix any spatial issues
            st_transform(., 3857) |>  # web meractor, consistent with surge_lakes
            st_set_geometry("geom") %>% # make sure geometry column name is geom (it is Shape, geometry, .... across objects)
+           
            # Each .shp must have a lake_name attribute.  All but 5 do.  Below
            # we address the 5 that need the attribute
            mutate( # first mutate creates a lake_name attribute if not already present
@@ -152,15 +157,18 @@ get_2016 <- function(paths){
                                    grepl("carr", lake_name, ignore.case = TRUE) ~ "Carr Fork Lake",
                                    grepl("cave", lake_name, ignore.case = TRUE) ~ "Cave Run Lake",
                                    grepl("falls", lake_name, ignore.case = TRUE) ~ "Falls Lake",
+                                   grepl("senecaville", lake_name, ignore.case = TRUE) ~ "Senecaville Lake",
+                                   grepl("milton", lake_name, ignore.case = TRUE) ~ "Lake Milton",
+                                   grepl("caesar", lake_name, ignore.case = TRUE) ~ "Caesar Creek Lake",
                                    TRUE ~ lake_name))) %>%
     # This dissolves intra reservoir strata and/or sections
-    map(function(x) x %>% group_by(lake_name) %>% 
+    map(function(x) x %>% group_by(lake_name) %>%
           summarise() %>% # this does the dissolve
           ungroup() %>% # remove grouping
           st_make_valid()) %>% # clean up objects
-    # this bit assigns lake_id values (e.g. 1000)
-     #d[1] %>%
-   map(function(x) {
+    #this bit assigns lake_id values (e.g. 1000)
+    #d[1] %>%
+    map(function(x) {
       x.lake_name <- x$lake_name # get the Lake_Name
       # find corresponding lakeSiteID from lake.list.2016 (see readSurgeLakes.R)
       x.lake_id <- lake.list.2016[lake.list.2016$eval_status_code_comment %in% x.lake_name, "lake_id"] %>% pull
@@ -309,7 +317,7 @@ dat_2016
 # data in correct UTC time zone. See issue 134
 dat_2016_sf <- dat_2016 %>%
   filter(!is.na(lat), !is.na(long)) %>%
-  st_as_sf(., coords = c("lat", "long"), crs = "EPSG:4326") %>% # lat/long
+  st_as_sf(., coords = c("long","lat"), crs = "EPSG:4326") %>% # lat/long
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
   select(lake_id, site_id, visit, site_depth, (matches(c("trap|chamb")) & contains("date_time"))) %>%
