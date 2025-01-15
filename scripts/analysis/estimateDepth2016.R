@@ -27,7 +27,7 @@ st_crs(bathy_2016$bathy_act) == st_crs(dat_2016_missing_depth)
 
 # overlay points on rasters and extract depth
 depth_estimates <- map(bathy_2016, # list of bathymetry files
-                       ~.x %>% raster::extract(dat_2016_missing_depth)) %>% # extract raster values for sites with missin data
+                       ~.x %>% raster::extract(dat_2016_missing_depth)) %>% # extract raster values for sites with missing data
   map_df(., ~cbind(.x)) %>% # collapse into a dataframe of columns
   # collapse into one column
   # https://stackoverflow.com/questions/75308080/row-wise-coalesce-over-all-columns
