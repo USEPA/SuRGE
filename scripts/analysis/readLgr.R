@@ -174,22 +174,26 @@ CIN_adjustments$TO<-difftime(CIN_adjustments$right.datetime, CIN_adjustments$wro
 #Check this
 CIN_adjustments$Time.Offset<-time_length(CIN_adjustments$TO,unit="second")
 
-gga$RDateTime_adj<-ifelse(gga$lake_id=="67",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[1]),
-                      ifelse(gga$lake_id=="68",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[2]),
-                             ifelse(gga$lake_id=="69_riverine",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[3]),
-                                    ifelse(gga$lake_id=="70_transitional",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[4]),
-                                           ifelse(gga$lake_id=="71",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[5]),
-                                                  ifelse(gga$lake_id=="72",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[6]),
-                                                      ifelse(gga$lake_id=="75",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[7]),
-                                                             ifelse(gga$lake_id=="79",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[8]),
-                                                                    ifelse(gga$lake_id=="149",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[9]),
-                                                                           ifelse(gga$lake_id=="231",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[10]),
-                                                                                  ifelse(gga$lake_id=="232",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[11]),
-                                                                                         ifelse(gga$lake_id=="232b",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[14]),
-                                                                                         ifelse(gga$lake_id=="236",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[12]),
-                                                                                                ifelse(gga$lake_id=="237",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[13]),
-                                                                                                       ifelse(gga$lake_id=="75",gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[15]),
-                                                                                                       gga$RDateTime)))))))))))))))
+gga$RDateTime_adj = case_when(gga$lake_id=="67" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[1]),
+                              gga$lake_id=="68" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[2]),
+                              gga$lake_id=="69_riverine" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[3]),
+                              gga$lake_id=="70_transitional" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[4]),
+                              gga$lake_id=="71" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[5]),
+                              gga$lake_id=="72"~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[6]),
+                              gga$lake_id=="75" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[7]),
+                              gga$lake_id=="79"~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[8]),
+                              gga$lake_id=="149" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[9]),
+                              gga$lake_id=="231" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[10]),
+                              gga$lake_id=="232" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[11]),
+                              gga$lake_id=="236" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[12]),
+                              gga$lake_id=="237" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[13]),
+                              gga$lake_id=="232b" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[14]),
+                              gga$lake_id=="240" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[15]),
+                              gga$lake_id=="155" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[16]),
+                              gga$lake_id=="78" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[17]),
+                              gga$lake_id=="233" ~ gga$RDateTime+dseconds(CIN_adjustments$Time.Offset[18]),
+                                                                         TRUE ~ gga$RDateTime)
+
 gga$RDateTime<-as_datetime(gga$RDateTime_adj)
 
 gga$lake_id<-ifelse(gga$lake_id=="232b","232", gga$lake_id)#collapse the two sets of data from lake 232 back together now that they can be distinguished

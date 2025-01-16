@@ -237,6 +237,8 @@ dat <- dat %>%
 dim(met_temp) #146
 dim(dat) #3483
 
+# write to disk
+save(dat, file = paste0("output/dat_", Sys.Date(), ".RData"))
 
 # 19. Aggregate by lake_id----------
 # 10/10/2024 NOT WORKING, IN PROGRESS....
