@@ -224,14 +224,14 @@ chm_deply <- gga_3 %>%
                         lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
                         TRUE ~ lake_id),
     lake_id = as.numeric(lake_id)) %>%
-  select(lake_id, site_id, visit, co2DeplyDtTm) %>%
-  rename(chamb_deply_date_time = co2DeplyDtTm) %>% # arbitrarily use CO2
+  select(lake_id, site_id, visit, ch4DeplyDtTm) %>%
+  rename(chamb_deply_date_time = ch4DeplyDtTm) %>% # we are focusing on CH4
   # time zones arbitrarily defined as UTC in readLgr.R, but are eastern for all 
   # lakes except Region 10 where LGR clock was set to Pacific. Here we 1) split
   # the R10 data into one list element and all other data into another, 2) redefine
   # time zone as Pacific or Eastern, 3) recast as UTC, 4) recombine data.
   mutate(tz = case_when(lake_id %in% c(238, 239, 249, 253, 263, 265, 287, 302,
-                                       308, 323, 331, 999) ~ "America/Los_Angeles", #all R10 are Pacific
+                                       308, 323, 331, 999) ~ "America/Los_Angeles", # all R10 are Pacific
                         TRUE ~ "America/New_York")) %>% # all others eastern
   group_split(tz) %>% # split by time zone
   # R can't support different time zones in one column. split eastern and pacific

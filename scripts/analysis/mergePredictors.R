@@ -13,9 +13,9 @@ dat <- bind_rows(dat_2016 %>%
                    mutate(lake_id = as.character(lake_id)) %>% # converted to numeric below
                    select(-chamb_deply_date_time),
                  all_obs)
-dim(dat_2016) # 1426
+dim(dat_2016) # 498
 dim(all_obs) # 2057
-dim(dat) # 3483, good
+dim(dat) # 2555, good
 
 # 2. Fill chemistry variables----
 # chemistry variables measured at one location.  NA reported
@@ -49,7 +49,7 @@ dat <- dat %>%
   fill(all_of(analytes_to_fill), .direction = "downup") %>%
   ungroup 
 
-dim(dat) # 3483
+dim(dat) # 2555
 
 # 3. Merge SuRGE lake list----
 dat <- dat %>%
@@ -80,7 +80,7 @@ dat <- dat %>%
       # remove records for 69 and 70
       filter(!lake_id == c(69|70)))
 
-dim(dat) # 3483
+dim(dat) # 2555
 
 
 # 3. Merge NLA chemistry----
@@ -95,7 +95,7 @@ dim(dat) # 3483
  # merge
  dat <- dat %>%
    left_join(nla17_chem)
- dim(dat) # 3483
+ dim(dat) # 2555
  
  # impute missing chem with NLA numbers
  dat <- dat %>%
@@ -122,7 +122,7 @@ dim(dat) # 3483
  dat <- dat %>%
    left_join(index_site, 
              by = c("lake_id", "site_id", "visit")) # default, but specifying for clarity
- dim(dat) # 3483
+ dim(dat) # 2555
  
  
 # 5. Merge Waterisotope----
@@ -135,18 +135,18 @@ dim(dat) # 3483
                                           lake_id == "69" ~ "69_lacustrine", # NLA 45.01971 -100.26474 
                                           TRUE ~ lake_id)))
  
- dim(dat) # 3483
+ dim(dat) # 2555
 
 # 6. Stratification Indices
  dat <- dat %>%
    left_join(strat_link, by=c("lake_id","visit"))
  
- dim(dat) #3483
+ dim(dat) # 2555
  
 # 7. Phytoplankton Composition from Avery----
  dat <- dat %>%
    left_join(phyto_SuRGE_link, by="lake_id")
- dim(dat) # 3483
+ dim(dat) # 2555
  
 # 8. Move lacustrine, transitional, and riverine to site_id.----
  # this will facilitate merging with variables the pertain to 
@@ -164,78 +164,78 @@ dim(dat) # 3483
                          TRUE ~ lake_id),
      lake_id = as.numeric(lake_id)) 
  
- dim(dat) # 3483
+ dim(dat) # 2555
  
 # 9. Merge lakeMorpho data (readMorpho.R)----
  dat <- dat %>%
    left_join(.,
              morpho)
 
- dim(morpho) # 145, 20
- dim(dat) # 3483
+ dim(morpho) # 147
+ dim(dat) # 2555
 
 # 10. Merge hydroLakes ID----
  dat <- dat %>%
    left_join(hylak_link)
  
  dim(hylak_link) #127, 16
- dim(dat) # 3483
+ dim(dat) # 2555
  
 # 11. Merge LAGOS----
   dat <- dat %>%
    left_join(lagos_links)
  
  dim(lagos_links) #150, 16
- dim(dat) # 3483
+ dim(dat) # 2555
  
 # 12. Merge NID----
  dat <- dat %>%
    left_join(nid_link)
  
  dim(nid_link) #147, 16
- dim(dat) # 3483
+ dim(dat) # 2555
  
 # 13. Merge NHDPlusV2 - lakeCat----
 dat <- dat %>%
    left_join(lake_cat_abbv,  by = c("nhd_plus_waterbody_comid" = "comid", "lake_id" = "lake_id"))
  
  dim(lake_cat) #147, 16
- dim(dat) # 3483
+ dim(dat) # 2555
 
 # 14. National Wetland Inventory----
 dat <- dat %>%
   left_join(nwi_link)
 
  dim(nwi_link) #148, 16
- dim(dat) # 3483
+ dim(dat) # 2555
  
 # 15. Reservoir Sedimentaion----
 dat <- dat %>%
   left_join(sedimentation_link, by = "lake_id")
 
  dim(sedimentation_link) # 139, 5
- dim(dat) # 3483
+ dim(dat) # 2555
  
 # 16. Water level change indices----
 dat<- dat %>%
   left_join(walev_link, by = c("lake_id","visit"))
  
 dim(walev_link) #21
-dim(dat) # 3483
+dim(dat) # 2555
 
 # 17. IPCC Climate Zone-----
 dat <- dat %>%
   left_join(surge_climate, by = "lake_id")
 
 dim(surge_climate) #149
-dim(dat) #3483
+dim(dat) # 2555
 
 # 18. ERA5 Water and Air Temperature----
 dat <- dat %>%
   left_join(met_temp, by = "lake_id") # values are identical for multiple visits
 
 dim(met_temp) #146
-dim(dat) #3483
+dim(dat) # 3483
 
 # write to disk
 save(dat, file = paste0("output/dat_", Sys.Date(), ".RData"))
