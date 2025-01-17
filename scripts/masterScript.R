@@ -3,8 +3,9 @@
 source("scripts/masterLibrary.R") # Read in renv controlled library
 source("scripts/setUserPath.R") # needed to allow consistent fixed file paths
 
-# Analysis
+# Designs and sample lists
 source("scripts/analysis/readSurgeLakes.R") # read in survey design file
+source("scripts/analysis/readLakeDesigns.R") # get survey design weights
 source("scripts/analysis/chemSampleList.R") # creates chem.samples.foo, an inventory of all collected chem sample
 
 # Read field sheets and merge sample dates

@@ -21,6 +21,7 @@ dat_2016 <- dat_2016 %>%
          eb_ml_hr_m2, # volumetric_ebullition and volumetric_ebullition_units
          lat_samp, long_smp, # sample site coordinates lat and long
          xcoord, ycoord, # survey design site coordinates
+         adj_wgt, # survey design weights
          trap_deply_dt_tm, # trap_deply_date_time
          trap_rtrv_dt_tm, # trap_rtrvl_date_time
          chm_deply_dt_tm,
