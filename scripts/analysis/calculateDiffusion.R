@@ -302,22 +302,26 @@ a = case_when(OUTb$co2note=="unstable start" ~ "linear")
 b = case_when(OUTb$co2.lm.aic <= OUTb$co2.ex.aic ~ "linear")
 c = case_when(is.na(OUTb$co2.ex.k)~ "linear")
 
-OUT2 <- mutate(OUTb, 
-              co2.best.model = ifelse(!is.na(a)|!is.na(b)|!is.na(c),"linear","exponential"),
-              co2_drate_mg_h_best = if_else(co2.best.model == "linear",
-                                           co2.lm.drate.mg.h, co2.ex.drate.mg.h),
-              ch4.best.model = if_else(ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic), 
-                                      "linear", "exponential"),
-              ch4_drate_mg_h_best = ifelse(ch4.best.model == "linear",
-                                           ch4.lm.drate.mg.h, ch4.ex.drate.mg.h),
-              ch4.se.overlap = ifelse(ch4.best.model == "linear",
-                                      ch4.lm.slope-ch4.lm.se,ch4.ex.k-ch4.ex.se),
-              co2.se.overlap =ifelse(co2.best.model == "linear",
-                                     co2.lm.slope-co2.lm.se,co2.ex.k-co2.ex.se)) 
+OUT2 <- mutate(OUTb,
+               co2.best.model= case_when(co2note=="unstable start"~"linear",
+                                         co2.lm.aic <= co2.ex.aic ~ "linear",
+                                         is.na(co2.ex.k) ~ "linear",
+                                               TRUE ~ "exponential"),
+              co2_drate_mg_h_best = case_when(co2.best.model == "linear" ~ co2.lm.drate.mg.h,
+                                              TRUE ~ co2.ex.drate.mg.h),
+              ch4.best.model = case_when(ch4.lm.aic <= ch4.ex.aic ~ "linear",
+                                         is.na(ch4.ex.aic) ~ "linear",
+                                         TRUE ~ "exponential"),
+              ch4_drate_mg_h_best = case_when(ch4.best.model == "linear"~ch4.lm.drate.mg.h,
+                                              TRUE ~ ch4.ex.drate.mg.h),
+              ch4.se.overlap = case_when (ch4.best.model == "linear" ~ abs(ch4.lm.slope)-ch4.lm.se,
+                                          TRUE ~ abs(ch4.ex.k) - ch4.ex.se),
+              co2.se.overlap = case_when (co2.best.model == "linear" ~ abs(co2.lm.slope)-co2.lm.se,
+                                          TRUE ~ abs(co2.ex.k) - co2.ex.se))
 
 summary(OUT2)
 
-#Check the number of lakes that have at least some gas data-- 109 which is total number
+#Check the number of lakes that have at least some gas data-- 119 
 #Check the average number of independent site estimates in each lake (and min and max)
 test<-OUT2 %>%
   group_by(lake_id)%>%
@@ -325,41 +329,38 @@ test<-OUT2 %>%
             sd_CO2=sd(!is.na(co2_drate_mg_h_best)),sd_CH4=sd(!is.na(ch4_drate_mg_h_best)))
 
 #Fraction of usable ch4 data
-(1646-(length(filter(OUT2,is.na(ch4_drate_mg_h_best)))))/1646
+(1829-(length(filter(OUT2,is.na(ch4_drate_mg_h_best)))))/1829
 #Fraction of usable co2 data
-(1646-40)/1646
+(1829-(length(filter(OUT2,is.na(co2_drate_mg_h_best)))))/1829
 
 #Maximum methane diffusion rate whose standard error overlaps zero
-#66 mg CH4 m-2 d-1
+#none
 a<-filter(OUT2,ch4.se.overlap<0)
-max(a$ch4.drate.mg.h.best)*24
-summary(a)
 
-#Maximum and minimum carbon dioxide rates whose standard errors overlap zero
-#193 and -7318 mg CO2 m-2 d-1
+#there were 3 carbon dioxide rates whose standard errors overlap zero
 b<-filter(OUT2,co2.se.overlap<0)
-max(b$co2.drate.mg.h.best)*24
-min(b$co2.drate.mg.h.best)*24
+
 # Inspect r2.
 plot(with(OUT2,ifelse(co2.best.model == "linear", 
                      co2.lm.r2, co2.ex.r2)))  # CO2: some low ones to investigate
 plot(with(OUT2,ifelse(ch4.best.model == "linear", 
                      ch4.lm.r2, ch4.ex.r2)))  # CH4:  some low ones to investigate
 
-# If r2 of best model < 0.9, then set to 0
+# If r2 of best model < 0.9 or when the standard error of the slope overlaps zero, then set to 0
 OUT2 <- mutate(OUT2, 
-              co2.drate.mg.h.best = case_when(
+              co2_drate_mg_h_best = case_when(
                 # (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ NA_real_,
                 # (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ NA_real_,
-                (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 < 0.9 ~ 0,
+                # this retains low r2 model fits, but assigns a rate of 0
+                (co2.lm.aic < co2.ex.aic | is.na(co2.ex.aic)) & co2.lm.r2 <0.9 | co2.se.overlap<0  ~ 0,
                 (co2.ex.aic < co2.lm.aic) & co2.ex.r2 < 0.9 ~ 0,
                 TRUE ~ co2_drate_mg_h_best),
         
-              ch4.drate.mg.h.best = case_when(
+              ch4_drate_mg_h_best = case_when(
                 # (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ NA_real_,
                 # (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ NA_real_,
-                # so this retains low r2 model fits, but assigns a rate of 0?
-                (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 ~ 0,
+                # this retains low r2 model fits, but assigns a rate of 0
+                (ch4.lm.aic < ch4.ex.aic | is.na(ch4.ex.aic)) & ch4.lm.r2 < 0.9 | ch4.se.overlap<0 ~ 0,
                 (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ 0,
                 TRUE ~ ch4_drate_mg_h_best))
 
@@ -377,7 +378,7 @@ plot(with(OUT2[!is.na(OUT2$ch4_drate_mg_h_best),],
           ifelse(ch4_best_model == "linear", ch4_lm_r2, ch4_ex_r2)))  # CH4: all > 0.9
 
 #Look at averages by site/visit combo
-#average of 4.83, median of 1.81 and 3rd quartile of 3.38 mg m_2 h-1 
+#average of 4.38, median of 1.87 and 3rd quartile of 3.38 mg m_2 h-1 
 
 bysch4<-OUT2 %>%
   filter(!is.na(ch4_drate_mg_h_best))%>%
@@ -403,7 +404,7 @@ ch4varplot<-OUT2 %>%
   ylab("CH4 Diffusion (mg m-2 d-1)")
 ch4varplot
 
-#You get an average of 70.3, median of 38.2, 3rd quartile of 100 mg m-2 h-1 
+#You get an average of 74.23, median of 40.12, 3rd quartile of 109 mg m-2 h-1 
 bysco2<-OUT2 %>%
   filter(!is.na(co2_drate_mg_h_best))%>%
   mutate(vID=paste(lake_id,visit))%>%
