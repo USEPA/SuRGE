@@ -13,7 +13,7 @@ library(stringi) # character manipulation
 library(scales) # for ggplot2 datetime formatting 
 library(lutz) # time zones from coordinates
 library(plotly) # interactive plots (readLgr.R)
-library(spsurvey) # lake design. originally used 4.1.2 on R3.6.2.  Upgraded to R 4.4, not tested yet
+library(spsurvey) # lake design. originally used 4.1.2 on R3.6.2.  Upgraded to R 4.4, and spSurvey 5.5.1
 library(leaflet) # for lake design printables
 library(mapview) # for lake design printables
 library(tictoc) # timing operations

@@ -83,7 +83,21 @@ dat <- dat %>%
 dim(dat) # 2555
 
 
-# 3. Merge NLA chemistry----
+# 4. Merge SuRGE + Falls Lake Design Weights------------
+# dat_2016 already contains design weights (site_wgt), therefore dat already has this column
+# use super cool rows_update function to update the site_wgt column. this will
+# replace NA values for SuRGE sites with the true weights
+dat <- rows_update(dat, # object to be updated
+  lake_dsn %>% select(lake_id, site_id, site_wgt), # update the site_wgt column
+  by = c("lake_id", "site_id"), # match on these variables
+  unmatched = "ignore") %>% # ignore values in y absent from x (e.g. unused oversample sites)
+  left_join(lake_dsn %>% select(-site_wgt)) # now join other columns from lake_dsn (site_panel, site_section, site_stratum)
+  
+
+dim(lake_dsn) # 4463, includes all oversample sites
+dim(dat) # 2555
+
+# 5. Merge NLA chemistry----
  # common names
  names(nla17_chem)[names(nla17_chem) %in% names(dat)] # nla17_site_id
  
@@ -118,14 +132,14 @@ dim(dat) # 2555
                                   TRUE ~ shallow_so4))
 
 
- # 4. Index site location----
+ # 6. Index site location----
  dat <- dat %>%
    left_join(index_site, 
              by = c("lake_id", "site_id", "visit")) # default, but specifying for clarity
  dim(dat) # 2555
  
  
-# 5. Merge Waterisotope----
+# 7. Merge Waterisotope----
  dat <- dat %>%
    left_join(water_isotope_agg %>%
                # water isotope samples collected at NLA Index site. Here we 
@@ -137,18 +151,18 @@ dim(dat) # 2555
  
  dim(dat) # 2555
 
-# 6. Stratification Indices
+# 8. Stratification Indices
  dat <- dat %>%
    left_join(strat_link, by=c("lake_id","visit"))
  
  dim(dat) # 2555
  
-# 7. Phytoplankton Composition from Avery----
+# 9. Phytoplankton Composition from Avery----
  dat <- dat %>%
    left_join(phyto_SuRGE_link, by="lake_id")
  dim(dat) # 2555
  
-# 8. Move lacustrine, transitional, and riverine to site_id.----
+# 10. Move lacustrine, transitional, and riverine to site_id.----
  # this will facilitate merging with variables the pertain to 
  # entire lake
  dat <- dat %>%
@@ -166,7 +180,7 @@ dim(dat) # 2555
  
  dim(dat) # 2555
  
-# 9. Merge lakeMorpho data (readMorpho.R)----
+# 11. Merge lakeMorpho data (readMorpho.R)----
  dat <- dat %>%
    left_join(.,
              morpho)
@@ -174,63 +188,63 @@ dim(dat) # 2555
  dim(morpho) # 147
  dim(dat) # 2555
 
-# 10. Merge hydroLakes ID----
+# 12. Merge hydroLakes ID----
  dat <- dat %>%
    left_join(hylak_link)
  
  dim(hylak_link) #127, 16
  dim(dat) # 2555
  
-# 11. Merge LAGOS----
+# 13. Merge LAGOS----
   dat <- dat %>%
    left_join(lagos_links)
  
  dim(lagos_links) #150, 16
  dim(dat) # 2555
  
-# 12. Merge NID----
+# 14. Merge NID----
  dat <- dat %>%
    left_join(nid_link)
  
  dim(nid_link) #147, 16
  dim(dat) # 2555
  
-# 13. Merge NHDPlusV2 - lakeCat----
+# 15. Merge NHDPlusV2 - lakeCat----
 dat <- dat %>%
    left_join(lake_cat_abbv,  by = c("nhd_plus_waterbody_comid" = "comid", "lake_id" = "lake_id"))
  
  dim(lake_cat) #147, 16
  dim(dat) # 2555
 
-# 14. National Wetland Inventory----
+# 16. National Wetland Inventory----
 dat <- dat %>%
   left_join(nwi_link)
 
  dim(nwi_link) #148, 16
  dim(dat) # 2555
  
-# 15. Reservoir Sedimentaion----
+# 17. Reservoir Sedimentaion----
 dat <- dat %>%
   left_join(sedimentation_link, by = "lake_id")
 
  dim(sedimentation_link) # 139, 5
  dim(dat) # 2555
  
-# 16. Water level change indices----
+# 18. Water level change indices----
 dat<- dat %>%
   left_join(walev_link, by = c("lake_id","visit"))
  
 dim(walev_link) #21
 dim(dat) # 2555
 
-# 17. IPCC Climate Zone-----
+# 19. IPCC Climate Zone-----
 dat <- dat %>%
   left_join(surge_climate, by = "lake_id")
 
 dim(surge_climate) #149
 dim(dat) # 2555
 
-# 18. ERA5 Water and Air Temperature----
+# 20. ERA5 Water and Air Temperature----
 dat <- dat %>%
   left_join(met_temp, by = "lake_id") # values are identical for multiple visits
 
@@ -240,7 +254,27 @@ dim(dat) # 3483
 # write to disk
 save(dat, file = paste0("output/dat_", Sys.Date(), ".RData"))
 
-# 19. Aggregate by lake_id----------
+# 1. Aggregate by lake_id----------
+foo <- dat %>%
+  filter(lake_id == 75)
+
+cont_analysis(foo,
+              siteID = "site_id",
+              vars = "ch4_ebullition",
+              weight = "site_wgt",
+              stratumID = "stratum")
+
+
+
+cont_analysis(
+  NLA_PNW,
+  siteID = "SITE_ID",
+  vars = "BMMI",
+  weight = "WEIGHT",
+  stratumID = "URBAN"
+)
+
+
 # 10/10/2024 NOT WORKING, IN PROGRESS....
 # This should be done using grts algorithms and survey design weights.
 # Under a time crunch, so ignoring that step for now.

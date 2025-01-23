@@ -60,6 +60,9 @@ dat_2016 <- dat_2016 %>%
     lat = lat_samp,
     long = long_smp,
     
+    # design weights
+    site_wgt = adj_wgt, # this is adjusted weight, simplifying name here
+    
     # chemistry
     shallow_chla_lab = chla_sample,
     shallow_tn = tn,

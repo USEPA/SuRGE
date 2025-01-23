@@ -63,17 +63,6 @@
       ],
       "Hash": "ac8b12951882c375d1a14f64c93e78f1"
     },
-    "Formula": {
-      "Package": "Formula",
-      "Version": "1.2-5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "stats"
-      ],
-      "Hash": "7a29697b75e027767a53fde6c903eca7"
-    },
     "GPfit": {
       "Package": "GPfit",
       "Version": "1.0-8",
@@ -84,34 +73,6 @@
         "lhs"
       ],
       "Hash": "29a7dccade1fd037c8262c2a239775eb"
-    },
-    "Hmisc": {
-      "Package": "Hmisc",
-      "Version": "5.1-2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "Formula",
-        "R",
-        "base64enc",
-        "cluster",
-        "colorspace",
-        "data.table",
-        "foreign",
-        "ggplot2",
-        "grid",
-        "gridExtra",
-        "gtable",
-        "htmlTable",
-        "htmltools",
-        "knitr",
-        "methods",
-        "nnet",
-        "rmarkdown",
-        "rpart",
-        "viridis"
-      ],
-      "Hash": "c0d441bec5693f2cad30231f7f72d90a"
     },
     "KernSmooth": {
       "Package": "KernSmooth",
@@ -299,6 +260,20 @@
         "utils"
       ],
       "Hash": "f27411eb6d9c3dada5edd444b8416675"
+    },
+    "RcppArmadillo": {
+      "Package": "RcppArmadillo",
+      "Version": "14.2.2-1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "methods",
+        "stats",
+        "utils"
+      ],
+      "Hash": "9da7c242d94a8419d045f6b3a64b9765"
     },
     "RcppEigen": {
       "Package": "RcppEigen",
@@ -724,20 +699,6 @@
         "vctrs"
       ],
       "Hash": "3dcaebd52554438d12989e5061e15de8"
-    },
-    "cluster": {
-      "Package": "cluster",
-      "Version": "2.1.6",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "grDevices",
-        "graphics",
-        "stats",
-        "utils"
-      ],
-      "Hash": "0aaa05204035dc43ea0004b9c76611dd"
     },
     "coda": {
       "Package": "coda",
@@ -1904,24 +1865,6 @@
       ],
       "Hash": "b59377caa7ed00fa41808342002138f9"
     },
-    "htmlTable": {
-      "Package": "htmlTable",
-      "Version": "2.4.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "checkmate",
-        "htmltools",
-        "htmlwidgets",
-        "knitr",
-        "magrittr",
-        "methods",
-        "rstudioapi",
-        "stringr"
-      ],
-      "Hash": "0164d8cade33fac2190703da7e6e3241"
-    },
     "htmltools": {
       "Package": "htmltools",
       "Version": "0.5.8.1",
@@ -2102,7 +2045,7 @@
     },
     "insight": {
       "Package": "insight",
-      "Version": "0.20.5",
+      "Version": "1.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2111,7 +2054,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "856341c90b80b78090cf2d68862102bd"
+      "Hash": "bee0c3abb5eea6c4170ea2a7c334893f"
     },
     "ipred": {
       "Package": "ipred",
@@ -2478,6 +2421,13 @@
       ],
       "Hash": "f2a94f8fc9db382a642e965339635ad6"
     },
+    "lpSolve": {
+      "Package": "lpSolve",
+      "Version": "5.6.23",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c4e64e374c4ab1e6ffda55073fd04c59"
+    },
     "lubridate": {
       "Package": "lubridate",
       "Version": "1.9.3",
@@ -2688,6 +2638,18 @@
         "Rcpp"
       ],
       "Hash": "785ef8e22389d4a7634c6c944f2dc07d"
+    },
+    "mitools": {
+      "Package": "mitools",
+      "Version": "2.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "DBI",
+        "methods",
+        "stats"
+      ],
+      "Hash": "a4b659bd0528226724d55034f11ed7cb"
     },
     "modeldata": {
       "Package": "modeldata",
@@ -3553,21 +3515,6 @@
       ],
       "Hash": "bb5996d0bd962d214a11140d77589917"
     },
-    "rgeos": {
-      "Package": "rgeos",
-      "Version": "0.6-4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "graphics",
-        "methods",
-        "sp",
-        "stats",
-        "utils"
-      ],
-      "Hash": "2eab4e0f0b131f018bfb3e81857f9767"
-    },
     "rlang": {
       "Package": "rlang",
       "Version": "1.1.4",
@@ -3725,6 +3672,17 @@
         "wk"
       ],
       "Hash": "32f7b1a15bb01ae809022960abad5363"
+    },
+    "sampling": {
+      "Package": "sampling",
+      "Version": "2.10",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "MASS",
+        "lpSolve"
+      ],
+      "Hash": "efbfce0667362d0ac769f920edbfb2c8"
     },
     "sass": {
       "Package": "sass",
@@ -4022,26 +3980,25 @@
     },
     "spsurvey": {
       "Package": "spsurvey",
-      "Version": "4.1.2",
+      "Version": "5.5.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
-        "Hmisc",
         "MASS",
         "R",
+        "boot",
         "crossdes",
         "deldir",
-        "foreign",
         "grDevices",
         "graphics",
-        "methods",
-        "parallel",
-        "rgeos",
+        "lme4",
+        "sampling",
         "sf",
-        "sp",
-        "stats"
+        "stats",
+        "survey",
+        "units"
       ],
-      "Hash": "5dfa277710e117242169ed975bfe847f"
+      "Hash": "15ed4e57407dbc35e49de725f44ca9c3"
     },
     "stringfish": {
       "Package": "stringfish",
@@ -4111,6 +4068,29 @@
         "utils"
       ],
       "Hash": "1946d61226cb38beca83108d6e7ed7c9"
+    },
+    "survey": {
+      "Package": "survey",
+      "Version": "4.4-2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Matrix",
+        "R",
+        "Rcpp",
+        "RcppArmadillo",
+        "graphics",
+        "grid",
+        "lattice",
+        "methods",
+        "minqa",
+        "mitools",
+        "numDeriv",
+        "splines",
+        "stats",
+        "survival"
+      ],
+      "Hash": "b29af45d3afe5f718e387688d43d71e6"
     },
     "survival": {
       "Package": "survival",
@@ -4543,19 +4523,6 @@
         "rlang"
       ],
       "Hash": "c03fa420630029418f7e6da3667aac4a"
-    },
-    "viridis": {
-      "Package": "viridis",
-      "Version": "0.6.5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "ggplot2",
-        "gridExtra",
-        "viridisLite"
-      ],
-      "Hash": "acd96d9fa70adeea4a5a1150609b9745"
     },
     "viridisLite": {
       "Package": "viridisLite",
