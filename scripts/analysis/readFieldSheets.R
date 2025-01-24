@@ -15,6 +15,7 @@ get_data_sheet <- function(paths){
                recurse = TRUE) %>% # look in all subdirectories
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway (add visit number to file name)
+    .[!grepl(c("surgeData207_nlafill.xlsx"), .)] %>% # temp file Bridget is using to extrapolate sonde data
     #.[53] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
@@ -50,6 +51,8 @@ get_data_sheet <- function(paths){
                across(contains("flag"), ~ as.character(.)),
                across(contains("extn"), ~ as.character(.)),
                across(contains("depth"), ~round(.x, 1))) %>% # round to nearest tenth of meter
+        # remove unused sites
+        filter(eval_status == "TS") %>% # keep "Target/Sampled". Exclude all others
         # Format date and time objects
         mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
                across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
@@ -90,7 +93,7 @@ janitor::get_dupes(fld_sheet %>% select(lake_id, site_id, visit)) # no dups
 fld_sheet %>% filter(visit == 2) %>% distinct(lake_id) # [1/2/2024] two visits at 250, 281, 147, 148.  
 fld_sheet %>% filter(grepl(c("250|281|147|148"), lake_id)) %>%
   select(lake_id, site_id, visit, trap_deply_date) %>% print(n=Inf)
-dim(fld_sheet) #2052, 83  [5/9/2024]
+dim(fld_sheet) #1869, 83  [1/24/2025]
 
 # 4. Function to read 'dissolved.gas' tab of surgeData file.
 get_dg_sheet <- function(paths){

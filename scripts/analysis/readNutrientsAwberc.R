@@ -305,7 +305,7 @@ chem22 <- get_awberc_data(cin.awberc.path,
                           "2022 Data") 
 
 chem23 <- get_awberc_data(cin.awberc.path, 
-                          "2023_ESF-EFWS_NutrientData_Updated05012024_AKB.xlsx", 
+                          "2023_ESF-EFWS_NutrientData_Updated05012024_AKB_JB.xlsx", # path to local copy with fixes. Update when Andrea releases next update.
                           "2023 Data") 
 
 chemCinNutrients <- bind_rows(chem21, chem22, chem23) %>%
