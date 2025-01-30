@@ -73,24 +73,23 @@ all_obs <- full_join(chem_fld_wide, # keep all observations
          matches("diffusion|ebullition|total|volumetric"), # then these
          everything()) # then everything else, unchanged
 
-dim(chem_fld_wide) # 2057, 250
-dim(emissions) # 1866, 54
-dim(all_obs) # 2057, 269
+dim(chem_fld_wide) # 1869, 250
+dim(emissions) # 1867, 54
+dim(all_obs) # 1869, 269
 
 # all observations from emissions are in chem
 emissions[!(with(emissions, paste(lake_id, site_id, visit)) %in% 
             with(chem_fld_wide, paste(lake_id, site_id, visit))),]
 
-# 191 observations from chem_fld are not in emissions
-# these are mostly sites that weren't sampled but kept in database
-# for potential weight adjustments.  Also includes 69_lacustrine sites
-# with chemistry (sonde) but no emissions?  Not sure how this occurred but accurately
-# reflects field sheets.
+# 1 observations from chem_fld not in emissions
+# lake_id == 148, site_id == 14, visit == 1
+# lake_id == 71, site_id == 1, visit == 1
+# tube fell off trap. No good diffusion data.
 chem_fld_wide[!(with(chem_fld_wide, paste(lake_id, site_id, visit)) %in%
                   with(emissions, paste(lake_id, site_id, visit))),
               c("lake_id", "site_id", "visit", "eval_status", "deep_sample_depth_m")] %>%
   print(n=Inf)
 
 # write to disk
-save(all_obs, file = paste0(userPath, "data/all_obs_", Sys.Date(), ".RData"))
+#save(all_obs, file = paste0(userPath, "data/all_obs_", Sys.Date(), ".RData"))
 #write.table(all_obs, file = paste0(userPath, "data/all_obs_",  Sys.Date(),".txt"), row.names = F, col.names = T)

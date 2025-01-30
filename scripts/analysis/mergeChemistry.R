@@ -34,7 +34,7 @@
 # Inspect objects----
 
 # inspect object to merge
-## each df contains 10 - 335 observations [5/18/2024]
+## each df contains 10 - 333 observations [1/24/2025]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
   map_dfc(., nrow)
@@ -228,4 +228,4 @@ chemistry_all <- chemistry_all %>%
            sort(colnames(.))) # others arranged alphabetically
 
 
-dim(chemistry_all) # 374, 125 [5/19/2024]
+dim(chemistry_all) # 368, 125 [1/24/2025]

@@ -22,6 +22,8 @@ dat_2016 <- dat_2016 %>%
          lat_samp, long_smp, # sample site coordinates lat and long
          xcoord, ycoord, # survey design site coordinates
          adj_wgt, # survey design weights
+         stratum, # survey design stratum
+         eval_status, # evaluation status of survey design sites
          trap_deply_dt_tm, # trap_deply_date_time
          trap_rtrv_dt_tm, # trap_rtrvl_date_time
          chm_deply_dt_tm,
@@ -60,8 +62,10 @@ dat_2016 <- dat_2016 %>%
     lat = lat_samp,
     long = long_smp,
     
-    # design weights
+    # design parameters
     site_wgt = adj_wgt, # this is adjusted weight, simplifying name here
+    site_stratum = stratum,
+    site_eval_status = eval_status,
     
     # chemistry
     shallow_chla_lab = chla_sample,

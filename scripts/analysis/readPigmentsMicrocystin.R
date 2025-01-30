@@ -107,10 +107,10 @@ cin.peg.path <- paste0(userPath,
                        "data/algalIndicators/pigments/")
 
 chla <- get_chla_data(cin.peg.path,
-                      "surge_chl_all_years.csv")
+                      "surge_chl_all_years_JB.csv") # temp file while Jeff fixes problems. surge_algal issue #8
 
 phycocyanin <- get_phyco_data(cin.peg.path,
-                              "surge_phyco_all_years.csv")
+                              "surge_phyco_all_years_JB.csv") # temp file while Jeff fixes problems. surge_algal issue #8
 
 # chla_20_21_22 <- get_chla_data(cin.pig.path,
 #                                "surge_chla_all_2020_2021_2022.csv") 

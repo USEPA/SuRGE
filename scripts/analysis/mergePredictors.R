@@ -6,16 +6,24 @@
 
 
 # 1. Merge 2016 and SuRGE data----------
-names(dat_2016)[!(names(dat_2016) %in% names(all_obs))] # remove "chamb_deply_date_time" from dat_2016
-names(all_obs)[!(names(all_obs) %in% names(dat_2016))] 
+# Names in dat_2016, but not in all_obs
+names(dat_2016)[!(names(dat_2016) %in% names(all_obs))] # chamb_deply_date_time, site_wgt, site_stratum, site_eval_status
+# names in all_obs, but not in dat_2016
+names(all_obs)[!(names(all_obs) %in% names(dat_2016))] # lots, eval_status is for points= 
 
 dat <- bind_rows(dat_2016 %>% 
                    mutate(lake_id = as.character(lake_id)) %>% # converted to numeric below
-                   select(-chamb_deply_date_time),
-                 all_obs)
+                   select(-chamb_deply_date_time, -site_wgt, -site_stratum), # these get added later
+                 all_obs %>%
+                   # eval_status is inherited from fld_sheet and reflects
+                   # site_id evaluations made during sampling. Changing name here,
+                   # rather than earlier, to avoid unanticipated consequences.
+                   # eval_status is referenced in numerous existing lines of code
+                   rename(site_eval_status = eval_status)) # consistent with dat_2016
+
 dim(dat_2016) # 498
-dim(all_obs) # 2057
-dim(dat) # 2555, good
+dim(all_obs) # 1869
+dim(dat) # 2367, good
 
 # 2. Fill chemistry variables----
 # chemistry variables measured at one location.  NA reported
@@ -49,14 +57,14 @@ dat <- dat %>%
   fill(all_of(analytes_to_fill), .direction = "downup") %>%
   ungroup 
 
-dim(dat) # 2555
+dim(dat) # 2367
 
 # 3. Merge SuRGE lake list----
 dat <- dat %>%
   left_join(
     # expand lake.list to include lacustrine, riverine, and transitional
     lake.list %>% # Surge sites
-      select(-eval_status) %>% # this is for lake-scale. same variable in dat is for each point.
+      select(-eval_status) %>% # this is for lake-scale, not needed. site_eval_status is for each point.
       filter(lake_id %in% 69:70) %>% # pull out 69 and 70
       group_by(lake_id) %>%
       slice(rep(1,3)) %>% # selects the first row (by group), 3 times, giving the repeated rows desired;
@@ -78,24 +86,38 @@ dat <- dat %>%
             lake.list %>% select(-eval_status), # omit lake-scale eval_status
             lake.list.2016 %>% select(-eval_status)) %>% # omit lake-scale eval_status 
       # remove records for 69 and 70
-      filter(!lake_id == c(69|70)))
+      filter(!lake_id == c(69|70))) %>%
+  # differentiate SuRGE-scale design (e.g. lake_wgt) from lake-scale design (e.g. site_wgt) 
+  rename(lake_mdcaty = mdcaty,
+         lake_wgt = wgt,
+         lake_stratum = stratum,
+         lake_panel = panel,
+         lake_site_type = site_type,
+         lake_eval_status_code = eval_status_code, # all S? Do I need this variable?
+         lake_eval_status_code_comment = eval_status_code_comment
+         )
 
-dim(dat) # 2555
+dim(dat) # 2367
 
 
-# 4. Merge SuRGE + Falls Lake Design Weights------------
-# dat_2016 already contains design weights (site_wgt), therefore dat already has this column
-# use super cool rows_update function to update the site_wgt column. this will
-# replace NA values for SuRGE sites with the true weights
-dat <- rows_update(dat, # object to be updated
-  lake_dsn %>% select(lake_id, site_id, site_wgt), # update the site_wgt column
-  by = c("lake_id", "site_id"), # match on these variables
-  unmatched = "ignore") %>% # ignore values in y absent from x (e.g. unused oversample sites)
-  left_join(lake_dsn %>% select(-site_wgt)) # now join other columns from lake_dsn (site_panel, site_section, site_stratum)
-  
+# 4. Merge SuRGE + Falls Lake + 2016 Design Details------------
+# dat_2016 contains site_wgt and site_stratum which were omitted from initial
+# merge with all_obs (step 1).
+# SuRGE and Falls Lake site_wgt and site_stratum are in lake_dsn
 
+# join design details from both sources, then join into dat
+dat <- bind_rows(
+  # 2016 numbers
+  dat_2016 %>% 
+    select(lake_id, site_id, site_wgt, site_stratum) %>%
+    mutate(lake_id = as.character(lake_id)), # lake_id is character in dat and lake_dsn
+  # SuRGE numbers
+  lake_dsn) %>%
+  # joint design details with data
+  right_join(dat)
+          
 dim(lake_dsn) # 4463, includes all oversample sites
-dim(dat) # 2555
+dim(dat) # 2367
 
 # 5. Merge NLA chemistry----
  # common names
@@ -109,7 +131,7 @@ dim(dat) # 2555
  # merge
  dat <- dat %>%
    left_join(nla17_chem)
- dim(dat) # 2555
+ dim(dat) # 2367
  
  # impute missing chem with NLA numbers
  dat <- dat %>%
@@ -136,7 +158,7 @@ dim(dat) # 2555
  dat <- dat %>%
    left_join(index_site, 
              by = c("lake_id", "site_id", "visit")) # default, but specifying for clarity
- dim(dat) # 2555
+ dim(dat) # 2367
  
  
 # 7. Merge Waterisotope----
@@ -149,18 +171,18 @@ dim(dat) # 2555
                                           lake_id == "69" ~ "69_lacustrine", # NLA 45.01971 -100.26474 
                                           TRUE ~ lake_id)))
  
- dim(dat) # 2555
+ dim(dat) # 2367
 
 # 8. Stratification Indices
  dat <- dat %>%
    left_join(strat_link, by=c("lake_id","visit"))
  
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 9. Phytoplankton Composition from Avery----
  dat <- dat %>%
    left_join(phyto_SuRGE_link, by="lake_id")
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 10. Move lacustrine, transitional, and riverine to site_id.----
  # this will facilitate merging with variables the pertain to 
@@ -178,7 +200,7 @@ dim(dat) # 2555
                          TRUE ~ lake_id),
      lake_id = as.numeric(lake_id)) 
  
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 11. Merge lakeMorpho data (readMorpho.R)----
  dat <- dat %>%
@@ -186,93 +208,120 @@ dim(dat) # 2555
              morpho)
 
  dim(morpho) # 147
- dim(dat) # 2555
+ dim(dat) # 2367
 
 # 12. Merge hydroLakes ID----
  dat <- dat %>%
    left_join(hylak_link)
  
  dim(hylak_link) #127, 16
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 13. Merge LAGOS----
   dat <- dat %>%
    left_join(lagos_links)
  
  dim(lagos_links) #150, 16
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 14. Merge NID----
  dat <- dat %>%
    left_join(nid_link)
  
  dim(nid_link) #147, 16
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 15. Merge NHDPlusV2 - lakeCat----
 dat <- dat %>%
    left_join(lake_cat_abbv,  by = c("nhd_plus_waterbody_comid" = "comid", "lake_id" = "lake_id"))
  
  dim(lake_cat) #147, 16
- dim(dat) # 2555
+ dim(dat) # 2367
 
 # 16. National Wetland Inventory----
 dat <- dat %>%
   left_join(nwi_link)
 
  dim(nwi_link) #148, 16
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 17. Reservoir Sedimentaion----
 dat <- dat %>%
   left_join(sedimentation_link, by = "lake_id")
 
  dim(sedimentation_link) # 139, 5
- dim(dat) # 2555
+ dim(dat) # 2367
  
 # 18. Water level change indices----
 dat<- dat %>%
   left_join(walev_link, by = c("lake_id","visit"))
  
 dim(walev_link) #21
-dim(dat) # 2555
+dim(dat) # 2367
 
 # 19. IPCC Climate Zone-----
 dat <- dat %>%
   left_join(surge_climate, by = "lake_id")
 
 dim(surge_climate) #149
-dim(dat) # 2555
+dim(dat) # 2367
 
 # 20. ERA5 Water and Air Temperature----
 dat <- dat %>%
   left_join(met_temp, by = "lake_id") # values are identical for multiple visits
 
 dim(met_temp) #146
-dim(dat) # 3483
+dim(dat) # 2367
 
 # write to disk
 save(dat, file = paste0("output/dat_", Sys.Date(), ".RData"))
 
 # 1. Aggregate by lake_id----------
-foo <- dat %>%
-  filter(lake_id == 75)
 
-cont_analysis(foo,
-              siteID = "site_id",
-              vars = "ch4_ebullition",
-              weight = "site_wgt",
-              stratumID = "stratum")
+emissions_agg <- dat %>%
+  # All NAs break cont_analysis. No CH4 diffusion or from lake 253, set to 0
+  # then filter results at end
+  mutate(ch4_diffusion_best = replace(ch4_diffusion_best, lake_id == 253, 0),
+         ch4_total = replace(ch4_total, lake_id == 253, 0)) %>% 
+  # split into list elements. use base::split to enable list
+  # element naming
+  split(., paste(.$lake_id, .$visit, sep = "_")) %>%
+  .["253_1"] %>% # subset for development. 10 is unstratified
+  #within(., rm("253_1")) %>% # exclude list element by name for development
+  imap(~.x %>%
+        st_as_sf(., coords = c("long", "lat")) %>% # convert to sf object
+        `st_crs<-` (4326) %>% # latitude and longitude
+        st_transform(., 5070) %>% # Conus Albers
+        cont_analysis(., # calculate statistics
+                      siteID = "site_id",
+                      vars = c("ch4_ebullition", "ch4_diffusion_best", "ch4_total"),
+                      weight = "site_wgt",
+                      stratumID = "site_stratum") %>%
+         # above function produces a list with 4 elements (CDF, Pct, Mean, Total)
+         # We may want all of these, maybe not. Extracting mean for now
+        .[["Mean"]] %>% # extract list element "Mean" as a dataframe
+         janitor::clean_names(.) %>% # clean names
+         rename(margin_of_error = marginof_error) %>%
+         # add lake_id identifiers to data frame
+         mutate(lake_id = str_extract(.y, "[^_]+") %>% as.numeric, # add lake_id
+                visit = str_extract(.y, "(?<=_).*") %>% as.numeric, # add visit 
+                units = "mg_ch4_m2_h") %>%
+         # Remove rows where emission = 0. This occurs when data were unavailable
+         # and set to 0 so cont_analysis wouldn't break (e.g. 253, see above)
+         filter(estimate != 0) %>% 
+         select(-type, -subpopulation, -n_resp) %>%
+         relocate(lake_id, visit) %>%
+         as_tibble %>%
+         pivot_wider(names_from = indicator, 
+                     values_from = c(estimate, std_error, margin_of_error, lcb95pct, ucb95pct, units),
+                     names_glue = "{indicator}_{.value}_grts",)) %>%
+  dplyr::bind_rows(.)
+
+foo <- left_join(dat, emissions_agg)
+       
+  
 
 
-
-cont_analysis(
-  NLA_PNW,
-  siteID = "SITE_ID",
-  vars = "BMMI",
-  weight = "WEIGHT",
-  stratumID = "URBAN"
-)
 
 
 # 10/10/2024 NOT WORKING, IN PROGRESS....
