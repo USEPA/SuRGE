@@ -10,6 +10,7 @@ source("scripts/analysis/chemSampleList.R") # creates chem.samples.foo, an inven
 
 # Read field sheets and merge sample dates
 source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
+source("scripts/analysis/missingSonde.R") #interpolate missing Sonde data
 source("scripts/analysis/chamberVolume.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
 source("scripts/analysis/sampleDates.R") # df of lake_id, visit, and sample_date 
 
