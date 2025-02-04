@@ -9,7 +9,7 @@ library(sf)
 library(interp)
 library(tictoc)
 library(tmap)
-library(spatialEco)
+
 
 library(conflicted)
 conflicted::conflict_scout()
@@ -56,15 +56,6 @@ tm_shape(boundary_70) +
 tm_shape(measured_depths_70 %>% filter(depth<0)) +
   tm_dots()
 
-# read bounding box that encloses the the mid channel depths <0
-bbox <- st_read(paste0(userPath, "lakeDsn/CIN/CH4-070/bathymetry/neg_depth_bb.shp"))
-
-# delete mid-channel points <0 depth
-# 504,762 after erase.point
-# 538,141 before erase.point
-### this isn't working, assign 0 for now ###
-# measured_depths_70 <- spatialEco::erase.point(measured_depths_70 %>% filter(depth<0),
-#                                               bbox, inside = TRUE)
 
 # replace depths < 0 with 0
 measured_depths_70 <- measured_depths_70 %>%

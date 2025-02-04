@@ -276,17 +276,18 @@ dim(dat) # 2367
 # write to disk
 save(dat, file = paste0("output/dat_", Sys.Date(), ".RData"))
 
-# 1. Aggregate by lake_id----------
-
+# 1. Aggregate by lake_id using site weights----------
+# emission rates
 emissions_agg <- dat %>%
   # All NAs break cont_analysis. No CH4 diffusion or from lake 253, set to 0
   # then filter results at end
   mutate(ch4_diffusion_best = replace(ch4_diffusion_best, lake_id == 253, 0),
          ch4_total = replace(ch4_total, lake_id == 253, 0)) %>% 
+  rename_with(~gsub("_best", "", .x)) %>%
   # split into list elements. use base::split to enable list
   # element naming
   split(., paste(.$lake_id, .$visit, sep = "_")) %>%
-  .["253_1"] %>% # subset for development. 10 is unstratified
+  #.["47_1"] %>% # subset for development. 10 is unstratified
   #within(., rm("253_1")) %>% # exclude list element by name for development
   imap(~.x %>%
         st_as_sf(., coords = c("long", "lat")) %>% # convert to sf object
@@ -294,7 +295,8 @@ emissions_agg <- dat %>%
         st_transform(., 5070) %>% # Conus Albers
         cont_analysis(., # calculate statistics
                       siteID = "site_id",
-                      vars = c("ch4_ebullition", "ch4_diffusion_best", "ch4_total"),
+                      vars = c("ch4_ebullition", "ch4_diffusion", "ch4_total",
+                               "co2_ebullition", "co2_diffusion", "co2_total"),
                       weight = "site_wgt",
                       stratumID = "site_stratum") %>%
          # above function produces a list with 4 elements (CDF, Pct, Mean, Total)
@@ -305,7 +307,9 @@ emissions_agg <- dat %>%
          # add lake_id identifiers to data frame
          mutate(lake_id = str_extract(.y, "[^_]+") %>% as.numeric, # add lake_id
                 visit = str_extract(.y, "(?<=_).*") %>% as.numeric, # add visit 
-                units = "mg_ch4_m2_h") %>%
+                units = case_when(grepl("ch4", indicator) ~ "mg_ch4_m2_h",
+                                  grepl("co2", indicator) ~ "mg_co2_m2_h",
+                                  TRUE ~"Fly you fools"))%>%
          # Remove rows where emission = 0. This occurs when data were unavailable
          # and set to 0 so cont_analysis wouldn't break (e.g. 253, see above)
          filter(estimate != 0) %>% 
@@ -314,14 +318,43 @@ emissions_agg <- dat %>%
          as_tibble %>%
          pivot_wider(names_from = indicator, 
                      values_from = c(estimate, std_error, margin_of_error, lcb95pct, ucb95pct, units),
-                     names_glue = "{indicator}_{.value}_grts",)) %>%
+                     names_glue = "{indicator}_{.value}_lake") %>%
+         rename_with(~ gsub("estimate_", "", .x, fixed = TRUE))) %>%
   dplyr::bind_rows(.)
 
-foo <- left_join(dat, emissions_agg)
-       
+
+# make sure lake-wide means are within the range of site data from each lake
+bind_rows(emissions_agg %>%
+            select(-contains("95"), -contains("error"), -contains("units")) %>%
+            mutate(source = "lake") %>%
+            rename_with(~gsub("_lake", "", .)),
+          dat %>%
+            select(lake_id, visit, contains("ch4"), contains("co2"),
+                   -contains("units"), -contains("note")) %>%
+            rename_with(~gsub("_best", "", .)) %>%
+            mutate(source = "site")) %>% 
+  mutate(lake_id = as.factor(lake_id)) %>%
+ggplot(aes(lake_id, ch4_diffusion)) +
+  geom_point(aes(color = source)) +
+  scale_y_log10()
   
 
+ggplot(aes(lake_id, ch4_ebullition)) +
+  geom_point(aes(color = source)) +
+  scale_y_log10()
 
+
+ggplot(aes(lake_id, ch4_total)) +
+  geom_point(aes(color = source)) +
+  scale_y_log10()
+
+
+ggplot(aes(lake_id, co2_diffusion)) +
+  geom_point(aes(color = source)) 
+
+
+ggplot(aes(lake_id, co2_total)) +
+  geom_point(aes(color = source)) 
 
 
 # 10/10/2024 NOT WORKING, IN PROGRESS....
@@ -330,8 +363,8 @@ foo <- left_join(dat, emissions_agg)
 
 
 dat_agg <- dat %>%
-    select(-site_id, -eval_status, -trap_rtrvl_date_time, - trap_deply_date_time, 
-           -co2_total, -ch4_total) %>% # recalc totals after aggregating by lake
+    select(-site_id, -site_eval_status, -trap_rtrvl_date_time, -trap_deply_date_time, 
+           -contains("ch4"), -contains("co2")) %>% # recalc totals after aggregating by lake
     fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
     group_by(lake_id, visit) %>%
     summarise(across(where(is.numeric), \(x) mean(x, na.rm = TRUE)), # calculate arithmetic mean
@@ -352,9 +385,6 @@ dat_agg <- dat %>%
               lake_name = case_when(all(is.na(lake_name)) ~ NA_character_, # only NA present (Puerto Rico), return NA
                                     !all(is.na(lake_name)) ~ unique(lake_name), # if any values, then grab one, only one name per lake
                                     TRUE ~ "fly you fools!"), # look out for the Balrog 
-              stratum = case_when(all(is.na(stratum)) ~ NA_character_, # only NA present (Puerto Rico, 2016 survey), return NA
-                                  !all(is.na(stratum)) ~ unique(stratum), # if any values, then grab one, only one stratum per lake
-                                    TRUE ~ "fly you fools!"), # look out for the Balrog
               lab = case_when(all(is.na(lab)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
                               !all(is.na(lab)) ~ unique(lab), # if any values, then grab one, only one lab per lake, 
                               TRUE ~ "fly you fools!"), # look out for the Balrog,
