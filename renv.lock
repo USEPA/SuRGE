@@ -366,6 +366,30 @@
       ],
       "Hash": "07a37a82554f2ffee75c0d6db95d02a0"
     },
+    "XML": {
+      "Package": "XML",
+      "Version": "3.99-0.18",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "methods",
+        "utils"
+      ],
+      "Hash": "4a5eca1070ecfe97e68727ed4b9a89fa"
+    },
+    "abind": {
+      "Package": "abind",
+      "Version": "1.4-8",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "methods",
+        "utils"
+      ],
+      "Hash": "2288423bb0f20a457800d7fc47f6aa54"
+    },
     "arrow": {
       "Package": "arrow",
       "Version": "16.1.0",
@@ -1030,6 +1054,17 @@
         "withr"
       ],
       "Hash": "f2fbe4e90fab23fc1f95bffcd3662878"
+    },
+    "dichromat": {
+      "Package": "dichromat",
+      "Version": "2.0-0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "stats"
+      ],
+      "Hash": "16e66f2a483e124af5fc6582d26005f7"
     },
     "diffobj": {
       "Package": "diffobj",
@@ -2056,6 +2091,19 @@
       ],
       "Hash": "bee0c3abb5eea6c4170ea2a7c334893f"
     },
+    "interp": {
+      "Package": "interp",
+      "Version": "1.1-6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "RcppEigen",
+        "deldir"
+      ],
+      "Hash": "824328a500468b76e61402b2cb3033df"
+    },
     "ipred": {
       "Package": "ipred",
       "Version": "0.9-15",
@@ -2346,6 +2394,20 @@
       ],
       "Hash": "0c1e9e9a79598ec5acb1820d1948dae8"
     },
+    "leafsync": {
+      "Package": "leafsync",
+      "Version": "0.1.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "htmltools",
+        "htmlwidgets",
+        "leaflet",
+        "methods"
+      ],
+      "Hash": "819d7169c7d39f0f952473e943375da1"
+    },
     "lhs": {
       "Package": "lhs",
       "Version": "1.2.0",
@@ -2453,6 +2515,19 @@
         "stats"
       ],
       "Hash": "b2a1e127d24872c54d2038bd06d72d48"
+    },
+    "lwgeom": {
+      "Package": "lwgeom",
+      "Version": "0.2-14",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "sf",
+        "units"
+      ],
+      "Hash": "f1fb7cc9fc60f3b039201174268aaad9"
     },
     "magick": {
       "Package": "magick",
@@ -3781,7 +3856,7 @@
     },
     "sf": {
       "Package": "sf",
-      "Version": "1.0-16",
+      "Version": "1.0-19",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -3800,7 +3875,7 @@
         "units",
         "utils"
       ],
-      "Hash": "ad57b543f7c3fca05213ba78ff63df9b"
+      "Hash": "fe02eec2f6b3ba0e24afe83d5ccfb528"
     },
     "sfd": {
       "Package": "sfd",
@@ -3999,6 +4074,23 @@
         "units"
       ],
       "Hash": "15ed4e57407dbc35e49de725f44ca9c3"
+    },
+    "stars": {
+      "Package": "stars",
+      "Version": "0.6-7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "abind",
+        "classInt",
+        "methods",
+        "parallel",
+        "rlang",
+        "sf",
+        "units"
+      ],
+      "Hash": "0df88c47fce8cda8cfe84ce05cc4c5a1"
     },
     "stringfish": {
       "Package": "stringfish",
@@ -4366,6 +4458,57 @@
       ],
       "Hash": "d44e2fcd2e4e076f0aac540208559d1d"
     },
+    "tmap": {
+      "Package": "tmap",
+      "Version": "3.3-4",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "RColorBrewer",
+        "abind",
+        "classInt",
+        "grid",
+        "htmltools",
+        "htmlwidgets",
+        "leafem",
+        "leaflet",
+        "leafsync",
+        "methods",
+        "rlang",
+        "sf",
+        "stars",
+        "stats",
+        "tmaptools",
+        "units",
+        "utils",
+        "viridisLite",
+        "widgetframe"
+      ],
+      "Hash": "c65363bc002492caf754352499ce2386"
+    },
+    "tmaptools": {
+      "Package": "tmaptools",
+      "Version": "3.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "RColorBrewer",
+        "XML",
+        "dichromat",
+        "grid",
+        "lwgeom",
+        "magrittr",
+        "methods",
+        "sf",
+        "stars",
+        "stats",
+        "units",
+        "viridisLite"
+      ],
+      "Hash": "dd597445fa5aa8adbcae4d1d222a6f78"
+    },
     "triebeard": {
       "Package": "triebeard",
       "Version": "0.4.1",
@@ -4594,6 +4737,22 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "c6abfa47a46d281a7d5159d0a8891e88"
+    },
+    "widgetframe": {
+      "Package": "widgetframe",
+      "Version": "0.3.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "htmltools",
+        "htmlwidgets",
+        "magrittr",
+        "purrr",
+        "tools",
+        "utils"
+      ],
+      "Hash": "0ee89e6cb58182d39b30a5b506e04808"
     },
     "withr": {
       "Package": "withr",
