@@ -107,6 +107,7 @@ points <- st_read(paste0(
   layer = "points",
   quiet = TRUE
 )
+
 head(points)
 
 #Look to see the depth of the closest sites to each missing point
