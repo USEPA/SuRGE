@@ -26,23 +26,33 @@ lake_cat <- lc_get_data(metric = paste(lake_cat_vars, collapse=","),
 
 lake_cat_abbv <- lake_cat %>%
   mutate(NitrogenCat = manurecat + cbnfcat + fertcat) %>%
+  mutate(NitrogenWs = manurews + cbnfws + fertws) %>%
   select(
     comid,
     lake_id,
     kffactcat,
+    kffactws,
     runoffcat,
+    runoffws,
     omcat,
+    omws,
     scat,
+    sws,
     pctcrop2019cat,
+    pctcrop2019ws,
     catareasqkm,
+    wsareasqkm,
     NitrogenCat,
+    NitrogenWs,
     npdesdenscat,
+    npdesdensws,
     agkffactcat,
+    agkffactws,
     damnidstorcat,
-    elevcat
+    damnidstorws,
+    elevcat,
+    elevws
   )
-
-
 
 # Inventory records
 dim(lake_cat) # 147 rows.  which one is missing?  
