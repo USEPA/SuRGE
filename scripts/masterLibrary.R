@@ -16,6 +16,7 @@ library(plotly) # interactive plots (readLgr.R)
 library(spsurvey) # lake design. originally used 4.1.2 on R3.6.2.  Upgraded to R 4.4, and spSurvey 5.5.1
 library(leaflet) # for lake design printables
 library(mapview) # for lake design printables
+library(tmap) # mapping
 library(tictoc) # timing operations
 library(gridExtra) # grid.arrange() for multiple panels per page on .pdf
 library(lubridate) #for adjusting time offsets in readLGR
