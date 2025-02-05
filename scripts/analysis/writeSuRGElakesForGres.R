@@ -20,13 +20,16 @@ lakes_foo <- c(unique(surge_lakes$lake_id),
 
 # AGRREGATED EMISSION RATES------
 str(emissions_agg) # 150 observations
-unique(emissions_agg$lake_id) # 147 lakes
+unique(emissions_agg$lake_id) # 146 lakes. No Falls Lake
 
 
 
 # DATA INVENTORY-----------
 # Do all lakes with morphometry estimates have a corresponding polygon?
 morpho %>% filter(!(lake_id %in% lakes_foo)) # yes
+
+# Do all lakes with morphometry estimates have emission estimates?
+morpho %>% filter(!(lake_id %in% unique(emissions_agg$lake_id))) # no, Falls Lake
 
 # Do all lake polygons have morphometry values
 lakes_foo[!(lakes_foo %in% morpho$lake_id)] 
@@ -115,6 +118,14 @@ data_dictionary_gres <- tribble(
   "co2_total_units_lake", "CO2 total rates units"
 )
 
+# make sure all variables are included in dictionary
+gpkg_names <- bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
+  st_drop_geometry() %>%
+  left_join(morpho) %>%
+  left_join(emissions_agg) %>%
+  colnames
+
+gpkg_names[!(gpkg_names %in% data_dictionary_gres$variable)] # all accounted for
 
 st_write(data_dictionary_gres, 
          dsn = file.path(paste0(userPath, "lakeDsn/all_lakes_gres_", Sys.Date(), ".gpkg")),

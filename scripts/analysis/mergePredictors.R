@@ -276,18 +276,25 @@ dim(dat) # 2367
 # write to disk
 save(dat, file = paste0("output/dat_", Sys.Date(), ".RData"))
 
-# 1. Aggregate by lake_id using site weights----------
-# emission rates
+# 1. AGGREGATE BY LAKE_ID USING SITE WEIGHTS----------
+
+## 1.1 aggregate emission rates across all lakes including transitional/riverine/lacustrine-----
 emissions_agg <- dat %>%
   # All NAs break cont_analysis. No CH4 diffusion or from lake 253, set to 0
   # then filter results at end
   mutate(ch4_diffusion_best = replace(ch4_diffusion_best, lake_id == 253, 0),
-         ch4_total = replace(ch4_total, lake_id == 253, 0)) %>% 
-  rename_with(~gsub("_best", "", .x)) %>%
+         ch4_total = replace(ch4_total, lake_id == 253, 0),
+         # add subsection identifiers back into lake_id
+         lake_id = as.character(lake_id),
+         lake_id = case_when(grepl("lacustrine", site_id) ~ paste0(lake_id, "_lacustrine"),
+                             grepl("riverine", site_id) ~ paste0(lake_id, "_riverine"),
+                             grepl("transitional", site_id) ~ paste0(lake_id, "_transitional"),
+                             TRUE ~ lake_id)) %>% 
+  rename_with(~gsub("_best", "", .x)) %>% 
   # split into list elements. use base::split to enable list
   # element naming
   split(., paste(.$lake_id, .$visit, sep = "_")) %>%
-  #.["47_1"] %>% # subset for development. 10 is unstratified
+  #.[c("69_lacustrine_1", "69_transitional_1", "69_riverine_1", "70_lacustrine_1", "70_transitional_1", "70_riverine_1", "147_1")] %>% # subset for development. 10 is unstratified
   #within(., rm("253_1")) %>% # exclude list element by name for development
   imap(~.x %>%
         st_as_sf(., coords = c("long", "lat")) %>% # convert to sf object
@@ -305,11 +312,12 @@ emissions_agg <- dat %>%
          janitor::clean_names(.) %>% # clean names
          rename(margin_of_error = marginof_error) %>%
          # add lake_id identifiers to data frame
-         mutate(lake_id = str_extract(.y, "[^_]+") %>% as.numeric, # add lake_id
-                visit = str_extract(.y, "(?<=_).*") %>% as.numeric, # add visit 
+         mutate(lake_id = str_extract(.y, "(^.+)\\_") %>% # everything up to and including final _
+                  str_sub(., end = -2), # strip final character, which is _ here.
+                visit = str_extract(.y, "(?<=\\_)\\d+$*") %>% as.numeric, # add visit. string after final _
                 units = case_when(grepl("ch4", indicator) ~ "mg_ch4_m2_h",
                                   grepl("co2", indicator) ~ "mg_co2_m2_h",
-                                  TRUE ~"Fly you fools"))%>%
+                                  TRUE ~"Fly you fools")) %>%
          # Remove rows where emission = 0. This occurs when data were unavailable
          # and set to 0 so cont_analysis wouldn't break (e.g. 253, see above)
          filter(estimate != 0) %>% 
@@ -322,19 +330,115 @@ emissions_agg <- dat %>%
          rename_with(~ gsub("estimate_", "", .x, fixed = TRUE))) %>%
   dplyr::bind_rows(.)
 
+## 1.2 Aggregate Missouri River impoundments based on habitat weights-----  
+missouri_agg <- emissions_agg %>%
+  filter(grepl(c("69|70"), lake_id)) %>% # grab 69 and 70, lac, riv, lac
+  # scale values by proportion of each habitat. Applying to mean and SE.
+  # If SE are not scaled, the aggregated SE are too big. I think scaling
+  # SE is correct
+  mutate(
+    # mean emission rates
+    across(c(ch4_ebullition_lake, ch4_diffusion_lake, ch4_total_lake,
+             co2_ebullition_lake, co2_diffusion_lake, co2_total_lake),
+           # proportions defined in missoureRiverHabitatWeights.R
+           ~case_when(lake_id == "69_lacustrine" ~ . * 0.685, # proportion of 69 in lacustrine
+                      lake_id == "69_transitional" ~ . * 0.259, # proportion of 69 in transitional
+                      lake_id == "69_riverine" ~ . * 0.0553, # proportion of 69 in riverine
+                      lake_id == "70_lacustrine" ~ . * 0.46, # proportion of 70 in lacustrine
+                      lake_id == "70_transitional" ~ . * 0.176, # proportion of 70 in transitional
+                      lake_id == "70_riverine" ~ . * 0.364, # proportion of 70 in riverine
+                      TRUE ~ . * 99999)),
+    # standard errors
+    across(contains("std_error"),
+           # proportions defined in missoureRiverHabitatWeights.R
+           ~case_when(lake_id == "69_lacustrine" ~ . * 0.685, # proportion of 69 in lacustrine
+                      lake_id == "69_transitional" ~ . * 0.259, # proportion of 69 in transitional
+                      lake_id == "69_riverine" ~ . * 0.0553, # proportion of 69 in riverine
+                      lake_id == "70_lacustrine" ~ . * 0.46, # proportion of 70 in lacustrine
+                      lake_id == "70_transitional" ~ . * 0.176, # proportion of 70 in transitional
+                      lake_id == "70_riverine" ~ . * 0.364, # proportion of 70 in riverine
+                      TRUE ~ . * 99999))) %>%
+  # omit riv/lac/trans from lake_id to facilitate grouping by reservoir
+  mutate(lake_id = case_when(grepl("69", lake_id) ~ "69",
+                             grepl("70", lake_id) ~ "70",
+                             TRUE ~ lake_id)) %>%
+  group_by(lake_id, visit) %>% # only one visit, but this carries the variable through
+  #select(ch4_diffusion_std_error_lake) %>% # for development
+  summarize(
+    # Sum habitat weighted means
+    across(c(ch4_ebullition_lake, ch4_diffusion_lake, ch4_total_lake,
+             co2_ebullition_lake, co2_diffusion_lake, co2_total_lake),
+           sum),
+    # aggregate habitat specific standard errors as square root of sum of squares
+    across(contains("std_error"), ~ sqrt(sum(.x^2))),
+    # retain units
+    across(contains("units"), ~ unique(.x))) %>% 
+  ungroup %>%
+  # recalc 95% CI mean +/- (1.96*SE)
+  mutate(
+    # CH4 lower 95% confidence bound
+    ch4_ebullition_lcb95pct_lake = ch4_ebullition_lake - (1.96 * ch4_ebullition_std_error_lake),
+    ch4_diffusion_lcb95pct_lake = ch4_diffusion_lake - (1.96 * ch4_diffusion_std_error_lake),
+    ch4_total_lcb95pct_lake = ch4_total_lake - (1.96 * ch4_total_std_error_lake),
+    # CH4 upper 95% confidence bound
+    ch4_ebullition_ucb95pct_lake = ch4_ebullition_lake + (1.96 * ch4_ebullition_std_error_lake),
+    ch4_diffusion_ucb95pct_lake = ch4_diffusion_lake + (1.96 * ch4_diffusion_std_error_lake),
+    ch4_total_ucb95pct_lake = ch4_total_lake + (1.96 * ch4_total_std_error_lake),
+    # CO2 lower 95% confidence bound
+    co2_ebullition_lcb95pct_lake = co2_ebullition_lake - (1.96 * co2_ebullition_std_error_lake),
+    co2_diffusion_lcb95pct_lake = co2_diffusion_lake - (1.96 * co2_diffusion_std_error_lake),
+    co2_total_lcb95pct_lake = co2_total_lake - (1.96 * co2_total_std_error_lake),
+    # CO2 upper 95% confidence bound
+    co2_ebullition_ucb95pct_lake = co2_ebullition_lake + (1.96 * co2_ebullition_std_error_lake),
+    co2_diffusion_ucb95pct_lake = co2_diffusion_lake + (1.96 * co2_diffusion_std_error_lake),
+    co2_total_ucb95pct_lake = co2_total_lake + (1.96 * co2_total_std_error_lake)
+  )
 
-# make sure lake-wide means are within the range of site data from each lake
+## 1.3 Check aggregated Missouri River data against habitat specific values-------
+# these seem reasonable
+bind_rows(missouri_agg,
+          emissions_agg %>% 
+            filter(grepl(c("69|70"), lake_id)) %>% # grab 69 and 70, lac, riv, lac
+            select(-contains("margin"))) %>%
+  select(-contains("units")) %>%
+  pivot_longer(!(lake_id)) %>%
+  #filter(grepl("co2", name)) %>% # just co2 to make faceted panes readable
+  filter(grepl("ch4", name)) %>% # just ch4 to make faceted panes readable
+  ggplot(aes(lake_id, value)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  facet_wrap(~name, scales = "free")
+
+
+## 1.4 Replace lac/riv/trans in emissions_agg with aggregated values-------
+emissions_agg <- emissions_agg %>%
+  # strip the habitat specific estimates for 69 and 70
+  filter(!grepl(c("69|70"), lake_id)) %>%
+  # now add aggregated Missouri River values
+  bind_rows(missouri_agg) %>%
+  mutate(lake_id = as.numeric(lake_id))
+
+
+## 1.5 make sure lake-wide means are within the range of site data from each lake-----
 bind_rows(emissions_agg %>%
-            select(-contains("95"), -contains("error"), -contains("units")) %>%
-            mutate(source = "lake") %>%
-            rename_with(~gsub("_lake", "", .)),
+            select(-contains("95"), # remove 95% confidence interval
+                   -contains("error"), # remove margin of error 
+                   -contains("units")) %>% # remove emission rate units
+            mutate(source = "lake") %>% # whole-lake estimate, as opposed to site specific
+            rename_with(~gsub("_lake", "", .)), # remove "_lake" from lake_id values
           dat %>%
+            # add lac/river/trans to lake_id to facilitate merge.
+            mutate(lake_id = as.character(lake_id),
+                   lake_id = case_when(grepl("lacustrine", site_id) ~ paste0(lake_id, "_lacustrine"),
+                                       grepl("riverine", site_id) ~ paste0(lake_id, "_riverine"),
+                                       grepl("transitional", site_id) ~ paste0(lake_id, "_transitional"),
+                                       TRUE ~ lake_id)) %>%
             select(lake_id, visit, contains("ch4"), contains("co2"),
                    -contains("units"), -contains("note")) %>%
             rename_with(~gsub("_best", "", .)) %>%
             mutate(source = "site")) %>% 
   mutate(lake_id = as.factor(lake_id)) %>%
-ggplot(aes(lake_id, ch4_diffusion)) +
+  ggplot(aes(lake_id, ch4_diffusion)) +
   geom_point(aes(color = source)) +
   scale_y_log10()
   
