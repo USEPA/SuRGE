@@ -37,7 +37,7 @@ dat_2016_missing_sonde<-dat_2016 %>%
 dat_2016$deep_do_mg_flags <- ifelse(
   dat_2016$site_depth < 1 &
     is.na(dat_2016$deep_do_mg),
-  1,
+  "l",
   NA
 )
 dat_2016$deep_do_mg <- ifelse(
@@ -51,7 +51,7 @@ dat_2016$deep_do_mg <- ifelse(
 dat_2016$deep_temp_flags <- ifelse(
   dat_2016$site_depth < 1 &
     is.na(dat_2016$deep_temp),
-  1,
+  "l",
   NA
 )
 dat_2016$deep_temp <- ifelse(
@@ -65,7 +65,7 @@ dat_2016$deep_temp <- ifelse(
 dat_2016$deep_sp_cond_flags <- ifelse(
   dat_2016$site_depth < 1 &
     is.na(dat_2016$deep_sp_cond),
-  1,
+  "l",
   NA
 )
 
@@ -80,7 +80,7 @@ dat_2016$deep_sp_cond <- ifelse(
 dat_2016$deep_chla_sonde_flags <- ifelse(
   dat_2016$site_depth < 1 &
     is.na(dat_2016$deep_chla_sonde),
-  1,
+  "l",
   NA
 )
 
@@ -95,7 +95,7 @@ dat_2016$deep_chla_sonde <- ifelse(
 dat_2016$deep_turb_flags <- ifelse(
   dat_2016$site_depth < 1 &
     is.na(dat_2016$deep_turb),
-  1,
+  "l",
   NA
 )
 
@@ -110,7 +110,7 @@ dat_2016$deep_turb <- ifelse(
 dat_2016$deep_ph_flags <- ifelse(
   dat_2016$site_depth < 1 &
     is.na(dat_2016$deep_ph),
-  1,
+  "l",
   NA
 )
 
@@ -148,17 +148,17 @@ for (i in 1:31){
   intcond[j] <- pro$sp_cond[which.min(abs(dattt$site_depth[j] - pro$sample_depth))]
   
   dat_2016$deep_sp_cond[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- intcond[j]
-  dat_2016$deep_sp_cond_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- 1
+  dat_2016$deep_sp_cond_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- "l"
   dat_2016$deep_temp[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- inttemp[j]
-  dat_2016$deep_temp_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- 1
+  dat_2016$deep_temp_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- "l"
   dat_2016$deep_turb[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- intturb[j]
-  dat_2016$deep_turb_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- 1
+  dat_2016$deep_turb_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- "l"
   dat_2016$deep_ph[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- intph[j]
-  dat_2016$deep_ph_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- 1
+  dat_2016$deep_ph_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- "l"
   dat_2016$deep_chla_sonde[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- intchl[j]
-  dat_2016$deep_chla_sonde_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- 1
+  dat_2016$deep_chla_sonde_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- "l"
   dat_2016$deep_do_mg[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- intdo[j]
-  dat_2016$deep_do_mg_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- 1
+  dat_2016$deep_do_mg_flags[match(dattt$uniqueid[j], dat_2016$uniqueid)] <- "l"
 
   }
 }
