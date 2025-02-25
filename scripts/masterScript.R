@@ -32,6 +32,7 @@ source("scripts/analysis/readGc.R") # gc_lakeid_agg
 source("scripts/analysis/read2016data.R")
 source("scripts/analysis/estimateDepth2016.R")
 
+
 # Read other lake characteristics
 source("scripts/analysis/readMorpho.R") # morpho
 source("scripts/analysis/readNla17.R") # nla17_chem
@@ -46,6 +47,7 @@ source("scripts/analysis/readSedimentation.R")#read in reservoir sedimentation d
 source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
 source("scripts/analysis/readNWIS.R")#read water level data for subset of reservoirs
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
+source("scripts/analysis/missingSonde2016.R") #Interpolate based on profiles
 source("scripts/analysis/readGriddedTemp.R") # ERA5 derived estimates of air, shallow, and deep temperature
 
 # Calculate derived quantities
