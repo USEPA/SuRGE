@@ -22,6 +22,8 @@ lakes_foo <- c(unique(surge_lakes$lake_id),
 str(emissions_agg) # 150 observations
 unique(emissions_agg$lake_id) # 146 lakes. No Falls Lake
 
+str(emissions_agg_annual) # 149 observations
+unique(emissions_agg_annual$lake_id) # 146 lakes. No Falls Lake (1033) or Four Prong Lake (45)
 
 
 # DATA INVENTORY-----------
@@ -47,6 +49,12 @@ bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_make_valid() %>%
   left_join(morpho) %>%
   left_join(emissions_agg) %>%
+  left_join(emissions_agg_annual %>% 
+              filter(temp_source == "mixed_layer") %>%
+              select(-temp_source)) %>%
+  left_join(dat %>% 
+              select(lake_id, visit, ag_eco9_nm, year_completed) %>%
+              distinct) %>%
   st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_gres_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "all_lakes",
            append = FALSE)
@@ -57,6 +65,10 @@ bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_drop_geometry() %>%
   left_join(morpho) %>%
   left_join(emissions_agg) %>%
+  left_join(emissions_agg_annual %>% 
+              filter(temp_source == "mixed_layer") %>%
+              select(-temp_source)) %>%
+  left_join(dat %>% select(lake_id, visit, ag_eco9_nm, year_completed)) %>%
   colnames %>% 
   write.table("clipboard", sep = ",", row.names = FALSE) # past below
 
@@ -110,19 +122,27 @@ data_dictionary_gres <- tribble(
   "co2_ebullition_ucb95pct_lake", "95% upper confidence bound of lake-scale mean CO2 ebullition estimate",
   "co2_diffusion_ucb95pct_lake", "95% upper confidence bound of lake-scale  mean CO2 diffusion estimate",
   "co2_total_ucb95pct_lake", "95% upper confidence bound of lake-scale  mean total CO2 emission estimate",
+  "ch4_ebullition_lake_annual", "Lake-scale aggregation of CH4 ebullition observed at 15 or more measurement locations selected via a generalized random tessellation stratified surey design. Data annualized by applying a temperature correction based on mean monthly mixed layer water temperature and Boltzmann-Arrhenius equation with an activation energy of 0.96 eV (Yvon-Durocher et al. 2014). ",
+  "ch4_diffusion_lake_annual", "Lake-scale aggregation of CH4 diffusion observed at 15 or more measurement locations selected via a generalized random tessellation stratified surey design. Data annualized by applying a temperature correction based on mean monthly mixed layer water temperature and Boltzmann-Arrhenius equation with an activation energy of 0.96 eV (Yvon-Durocher et al. 2014). ",
+  "ch4_total_lake_annual", "Lake-scale aggregation of total CH4 emissions observed at 15 or more measurement locations selected via a generalized random tessellation stratified surey design. Data annualized by applying a temperature correction based on mean monthly mixed layer water temperature and Boltzmann-Arrhenius equation with an activation energy of 0.96 eV (Yvon-Durocher et al. 2014). ",
   "ch4_ebullition_units_lake", "CH4 ebullition rate units",
   "ch4_diffusion_units_lake", "CH4 diffusion rate units",
   "ch4_total_units_lake", "CH4 total emission rate units",
   "co2_ebullition_units_lake", "CO2 ebullition rates units",
   "co2_diffusion_units_lake", "CO2 diffusion rates units",
-  "co2_total_units_lake", "CO2 total rates units"
+  "co2_total_units_lake", "CO2 total rates units",
+  "ag_eco9_nm", "level 9 aggregated ecoregion",
+  "year_completed", "year that waterbody was impounded or created (e.g. excavated)"
 )
 
 # make sure all variables are included in dictionary
 gpkg_names <- bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_drop_geometry() %>%
   left_join(morpho) %>%
-  left_join(emissions_agg) %>%
+  left_join(emissions_agg_annual %>% 
+              filter(temp_source == "mixed_layer") %>%
+              select(-temp_source)) %>%
+  left_join(dat %>% select(lake_id, visit, ag_eco9_nm, year_completed)) %>%
   colnames
 
 gpkg_names[!(gpkg_names %in% data_dictionary_gres$variable)] # all accounted for

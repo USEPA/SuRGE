@@ -365,6 +365,26 @@ dat_falls_lake_sf <- rbind(
          lake_id = as.numeric(lake_id))
 
 
+# CHECK SITE WEIGHTS--------
+# site weights for SuRGE and 2016 are in dat. Need to merge with site weights
+# from Falls Lake
+site_wgt <- bind_rows(
+  # Falls Lake weights
+  st_read(paste0(userPath,  "lakeDsn/2016_survey/fallsLake/FallsLakeSitesEqArea.shp")) %>%
+  st_drop_geometry() %>%
+  select(siteID, wgt) %>%
+  rename(site_id = siteID,
+         site_wgt = wgt) %>%
+  mutate(site_id = substr(site_id, 4,5),
+         lake_id = 1033),
+  # SuRGE + 2016 weights
+  dat %>% select(lake_id, site_id, site_wgt))
+
+
+unique(dat$lake_id)
+dat %>% filter(lake_id == 1033)
+is.na(site_wgt)
+
 # WRITE POLYGONS AND POINTS TO DISK-----------
 ## POLYGONS----
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
@@ -381,6 +401,7 @@ dim(lakes_2016) #33
 # merge 2016, SuRGE, and Falls Lake data
 # add point to all_lakes.gpkg
 bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
+  left_join(dat %>% select(lake_id, site_id, visit, site_wgt)) %>% # add site weights
   st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "points",
            append = FALSE)

@@ -85,6 +85,9 @@ source("scripts/analysis/calculateTotalEmissions.R")
 source("scripts/analysis/mergeChemEmissions.R") #all_obs
 source("scripts/analysis/mergePredictors.R") # dat
 
+# Annualize emissions
+source("scripts/analysis/annualizeEmissions.R")
+
 # Random
 #source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 
 #source("scripts/analysis/chemSampleList2022.R") # estimate 2022 sample load
