@@ -1,6 +1,11 @@
 ## Script for Data Paper Figures
 ## February 26 2025
 
+# load("C:/Users/rpp/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/all_obs_2025-01-23.RData")
+# dat = all_obs
+
+
+
 #create an object for overlaid methane density plots
 di<-data.frame(dat$ch4_diffusion_best,"diffusion")
 colnames(di)<-c("rate","type")
@@ -42,7 +47,7 @@ colnames(totc)<-c("rate","type")
 
 diebc<-bind_rows(dic,ebc,totc)
 nbreaks <- 7
-breaks <-c(-10^(nbreaks:1),10^(nbreaks:1))
+breaks <-c(-10^(nbreaks:1),0, 10^(nbreaks:1))
 
 densplotco2<-diebc%>%
   mutate(rt=rate*24)%>%
@@ -57,7 +62,7 @@ densplotco2<-diebc%>%
         axis.text = element_text(size = 14,angle = 90),
         axis.title = element_text(size = 16),
         legend.position="none")+
-  scale_x_continuous(trans = pseudo_log_trans(sigma = 10^(-nbreaks), base = 10),breaks=breaks)+
+  scale_x_continuous(trans = "pseudo_log",breaks=breaks)+
   xlab(expression(paste("Carbon Dioxide (mg CO"[2]*" m"^"-2"*"d"^"-1"*")")))+
   ylab("Density")
 densplotco2
@@ -80,5 +85,38 @@ densplotco2b<-totc%>%
   ylab("Density")
 densplotco2b
 
-dens<-plot_grid(densplot,densplotco2,ncol=1,align="v",labels=c("A","B"),rel_heights = c(1,1))
+dens<-cowplot::plot_grid(densplot,densplotco2,ncol=1,align="v",labels=c("A","B"),rel_heights = c(1,1))
 dens
+
+
+
+
+## rmp additions
+
+dat_all = dieb %>%
+  mutate(gas_name = "CH[4]") %>%
+  full_join(diebc %>%
+              mutate(gas_name = "CO[2]")) %>%
+  mutate(rate_daily = rate * 24)
+
+
+ggplot() +
+  geom_density(data = dat_all, aes(x = rate_daily, y=..scaled.., fill = type, color = type), alpha = 0.3) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  facet_wrap(~ gas_name, scale = "free", ncol = 1, labeller = label_parsed) +
+  scale_x_continuous(trans = "pseudo_log", breaks = breaks, expand = c(0.025, 0.025),
+                     labels = scales::comma_format(big.mark = ",")) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.025))) +
+  scale_color_brewer(palette = "Dark2", name = NULL) +
+  scale_fill_brewer(palette = "Dark2", name = NULL) +
+  theme_bw()+
+  theme(axis.text.x = element_text(size = 14, color = "black"), #angle = 90, hjust = 1, vjust = 0.5),
+        axis.text.y = element_text(size = 14, color = "black"),
+        axis.title = element_text(size = 14, color = "black"),
+        legend.text = element_text(size = 14, color = "black"),
+        legend.title = element_text(size = 14, color = "black"),
+        strip.text = element_text(size = 14, color = "black"),
+        legend.position = c(0.91, 0.9),
+        legend.background = element_rect(color = "black"))+
+  xlab(expression(paste("Emissions Rate (mg m"^"-2"~"d"^"-1"*")")))+
+  ylab("Density (scaled)")
