@@ -15,7 +15,7 @@
 #add a Flag field for any co2notes that contain the phrase "unstable start"
 adjData$co2Flag<-ifelse(grepl("unstable start",adjData$co2Notes), "U",NA)
 
-good.data <- adjData %>% filter(co2Notesabb == "unst" | co2Status == "done" | ch4Status == "done") %>%
+good.data <- adjData %>% filter(co2Flag == "U" | co2Status == "done" | ch4Status == "done") %>%
   select(lake_id, site_id, contains("status"),co2Flag)
 
 # filter down to lake and sites with good data
