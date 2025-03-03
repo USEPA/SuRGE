@@ -25,6 +25,24 @@ dim(dat_2016) # 498
 dim(all_obs) # 1869
 dim(dat) # 2367, good
 
+# 1b. Summarize entire GHG dataset for data paper
+
+mes<-dat %>%
+  filter(!is.na(ch4_diffusion_best))%>%
+  mutate(ch4diff=ch4_diffusion_best*24)
+#2150 individual measurements
+mez<-mes %>%
+  filter(ch4_diffusion_best==0)
+#38 are zero values
+
+cas<-dat %>%
+  filter(!is.na(co2_diffusion_best))%>%
+  mutate(co2diff=co2_diffusion_best*24)
+#2083 individual measurements
+caz<-cas %>%
+  filter(co2_diffusion_best==0)
+#264 are zero values
+
 # 2. Fill chemistry variables----
 # chemistry variables measured at one location.  NA reported
 # for all other sites in lake.  Here we fill all NAs using
