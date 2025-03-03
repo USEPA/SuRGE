@@ -11,7 +11,7 @@ get_chla_data <- function(path, data, sheet) {
   
   d <- read_csv(paste0(path, data)) %>% #
     janitor::clean_names() %>% # 
-    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site))) %>% # convert to numeric
+    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # convert to numeric
     mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
     mutate(units = "ug_l") %>% # to match naming conventions
 
@@ -40,7 +40,8 @@ get_chla_data <- function(path, data, sheet) {
                                        as.Date("2023-08-30")) ~ 2,
                              TRUE ~ 1)) %>%
     select(lake_id, site_id, sample_type, sample_depth, visit,
-           chla_lab, chla_lab_units, chla_lab_flags) 
+           chla_lab, chla_lab_units, chla_lab_flags) %>%
+    filter(sample_type != "blank")
 
     # unite("chla_flags", chla_qual, chla_ship, sep = " ") %>% 
     #   mutate(chla_flags = if_else( # NA if there are no flags
@@ -55,7 +56,7 @@ get_phyco_data <- function(path, data, sheet) {
   
   d <- read_csv(paste0(path, data)) %>% #
     janitor::clean_names() %>% # 
-    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site))) %>% # convert to numeric
+    mutate(site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # convert to numeric
     mutate(sample_depth = "shallow") %>% # all samples were collected near a-w interface
     mutate(units = "ug_l") %>% # to match naming conventions
     
@@ -85,7 +86,8 @@ get_phyco_data <- function(path, data, sheet) {
                              TRUE ~ 1)) %>%
     
     select(lake_id, site_id, sample_type, sample_depth, visit, 
-           phycocyanin_lab, phycocyanin_lab_units, phycocyanin_lab_flags) 
+           phycocyanin_lab, phycocyanin_lab_units, phycocyanin_lab_flags) %>%
+    filter(sample_type != "blank")
     # variable names must be same for aggregateFieldDupsStripFieldBlanks.R
 
     
@@ -107,10 +109,10 @@ cin.peg.path <- paste0(userPath,
                        "data/algalIndicators/pigments/")
 
 chla <- get_chla_data(cin.peg.path,
-                      "surge_chl_all_years_JB.csv") # temp file while Jeff fixes problems. surge_algal issue #8
+                      "surge_chla_all_years.csv") 
 
 phycocyanin <- get_phyco_data(cin.peg.path,
-                              "surge_phyco_all_years_JB.csv") # temp file while Jeff fixes problems. surge_algal issue #8
+                              "surge_phyco_all_years.csv") 
 
 # chla_20_21_22 <- get_chla_data(cin.pig.path,
 #                                "surge_chla_all_2020_2021_2022.csv") 
@@ -119,7 +121,7 @@ phycocyanin <- get_phyco_data(cin.peg.path,
 #                             "surge_phyco_all_2020_2021_2022.csv")
 
 nrow(chla) #160
-nrow(phycocyanin) #161
+nrow(phycocyanin) #160
 pigments <- full_join(chla, phycocyanin, 
                             by = c("lake_id", "site_id", 
                                    "sample_depth", "sample_type", "visit")) 
@@ -159,7 +161,8 @@ pigments_analyzed <- pigments %>%
   pivot_longer(cols = c(chla_lab, phycocyanin_lab),
                 names_to = "analyte",
               values_to = "concentration") %>%
-  select(lake_id, sample_type, sample_depth, visit, analyte)
+  select(lake_id, sample_type, sample_depth, visit, analyte) %>%
+  filter(sample_type != "blank")
 
 pigments_collected <- chem.samples.foo %>% 
   filter(analyte %in% c("phycocyanin_lab", "chla_lab"),

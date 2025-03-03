@@ -428,24 +428,24 @@ bind_rows(emissions_agg %>%
             rename_with(~gsub("_lake", "", .)), # remove "_lake" from lake_id values
           dat %>%
             # add lac/river/trans to lake_id to facilitate merge.
-            mutate(lake_id = as.character(lake_id),
-                   lake_id = case_when(grepl("lacustrine", site_id) ~ paste0(lake_id, "_lacustrine"),
-                                       grepl("riverine", site_id) ~ paste0(lake_id, "_riverine"),
-                                       grepl("transitional", site_id) ~ paste0(lake_id, "_transitional"),
-                                       TRUE ~ lake_id)) %>%
+            # mutate(lake_id = as.character(lake_id),
+            #        lake_id = case_when(grepl("lacustrine", site_id) ~ paste0(lake_id, "_lacustrine"),
+            #                            grepl("riverine", site_id) ~ paste0(lake_id, "_riverine"),
+            #                            grepl("transitional", site_id) ~ paste0(lake_id, "_transitional"),
+            #                            TRUE ~ lake_id)) %>%
             select(lake_id, visit, contains("ch4"), contains("co2"),
                    -contains("units"), -contains("note")) %>%
             rename_with(~gsub("_best", "", .)) %>%
             mutate(source = "site")) %>% 
   mutate(lake_id = as.factor(lake_id)) %>%
-  ggplot(aes(lake_id, ch4_diffusion)) +
-  geom_point(aes(color = source)) +
-  scale_y_log10()
+  # ggplot(aes(lake_id, ch4_diffusion)) +
+  # geom_point(aes(color = source)) +
+  # scale_y_log10()
   
 
-ggplot(aes(lake_id, ch4_ebullition)) +
-  geom_point(aes(color = source)) +
-  scale_y_log10()
+# ggplot(aes(lake_id, ch4_ebullition)) +
+#   geom_point(aes(color = source)) +
+#   scale_y_log10()
 
 
 ggplot(aes(lake_id, ch4_total)) +
