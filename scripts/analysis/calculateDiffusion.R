@@ -11,16 +11,20 @@
 
 # STEP 1: LINEAR AND NONLINEAR REGRESSION
 # for practice, only consider sites with co2Status or ch4Status == done
-good.data <- adjData %>% filter(co2Notes == "unstable start" | co2Status == "done" | ch4Status == "done") %>%
-  select(lake_id, site_id, contains("status"),co2Notes)
+
+#add a Flag field for any co2notes that contain the phrase "unstable start"
+adjData$co2Flag<-ifelse(grepl("unstable start",adjData$co2Notes), "U",NA)
+
+good.data <- adjData %>% filter(co2Notesabb == "unst" | co2Status == "done" | ch4Status == "done") %>%
+  select(lake_id, site_id, contains("status"),co2Flag)
 
 # filter down to lake and sites with good data
 gga_4 <- gga_3 %>% filter(paste0(lake_id, site_id) %in% paste0(good.data$lake_id, good.data$site_id)) %>%
-  left_join(., good.data %>% select(lake_id, site_id, ch4Status, co2Status,co2Notes))
+  left_join(., good.data %>% select(lake_id, site_id, ch4Status, co2Status,co2Flag))
 
 # substitute NA for profiles that are "in progress"
 gga_4 <- gga_4 %>% mutate(CO2.case = ifelse(co2Status == "done", "a", 
-                                            ifelse(co2Notes == "unstable start", "a","b")),
+                                            ifelse(co2Flag=="U", "a","b")),
                           CO2._ppm = case_when(CO2.case == "a" ~ CO2._ppm,
                                                TRUE ~ NA_real_),
                           CH4._ppm = case_when(ch4Status == "done" ~ CH4._ppm,
@@ -45,7 +49,7 @@ foo <- gga_4 %>%
       # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
       mutate(elapTime = RDateTime - RDateTime[1]) %>% # Calculate elapsed time (seconds).
       rename(chmVol.L = chm_vol_l) %>%
-      select(lake_id, site_id, visit, CH4._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm,co2Notes)  # Pull out data of interest
+      select(lake_id, site_id, visit, CH4._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm,co2Flag)  # Pull out data of interest
     
     co2.data <- filter(x,  # extract data
                        RDateTime >= co2DeplyDtTm, # based on diff start time
@@ -53,7 +57,7 @@ foo <- gga_4 %>%
       # Calculate elapsed time (seconds).  lm behaves strangely when used with POSIXct data.
       mutate(elapTime = RDateTime - RDateTime[1]) %>% # Calculate elapsed time (seconds).
       rename(chmVol.L = chm_vol_l) %>%
-      select(lake_id, site_id, visit, CO2._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm,co2Notes)  # Pull out data of interest
+      select(lake_id, site_id, visit, CO2._ppm, elapTime, GasT_C, chmVol.L,H2O._ppm,co2Flag)  # Pull out data of interest
     
     return(list("ch4" = ch4.data, "co2" = co2.data)) # returns a nested list
     print(i)
@@ -181,7 +185,7 @@ for(i in 1:length(data.gga.ch4.list)){
     NA else
       co2.ex.drate.i.umol.s * (44/1000) * (60*60)  #mg CO2 m-2 h-1
   
-  co2note<-data.gga.co2.list[[i]]$co2Notes[1]
+  co2Flag<-data.gga.co2.list[[i]]$co2Flag[1]
   nco2<-length(data.gga.co2.list[[i]]$CO2._ppm)
   nch4<-length(data.gga.ch4.list[[i]]$CH4._ppm)
   dh2o<-max(data.gga.ch4.list[[i]]$H2O._ppm)-min(data.gga.ch4.list[[i]]$H2O._ppm)
@@ -195,7 +199,7 @@ for(i in 1:length(data.gga.ch4.list)){
                   co2.lm.slope, co2.lm.drate.mg.h, 
                   co2.lm.aic, co2.lm.r2, co2.lm.se, co2.lm.pval,
                   co2.ex.aic, co2.ex.se, co2.ex.r2, co2.ex.slope, 
-                  co2.ex.k, co2.ex.drate.mg.h,co2note,nco2,nch4,dh2o,mh2o, row.names = i)
+                  co2.ex.k, co2.ex.drate.mg.h,co2Flag,nco2,nch4,dh2o,mh2o, row.names = i)
   colnames(out)<-c("site_id", "lake_id", "visit", 
                    "ch4.lm.slope", "ch4.lm.drate.mg.h", 
                    "ch4.lm.aic", "ch4.lm.r2", "ch4.lm.se", "ch4.lm.pval",
@@ -204,7 +208,7 @@ for(i in 1:length(data.gga.ch4.list)){
                    "co2.lm.slope", "co2.lm.drate.mg.h", 
                    "co2.lm.aic", "co2.lm.r2", "co2.lm.se", "co2.lm.pval",
                    "co2.ex.aic", "co2.ex.se", "co2.ex.r2", "co2.ex.slope", 
-                   "co2.ex.k", "co2.ex.drate.mg.h","co2note","nco2","nch4",
+                   "co2.ex.k", "co2.ex.drate.mg.h","co2Flag","nco2","nch4",
                    "dh2o","mh2o")
 
   OUT[[i]] = out
@@ -298,12 +302,9 @@ OUTb<-do.call(bind_rows, OUT)
 # Choose best rate.  Just use AIC
 # Cowan lake manual syringe sample data wouldn't support ex model.
 # Include is.na(ex.aic) to accommodate this.
-a = case_when(OUTb$co2note=="unstable start" ~ "linear")
-b = case_when(OUTb$co2.lm.aic <= OUTb$co2.ex.aic ~ "linear")
-c = case_when(is.na(OUTb$co2.ex.k)~ "linear")
 
 OUT2 <- mutate(OUTb,
-               co2.best.model= case_when(co2note=="unstable start"~"linear",
+               co2.best.model= case_when(co2Flag=="U"~"linear",
                                          co2.lm.aic <= co2.ex.aic ~ "linear",
                                          is.na(co2.ex.k) ~ "linear",
                                                TRUE ~ "exponential"),
