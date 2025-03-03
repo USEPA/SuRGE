@@ -11,6 +11,7 @@ dim(emissions) #1867
 
 
 
+
 # CALCULATE TOTAL EMISSION RATES------------------
 # Only calculate if both diff and ebul were quantified
 # tot = NA if is_na(ebul) or is_na(diff)_
