@@ -120,3 +120,40 @@ ggplot() +
         legend.background = element_rect(color = "black"))+
   xlab(expression(paste("Emissions Rate (mg m"^"-2"~"d"^"-1"*")")))+
   ylab("Density (scaled)")
+
+### Unstable start plot
+
+# this code generates a 2 panel plot used to demonstrate relationship between
+# CO2, and H2O times to stabilization.  we will be using this for data paper figure
+# it is for lake 288 site 14
+
+unstable_plot<-gga_2 %>%
+  filter(lake_id == "288",
+         site_id == "14",
+         RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
+         RDateTime < ch4RetDtTm + 300, # extend plot 1 minute post deployment
+         CH4._ppm > 0) %>%
+  select(lake_id, RDateTime, CH4._ppm, CO2._ppm, H2O._ppm,
+         co2DeplyDtTm, co2RetDtTm, ch4DeplyDtTm, ch4RetDtTm) %>%
+  pivot_longer(!c(lake_id, RDateTime,co2DeplyDtTm, co2RetDtTm,
+                  ch4DeplyDtTm, ch4RetDtTm)) %>%
+  filter(name %in% c("CO2._ppm","H2O._ppm"))%>%
+  ggplot(aes(RDateTime, value)) +
+  geom_point() +
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),legend.title=element_blank(),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16),
+        legend.position="top")+
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:16:22", tz = "UTC")),
+                 color = "deployment"), key_glyph = "path") +
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:43", tz = "UTC")),
+                 color = "CO2 stabilizes"), key_glyph = "path") + #CO2
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
+                 color = "retrieval"), key_glyph = "path") +
+  scale_color_discrete(breaks = c("deployment", "CO2 stabilizes", "retrieval"), name="") +
+  xlab("time (hh:mm)") +
+  facet_wrap(~name, scales = "free", nrow = 3)+
+  ylab("ppm")
+unstable_plot
