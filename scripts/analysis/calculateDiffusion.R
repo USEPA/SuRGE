@@ -213,6 +213,8 @@ for(i in 1:length(data.gga.ch4.list)){
 
   OUT[[i]] = out
   
+  rm(co2Flag)
+  
   # Plots
   # CH4 first
   # ch4.ex.pred <- try(

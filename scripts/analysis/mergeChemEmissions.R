@@ -36,7 +36,7 @@ chem_fld_wide <- chem_fld %>%
 all_obs <- full_join(chem_fld_wide, # keep all observations
                      # omit diffusion model fit statistics
                      emissions %>% 
-                       select(lake_id, visit, site_id, co2note, 
+                       select(lake_id, visit, site_id, co2flag, 
                               matches("diffusion|ebullition|total|volumetric"))) %>%
   # arrange merged data frame
   select(lake_id, site_id, eval_status, visit, sample_date, lat, long, site_depth, # these first
