@@ -1,5 +1,5 @@
 # Names of lakeCat variables
-lake_cat_vars <- lc_get_params(param='name') %>%
+lake_cat_vars <- lc_get_params(param='name') %>% 
   as_tibble %>%
   # ignore older data
   filter(!grepl(paste0(1984:2018, collapse = "|"), value)) %>%
@@ -18,11 +18,14 @@ dim(surge_comid) # 148 unique values
 
 # Get lakeCat data
 lake_cat <- lc_get_data(metric = paste(lake_cat_vars, collapse=","), 
-                       aoi = 'catchment,watershed', 
+                       aoi = 'cat,ws', 
                        comid = surge_comid$comid) %>%
   janitor::clean_names() %>%
   # add lake_id
   left_join(surge_comid)
+
+
+
 
 lake_cat_abbv <- lake_cat %>%
   mutate(NitrogenCat = manurecat + cbnfcat + fertcat) %>%
@@ -40,8 +43,8 @@ lake_cat_abbv <- lake_cat %>%
     sws,
     pctcrop2019cat,
     pctcrop2019ws,
-    catareasqkm,
-    wsareasqkm,
+    #catareasqkm, # not available in StreamCatTools.0.4.0
+    #wsareasqkm, # not available in StreamCatTools.0.4.0
     NitrogenCat,
     NitrogenWs,
     npdesdenscat,
