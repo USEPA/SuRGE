@@ -53,16 +53,16 @@ gga_2 <- gga_2 %>%
 # in lab specific Excel file.  
 
 # specify which lake and site to inspect
-lake_id.i <- "240"  # numeric component of lake_id without leading zero(s), formatted as character
+lake_id.i <- "1000"  # numeric component of lake_id without leading zero(s), formatted as character
 site_id.i <- "2" # numeric component of lake_id, no leading zero(s), formatted as numeric
 visit_id.i <- "1"
 # this code generates a 3 panel plot used to demonstrate relationship between
-# CH4, CO2, and H2O times to stabilization.  This can be deleted after the issue
-# has been resolved. [JB 3/29/2024]
+# CH4, CO2, and H2O times to stabilization.  we will be using this for data paper figure
+# it is for lake 288 site 14
 
-# gga_2 %>%
-#   filter(lake_id == lake_id.i,
-#          site_id == site_id.i,
+# unstable_plot<-gga_2 %>%
+#   filter(lake_id == "288",
+#          site_id == "14",
 #          RDateTime > ch4DeplyDtTm - 60, # start plot 1 minute prior to deployment
 #          RDateTime < ch4RetDtTm + 300, # extend plot 1 minute post deployment
 #          CH4._ppm > 0) %>%
@@ -83,7 +83,10 @@ visit_id.i <- "1"
 #   scale_color_discrete(breaks = c("deployment", "CH4 stabilizes", "CO2 stabilizes", "retrieval"), name="") +
 #   #scale_x_datetime(date_labels = ("%m/%d %H:%M")) +
 #   xlab("time (hh:mm)") +
-#   facet_wrap(~name, scales = "free", nrow = 3)
+#   facet_wrap(~name, scales = "free", nrow = 3)+
+#   ylab("ppm")+
+#   xlab("time")
+# unstable_plot
 
 plotCh4 <- gga_2 %>% 
   filter(lake_id == lake_id.i, 
