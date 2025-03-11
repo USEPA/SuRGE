@@ -82,7 +82,7 @@ clow_surgel<- sl %>%
   select(lake_id,area_sq_m_recalc,barren_pct,crop_pct,forest_pct,wetland_pct,mean_kfact,
          soc0_5,basin_slope) %>%
   filter(!is.na(barren_pct)) %>%
-  mutate(type="clow")
+  mutate(sediment_predictor_type="clow")
 
 # colnames(clow_surgel)<-c("lake_id","area_sq_m_recalc","barren_pct","crop_pct",
 #                          "forest_pct","forest_pct","wetland_pct","mean_kfact",
@@ -323,8 +323,8 @@ clow_predictors <- inner_join(lake_area, basin_lu) %>%
   mutate(barren_pct=barren_pct/100,
          wetland_pct=wetland_pct/100,
          crop_pct=crop_pct/100,
-         forest_pct=forest_pct/100)
-
+         forest_pct=forest_pct/100)%>%
+  mutate(sediment_predictor_type="derived")
 
 
 # 3. MERGE PREDICTORS FOR MISSING SITES WITH THE LARGER----------
@@ -374,10 +374,28 @@ ocplot
 #Create sedimentation link
 
 sedimentation_link<-clow_surge %>%
-  mutate(sedimentation_m3y=log_sedimentation)%>%
-  select(lake_id,sedimentation_m3y,sedimentOC)%>%
-  mutate(C_sedimentation_m3y=sedimentOC*sedimentation_m3y)%>%
-  mutate(log_sedimentation=log10(sedimentation_m3y))
+  #we determined that Clow's model actually produces unlogged sedimentation rates (m3y)
+  mutate(sedimentation=log_sedimentation)%>%
+  select(lake_id,sedimentation,sedimentOC,basin_slope,forest_pct,area_sq_m_recalc,
+         crop_pct,wetland_pct,mean_kfact,soc0_5,sediment_predictor_type)%>%
+  mutate(sedimentation_units="m3_y")%>%
+  mutate(sedimentOC_units="percent")%>%
+  mutate(basin_forest_units="percent/100")%>%
+  mutate(basin_crop_units="percent/100")%>%
+  mutate(basin_wetland_units="percent/100")%>%
+  mutate(basin_barren_units="percent/100")%>%
+  mutate(basin_kfact_units="dimensionless")%>%
+  mutate(basin_soc0_5_units="g_m2")%>%
+  mutate(basin_slope_units="degrees")%>%
+  mutate(clow_surface_area_units="m2")
+
+colnames(sedimentation_link)<-c("lake_id","sedimentation","sedimentOC","basin_slope","basin_forest","clow_surface_area",
+                                "basin_crop","basin_wetland","basin_kfact","basin_soc0_5","sediment_predictor_type","sedimentation_units",
+                                "sedimentOC_units","basin_forest_units","basin_crop_units","basin_wetland_units",
+                                "basin_barren_units","basin_kfact_units","basin_soc0_5_units","basin_slope_units",
+                                "clow_surface_area_units")
+# Run through janitor to enforce SuRGE name conventions
+sedimentation_link <- janitor::clean_names(sedimentation_link)
 
 #There are no additional sedimentation estimates in RESSED that aren't already in Clow
 # RESSED_link <- left_join(RESSED_link,clow_links, by="lake_id")
