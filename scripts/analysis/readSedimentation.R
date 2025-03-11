@@ -28,32 +28,32 @@
 #
 # manually linked SuRGE sites with RESSED here-- doesn't give us any
 # additional sedimentation data 
-# 
-# RESSEDl <- read.csv(paste0(userPath, "data/siteDescriptors/RESSED_links.csv"))
-# 
-# RESSED_link <- RESSEDl %>%
-#   filter(!is.na(period_yrs)) %>%
-#   group_by(RESSED) %>%
-#   summarise(
-#     siteID = siteID[1],
-#     tot_per_seddep = sum(tot_per_seddep),
-#     period_yrs = sum(period_yrs),
-#     acre.feet.per.yr = tot_per_seddep / period_yrs
-#   ) %>%
-#   mutate(lake_id = str_extract(siteID, "(\\d+$)") %>% as.numeric) %>% # extract numeric part of lake_id)
-#   select(RESSED, lake_id, acre.feet.per.yr)
-# 
-# RESSED_link<-RESSEDl %>%
-#   filter(!is.na(period_yrs))%>%
-#   mutate(cubic_meter_sed=1233.4818375*tot_per_seddep)%>%
-#   group_by(RESSED)%>%
-#   summarise(siteID=siteID[1],cubic_meter_sed=sum(cubic_meter_sed),period_yrs=sum(period_yrs),
-#             cubic_meters_per_yr=cubic_meter_sed/period_yrs)%>%
-#   mutate(lake_id = str_extract(siteID, "(\\d+$)"))%>% # extract numeric part of lake_id)
-#   select(RESSED,lake_id,cubic_meters_per_yr)
-# 
-# RESSED_link$lake_id<-as.numeric(RESSED_link$lake_id)
 
+#0. Read in sedimentation rates from RESSED for comparison to our model
+RESSEDl <- read.csv(paste0(userPath, "data/siteDescriptors/RESSED_links.csv"))
+
+RESSED_link <- RESSEDl %>%
+  filter(!is.na(period_yrs)) %>%
+  group_by(RESSED) %>%
+  summarise(
+    siteID = siteID[1],
+    tot_per_seddep = sum(tot_per_seddep),
+    period_yrs = sum(period_yrs),
+    acre.feet.per.yr = tot_per_seddep / period_yrs
+  ) %>%
+  mutate(lake_id = str_extract(siteID, "(\\d+$)") %>% as.numeric) %>% # extract numeric part of lake_id)
+  select(RESSED, lake_id, acre.feet.per.yr)
+
+RESSED_link<-RESSEDl %>%
+  filter(!is.na(period_yrs))%>%
+  mutate(cubic_meter_sed=1233.4818375*tot_per_seddep)%>%
+  group_by(RESSED)%>%
+  summarise(siteID=siteID[1],cubic_meter_sed=sum(cubic_meter_sed),period_yrs=sum(period_yrs),
+            cubic_meters_per_yr=cubic_meter_sed/period_yrs)%>%
+  mutate(lake_id = str_extract(siteID, "(\\d+$)"))%>% # extract numeric part of lake_id)
+  select(RESSED,lake_id,cubic_meters_per_yr)
+# 
+RESSED_link$lake_id<-as.numeric(RESSED_link$lake_id)
 
 
 # 1. READ SEDIMENTATION DATA FROM DAVID CLOW-----------
@@ -371,7 +371,7 @@ ocplot<-clow_surge %>%
   scale_x_log10()
 ocplot
 
-#Create sedimentation link
+# 5. CREATE SEDIMENTATION LINK-------------
 
 sedimentation_link<-clow_surge %>%
   #we determined that Clow's model actually produces unlogged sedimentation rates (m3y)
@@ -397,8 +397,56 @@ colnames(sedimentation_link)<-c("lake_id","sedimentation","sedimentOC","basin_sl
 # Run through janitor to enforce SuRGE name conventions
 sedimentation_link <- janitor::clean_names(sedimentation_link)
 
-#There are no additional sedimentation estimates in RESSED that aren't already in Clow
-# RESSED_link <- left_join(RESSED_link,clow_links, by="lake_id")
-# RESSED_link$C_sedimentation<-RESSED_link$log_sedimentation*RESSED_link$sedimentOC
+# 6. COMPARE TO RESSED WHERE ESTIMATES OVERLAP-------------
+RESSED_comp <- left_join(RESSED_link,sedimentation_link, by="lake_id")
 
+ressed_plot<-RESSED_comp %>%
+  #mutate(sedimentationtest=log10(sedimentation))%>%
+  filter(cubic_meters_per_yr<1000000)%>%
+  ggplot(aes(x=cubic_meters_per_yr,y=sedimentation))+
+  geom_point(aes(color=sediment_predictor_type))+
+  xlab("RESSED Sedimentation")+
+  ylab("Modeled Sedimentation")+
+  geom_abline(slope=1,intercept=0)
+ressed_plot
 
+# 5. COMPARE CLOW PREDICTOR OUTPUT WITH OUR GAPFILLING PREDICTOR APPROACH-------------
+
+lake_areas <- left_join(basin_lu %>% select(lake_id),
+                       morpho %>% select(lake_id, surface_area)) %>%
+  rename(area_sq_m_recalc = surface_area)
+
+derived <- left_join (basin_lu,lake_areas,by="lake_id")
+
+derived_predictors <- derived %>%
+  inner_join(., basin_soc) %>%
+  inner_join(., basin_slope)%>%
+  mutate(barren_pct=barren_pct/100,
+         wetland_pct=wetland_pct/100,
+         crop_pct=crop_pct/100,
+         forest_pct=forest_pct/100)
+
+derived_surge <- derived_predictors %>%
+  mutate(log_sedimentation = -1.520 + 
+           0.925 * area_sq_m_recalc +
+           0.043 * basin_slope +
+           -0.379 * forest_pct +
+           0.263 * crop_pct,
+         sedimentOC = case_when(wetland_pct < 0 ~ NA_real_,
+                                TRUE ~ 17.170 +
+                                  0.0013 * soc0_5 +
+                                  19.197 * log10(wetland_pct + 1) +
+                                  -26.494 * barren_pct +
+                                  -14.098 * mean_kfact +
+                                  -1.275 *
+                                  log10(area_sq_m_recalc) +
+                                  -2.055))
+clow_surge$sedimentOC<-ifelse(clow_surge$sedimentOC<0,0.1,clow_surge$sedimentOC)
+
+method_comparison<-inner_join(derived_surge,clow_predictors,by="lake_id")
+
+#We don't have any way to compare our method to the Clow dataset here...
+mc_plot<-method_comparison %>%
+  ggplot(aes(x=sedimentation,y=log_sedimentation)) +
+  geom_point()
+mc_plot
