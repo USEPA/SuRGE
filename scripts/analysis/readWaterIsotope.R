@@ -1,5 +1,5 @@
 ## Read In Renee Brook's Water Isotope Data and Match with Surge Links
-## Last Updated 7/3/2024
+## Last Updated 3/11/2025
 
 # MAKE SURE YOU HAVE RUN THE lagosLakesID.R TO CREATE THE
 # lake_links OBJECT
@@ -99,24 +99,30 @@ water_isotope_agg<- water_isotope_long %>%
   summarise(nla_unique_id=nla_unique_id[1],
             E_I=mean(e_i,na.rm=TRUE),
             sdE_I=sd(e_i),
-            RT=mean(rt_iso,na.rm=TRUE),
+            Retention_Time=mean(rt_iso,na.rm=TRUE),
             sdRT=sd(rt_iso),
-            n=n()) %>%
-  select(-nla_unique_id) # get from SuRGE design file
+            rt_ei_repeat_visits=n()-1) %>%
+  select(-nla_unique_id)%>% # get from SuRGE design file
+  mutate(Retention_Time_Units="yrs")%>%
+  mutate(e_i_units="dimensionless")
 summary(water_isotope_agg)
 
 #Fix lake_id to character so it will work with lake link
 water_isotope_agg$lake_id<-as.character(water_isotope_agg$lake_id)
 
 #look at total count of repeat visits
-nrow(filter(water_isotope_agg,n=="2")) # one of these repeats was missing a residence time estimate (lake id 999     )
-nrow(filter(water_isotope_agg,n=="3"))
-nrow(filter(water_isotope_agg,n=="4"))
-nrow(filter(water_isotope_agg,n=="5"))
-nrow(filter(water_isotope_agg,n=="6"))
-nrow(filter(water_isotope_agg,n=="1"))
+nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="1"))
+nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="2")) 
+nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="3"))
+nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="4"))
+nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="5"))
+nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="6"))
+
 
 #Create a threshold value for assigning "storage" vs. "run-of-river"
 water_isotope_agg$E_I_type<-ifelse(water_isotope_agg$E_I<0.2,"run-of-river","storage")
 nrow(filter(water_isotope_agg,E_I_type=="storage"))
 nrow(filter(water_isotope_agg,E_I_type=="run-of-river"))
+
+# Run through janitor to enforce SuRGE name conventions
+water_isotope_agg <- janitor::clean_names(water_isotope_agg)
