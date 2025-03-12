@@ -16,30 +16,30 @@ master_dictionary <- tribble(~variable, ~definition,
                              "do", "Dissolved oxygen concentration",
                              "do_sat", "Dissolved oxygen concentration expressed as percent saturation",
                              "do_units", "Dissolved oxygen concentration units",
-                             "do_flag", "Value of 1 if dissolved oxygen failed post-deployment calibration check or value was otherwise suspicious",
+                             "do_flag", "Value of 1 if dissolved oxygen failed post-deployment calibration check or value was otherwise suspicious, value of I if data was interpolated",
                              "do_comment", "Field or data analyst notes pertaining to dissolved oxygen concentration measurement",
                              
                              
                              "sp_cond", "Specific conductivity",
                              "sp_cond_units", "Specific conductivity units",
-                             "sp_cond_flag", "Value of 1 if specific conductivity failed post-deployment calibration check or value was otherwise suspicious",
+                             "sp_cond_flag", "Value of 1 if specific conductivity failed post-deployment calibration check or value was otherwise suspicious, value of I if data was interpolated",
                              "sp_cond_comment", "Field or data analyst notes pertaining to specific conductivity measurement",
                              
                              
                              "ph", "pH",
-                             "ph_flag", "Value of 1 if pH failed post-deployment calibration check or value was otherwise suspicious",
+                             "ph_flag", "Value of 1 if pH failed post-deployment calibration check or value was otherwise suspicious, value of I if data was interpolated",
                              "ph_comment",  "Field or data analyst notes pertaining to pH measurement",
                              
                              
                              "turbidity", "Turbidity",
                              "turbidity_units", "Turbidity units",
-                             "turbidity_flag", "Value of 1 if turbidity failed post-deployment calibration check or value was otherwise suspicious",
+                             "turbidity_flag", "Value of 1 if turbidity failed post-deployment calibration check or value was otherwise suspicious, value of I if data was interpolated",
                              "turbidity_comment", "Field or data analyst notes pertaining to turbidity measurement",
                              
                              
                              "chla_sonde", "Chlorophyll a concentration measured with sonde",
                              "chla_sonde_units", "Units of sonde-based chlorophyll a measurement",
-                             "chla_sonde_flag", "Value of 1 if sonde-based chlorophyll a measurement failed post-deployment calibration check or value was otherwise suspicious",
+                             "chla_sonde_flag", "Value of 1 if sonde-based chlorophyll a measurement failed post-deployment calibration check or value was otherwise suspicious, value of I if data was interpolated",
                              "chla_sonde_comment", "Field or data analyst notes pertaining to sonde-based chlorophyll a measurement",
                              
                              "phycocyanin_sonde", "Phycocyanic concentration measured with sonde",
@@ -97,7 +97,25 @@ master_dictionary <- tribble(~variable, ~definition,
                              "ag_eco9", "Abbreviation for the 9 aggregated ecoregions used for the SuRGE survey design",
                              "ag_eco9_nm", "Full name of the 9 aggregated ecoregions used for the SuRGE survey design",
                              "depth_cat", "Depth category used for the SuRGE survey design",
-                             "chla_cat", "Chlorophyll a category used for the SuRGE survery design"
+                             "chla_cat", "Chlorophyll a category used for the SuRGE survery design",
+                             
+                             #emissions
+                             "ch4_diffusion_best","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
+                             "ch4_diffusion_units","ch4_diffusion_best units",
+                             "ch4_ebullition","areal ch4 ebullition flux from bubble traps",
+                             "ch4_ebullition_units","ch4_ebullition units",
+                             "ch4_total","the sum of ch4 diffusion and ch4 ebullition when both were measured",
+                             "ch4_total_units","ch4_total units",
+                             "co2_diffusion_best","areal co2 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
+                             "co2_diffusion_units","co2_diffusion units",
+                             "co2flag","Value of U if the floating chamber experienced an unstable start",
+                             "co2_ebullition","areal co2 ebullition flux from bubble traps",
+                             "co2_ebullition_units","co2_ebullition units",
+                             "co2_total","the sum of co2 diffusion and co2 ebullition when both were measured",
+                             "co2_total_units","co2_total units",
+                             "chamb_deply_date_time","date and time of floating chamber deployment in UTC",
+                             "trap_deply_date_time","date and time of bubble trap deployment in UTC",
+                             "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC"
 )
 
 # 3. LAKE SCALE VALUES-----------
@@ -310,3 +328,86 @@ chemistry_all %>%
                # breaking pattern in final _
                names_pattern = "(.+)_(.+)")
 
+  # 6. EMISSIONS RATES (POINT)----
+  
+  #First need to compile correct chamber deployment times into an object
+  #pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
+  #and from the dat_2016 object for the 2016 sites
+  chm_dep <- bind_rows (
+    chm_deply %>%
+      select(lake_id, site_id, visit, chamb_deply_date_time),
+    
+    dat_2016 %>%
+      select(lake_id, site_id, visit, chamb_deply_date_time) %>%
+      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
+    )
+  
+  trp_dep <- bind_rows (
+    dat_surge_sf %>%
+      select(
+        lake_id,
+        site_id,
+        visit,
+        trap_deply_date_time,
+        trap_rtrvl_date_time
+      ),
+    
+    dat_2016 %>%
+      select(
+        lake_id,
+        site_id,
+        visit,
+        trap_deply_date_time,
+        trap_rtrvl_date_time
+      ) %>%
+      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
+    )
+  
+  dep <- left_join(chm_dep, trp_dep)
+  dep <- as.data.frame(dep) %>%
+    select(-geom)
+  
+  emission_rate_points_data_paper <- left_join(
+    dat %>%
+      select(
+        lake_id,
+        site_id,
+        visit,
+        ch4_diffusion_best,
+        ch4_diffusion_units,
+        ch4_ebullition,
+        ch4_ebullition_units,
+        ch4_total,
+        ch4_total_units,
+        co2_diffusion_best,
+        co2_diffusion_units,
+        co2flag,
+        co2_ebullition,
+        co2_ebullition_units,
+        co2_total,
+        co2_total_units
+      ),
+    dep
+  )
+  
+  # Data dictionary
+  emission_rate_points_data_paper_dictionary <- master_dictionary %>%
+    filter(variable %in% colnames(emission_rate_points_data_paper))
+  
+  # write data
+  write.csv(
+    x = emission_rate_points_data_paper,
+    file = paste0(
+      userPath,
+      "communications/manuscript/data_paper/6_emission_rate_points.csv"
+    )
+  )
+  
+  # write dictionary
+  write.csv(
+    x = emission_rate_points_data_paper_dictionary,
+    file = paste0(
+      userPath,
+      "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv"
+    )
+  )
