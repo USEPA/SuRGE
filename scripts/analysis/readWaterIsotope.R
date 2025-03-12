@@ -35,46 +35,68 @@ surge_sites_nla <- read_xlsx(paste0(userPath, "surgeDsn/SuRGE_design_20191206_ev
 #Read in the water isotope data that Renee sent as three separate files for the different years
 #The NLA ID for a given year is different than the NLA ID across years, so pull 
 #both out and name them for the lake link
-waterisotope17<- read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
-                                       sheet = "NLA_17_water_isotopes",na="NA")%>%
+waterisotope17 <- read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
+                                       sheet = "NLA_17_water_isotopes",na="NA") %>%
                   janitor::clean_names()
-waterisotope17$nla17_site_id<-waterisotope17$site_id
+waterisotope17$nla17_site_id <- waterisotope17$site_id
 
-waterisotope12<-  read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
-                            sheet = "NLA_12_water_isotopes",na = "NA")%>%
+waterisotope12 <- read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
+                            sheet = "NLA_12_water_isotopes", na = "NA")%>%
                   janitor::clean_names()
-waterisotope12$nla12_site_id<-waterisotope12$site_id
-waterisotope12$nla_unique_id<-waterisotope12$unique_id
+waterisotope12$nla12_site_id <- waterisotope12$site_id
+waterisotope12$nla_unique_id <- waterisotope12$unique_id
 
-waterisotope07<- read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
-                           sheet = "NLA_07_water isotopes",na = "NA")%>%
+waterisotope07 <- read_xlsx(paste0(userPath, "data/siteDescriptors/NLA water isotope data-2007-2017.xlsx"),
+                           sheet = "NLA_07_water isotopes", na = "NA")%>%
                    janitor::clean_names()
-waterisotope07$nla07_site_id<-waterisotope07$site_id_4
-waterisotope07$nla_unique_id<-waterisotope07$unique_id_1
+waterisotope07$nla07_site_id <- waterisotope07$site_id_4
+waterisotope07$nla_unique_id <- waterisotope07$unique_id_1
 
 #Setup file with desired water isotope data from each of 3 years
 water_isotope_data_17 <- left_join(surge_sites_nla, waterisotope17, by ="nla17_site_id")%>% 
   select(lake_id, nla17_site_id, nla_unique_id, visit_no, e_i, rt_iso)
-colnames(water_isotope_data_17)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
-water_isotope_data_17$surveyyear<-2017
 
-water_isotope_data_12<-left_join(surge_sites_nla, waterisotope12, by ="nla_unique_id")%>% 
+## I much prefer dplyr::rename for renaming columns because it ensures allignment
+## between old and new column names, whereas the approach below assumes the order
+## of the old names. dplyr::rename is more verbose, but I'll take more code for
+## improved readability and reliability.
+colnames(water_isotope_data_17) <- c("lake_id",
+                                     "nlaXX_site_id",
+                                     "nla_unique_id",
+                                     "visit_no",
+                                     "e_i",
+                                     "rt_iso")
+water_isotope_data_17$surveyyear <- 2017
+
+water_isotope_data_12 <- left_join(surge_sites_nla, waterisotope12, by =
+                                     "nla_unique_id") %>%
   select(lake_id, nla12_site_id, nla_unique_id, visit_no, e_i, rt_iso)
-colnames(water_isotope_data_12)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
-water_isotope_data_12$surveyyear<-2012
+colnames(water_isotope_data_12) <- c("lake_id",
+                                     "nlaXX_site_id",
+                                     "nla_unique_id",
+                                     "visit_no",
+                                     "e_i",
+                                     "rt_iso")
+water_isotope_data_12$surveyyear <- 2012
 
-water_isotope_data_07<-left_join(surge_sites_nla, waterisotope07, by ="nla_unique_id")%>% 
+water_isotope_data_07 <- left_join(surge_sites_nla, waterisotope07, by =
+                                     "nla_unique_id") %>%
   select(lake_id, nla07_site_id, nla_unique_id, visit_no_5, e_i, rt_iso)
-colnames(water_isotope_data_07)<-c("lake_id","nlaXX_site_id","nla_unique_id","visit_no","e_i","rt_iso")
-water_isotope_data_07$surveyyear<-2007
+colnames(water_isotope_data_07) <- c("lake_id",
+                                     "nlaXX_site_id",
+                                     "nla_unique_id",
+                                     "visit_no",
+                                     "e_i",
+                                     "rt_iso")
+water_isotope_data_07$surveyyear <- 2007
 
 #Check how many visits to each site in 2017
 #2017: Data for 111 sites, and repeat data for 18 sites
-water_isotope_data_17_agg<-water_isotope_data_17 %>%
-  filter(!is.na(e_i))%>%
-  group_by(nlaXX_site_id)%>%
-  summarise(n=n())
-nrow(filter(water_isotope_data_17_agg,n=="2"))
+water_isotope_data_17_agg <- water_isotope_data_17 %>%
+  filter(!is.na(e_i)) %>%
+  group_by(nlaXX_site_id) %>%
+  summarise(n = n())
+nrow(filter(water_isotope_data_17_agg, n == "2"))
 
 #2012: Data from 81 sites, and repeat visits for 10 sites
 water_isotope_data_12_agg <- water_isotope_data_12 %>%
@@ -92,23 +114,27 @@ nrow(filter(water_isotope_data_07_agg,n=="2"))
 
 #Create a long file with all the NLA data for Surge Sites across years
 
-water_isotope_long<-rbind(water_isotope_data_07,water_isotope_data_12,water_isotope_data_17)
-water_isotope_agg<- water_isotope_long %>%
-  filter(!is.na(e_i))%>%
-  group_by(lake_id)%>%
-  summarise(nla_unique_id=nla_unique_id[1],
-            E_I=mean(e_i,na.rm=TRUE),
-            sdE_I=sd(e_i),
-            Retention_Time=mean(rt_iso,na.rm=TRUE),
-            sdRT=sd(rt_iso),
-            rt_ei_repeat_visits=n()-1) %>%
-  select(-nla_unique_id)%>% # get from SuRGE design file
-  mutate(Retention_Time_Units="yrs")%>%
-  mutate(e_i_units="dimensionless")
+water_isotope_long <- rbind(water_isotope_data_07,
+                            water_isotope_data_12,
+                            water_isotope_data_17)
+water_isotope_agg <- water_isotope_long %>%
+  filter(!is.na(e_i)) %>%
+  group_by(lake_id) %>%
+  summarise(
+    nla_unique_id = nla_unique_id[1],
+    e_i = mean(e_i, na.rm = TRUE),
+    sd_e_i = sd(e_i),
+    retention_time = mean(rt_iso, na.rm = TRUE),
+    sdRetention_Time = sd(rt_iso),
+    retention_time__ei_repeat_visits = n() - 1
+  ) %>%
+  select(-nla_unique_id) %>% # get from SuRGE design file
+  mutate(retention_time_units = "yrs") %>%
+  mutate(e_i_units = "dimensionless")
 summary(water_isotope_agg)
 
 #Fix lake_id to character so it will work with lake link
-water_isotope_agg$lake_id<-as.character(water_isotope_agg$lake_id)
+water_isotope_agg$lake_id <- as.character(water_isotope_agg$lake_id)
 
 #look at total count of repeat visits
 nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="1"))
@@ -120,9 +146,9 @@ nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="6"))
 
 
 #Create a threshold value for assigning "storage" vs. "run-of-river"
-water_isotope_agg$E_I_type<-ifelse(water_isotope_agg$E_I<0.2,"run-of-river","storage")
-nrow(filter(water_isotope_agg,E_I_type=="storage"))
-nrow(filter(water_isotope_agg,E_I_type=="run-of-river"))
+water_isotope_agg$e_i_type <- ifelse(water_isotope_agg$e_i<0.2,"run-of-river","storage")
+nrow(filter(water_isotope_agg, e_i_type=="storage"))
+nrow(filter(water_isotope_agg, e_i_type=="run-of-river"))
 
 # Run through janitor to enforce SuRGE name conventions
 water_isotope_agg <- janitor::clean_names(water_isotope_agg)
