@@ -17,3 +17,4 @@ nid <- read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
 colnames(nid)<-c("nid_id","dam_name","dam_latitude","dam_longitude")
 nid_link<- left_join(nid_link,nid, by= "nid_id")
 nid_link$lake_id<-as.numeric(nid_link$lake_id)
+nid_link <- ungroup(nid_link)

@@ -117,6 +117,7 @@ nrow(filter(water_isotope_data_07_agg,n=="2"))
 water_isotope_long <- rbind(water_isotope_data_07,
                             water_isotope_data_12,
                             water_isotope_data_17)
+
 water_isotope_agg <- water_isotope_long %>%
   filter(!is.na(e_i)) %>%
   group_by(lake_id) %>%
@@ -125,28 +126,35 @@ water_isotope_agg <- water_isotope_long %>%
     e_i = mean(e_i, na.rm = TRUE),
     sd_e_i = sd(e_i),
     retention_time = mean(rt_iso, na.rm = TRUE),
-    sdRetention_Time = sd(rt_iso),
-    retention_time__ei_repeat_visits = n() - 1
+    sd_retention_time = sd(rt_iso),
+    retention_time_ei_repeat_visits = n() - 1
   ) %>%
   select(-nla_unique_id) %>% # get from SuRGE design file
-  mutate(retention_time_units = "yrs") %>%
-  mutate(e_i_units = "dimensionless")
+  mutate(retention_time_units = "years",
+         sd_retention_time_units = "years",
+         e_i_units = "dimensionless",
+         sd_e_i_units = "dimensionless",
+         retention_time_ei_repeat_visits_units = "dimensionless",
+         e_i_type_units = "dimensionless")
 summary(water_isotope_agg)
 
 #Fix lake_id to character so it will work with lake link
 water_isotope_agg$lake_id <- as.character(water_isotope_agg$lake_id)
 
 #look at total count of repeat visits
-nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="1"))
-nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="2")) 
-nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="3"))
-nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="4"))
-nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="5"))
-nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="6"))
+# this code isn't working
+# nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="1"))
+# nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="2")) 
+# nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="3"))
+# nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="4"))
+# nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="5"))
+# nrow(filter(water_isotope_agg,rt_ei_repeat_visits>="6"))
 
 
 #Create a threshold value for assigning "storage" vs. "run-of-river"
-water_isotope_agg$e_i_type <- ifelse(water_isotope_agg$e_i<0.2,"run-of-river","storage")
+water_isotope_agg$e_i_type <- ifelse(water_isotope_agg$e_i < 0.2,
+                                     "run-of-river",
+                                     "storage")
 nrow(filter(water_isotope_agg, e_i_type=="storage"))
 nrow(filter(water_isotope_agg, e_i_type=="run-of-river"))
 

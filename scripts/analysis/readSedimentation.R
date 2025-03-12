@@ -449,4 +449,4 @@ method_comparison<-inner_join(derived_surge,clow_predictors,by="lake_id")
 mc_plot<-method_comparison %>%
   ggplot(aes(x=sedimentation,y=log_sedimentation)) +
   geom_point()
-mc_plot
+# mc_plot this throws error

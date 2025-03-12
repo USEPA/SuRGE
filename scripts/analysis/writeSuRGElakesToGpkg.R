@@ -51,6 +51,7 @@ fs_paths <- fs::dir_ls(path = paths, # see above
            recurse = TRUE, # look in all subdirectories
            type = "file") %>% # only retain file names, not directory names   
   sub('\\/[^\\/]*$', '',.) %>% # extract characters before final /
+  .[!grepl("bathymetry", .)] %>% # omit bathymetry files
   unique(.) %>% # names of .gdb e.g. merc297.gdb
   .[grepl(gdb_list, .)] # extract only desired .gdb
 
@@ -70,6 +71,7 @@ layers <- purrr::map(fs_paths, ~st_layers(.)) %>% # Read layers in each .gdb
 # named function and the second vector/list will be supplied as the second argument.
 # here dsn = fs_paths, and layer = layers.
 surge_lakes <- map2(fs_paths, layers,  st_read, stringsAsFactors = FALSE) %>% # read lake polygon layer
+  #.[68] %>% # code development
   # format lake_name and lake_id
   map(~rename(., lake_id = lakeSiteID) %>% 
         rename(lake_name = lakeName) %>% 
@@ -387,10 +389,20 @@ is.na(site_wgt)
 
 # WRITE POLYGONS AND POINTS TO DISK-----------
 ## POLYGONS----
+# general geopackage for collaborators
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_make_valid() %>%
   st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "all_lakes",
+           append = FALSE)
+
+# geopackage for data paper
+bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
+  select(-lake_name) %>%
+  st_make_valid() %>%
+  st_write(., file.path( "../../../communications/manuscript/data_paper/", 
+                         paste0("spatial_", Sys.Date(), ".gpkg")), # write to .gpkg
+           layer = "lake_polygons",
            append = FALSE)
 
 dim(surge_lakes) #114
@@ -399,11 +411,19 @@ dim(lakes_2016) #33
 
 ## POINTS----
 # merge 2016, SuRGE, and Falls Lake data
-# add point to all_lakes.gpkg
+# general geopackage for collaborators: add to all_lakes.gpkg
 bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
   left_join(dat %>% select(lake_id, site_id, visit, site_wgt)) %>% # add site weights
   st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "points",
+           append = FALSE)
+
+# geopackage for data paper
+bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
+  left_join(dat %>% select(lake_id, site_id, visit)) %>%  
+  st_write(., file.path( "../../../communications/manuscript/data_paper/", 
+                         paste0("spatial_", Sys.Date(), ".gpkg")), # write to .gpkg
+           layer = "site_points",
            append = FALSE)
 
 bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% dim #2816 observations
