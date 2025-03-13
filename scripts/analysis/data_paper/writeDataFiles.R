@@ -99,7 +99,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "depth_cat", "Depth category used for the SuRGE survey design",
                              "chla_cat", "Chlorophyll a category used for the SuRGE survery design",
                              
-                             #emissions
+                             #emissions (point)
                              "ch4_diffusion_best","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
                              "ch4_diffusion_units","ch4_diffusion_best units",
                              "ch4_ebullition","areal ch4 ebullition flux from bubble traps",
@@ -114,8 +114,70 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_total","the sum of co2 diffusion and co2 ebullition when both were measured",
                              "co2_total_units","co2_total units",
                              "chamb_deply_date_time","date and time of floating chamber deployment in UTC",
+                             "chamb_deply_date_time_units","timezone for chamb_deply_date_time",
                              "trap_deply_date_time","date and time of bubble trap deployment in UTC",
-                             "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC"
+                             "trap_deply_date_time_units","timezone for trap_deply_date_time",
+                             "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC",
+                             "trap_rtrvl_date_time_units", "timezone for trap_rtrvl_date_time",
+                             
+                             #emissions(lake)
+                             "ch4_ebullition_lake","lakewide areal methane ebullition flux estimated using survey site weights",
+                             "ch4_ebullition_units_lake","units for ch4_ebullition_lake_units",
+                             "ch4_diffusion_lake", "lakewide areal methane diffusion flux estimated using survey site weights",
+                             "ch4_diffusion_units_lake", "units for ch4_diffusion_lake",
+                             "ch4_total_lake", "lakewide total methane flux estimated using survey site weights",
+                             "ch4_total_units_lake","units for ch4_total_lake",
+                             "co2_ebullition_lake", "lakewide areal carbon dioxide ebullition flux estimated using survey site weights",
+                             "co2_ebulliiton_units_lake", "units for co2_ebullition_lake",
+                             "co2_diffusion_lake", "lakewide areal carbon dioxide diffuion flux estimated using survey site weights",
+                             "co2_diffusion_units_lake", "units for co2_diffusion_lake",
+                             "co2_total_lake", "lakewide areal total carbon dioxide flux estimated using survey site weights",
+                             "co2_total_units_lake","units for co2_total_lake_units",
+                             "ch4_ebullition_std_error_lake","standard error of ch4_ebullition_lake",
+                             "ch4_diffusion_std_error_lake", "standard error of ch4_diffusion_lake",
+                             "ch4_total_std_error_lake", "standard error of ch4_total_lake",
+                             "co2_ebullition_std_error_lake", "standard error of co2_ebullition_lake",
+                             "co2_diffusion_std_error_lake", "standard error of co2_diffusion_lake",
+                             "co2_total_std_error_lake", "standard error of co2_total_lake",
+                             "ch4_ebullition_margin_of_error_lake", "of ch4_ebullition_lake",
+                             "ch4_diffusion_margin_of_error_lake", "of ch4_diffusion_lake",
+                             "ch4_total_margin_of_error_lake", "of ch4_total_lake",
+                             "co2_ebullition_margin_of_error_lake", "of co2_ebullition_lake",
+                             "co2_diffusion_margin_of_error_lake", "of co2_diffusion_lake",
+                             "co2_total_margin_of_error_lake", "of co2_total_lake",
+                             "ch4_ebullition_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_ebullition_lake",
+                             "ch4_diffusion_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_diffusion_lake",
+                             "ch4_total_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_total_lake",
+                             "co2_ebullition_lcb95pct_lake", "lower bound 95 percent confidence interval for co2_ebullition_lake",
+                             "co2_diffusion_lcb95pct_lake", "lower bound 95 percent confidence interval for co2_diffusion_lake",
+                             "co2_total_lcb95pct_lake", "lower bound 95 percent confidence interval for co2_total_lake",
+                             "ch4_ebullition_ucb95pct_lake", "upper bound 95 percent confidence interval for ch4_ebullition_lake",
+                             "ch4_diffusion_ucb95pct_lake", "upper bound 95 percent confidence interval for ch4_diffusion_lake",
+                             "ch4_total_ucb95pct_lake", "upper bound 95 percent confidence interval for ch4_total_lake",
+                             "co2_ebullition_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_ebullition_lake",
+                             "co2_diffusion_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_diffusion_lake",
+                             "co2_total_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_total_lake",
+                             
+                             
+                             #remote sensing (lake)
+                             "chl_predicted_sample_month", "predicted chlorophyll a concentration from the same month 
+                                      and year that emissions were collected if available, otherwise mean predicted
+                                      chlorophyll from 2018-2020 during the same month emissions were collected, predictions
+                                      are from LAGOS-US LANDSAT (1984-2020)",
+                             "chl_predicted_sample_month_units", "units for chl_predicted_sample_month",
+                             "doc_predicted_sample_month", "predicted dissolved organic carbon concentration from the same month 
+                                      and year that emissions were collected if available, otherwise mean predicted
+                                      dissolved organic carbon concentration from 2018-2020 during the same month emissions were collected, predictions
+                                      are from LAGOS-US LANDSAT (1984-2020)",
+                             "doc_predicted_sample_month_units", "units for doc_predicted_sample_month",
+                             "chl_predicted_sample_season", "mean predicted chlorophyll a concentration during June to September
+                                      of the three years leading up to the emission sampling year as well as the samling year, when 
+                                      available, predictions are from LAGOS-US LANDSAT (1984-2020)",
+                             "chl_predicted_sample_season_units","units for chl_predicted_sample_season",
+                             "doc_predicted_sample_season", "mean predicted dissolved organic carbon concentration during June to September
+                                      of the three years leading up to the emission sampling year as well as the samling year, when 
+                                      available, predictions are from LAGOS-US LANDSAT (1984-2020)",
+                             "doc_predicted_sample_season_units", "units for doc_predicted_sample_season"
 )
 
 # 3. LAKE SCALE VALUES-----------
@@ -335,21 +397,27 @@ chemistry_all %>%
   #and from the dat_2016 object for the 2016 sites
   chm_dep <- bind_rows (
     chm_deply %>%
-      select(lake_id, site_id, visit, chamb_deply_date_time),
+      select(lake_id, site_id, visit, chamb_deply_date_time)%>%
+      mutate(chamb_deply_date_time_units="UTC"),
     
     dat_2016 %>%
       select(lake_id, site_id, visit, chamb_deply_date_time) %>%
-      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
+      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id),
+             chamb_deply_date_time_units="UTC")
     )
   
   trp_dep <- bind_rows (
     dat_surge_sf %>%
+      mutate (trap_deply_date_time_units="UTC",
+              trap_rtrvl_date_time_units="UTC")%>%
       select(
         lake_id,
         site_id,
         visit,
         trap_deply_date_time,
-        trap_rtrvl_date_time
+        trap_deply_date_time_units,
+        trap_rtrvl_date_time,
+        trap_rtrvl_date_time_units
       ),
     
     dat_2016 %>%
@@ -360,7 +428,9 @@ chemistry_all %>%
         trap_deply_date_time,
         trap_rtrvl_date_time
       ) %>%
-      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
+      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id),
+             trap_deply_date_time_units="UTC",
+             trap_rtrvl_date_time_units="UTC")
     )
   
   dep <- left_join(chm_dep, trp_dep)
@@ -411,3 +481,56 @@ chemistry_all %>%
       "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv"
     )
   )
+
+  # 7. EMISSIONS AND REMOTE SENSING (LAKE)----
+  
+  emission_remote_lake_data_paper<- left_join(
+    emissions_agg,
+    
+    lagos_ts_agg_link %>%
+      select(lake_id, visit,
+             chl_predicted_sample_month, doc_predicted_sample_month,
+             chl_predicted_sample_season, doc_predicted_sample_season)%>%
+      mutate(chl_predicted_sample_month_units = "micrograms per liter",
+             doc_predicted_sample_month_units = "milligrams per liter",
+             chl_predicted_sample_season_units = "micrograms per liter",
+             doc_predicted_sample_season_units = "milligrams per liter")
+  )%>%
+    #reorder variables so they match the data dictionary
+    select("lake_id", "visit", "ch4_ebullition_lake","ch4_ebullition_units_lake","ch4_diffusion_lake",
+           "ch4_diffusion_units_lake", "ch4_total_lake", "ch4_total_units_lake","co2_ebullition_lake", 
+           "co2_ebullition_units_lake", "co2_diffusion_lake", "co2_diffusion_units_lake","co2_total_lake", 
+           "co2_total_units_lake","ch4_ebullition_std_error_lake", "ch4_diffusion_std_error_lake", 
+           "ch4_total_std_error_lake",  "co2_ebullition_std_error_lake", "co2_diffusion_std_error_lake",
+           "co2_total_std_error_lake", "ch4_ebullition_margin_of_error_lake", "ch4_diffusion_margin_of_error_lake",
+           "ch4_total_margin_of_error_lake", "co2_ebullition_margin_of_error_lake","co2_diffusion_margin_of_error_lake", 
+           "co2_total_margin_of_error_lake", "ch4_ebullition_lcb95pct_lake", "ch4_diffusion_lcb95pct_lake", "ch4_total_lcb95pct_lake", 
+           "co2_ebullition_lcb95pct_lake",  "co2_diffusion_lcb95pct_lake", "co2_total_lcb95pct_lake", "ch4_ebullition_ucb95pct_lake", 
+           "ch4_diffusion_ucb95pct_lake",  "ch4_total_ucb95pct_lake", "co2_ebullition_ucb95pct_lake", "co2_diffusion_ucb95pct_lake", 
+           "co2_total_ucb95pct_lake", "chl_predicted_sample_month",  "chl_predicted_sample_month_units", "doc_predicted_sample_month", 
+           "doc_predicted_sample_month_units", "chl_predicted_sample_season",  "chl_predicted_sample_season_units","doc_predicted_sample_season", 
+           "doc_predicted_sample_season_units")
+  
+  
+  # Data dictionary
+  emission_remote_lake_data_paper_dictionary <- master_dictionary %>%
+    filter(variable %in% colnames(emission_remote_lake_data_paper))
+  
+  # write data
+  write.csv(
+    x = emission_remote_lake_data_paper,
+    file = paste0(
+      userPath,
+      "communications/manuscript/data_paper/7_emission_remote_lake.csv"
+    )
+  )
+  
+  # write dictionary
+  write.csv(
+    x = emission_remote_lake_data_paper_dictionary,
+    file = paste0(
+      userPath,
+      "communications/manuscript/data_paper/6_emission_remote_lake_dictionary.csv"
+    )
+  )
+  
