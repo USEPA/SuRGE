@@ -186,3 +186,91 @@ H2O
 
 unstab<-cowplot::plot_grid(CO2,H2O,ncol=1,align="v",labels=c("A","B"),rel_heights = c(1.1,1))
 unstab
+
+## Plot of Variables that Survey was Designed on
+
+lake.list.plot.methane<-left_join(
+  emissions_agg %>%
+    select(lake_id, visit,ch4_total_lake)%>%
+    mutate(type="methane"),
+  
+  lake.list.all %>%
+  mutate(lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
+                             lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+                             TRUE ~ lake_id))%>%
+  mutate(lake_id=as.numeric(lake_id))%>%
+    select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
+  rename(emission = "ch4_total_lake")
+
+lake.list.plot.cd<-left_join(
+  emissions_agg %>%
+    select(lake_id, visit,co2_total_lake)%>%
+    mutate(type="carbon dioxide"),
+  
+  lake.list.all %>%
+    mutate(lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
+                               lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+                               TRUE ~ lake_id))%>%
+    mutate(lake_id=as.numeric(lake_id))%>%
+    select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
+  rename(emission = "co2_total_lake")
+
+lake.list.plot<-bind_rows(lake.list.plot.methane,lake.list.plot.cd)
+
+ecoregion<-lake.list.plot  %>%
+  filter(!is.na(ag_eco9_nm))%>%
+  filter(!is.na(emission))%>%
+  mutate(emi_mg=emission*24)%>%
+  ggplot(aes(x=ag_eco9_nm, y=emi_mg))+
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),legend.title=element_blank(),
+        axis.text = element_text(size = 14, angle = 45, hjust=1),
+        axis.title = element_text(size = 16),
+        legend.position="top")+
+  geom_boxplot(aes(color=type))+
+  scale_y_log10()+
+  ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
+  xlab("")
+ecoregion
+
+depth<-lake.list.plot %>%
+  filter(!is.na(depth_cat))%>%
+  filter(!is.na(emission))%>%
+  mutate(emi_mg=emission*24)%>%
+  mutate(depth_cat=ifelse(depth_cat=="GT_6m","deep","shallow")) %>%
+  ggplot(aes(x=depth_cat, y=emi_mg))+
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),legend.title=element_blank(),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16),
+        legend.position="none")+
+  geom_boxplot(aes(color=type))+
+  scale_y_log10()+
+  ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
+  xlab("")
+depth
+
+productivity<-lake.list.plot %>%
+  filter(!is.na(emission))%>%
+  mutate(emi_mg=emission*24)%>%
+  filter(!is.na(chla_cat))%>%
+  mutate(chla_cat=ifelse(chla_cat=="GT_7","productive","unproductive")) %>%
+  ggplot(aes(x=chla_cat, y=emi_mg))+
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),legend.title=element_blank(),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16),
+        legend.position="none")+
+  geom_boxplot(aes(color=type))+
+  scale_y_log10()+
+  ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
+  xlab("")
+productivity
+
+top_row <- plot_grid(depth,productivity)
+
+strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,2))
+strata_fig
