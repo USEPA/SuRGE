@@ -3,12 +3,13 @@
 #
 master_dictionary <- tribble(~variable, ~definition,
                              # COMMON TO SEVERAL FILES
-                             "name", "Analyte name",
+                             "name", "Variable name",
                              "site_id", "Unique identifier for sample site within a waterbody",
                              "lake_id", "Unique identifier for each waterbody",
                              "visit", "First (1) or second (2) site visit",
                              "units", "Measurement units",
                              "comment", "Comment pertaining to measurement",
+                             "value", "Value of corresponding variable",
                              
                              # DEPTH PROFILES
                              "sample_depth", "Measurement depth",
@@ -170,7 +171,16 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_total_units", "co2_total units",
                              "chamb_deply_date_time", "date and time of floating chamber deployment in UTC",
                              "trap_deply_date_time", "date and time of bubble trap deployment in UTC",
-                             "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC"
+                             "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC",
+                             
+                             # 8. site descriptors
+                             "site_depth", "Sampling site depth",
+                             "site_depth_units", "Units of site_depth measurement",
+                             "site_wgt", "Weight for lake-specific probabilistic survey design.",
+                             "site_wgt_units", "Units for site_wgt",
+                             "sample_start", "First day of sampling campaign at lake",
+                             "sample_end", "Last day of sampling campaign at lake",
+                             "chla_collection_date", "Date that sample was collected for laboratory-based chlorophyll a measurement"
 )
 
 # 3. LAKE SCALE VALUES-----------
@@ -454,11 +464,16 @@ site_data <-
 
 # Data dictionary
 site_data_dictionary <- master_dictionary %>%
-  filter(variable %in% colnames(s) |
+  filter(variable %in% colnames(site_data) |
          variable %in% unique(site_data$name))
 
 # Are all values in data dictionary?
-colnames(site_data) %in% site_data_dictionary$variable
+ifelse (c(colnames(site_data) %in% site_data_dictionary$variable,
+          unique(site_data$name) %in% site_data_dictionary$variable) %>% 
+          {!.} %>%
+          sum(.) == 0,
+"Site data dictionary is complete", 
+"Site data dictionary is incomplete")
 
 # write data
 write.csv(x = site_data, 
@@ -468,86 +483,269 @@ write.csv(x = site_data,
 write.csv(x = site_data_dictionary, 
           file = "../../../communications/manuscript/data_paper/5_site_data_dictionary.csv")
 
-  # 6. EMISSIONS RATES (POINT)----
+# 6. EMISSIONS RATES (POINT)----
+
+#First need to compile correct chamber deployment times into an object
+#pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
+#and from the dat_2016 object for the 2016 sites
+chm_dep <- bind_rows (
+  chm_deply %>%
+    select(lake_id, site_id, visit, chamb_deply_date_time),
   
-  #First need to compile correct chamber deployment times into an object
-  #pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
-  #and from the dat_2016 object for the 2016 sites
-  chm_dep <- bind_rows (
-    chm_deply %>%
-      select(lake_id, site_id, visit, chamb_deply_date_time),
-    
-    dat_2016 %>%
-      select(lake_id, site_id, visit, chamb_deply_date_time) %>%
-      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
-    )
+  dat_2016 %>%
+    select(lake_id, site_id, visit, chamb_deply_date_time) %>%
+    mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
+)
+
+trp_dep <- bind_rows (
+  dat_surge_sf %>%
+    select(
+      lake_id,
+      site_id,
+      visit,
+      trap_deply_date_time,
+      trap_rtrvl_date_time
+    ),
   
-  trp_dep <- bind_rows (
-    dat_surge_sf %>%
-      select(
-        lake_id,
-        site_id,
-        visit,
-        trap_deply_date_time,
-        trap_rtrvl_date_time
-      ),
-    
-    dat_2016 %>%
-      select(
-        lake_id,
-        site_id,
-        visit,
-        trap_deply_date_time,
-        trap_rtrvl_date_time
-      ) %>%
-      mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
-    )
-  
-  dep <- left_join(chm_dep, trp_dep)
-  dep <- as.data.frame(dep) %>%
-    select(-geom)
-  
-  emission_rate_points_data_paper <- left_join(
+  dat_2016 %>%
+    select(
+      lake_id,
+      site_id,
+      visit,
+      trap_deply_date_time,
+      trap_rtrvl_date_time
+    ) %>%
+    mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id))
+)
+
+dep <- left_join(chm_dep, trp_dep)
+dep <- as.data.frame(dep) %>%
+  select(-geom)
+
+emission_rate_points_data_paper <- left_join(
+  dat %>%
+    select(
+      lake_id,
+      site_id,
+      visit,
+      ch4_diffusion_best,
+      ch4_diffusion_units,
+      ch4_ebullition,
+      ch4_ebullition_units,
+      ch4_total,
+      ch4_total_units,
+      co2_diffusion_best,
+      co2_diffusion_units,
+      co2flag,
+      co2_ebullition,
+      co2_ebullition_units,
+      co2_total,
+      co2_total_units
+    ),
+  dep
+)
+
+# Data dictionary
+emission_rate_points_data_paper_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(emission_rate_points_data_paper))
+
+# write data
+write.csv(
+  x = emission_rate_points_data_paper,
+  file = paste0(
+    userPath,
+    "communications/manuscript/data_paper/6_emission_rate_points.csv"
+  )
+)
+
+# write dictionary
+write.csv(
+  x = emission_rate_points_data_paper_dictionary,
+  file = paste0(
+    userPath,
+    "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv"
+  )
+)
+
+# 8. SITE DESCRIPTORS--------------
+# 8.	Site Descriptors
+# a.	Lake_id
+# b.	Site_id
+# c.	Visit
+# d.	site_depth
+# e.	Units
+# f.	Lat
+# g.	Long
+# h.	Site weight from the survey design
+# i.	Sampling dates (or just starting date of sampling)
+# i.	Sonde sampling date
+# ii.	Water chemistry date
+# iii.	Filter based chlorophyll
+# iv.	This might make sense, but maybe easier to fit in files where the data are presented
+# j.	Sampling interval
+
+site_descriptors_data <- 
+  left_join(
+    # keep all unique IDs in dat
+    # DATA FIRST
     dat %>%
-      select(
-        lake_id,
-        site_id,
-        visit,
-        ch4_diffusion_best,
-        ch4_diffusion_units,
-        ch4_ebullition,
-        ch4_ebullition_units,
-        ch4_total,
-        ch4_total_units,
-        co2_diffusion_best,
-        co2_diffusion_units,
-        co2flag,
-        co2_ebullition,
-        co2_ebullition_units,
-        co2_total,
-        co2_total_units
-      ),
-    dep
-  )
-  
-  # Data dictionary
-  emission_rate_points_data_paper_dictionary <- master_dictionary %>%
-    filter(variable %in% colnames(emission_rate_points_data_paper))
-  
-  # write data
-  write.csv(
-    x = emission_rate_points_data_paper,
-    file = paste0(
-      userPath,
-      "communications/manuscript/data_paper/6_emission_rate_points.csv"
-    )
-  )
-  
-  # write dictionary
-  write.csv(
-    x = emission_rate_points_data_paper_dictionary,
-    file = paste0(
-      userPath,
-      "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv"
-    )
-  )
+      select(lake_id, site_id, visit, site_depth, site_wgt) %>%
+      mutate(site_depth_units = "m",
+             site_wgt_units = "dimensionless"),
+    
+    # Gather all available information pertaining sample dates, then calculate sample duration
+    bind_rows(
+      # chlorophyll sampling date first
+      # chlorophyll samples collected across multiple days for 69 and 70
+      # occasionally multiple samples collected over a few days (999, 2018 lake)
+      read_excel(paste0(userPath, "/data/algalIndicators/pigments/surgeFilteredVolumes.xlsx")) %>%
+        janitor::clean_names() %>%
+        filter(sample_type == "UNK", analyte == "chlorophyll") %>%
+        #filter(lake_id == 1000) %>%
+        mutate(
+          # remove transitional, riverine from lake_id
+          # retain character class initially, then convert to numeric.
+          lake_id = case_when(
+            grepl("69", lake_id) ~ "69",
+            grepl("70", lake_id) ~ "70",
+            TRUE ~ lake_id),
+          lake_id = gsub(".*?([0-9]+).*", "\\1", lake_id) %>% as.numeric,
+          collection_date = as.Date(collection_date, format = "%m.%d.%Y")) %>%
+        select(lake_id, visit, collection_date) %>%
+        group_by(lake_id, visit) %>%
+        reframe(collection_date = unique(collection_date)),
+      
+      
+      # Now bring in trap deployment/retrieval date/time
+      dat %>%
+        select(lake_id, visit, trap_deply_date_time, trap_rtrvl_date_time) %>%
+        mutate(across(contains("date_time"), as.Date)) %>%
+        pivot_longer(-c(lake_id, visit), values_to = "collection_date") %>%
+        select(-name)
+      ) %>% # close bind_rows
+      # calculate first and last sampling date per lake
+      group_by(lake_id, visit) %>%
+      summarize(
+        sample_start = min(collection_date, na.rm = TRUE),
+        sample_end = max(collection_date, na.rm = TRUE))
+  ) %>% # close left join
+# Now date of chlorophyll sampling
+  left_join(
+    bind_rows(
+      # ADD DATE SuRGE CHLOROPHYLL SAMPLES WERE COLLECTED
+      read_excel(paste0(userPath, "/data/algalIndicators/pigments/surgeFilteredVolumes.xlsx")) %>%
+        janitor::clean_names() %>%
+        filter(sample_type == "UNK",
+               analyte == "chlorophyll") %>%
+        select(lake_id, site_id, visit, collection_date) %>%
+        mutate(
+          site_id = gsub(".*?([0-9]+).*", "\\1", site_id), # clean site_id values
+          site_id = case_when(grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                              grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                              TRUE ~ as.character(site_id)),
+          # remove transitional, riverine from lake_id
+          # retain character class initially, then convert to numeric.
+          lake_id = case_when(grepl("69", lake_id) ~ "69",
+                              grepl("70", lake_id) ~ "70",
+                              TRUE ~ lake_id),
+          lake_id = gsub(".*?([0-9]+).*", "\\1", lake_id) %>% as.numeric) %>%
+        rename(chla_collection_date = collection_date) %>%
+        mutate(chla_collection_date = as.Date(chla_collection_date, format = "%m.%d.%Y")),
+      
+      # ADD DATE 2016 CHLOROPHYLL SAMPLES WERE COLLECTED
+      tribble(~lake_id, ~site_id, ~visit, ~chla_collection_date,
+              1023, 1, 1, as.Date("2016-07-26"), 
+              1023, 30, 1, as.Date("2016-07-26"),
+              1025, 31, 1, as.Date("2016-07-13"),
+              1025, 4, 1, as.Date("2016-07-13"),
+              1011, 1, 1, as.Date("2016-07-18"),
+              1011, 16, 1, as.Date("2016-07-18"),
+              1027, 34, 1, as.Date("2016-07-19"),
+              1027, 7, 1, as.Date("2016-07-19"),
+              1003, 31, 1, as.Date("2016-07-20"),
+              1003, 6, 1, as.Date("2016-07-20"),
+              1028, 31, 1, as.Date("2016-07-11"),
+              1028, 7, 1, as.Date("2016-07-11"),
+              1026, 33, 1, as.Date("2016-06-27"),
+              1026, 10, 1, as.Date("2016-06-27"),
+              1030, 28, 1, as.Date("2016-06-28"),
+              1030, 7, 1, as.Date("2016-06-28"),
+              1004, 33, 1, as.Date("2016-06-29"),
+              1004, 3, 1, as.Date("2016-06-29"),
+              1008, 32, 1, as.Date("2016-06-16"),
+              1008, 12, 1, as.Date("2016-06-16"),
+              1007, 21, 1, as.Date("2016-06-20"),
+              1007, 5, 1, as.Date("2016-06-20"),
+              1015, 15, 1, as.Date("2016-06-20"),
+              1015, 7, 1, as.Date("2016-06-20"),
+              1002, 30, 1, as.Date("2016-06-07"),
+              1002, 4, 1, as.Date("2016-06-07"),
+              1013, 30, 1, as.Date("2016-06-08"),
+              1013, 8, 1, as.Date("2016-06-08"),
+              1017, 33, 1, as.Date("2016-06-09"),
+              1017, 1, 1, as.Date("2016-06-09"),
+              1001, 18, 1, as.Date("2016-05-31"),
+              1001, 4, 1, as.Date("2016-05-31"),
+              1012, 41, 1, as.Date("2016-06-02"),
+              1012, 4, 1, as.Date("2016-06-02"),
+              1014, 6, 1, as.Date("2016-09-15"),
+              1022, 9, 1, as.Date("2016-09-09"),
+              1006, 31, 1, as.Date("2016-08-24"),
+              1005, 14, 1, as.Date("2016-08-18"),
+              1019, 4, 1, as.Date("2016-08-03"),
+              1010, 46, 1, as.Date("2016-08-09"),
+              1010, 7, 1, as.Date("2016-08-09"),
+              1029, 21, 1, as.Date("2016-09-13"),
+              1029, 4, 1, as.Date("2016-09-13"),
+              1024, 23, 1, as.Date("2016-09-06"),
+              1024, 4, 1, as.Date("2016-09-06"),
+              1022, 32, 1, as.Date("2016-09-08"),
+              1022, 9, 1, as.Date("2016-09-08"),
+              1018, 40, 1, as.Date("2016-09-07"),
+              1018, 2, 1, as.Date("2016-09-07"),
+              1021, 28, 1, as.Date("2016-08-29"),
+              1021, 3, 1, as.Date("2016-08-29"),
+              1020, 34, 1, as.Date("2016-08-30"),
+              1020, 1, 1, as.Date("2016-08-30"),
+              1032, 16, 1, as.Date("2016-08-31"),
+              1009, 29, 1, as.Date("2016-08-22"),
+              1009, 4, 1, as.Date("2016-08-22"),
+              1006, 31, 1, as.Date("2016-08-24"),
+              1006, 3, 1, as.Date("2016-08-24"),
+              1031, 31, 1, as.Date("2016-08-01"),
+              1031, 3, 1, as.Date("2016-08-01"),
+              1031, 31, 1, as.Date("2016-08-01")
+      ) %>%
+        mutate(site_id = as.character(site_id))
+    ) # close bind_rows
+  )  # close left_join
+
+# Data quality checks
+# Are all chl sample dates within sampling date range?
+
+
+
+# Data dictionary
+site_descriptors_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(site_descriptors_data))
+
+# Are all values in data dictionary?
+ifelse (
+  #TRUE if variable is in dictionary, FALSE if not
+  colnames(site_descriptors_data) %in% site_descriptors_dictionary$variable %>% # TRUE if variable is present 
+          {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
+          sum(.) == 0, # all TRUE add up
+        "Site data dictionary is complete", # if 0 (all variables are present) 
+        "Site data dictionary is incomplete") # if not 0 (>=1 variable missing)
+
+# write data
+write.csv(x = site_descriptors_data, 
+          file = "../../../communications/manuscript/data_paper/8_site_descriptors_data.csv")
+
+# write dictionary
+write.csv(x = site_descriptors_dictionary, 
+          file = "../../../communications/manuscript/data_paper/8_site_descriptors_dictionary.csv")
+
+
+
+
