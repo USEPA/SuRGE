@@ -225,11 +225,15 @@ ecoregion<-lake.list.plot  %>%
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
         axis.line=element_line(colour="black"),legend.title=element_blank(),
-        axis.text = element_text(size = 14, angle = 45, hjust=1),
+        axis.text.x = element_text(size = 14, angle = 45, hjust=1),
+        axis.text.y = element_text(size = 14),
         axis.title = element_text(size = 16),
-        legend.position="top")+
-  geom_boxplot(aes(color=type))+
-  scale_y_log10()+
+        strip.text = element_text(size = 16),
+        legend.position="none")+
+  geom_boxplot(aes(fill=type))+
+  geom_hline(yintercept = 0, linetype = 2) +
+  facet_wrap(~type, scales = "free_y") +
+  scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
   xlab("")
 ecoregion
@@ -245,9 +249,12 @@ depth<-lake.list.plot %>%
         axis.line=element_line(colour="black"),legend.title=element_blank(),
         axis.text = element_text(size = 14),
         axis.title = element_text(size = 16),
+        strip.text = element_text(size = 16),
         legend.position="none")+
-  geom_boxplot(aes(color=type))+
-  scale_y_log10()+
+  geom_boxplot(aes(fill=type))+
+  geom_hline(yintercept = 0, linetype = 2) +
+  facet_wrap(~type, scales = "free_y") +
+  scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
   xlab("")
 depth
@@ -263,9 +270,12 @@ productivity<-lake.list.plot %>%
         axis.line=element_line(colour="black"),legend.title=element_blank(),
         axis.text = element_text(size = 14),
         axis.title = element_text(size = 16),
+        strip.text = element_text(size = 16),
         legend.position="none")+
-  geom_boxplot(aes(color=type))+
-  scale_y_log10()+
+  geom_boxplot(aes(fill=type))+
+  geom_hline(yintercept = 0, linetype = 2) +
+  facet_wrap(~type, scales = "free_y") +
+  scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
   xlab("")
 productivity
@@ -274,3 +284,4 @@ top_row <- plot_grid(depth,productivity)
 
 strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,2))
 strata_fig
+
