@@ -76,15 +76,25 @@ master_dictionary <- tribble(~variable, ~definition,
                              
                              # sedimentation
                              "sedimentation", "Total sedimentation rate.",
-                             "sediment_oc", "Sediment organic carbon content", 
+                             "sedimentation_units", "Units for sedimentation",
+                             "sediment_oc", "Sediment organic carbon content",
+                             "sediment_oc_units", "Units for sediment_oc",
                              "basin_slope", "Mean slope of lake basin",
-                             "basin_forest", "Percent of lake basin with forest land cover.",
+                             "basin_slope_units", "units for basin_slope",
+                             "basin_forest", "Percent of lake basin with forest land cover",
+                             "basin_forest_units","units for basin_forest",
                              "clow_surface_area", "Lake surface area used for calculation of sedimentation rates.",
-                             "basin_crop", "Percent of lake basin with crop land cover.",
-                             "basin_wetland", "Percent of lake basin with wetland land cover.",
+                             "clow_surface_area_units","units for clow_surface_area",
+                             "basin_crop", "Percent of lake basin with crop land cover",
+                             "basin_crop_units", "units for basin_crop_units",
+                             "basin_wetland", "Percent of lake basin with wetland land cover",
+                             "basin_wetland_units","units for basin_wetland",
                              "basin_kfact", "Mean of STATSGO Kffactor raster on land (NLCD 2006) within the lake basin. The Universal Soil Loss Equation (USLE) and represents a relative index of susceptibility of bare, cultivated soil to particle detachment and transport by rainfall",
+                             "basin_kfact_units","units for basin_kfact",
                              "basin_soc0_5", "Mean soil organic carbon content in top 5 cm of soil in lake basin",
-                             "basin_barren", "Percent of lake basin with barren land cover.",
+                             "basin_soc0_5","units for basin_soc0_5",
+                             "basin_barren", "Percent of lake basin with barren land cover",
+                             "basin_barren_units","units for basin_barren",
                              
                              # NID
                              "year_completed", "Year dam was completed",
@@ -192,7 +202,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "sp_cond", "Specific conductivity",
                              "temp", "Water temperature",
                              "turb", "Turbidity measured with sonde optical sensor",
-                             "phycocyanin_sonde", "Pycocyanin measured with sonde optical sensor",
+                             "phycocyanin_sonde", "Phycocyanin measured with sonde optical sensor",
                              "al", "aluminum",
                              "as", "arsenic",
                              "ba", "barium",
@@ -253,7 +263,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC",
                              
                              # 8. site descriptors
-                             "site_depth", "Sampling site depth",
+                             "site_depth", "Depth of reservoir at sampling site",
                              "site_depth_units", "Units of site_depth measurement",
                              "site_wgt", "Weight for lake-specific probabilistic survey design.",
                              "site_wgt_units", "Units for site_wgt",
@@ -290,7 +300,7 @@ lake_scale_data <- list(
   
   # c.	Sedimentation rates
   sedimentation_link %>%
-    select(-sediment_predictor_type) %>% # not sure about this variable
+    select(- c(sediment_predictor_type,sedimentation,sedimentation_units)) %>% # not sure about this variable or sedimentation numbers
     mutate(across(!lake_id, as.character)) %>%
     # subset for development
     #filter(lake_id == 100) %>%
@@ -790,7 +800,7 @@ write.csv(
   x = emission_remote_lake_data_paper_dictionary,
   file = paste0(
     userPath,
-    "communications/manuscript/data_paper/6_emission_remote_lake_dictionary.csv"
+    "communications/manuscript/data_paper/7_emission_remote_lake_dictionary.csv"
   )
 )
 
