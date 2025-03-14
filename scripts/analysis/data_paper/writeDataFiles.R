@@ -790,7 +790,7 @@ write.csv(
   x = emission_remote_lake_data_paper_dictionary,
   file = paste0(
     userPath,
-    "communications/manuscript/data_paper/6_emission_remote_lake_dictionary.csv"
+    "communications/manuscript/data_paper/7_emission_remote_lake_dictionary.csv"
   )
 )
 
