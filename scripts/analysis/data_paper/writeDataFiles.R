@@ -135,6 +135,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC",
                              "trap_rtrvl_date_time_units", "timezone for trap_rtrvl_date_time",
                              
+
                              #emissions(lake)
                              "ch4_ebullition_lake","lakewide areal methane ebullition flux estimated using survey site weights",
                              "ch4_ebullition_units_lake","units for ch4_ebullition_lake_units",
@@ -154,12 +155,12 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_ebullition_std_error_lake", "standard error of co2_ebullition_lake",
                              "co2_diffusion_std_error_lake", "standard error of co2_diffusion_lake",
                              "co2_total_std_error_lake", "standard error of co2_total_lake",
-                             "ch4_ebullition_margin_of_error_lake", "of ch4_ebullition_lake",
-                             "ch4_diffusion_margin_of_error_lake", "of ch4_diffusion_lake",
-                             "ch4_total_margin_of_error_lake", "of ch4_total_lake",
-                             "co2_ebullition_margin_of_error_lake", "of co2_ebullition_lake",
-                             "co2_diffusion_margin_of_error_lake", "of co2_diffusion_lake",
-                             "co2_total_margin_of_error_lake", "of co2_total_lake",
+                             "ch4_ebullition_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale ch4 ebullition rate estimate.",
+                             "ch4_diffusion_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale ch4 diffusion rate estimate.",
+                             "ch4_total_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale total ch4 emission rate estimate",
+                             "co2_ebullition_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale co2 ebullition rate estimate",
+                             "co2_diffusion_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale co2 diffusion rate estimate",
+                             "co2_total_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale total co2 emission rate estimate",
                              "ch4_ebullition_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_ebullition_lake",
                              "ch4_diffusion_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_diffusion_lake",
                              "ch4_total_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_total_lake",
@@ -175,34 +176,27 @@ master_dictionary <- tribble(~variable, ~definition,
                              
                              
                              #remote sensing (lake)
-                             "chl_predicted_sample_month", "predicted chlorophyll a concentration from the same month 
-                                      and year that emissions were collected if available, otherwise mean predicted
-                                      chlorophyll from 2018-2020 during the same month emissions were collected, predictions
-                                      are from LAGOS-US LANDSAT (1984-2020)",
+                             "chl_predicted_sample_month", paste("predicted chlorophyll a concentration from the same month",
+                                                                  "and year that emissions were collected if available, otherwise mean predicted",
+                                                                  "chlorophyll from 2018-2020 during the same month emissions were collected, ",
+                                                                  "predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "chl_predicted_sample_month_units", "units for chl_predicted_sample_month",
-                             "doc_predicted_sample_month", "predicted dissolved organic carbon concentration from the same month 
-                                      and year that emissions were collected if available, otherwise mean predicted
-                                      dissolved organic carbon concentration from 2018-2020 during the same month emissions were collected, predictions
-                                      are from LAGOS-US LANDSAT (1984-2020)",
+                             "doc_predicted_sample_month", paste("predicted dissolved organic carbon concentration from the same month",
+                                                                  "and year that emissions were collected if available, otherwise mean predicted",
+                                                                  "dissolved organic carbon concentration from 2018-2020 during the same month emissions",
+                                                                  "were collected, predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "doc_predicted_sample_month_units", "units for doc_predicted_sample_month",
-                             "chl_predicted_sample_season", "mean predicted chlorophyll a concentration during June to September
-                                      of the three years leading up to the emission sampling year as well as the samling year, when 
-                                      available, predictions are from LAGOS-US LANDSAT (1984-2020)",
+                             "chl_predicted_sample_season", paste("mean predicted chlorophyll a concentration during June to September",
+                                                                   "of the three years leading up to the emission sampling year as well as the samling year",
+                                                                   "when available, predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "chl_predicted_sample_season_units","units for chl_predicted_sample_season",
-                             "doc_predicted_sample_season", "mean predicted dissolved organic carbon concentration during June to September
-                                      of the three years leading up to the emission sampling year as well as the samling year, when 
-                                      available, predictions are from LAGOS-US LANDSAT (1984-2020)",
+                             "doc_predicted_sample_season", paste("mean predicted dissolved organic carbon concentration during June to September",
+                                                                   "of the three years leading up to the emission sampling year as well as the sampling",
+                                                                   "year, when available, predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "doc_predicted_sample_season_units", "units for doc_predicted_sample_season",
 
                              # SITE DATA
-                             # sonde
-                             "chla_sonde", "Chlorophyll a measured with sonde optical sensor",
-                             "do", "Dissolved oxygen",
-                             "ph", "pH",
-                             "sp_cond", "Specific conductivity",
-                             "temp", "Water temperature",
-                             "turb", "Turbidity measured with sonde optical sensor",
-                             "phycocyanin_sonde", "Phycocyanin measured with sonde optical sensor",
+                             # sonde (see above)
                              "al", "aluminum",
                              "as", "arsenic",
                              "ba", "barium",
@@ -234,7 +228,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "toc", "total organic carbon",
                              "v", "vanadium",
                              "zn","zinc",
-                             "chla_lab", "Laboratory based chloropyll a",
+                             "chla_lab", "Laboratory based chlorophyll a",
                              "nh4", "ammonium",
                              "no2_3", "nitrite + nitrate",
                              "op", "orthophosphate",
@@ -244,24 +238,6 @@ master_dictionary <- tribble(~variable, ~definition,
                              "flags", "1: failed post-deployment calibration check or value was otherwise suspicious. L: value is < reporting limit but > minimum detection limit. ND: analyte not detected and minimum detection limit reported. H: holding time violation. S: sampled warmed during shipping",
                              
 
-                             #emissions
-                             "ch4_diffusion_best", "areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
-                             "ch4_diffusion_units", "ch4_diffusion_best units",
-                             "ch4_ebullition", "areal ch4 ebullition flux from bubble traps",
-                             "ch4_ebullition_units", "ch4_ebullition units",
-                             "ch4_total", "the sum of ch4 diffusion and ch4 ebullition when both were measured",
-                             "ch4_total_units", "ch4_total units",
-                             "co2_diffusion_best", "areal co2 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
-                             "co2_diffusion_units", "co2_diffusion units",
-                             "co2flag", "Value of U if the floating chamber experienced an unstable start",
-                             "co2_ebullition", "areal co2 ebullition flux from bubble traps",
-                             "co2_ebullition_units", "co2_ebullition units",
-                             "co2_total", "the sum of co2 diffusion and co2 ebullition when both were measured",
-                             "co2_total_units", "co2_total units",
-                             "chamb_deply_date_time", "date and time of floating chamber deployment in UTC",
-                             "trap_deply_date_time", "date and time of bubble trap deployment in UTC",
-                             "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC",
-                             
                              # 8. site descriptors
                              "site_depth", "Depth of reservoir at sampling site",
                              "site_depth_units", "Units of site_depth measurement",
@@ -269,8 +245,18 @@ master_dictionary <- tribble(~variable, ~definition,
                              "site_wgt_units", "Units for site_wgt",
                              "sample_start", "First day of sampling campaign at lake",
                              "sample_end", "Last day of sampling campaign at lake",
-                             "chla_collection_date", "Date that sample was collected for laboratory-based chlorophyll a measurement"
-)
+                             "chla_collection_date", "Date that sample was collected for laboratory-based chlorophyll a measurement",
+                             
+                             # phytoplankton
+                             "algal_group", "Broad algal group classification",
+                             "phylum", "Phylum of taxon",
+                             "class", "Class of taxon",
+                             "order", "Order of taxon",
+                             "family", "Family of taxon",
+                             "genus", "Genus of taxon",
+                             "density", "Density of organisms enumerated from sample",
+                             "density_units", "Units used for density of organisms enumerated from sample"
+                             )
 
 
 # 3. LAKE SCALE VALUES-----------
@@ -900,4 +886,46 @@ write.csv(x = site_descriptors_data,
 write.csv(x = site_descriptors_dictionary, 
           file = "../../../communications/manuscript/data_paper/8_site_descriptors_dictionary.csv")
 
+# 9. PHYTOPLANKTON-------------------
+phyto_data <-  read_excel(paste0(userPath,
+                                 "data/algalIndicators/SuRGE Taxonomy 2021-23 v4.xlsx"), 
+                          sheet = "SuRGE Taxonomy- 2021-23") %>%
+  janitor::clean_names() %>%
+  select(site_id, year_col, algal_group, phylum,class, order, family, genus, density) %>%
+  # distinct(site_id) # no lacustrine...
+  rename(lake_id = site_id) %>%
+  mutate(lake_id = str_extract(lake_id, "(\\d+$)") %>% # extract numeric part of lake_id
+           as.numeric(), # convert lake_id to numeric
+         visit = case_when(lake_id == 147 & year_col == 2021 ~ 1,
+                           lake_id == 147 & year_col == 2023 ~ 2,
+                           lake_id == 148 & year_col == 2021 ~ 1,
+                           lake_id == 148 & year_col == 2023 ~ 2,
+                           lake_id == 250 ~ 2, # samples from visit 1 lost
+                           lake_id == 281 ~ 2, # samples from visit 1 lost
+                           TRUE ~ 1)) %>% # visit 1 for all others
+  select(-year_col) %>%
+  filter(!is.na(lake_id))
+
+
+# Data dictionary
+phyto_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(phyto_data))
+
+# Are all values in data dictionary?
+ifelse (
+  #TRUE if variable is in dictionary, FALSE if not
+  colnames(phyto_data) %in% phyto_dictionary$variable %>% # TRUE if variable is present 
+    {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
+    sum(.) == 0, # all TRUE add up
+  "Site data dictionary is complete", # if 0 (all variables are present) 
+  "Site data dictionary is incomplete") # if not 0 (>=1 variable missing)
+          
+
+# write data
+write.csv(x = phyto_data, 
+          file = "../../../communications/manuscript/data_paper/10_phyto_data.csv")
+
+# write dictionary
+write.csv(x = phyto_dictionary, 
+          file = "../../../communications/manuscript/data_paper/10_phyto_dictionary.csv")
 
