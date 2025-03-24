@@ -195,8 +195,9 @@ lake.list.plot.methane<-left_join(
     mutate(type="methane"),
   
   lake.list.all %>%
-  mutate(lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
-                             lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+  mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
+                            lake_id %in% c( "69_lacustrine") ~ "69",
+                             lake_id %in% c( "70_lacustrine") ~ "70",
                              TRUE ~ lake_id))%>%
   mutate(lake_id=as.numeric(lake_id))%>%
     select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
@@ -208,19 +209,22 @@ lake.list.plot.cd<-left_join(
     mutate(type="carbon dioxide"),
   
   lake.list.all %>%
-    mutate(lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
-                               lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+    mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
+                               lake_id %in% c( "69_lacustrine") ~ "69",
+                               lake_id %in% c( "70_lacustrine") ~ "70",
                                TRUE ~ lake_id))%>%
     mutate(lake_id=as.numeric(lake_id))%>%
     select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
   rename(emission = "co2_total_lake")
 
-lake.list.plot<-bind_rows(lake.list.plot.methane,lake.list.plot.cd)
-
-ecoregion<-lake.list.plot  %>%
+lake.list.plot<-bind_rows(lake.list.plot.methane,lake.list.plot.cd)%>%
   filter(!is.na(ag_eco9_nm))%>%
   filter(!is.na(emission))%>%
   mutate(emi_mg=emission*24)%>%
+  filter(!is.na(depth_cat))%>%
+  filter(!is.na(chla_cat))
+
+ecoregion<-lake.list.plot  %>%
   ggplot(aes(x=ag_eco9_nm, y=emi_mg))+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
@@ -229,15 +233,13 @@ ecoregion<-lake.list.plot  %>%
         axis.title = element_text(size = 16),
         legend.position="top")+
   geom_boxplot(aes(color=type))+
-  scale_y_log10()+
+  scale_y_continuous(trans = "pseudo_log", breaks = breaks, expand = c(0.025, 0.025),
+                     labels = scales::comma_format(big.mark = ",")) +
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
   xlab("")
 ecoregion
 
 depth<-lake.list.plot %>%
-  filter(!is.na(depth_cat))%>%
-  filter(!is.na(emission))%>%
-  mutate(emi_mg=emission*24)%>%
   mutate(depth_cat=ifelse(depth_cat=="GT_6m","deep","shallow")) %>%
   ggplot(aes(x=depth_cat, y=emi_mg))+
   theme_bw()+
@@ -247,15 +249,13 @@ depth<-lake.list.plot %>%
         axis.title = element_text(size = 16),
         legend.position="none")+
   geom_boxplot(aes(color=type))+
-  scale_y_log10()+
+  scale_y_continuous(trans = "pseudo_log", breaks = breaks, expand = c(0.025, 0.025),
+                     labels = scales::comma_format(big.mark = ",")) +
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
   xlab("")
 depth
 
 productivity<-lake.list.plot %>%
-  filter(!is.na(emission))%>%
-  mutate(emi_mg=emission*24)%>%
-  filter(!is.na(chla_cat))%>%
   mutate(chla_cat=ifelse(chla_cat=="GT_7","productive","unproductive")) %>%
   ggplot(aes(x=chla_cat, y=emi_mg))+
   theme_bw()+
@@ -265,7 +265,8 @@ productivity<-lake.list.plot %>%
         axis.title = element_text(size = 16),
         legend.position="none")+
   geom_boxplot(aes(color=type))+
-  scale_y_log10()+
+  scale_y_continuous(trans = "pseudo_log", breaks = breaks, expand = c(0.025, 0.025),
+                     labels = scales::comma_format(big.mark = ",")) +
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
   xlab("")
 productivity
