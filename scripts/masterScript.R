@@ -104,6 +104,9 @@ source("scripts/writeSuRGElakesForGres.R")
 source("scripts/analysis/inspectMeasurementValues.R")
 #source("scripts/analysis/reviewMetTemp.R") # ERA5 bias corrections
 
+# Manuscripts
+source("scripts/analysis/data_paper/writeDataFiles.R")
+
 
 
 
