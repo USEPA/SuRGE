@@ -23,15 +23,15 @@ library(lubridate) #for adjusting time offsets in readLGR
 library(minpack.lm) #for the exponential modeling of diffusive flux
 library(dttr2) # NA_Date_
 library(LAGOSUS)
-library(hydrolinks)
+#library(hydrolinks)
 library(corrplot)
 library(StreamCatTools) # read lakeCat
 library(jtools) # visualize regression models (effect_plot)
-library(StepReg) # stepwise selection based on p-value (`stepwise`)
+#library(StepReg) # stepwise selection based on p-value (`stepwise`)
 library(cowplot) # arranging ggplot plots into grid
 library(ggh4x) # ggplot2 hacks
 library(ggallin) # pseudolog10_trans
-#library(httr) #this is needed for downloading Lagos trophic status data
+library(httr) #this is needed for downloading Lagos trophic status data
 library(RODBC) #RESSED
 library(dataRetrieval) #NWIS data retrieval for water levels
 library(rLakeAnalyzer) #for center buoyancy and thermocline depth

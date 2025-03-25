@@ -25,54 +25,54 @@ missing_bottom_temps <- fld_sheet %>%
 
 #Lake 207 is missing sonde data from most sites.
 # Using the NLA17 profile to fill them
-nla207 <- read_xlsx(
-  paste0(
-    userPath,
-    "data/CIN/CH4_207_old mans lake/dataSheets/surgeDepthProfile207nla.xlsx"
-  )
-)
-miss207 <- filter(missing_bottom_temps, lake_id == 207)
-
-nlatemp <- NULL
-nlado <- NULL
-nlaph <- NULL
-nlachl <- NULL
-nlaturb <- NULL
-nlacond <- NULL
-
-#loop through to search and pull nearest water quality data from NLA profile
-for (i in 1:12) {
-  nlatemp[i] <- nla207$temp.C[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
-  nlado[i] <- nla207$do.mg.l[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
-  nlaph[i] <- nla207$pH[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
-  nlachl[i] <- nla207$chl.a.ug.l[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
-  nlaturb[i] <- nla207$turbidity.ntu[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
-  nlacond[i] <- nla207$sp.cond.us.cm[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
-}
-
-miss207$nlatemp <- nlatemp
-miss207$nlado <- nlado
-miss207$nlaph <- nlaph
-miss207$nlachl <- nlachl
-miss207$nlaturb <- nlaturb
-miss207$nlacond <- nlacond
-
-#fill out missing sonde data from lake 207
-
-for (i in 1:12) {
-  fld_sheet$sp_cond_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlacond[i]
-  fld_sheet$sp_cond_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
-  fld_sheet$temp_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlatemp[i]
-  fld_sheet$temp_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
-  fld_sheet$turb_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlaturb[i]
-  fld_sheet$turb_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
-  fld_sheet$ph_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlaph[i]
-  fld_sheet$ph_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
-  fld_sheet$chla_sonde_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlachl[i]
-  fld_sheet$chla_sonde_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
-  fld_sheet$do_mg_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlado[i]
-  fld_sheet$do_mg_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
-}
+# nla207 <- read_xlsx(
+#   paste0(
+#     userPath,
+#     "data/CIN/CH4_207_old mans lake/dataSheets/surgeDepthProfile207nla.xlsx"
+#   )
+# )
+# miss207 <- filter(missing_bottom_temps, lake_id == 207)
+# 
+# nlatemp <- NULL
+# nlado <- NULL
+# nlaph <- NULL
+# nlachl <- NULL
+# nlaturb <- NULL
+# nlacond <- NULL
+# 
+# #loop through to search and pull nearest water quality data from NLA profile
+# for (i in 1:12) {
+#   nlatemp[i] <- nla207$temp.C[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
+#   nlado[i] <- nla207$do.mg.l[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
+#   nlaph[i] <- nla207$pH[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
+#   nlachl[i] <- nla207$chl.a.ug.l[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
+#   nlaturb[i] <- nla207$turbidity.ntu[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
+#   nlacond[i] <- nla207$sp.cond.us.cm[which.min(abs(miss207$site_depth[i] - nla207$sample.depth.m))]
+# }
+# 
+# miss207$nlatemp <- nlatemp
+# miss207$nlado <- nlado
+# miss207$nlaph <- nlaph
+# miss207$nlachl <- nlachl
+# miss207$nlaturb <- nlaturb
+# miss207$nlacond <- nlacond
+# 
+# #fill out missing sonde data from lake 207
+# 
+# for (i in 1:12) {
+#   fld_sheet$sp_cond_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlacond[i]
+#   fld_sheet$sp_cond_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+#   fld_sheet$temp_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlatemp[i]
+#   fld_sheet$temp_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+#   fld_sheet$turb_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlaturb[i]
+#   fld_sheet$turb_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+#   fld_sheet$ph_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlaph[i]
+#   fld_sheet$ph_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+#   fld_sheet$chla_sonde_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlachl[i]
+#   fld_sheet$chla_sonde_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+#   fld_sheet$do_mg_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlado[i]
+#   fld_sheet$do_mg_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+# }
 
 #Now look at how many additional missing sonde data there are
 missing_bottom_tem <- fld_sheet %>%
@@ -84,7 +84,7 @@ missing_bottom_tem <- fld_sheet %>%
   mutate(lake_id_2 = str_extract(lake_id, "\\d+(?=\\_)")) %>%
   mutate(lake_id = ifelse(!is.na(region), lake_id_2, lake_id)) %>%
   mutate(uniqueid = paste(lake_id, site_id, visit))
-#10 observations
+#3 observations
 
 #Pull out lake 70 because it isn't getting a good depth match
 missing_bottom_temp <- missing_bottom_tem %>%
@@ -115,7 +115,7 @@ sitematch <- NULL
 depmatch <- NULL
 uidmatch <- NULL
 
-for (i in 1:8) {
+for (i in 1:1) {
   datmp <- points[points$lake_id == missing_bottom_temp$lake_id[i], ]
   datmp$distance <- st_distance(datmp)
   uniqueid <- paste(
@@ -140,7 +140,7 @@ missing_bottom_temp$sitematch <- sitematch
 missing_bottom_temp$depmatch <- depmatch
 missing_bottom_temp$uidmatch <- uidmatch
 
-for (i in 1:8) {
+for (i in 1:1) {
   fld_sheet$sp_cond_d[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- fld_sheet$sp_cond_d[match(missing_bottom_temp$uidmatch[i], fld_sheet$uniqueid)]
   fld_sheet$sp_cond_d_flags[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- "l"
   fld_sheet$temp_d[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- fld_sheet$temp_d[match(missing_bottom_temp$uidmatch[i], fld_sheet$uniqueid)]
