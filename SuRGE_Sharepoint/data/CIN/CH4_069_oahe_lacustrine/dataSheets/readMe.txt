@@ -1,0 +1,1 @@
+Using depth profile data collected by USACE. See 10/8/24 email from John Hargrave. Site OAHLK1153DW is just north of the lacustrine sampling area.

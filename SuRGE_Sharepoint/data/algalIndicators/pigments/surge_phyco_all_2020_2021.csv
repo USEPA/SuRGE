@@ -1,0 +1,83 @@
+﻿date,waterbody,site,reps,variable,units,value,notes
+9/11/2020,208,u1,unknown,phycocyanin,µg/L,2.978,NA
+7/29/2020,249,su06,unknown,phycocyanin,µg/L,2.629,NA
+7/29/2020,249,su06,duplicate,phycocyanin,µg/L,2.261,NA
+7/29/2020,211,u14,duplicate,phycocyanin,µg/L,1.452,NA
+7/29/2020,54,s5,unknown,phycocyanin,µg/L,26.604,NA
+7/29/2020,211,u14,unknown,phycocyanin,µg/L,1.266,NA
+8/27/2020,205,u7,unknown,phycocyanin,µg/L,2.047,NA
+8/25/2020,210,s5,duplicate,phycocyanin,µg/L,235.862,NA
+8/25/2020,210,s5,unknown,phycocyanin,µg/L,169.558,NA
+7/6/2020,238,su08,unknown,phycocyanin,µg/L,0,NA
+7/9/2020,287,u13,unknown,phycocyanin,µg/L,0.085,NA
+7/12/2020,265,u02,unknown,phycocyanin,µg/L,0,NA
+7/12/2020,265,u02,duplicate,phycocyanin,µg/L,0,NA
+8/10/2020,83,u18,unknown,phycocyanin,µg/L,1.016,NA
+8/10/2020,83,u18,duplicate,phycocyanin,µg/L,NA,missing filter
+8/12/2020,209,u14,unknown,phycocyanin,µg/L,0.464,NA
+8/19/2020,116,u11,unknown,phycocyanin,µg/L,202.93,5x dilution
+8/19/2020,116,u11,duplicate,phycocyanin,µg/L,221.19,5x dilution
+8/20/2020,101,u15,unknown,phycocyanin,µg/L,0,NA
+9/1/2020,234,s20,unknown,phycocyanin,µg/L,1.639,NA
+9/3/2020,235,s3,duplicate,phycocyanin,µg/L,116.671,NA
+9/3/2020,235,s3,unknown,phycocyanin,µg/L,123.453,NA
+9/4/2020,138,11,unknown,phycocyanin,µg/L,1.372,NA
+9/4/2020,138,11,duplicate,phycocyanin,µg/L,1.714,NA
+9/3/2020,44,7,unknown,phycocyanin,µg/L,3.365,NA
+9/2/2020,102,3,unknown,phycocyanin,µg/L,0.865,NA
+9/1/2020,98,11,unknown,phycocyanin,µg/L,0,NA
+9/12/2020,207,s25,unknown,phycocyanin,µg/L,1.919,NA
+9/9/2020,191,u13,duplicate,phycocyanin,µg/L,9.235,NA
+9/9/2020,191,u13,unknown,phycocyanin,µg/L,34.211,NA
+6/1/2021,233,S-18,duplicate,phycocyanin,µg/L,1.825,Badly thawed - warm
+6/1/2021,233,S-18,unknown,phycocyanin,µg/L,2.747,Badly thawed - warm
+6/3/2021,237,U-15,unknown,phycocyanin,µg/L,4.551,Badly thawed - warm
+6/4/2021,236,U-07,unknown,phycocyanin,µg/L,1.322,Badly thawed - warm
+6/11/2021,149,SU-08,unknown,phycocyanin,µg/L,0,Thawed but cool
+6/14/2021,155,SU-25,duplicate,phycocyanin,µg/L,0,Thawed but cool
+6/14/2021,155,SU-25,unknown,phycocyanin,µg/L,0,Thawed but cool
+6/16/2021,275,U-12,duplicate,phycocyanin,µg/L,0.169,Thawed but cool
+6/16/2021,275,U-12,unknown,phycocyanin,µg/L,0.49,Thawed but cool
+6/18/2021,240,1,unknown,phycocyanin,µg/L,0,Thawed but cool
+6/22/2021,69_transitional,U-12,unknown,phycocyanin,µg/L,0,Thawed but cool
+6/24/2021,69_lacustrine,U-04,unknown,phycocyanin,µg/L,0.196,Thawed but cool
+6/26/2021,70_lacustrine,U-06,duplicate,phycocyanin,µg/L,0.205,Frozen
+6/26/2021,70_lacustrine,U-06,unknown,phycocyanin,µg/L,0.31,Frozen
+6/29/2021,70_riverine,U-06,unknown,phycocyanin,µg/L,0.122,Frozen
+7/7/2021,79,U-12,unknown,phycocyanin,µg/L,7.781,Frozen
+7/8/2021,298,U-01,duplicate,phycocyanin,µg/L,0.48,Thawed - warm
+7/8/2021,298,U-01,unknown,phycocyanin,µg/L,1.316,Thawed - warm
+7/9/2021,75,U-8,unknown,phycocyanin,µg/L,3.79,Frozen
+7/10/2021,326,U-05,unknown,phycocyanin,µg/L,0,Thawed - warm
+7/11/2021,327,U-05,unknown,phycocyanin,µg/L,0,Thawed - warm
+7/12/2021,70_transitional,U-7,unknown,phycocyanin,µg/L,8.248,Frozen
+7/13/2021,231,S-24,unknown,phycocyanin,µg/L,6.589,Frozen
+7/9/2021,75,U-8,duplicate,phycocyanin,µg/L,73.189,Frozen; 2x dilution
+7/15/2021,147,U-01,duplicate,phycocyanin,µg/L,11.645,Thawed - warm - weekend out of freezer; 2x dilution
+7/15/2021,147,U-01,unknown,phycocyanin,µg/L,8.483,Thawed - warm - weekend out of freezer; 2x dilution
+6/29/2021,288,U-10,unknown,phycocyanin,µg/L,1.31,NA
+6/29/2021,288,U-10,duplicate,phycocyanin,µg/L,1.418,NA
+6/30/2021,316,U-3,unknown,phycocyanin,µg/L,0.067,NA
+7/26/2021,78,U-29,unknown,phycocyanin,µg/L,0,NA
+7/27/2021,167,U-06,unknown,phycocyanin,µg/L,10.717,Torn filter
+7/27/2021,167,U-06,duplicate,phycocyanin,µg/L,11.512,NA
+7/28/2021,232,U-13,unknown,phycocyanin,µg/L,3.208,NA
+7/29/2021,68,SU-4,unknown,phycocyanin,µg/L,10.123,NA
+7/29/2021,68,SU-4,duplicate,phycocyanin,µg/L,0.934,NA
+7/31/2021,69_riverine,U-07,unknown,phycocyanin,µg/L,0,NA
+8/16/2021,148,7,unknown,phycocyanin,µg/L,0.933,NA
+8/16/2021,148,7,duplicate,phycocyanin,µg/L,2.711,NA
+8/17/2021,291,U-13,unknown,phycocyanin,µg/L,0.351,NA
+8/17/2021,291,U-13,duplicate,phycocyanin,µg/L,0.133,NA
+8/9/2021,71,U-29,unknown,phycocyanin,µg/L,0.107,NA
+8/19/2021,296,U-17,unknown,phycocyanin,µg/L,0.058,NA
+8/20/2021,317,U-18,unknown,phycocyanin,µg/L,0.167,NA
+8/23/2021,297,U-41,unknown,phycocyanin,µg/L,0.07,NA
+8/24/2021,119,O4,unknown,phycocyanin,µg/L,0.498,NA
+8/25/2021,67,O4,unknown,phycocyanin,µg/L,0.448,NA
+8/25/2021,67,O4,duplicate,phycocyanin,µg/L,0.415,NA
+8/25/2021,16,O8,unknown,phycocyanin,µg/L,1.985,NA
+8/26/2021,72,U-09,unknown,phycocyanin,µg/L,0.71,NA
+8/26/2021,82,11,unknown,phycocyanin,µg/L,8.312,NA
+8/28/2021,137,O4,unknown,phycocyanin,µg/L,0.914,NA
+8/28/2021,137,O4,duplicate,phycocyanin,µg/L,1.281,NA

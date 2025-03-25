@@ -1,0 +1,161 @@
+﻿date,waterbody,site,field_dups,variable,units,value,notes,chla_flag
+7/29/2020,249,su06,unknown,chlorophyll,µg/L,3.965,NA,NA
+7/29/2020,249,su06,duplicate,chlorophyll,µg/L,4.724,NA,NA
+8/27/2020,205,u7,unknown,chlorophyll,µg/L,5.402,NA,NA
+7/6/2020,238,su08,unknown,chlorophyll,µg/L,3.704,held for 79 days,H
+7/9/2020,287,u13,unknown,chlorophyll,µg/L,0.707,held for 76 days,H
+7/12/2020,265,u02,unknown,chlorophyll,µg/L,1.088,held for 73 days,H
+7/12/2020,265,u02,duplicate,chlorophyll,µg/L,1.212,held for 73 days,H
+8/10/2020,83,u18,unknown,chlorophyll,µg/L,3.791,NA,NA
+8/10/2020,83,u18,duplicate,chlorophyll,µg/L,4.469,NA,NA
+8/12/2020,209,u14,unknown,chlorophyll,µg/L,3.913,NA,NA
+8/20/2020,101,u15,unknown,chlorophyll,µg/L,1.991,NA,NA
+9/1/2020,234,s20,unknown,chlorophyll,µg/L,16.81,NA,NA
+9/4/2020,138,11,unknown,chlorophyll,µg/L,4.466,NA,NA
+9/4/2020,138,11,duplicate,chlorophyll,µg/L,4.814,NA,NA
+9/3/2020,44,7,unknown,chlorophyll,µg/L,5.172,NA,NA
+9/2/2020,102,3,unknown,chlorophyll,µg/L,2.304,NA,NA
+9/1/2020,98,11,unknown,chlorophyll,µg/L,2.706,NA,NA
+9/12/2020,207,s25,unknown,chlorophyll,µg/L,3.724,NA,NA
+9/11/2020,208,u1,unknown,chlorophyll,µg/L,15.562,4x dilution,NA
+7/29/2020,211,u14,duplicate,chlorophyll,µg/L,38.848,4x dilution,NA
+7/29/2020,54,s5,unknown,chlorophyll,µg/L,54.894,4x dilution,NA
+7/29/2020,211,u14,unknown,chlorophyll,µg/L,45.047,4x dilution,NA
+8/25/2020,210,s5,duplicate,chlorophyll,µg/L,228.725,5x dilution,NA
+8/25/2020,210,s5,unknown,chlorophyll,µg/L,233.172,5x dilution,NA
+9/3/2020,235,s3,duplicate,chlorophyll,µg/L,47.036,4x dilution,NA
+9/3/2020,235,s3,unknown,chlorophyll,µg/L,50.776,4x dilution,NA
+9/9/2020,191,u13,duplicate,chlorophyll,µg/L,50.106,5x dilution,NA
+9/9/2020,191,u13,unknown,chlorophyll,µg/L,51.823,5x dilution,NA
+8/19/2020,116,u11,unknown,chlorophyll,µg/L,94.873,6x dilution,NA
+8/19/2020,116,u11,duplicate,chlorophyll,µg/L,98.661,6x dilution,NA
+6/1/2021,233,S-18,duplicate,chlorophyll,µg/L,13.068,Badly thawed - warm,NA
+6/3/2021,237,U-15,unknown,chlorophyll,µg/L,1.912,Badly thawed - warm,NA
+6/4/2021,236,U-07,unknown,chlorophyll,µg/L,0.65,Badly thawed - warm,NA
+6/11/2021,149,SU-08,unknown,chlorophyll,µg/L,4.781,Thawed but cool,NA
+6/14/2021,155,SU-25,duplicate,chlorophyll,µg/L,1.717,Thawed but cool,NA
+6/14/2021,155,SU-25,unknown,chlorophyll,µg/L,1.576,Thawed but cool,NA
+6/16/2021,275,U-12,duplicate,chlorophyll,µg/L,1.441,Thawed but cool,NA
+6/16/2021,275,U-12,unknown,chlorophyll,µg/L,1.549,Thawed but cool,NA
+6/18/2021,240,1,unknown,chlorophyll,µg/L,5.803,Thawed but cool,NA
+6/22/2021,69_transitional,U-12,unknown,chlorophyll,µg/L,1.681,Thawed but cool,NA
+6/24/2021,69_lacustrine,U-04,unknown,chlorophyll,µg/L,0.582,Thawed but cool,NA
+6/26/2021,70_lacustrine,U-06,duplicate,chlorophyll,µg/L,0.77,Frozen,NA
+6/26/2021,70_lacustrine,U-06,unknown,chlorophyll,µg/L,0.506,Frozen,NA
+6/29/2021,70_riverine,U-06,unknown,chlorophyll,µg/L,2.784,Frozen,NA
+7/10/2021,326,U-05,unknown,chlorophyll,µg/L,2.319,Thawed - warm,NA
+7/11/2021,327,U-05,unknown,chlorophyll,µg/L,2.6,Thawed - warm,NA
+7/12/2021,70_transitional,U-7,unknown,chlorophyll,µg/L,3.897,Frozen,NA
+7/13/2021,231,S-24,unknown,chlorophyll,µg/L,35.66,Frozen,NA
+6/1/2021,233,S-18,unknown,chlorophyll,µg/L,11.453,Badly thawed - warm,NA
+7/7/2021,79,U-12,unknown,chlorophyll,µg/L,22.008,Frozen,NA
+7/8/2021,298,U-01,duplicate,chlorophyll,µg/L,7.524,Thawed - warm,NA
+7/8/2021,298,U-01,unknown,chlorophyll,µg/L,7.916,Thawed - warm,NA
+7/9/2021,75,U-8,duplicate,chlorophyll,µg/L,75.071,Frozen,NA
+7/9/2021,75,U-8,unknown,chlorophyll,µg/L,71.082,Frozen,NA
+7/15/2021,147,U-01,unknown,chlorophyll,µg/L,40.741,Thawed - warm - weekend out of freezer,NA
+7/15/2021,147,U-01,duplicate,chlorophyll,µg/L,35.904,Thawed - warm - weekend out of freezer,NA
+8/29/2023,147,u01,unknown,chlorophyll,µg/L,20.796,NA,NA
+7/28/2021,232,U-13,unknown,chlorophyll,µg/L,206.362,held for 62 days,H
+8/25/2021,16,O8,unknown,chlorophyll,µg/L,19.532,NA,NA
+8/26/2021,82,U-11,unknown,chlorophyll,µg/L,36.053,NA,NA
+8/24/2021,119,O4,unknown,chlorophyll,µg/L,17.92,NA,NA
+8/28/2021,137,O4,unknown,chlorophyll,µg/L,6.198,NA,NA
+8/28/2021,137,O4,duplicate,chlorophyll,µg/L,6.39,NA,NA
+7/27/2021,167,U-06,unknown,chlorophyll,µg/L,8.663,Torn filter;held for 63 days,H
+7/27/2021,167,U-06,duplicate,chlorophyll,µg/L,35.63,held for 63 days,H
+8/17/2021,291,U-13,unknown,chlorophyll,µg/L,12.149,NA,NA
+8/17/2021,291,U-13,duplicate,chlorophyll,µg/L,12.897,NA,NA
+8/19/2021,296,U-17,unknown,chlorophyll,µg/L,2.666,NA,NA
+8/23/2021,297,U-41,unknown,chlorophyll,µg/L,4.132,NA,NA
+8/20/2021,317,U-18,unknown,chlorophyll,µg/L,9.323,NA,NA
+8/25/2021,67,O4,unknown,chlorophyll,µg/L,9.202,NA,NA
+8/25/2021,67,O4,duplicate,chlorophyll,µg/L,7.13,NA,NA
+7/29/2021,68,SU-4,duplicate,chlorophyll,µg/L,23.866,held for 61 days,H
+7/29/2021,68,SU-4,unknown,chlorophyll,µg/L,63.493,held for 61 days,H
+7/31/2021,69_riverine,U-07,unknown,chlorophyll,µg/L,1.164,NA,NA
+8/26/2021,72,U-09,unknown,chlorophyll,µg/L,11.669,NA,NA
+8/9/2021,71,2,unknown,chlorophyll,µg/L,2.076,NA,NA
+7/26/2021,78,U-29,unknown,chlorophyll,µg/L,1.732,held for 64 days,H
+6/29/2021,288,U-10,unknown,chlorophyll,µg/L,62.04,Communication problem between laptop and fluorometer.  Sample and waterbody linked messed up.  These are best guess.  Use with caution.;held for 64 days,H
+6/29/2021,288,U-10,duplicate,chlorophyll,µg/L,75.444,Communication problem between laptop and fluorometer.  Sample and waterbody linked messed up.  These are best guess.  Use with caution.;held for 64 days,H
+6/30/2021,316,U-3,unknown,chlorophyll,µg/L,4.543,Communication problem between laptop and fluorometer.  Sample and waterbody linked messed up.  These are best guess.  Use with caution.;held for 63 days,H
+6/1/2022,55,U14,unknown,chlorophyll,µg/L,8.356,NA,NA
+6/1/2022,55,U14,duplicate,chlorophyll,µg/L,2.458,NA,NA
+6/6/2022,146,SU04,unknown,chlorophyll,µg/L,20.673,NA,NA
+6/6/2022,146,SU04,duplicate,chlorophyll,µg/L,20.647,NA,NA
+6/8/2022,190,SU08,unknown,chlorophyll,µg/L,7.599,NA,NA
+6/13/2022,184,U03,unknown,chlorophyll,µg/L,6.868,NA,NA
+6/15/2022,166,U06,unknown,chlorophyll,µg/L,19.383,NA,NA
+6/22/2022,76,U07,unknown,chlorophyll,µg/L,0.694,NA,NA
+6/22/2022,76,U07,duplicate,chlorophyll,µg/L,0.627,NA,NA
+6/23/2022,77,U12,unknown,chlorophyll,µg/L,1.834,NA,NA
+6/23/2022,66,U16,unknown,chlorophyll,µg/L,3.46,NA,NA
+7/6/2022,64,U02,unknown,chlorophyll,µg/L,3.554,NA,NA
+7/6/2022,64,U02,duplicate,chlorophyll,µg/L,3.585,NA,NA
+7/14/2022,117,U12,unknown,chlorophyll,µg/L,29.084,NA,NA
+7/14/2022,117,U12,duplicate,chlorophyll,µg/L,29.119,NA,NA
+7/20/2022,328,U07,unknown,chlorophyll,µg/L,4.82,NA,NA
+7/20/2022,328,U07,duplicate,chlorophyll,µg/L,5.529,NA,NA
+7/21/2022,136,U13,unknown,chlorophyll,µg/L,1.44,NA,NA
+7/21/2022,136,U13,duplicate,chlorophyll,µg/L,2.472,NA,NA
+7/22/2022,276,U20,unknown,chlorophyll,µg/L,1.078,NA,NA
+7/23/2022,100,U11,unknown,chlorophyll,µg/L,1.954,NA,NA
+7/25/2022,206,U02,unknown,chlorophyll,µg/L,2.919,NA,NA
+8/3/2022,165,U06,unknown,chlorophyll,µg/L,8.484,NA,NA
+8/5/2022,159,U12,unknown,chlorophyll,µg/L,2.061,NA,NA
+8/5/2022,159,U12,duplicate,chlorophyll,µg/L,2.022,NA,NA
+8/9/2022,2,U10,unknown,chlorophyll,µg/L,20.131,NA,NA
+8/9/2022,2,U10,duplicate,chlorophyll,µg/L,18.644,NA,NA
+8/11/2022,84,U03,unknown,chlorophyll,µg/L,17.941,NA,NA
+8/15/2022,51,U02,unknown,chlorophyll,µg/L,4.606,NA,NA
+8/15/2022,51,U02,duplicate,chlorophyll,µg/L,4.268,NA,NA
+8/19/2022,45,U17,unknown,chlorophyll,µg/L,1.099,NA,NA
+8/19/2022,45,U17,duplicate,chlorophyll,µg/L,0.753,NA,NA
+8/20/2022,247,U06,unknown,chlorophyll,µg/L,3.423,NA,NA
+8/20/2022,247,U06,duplicate,chlorophyll,µg/L,3.717,NA,NA
+8/30/2022,65,U08,unknown,chlorophyll,µg/L,3.032,NA,NA
+8/30/2022,65,U08,duplicate,chlorophyll,µg/L,3.062,NA,NA
+9/12/2022,11,U03,unknown,chlorophyll,µg/L,1.664,NA,NA
+9/12/2022,11,U03,duplicate,chlorophyll,µg/L,1.569,NA,NA
+8/23/2022,157,U04,unknown,chlorophyll,µg/L,3.581,NA,NA
+8/23/2022,157,U04,duplicate,chlorophyll,µg/L,3.886,NA,NA
+8/16/2021,148,7,duplicate,chlorophyll,µg/L,22.61,NA,NA
+8/24/2023,148,u07,unknown,chlorophyll,µg/L,64.781,4x dilution,NA
+8/18/2022,10,U02,unknown,chlorophyll,µg/L,2.266,NA,NA
+8/25/2022,188,U09,unknown,chlorophyll,µg/L,2.739,NA,NA
+8/24/2023,148,u07,duplicate,chlorophyll,µg/L,64.868,4x dilution,NA
+8/18/2022,264,U15,unknown,chlorophyll,µg/L,148.546,NA,NA
+9/15/2022,3,U20,unknown,chlorophyll,µg/L,60.656,NA,NA
+6/18/2023,47,S01,unknown,chlorophyll,µg/L,20.717,NA,NA
+6/18/2023,47,S01,duplicate,chlorophyll,µg/L,8.52,NA,NA
+6/19/2023,49,S21,unknown,chlorophyll,µg/L,4.012,NA,NA
+6/24/2023,13,U07,unknown,chlorophyll,µg/L,7.213,NA,NA
+6/22/2023,46,U12,unknown,chlorophyll,µg/L,4.935,NA,NA
+6/27/2023,103,U11,unknown,chlorophyll,µg/L,3.589,NA,NA
+6/27/2023,103,U11,duplicate,chlorophyll,µg/L,4.269,NA,NA
+7/25/2023,186,U08,unknown,chlorophyll,µg/L,1.721,NA,NA
+7/28/2023,18,S26,unknown,chlorophyll,µg/L,10.388,NA,NA
+7/28/2023,18,S26,duplicate,chlorophyll,µg/L,6.758,NA,NA
+7/28/2023,57,S04,unknown,chlorophyll,µg/L,19.724,NA,NA
+7/28/2023,57,S04,duplicate,chlorophyll,µg/L,19.191,NA,NA
+8/1/2023,14,U08,unknown,chlorophyll,µg/L,28.323,NA,NA
+8/1/2023,14,U08,duplicate,chlorophyll,µg/L,26.237,NA,NA
+8/3/2023,1,S08,unknown,chlorophyll,µg/L,14.485,NA,NA
+7/17/2023,17,U02,unknown,chlorophyll,µg/L,201.483,4x dilution,NA
+7/17/2023,17,U02,duplicate,chlorophyll,µg/L,178.937,4x dilution,NA
+9/2/2022,250,U03,unknown,chlorophyll,µg/L,0.219,NA,NA
+8/30/2023,53,u06,unknown,chlorophyll,µg/L,6.316,NA,NA
+8/30/2023,53,u06,duplicate,chlorophyll,µg/L,6.348,NA,NA
+9/5/2023,52,u09,unknown,chlorophyll,µg/L,13.012,NA,NA
+8/31/2022,281,U12,unknown,chlorophyll,µg/L,0.109,NA,NA
+8/31/2022,281,U12,duplicate,chlorophyll,µg/L,0.183,NA,NA
+10/24/2023,1000,S-03,unknown,chlorophyll,µg/L,12.916,NA,NA
+10/24/2023,1000,S-03,duplicate,chlorophyll,µg/L,15.569,NA,NA
+6/4/2023,195,S2,duplicate,chlorophyll,µg/L,39.684,NA,NA
+6/4/2023,195,S3,unknown,chlorophyll,µg/L,38.38,NA,NA
+6/5/2023,99,16,duplicate,chlorophyll,µg/L,6.258,NA,NA
+6/5/2023,99,16,unknown,chlorophyll,µg/L,6.297,NA,NA
+6/6/2023,214,4,unknown,chlorophyll,µg/L,15.018,NA,NA
+6/8/2023,230,S8,unknown,chlorophyll,µg/L,4.097,NA,NA
+6/8/2023,4,S9,unknown,chlorophyll,µg/L,12.057,NA,NA
