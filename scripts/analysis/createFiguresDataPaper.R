@@ -189,9 +189,13 @@ unstab
 
 ## Plot of Variables that Survey was Designed on
 
+# source("scripts/masterLibrary.R")
+# load("SuRGE-masterScript-objects_2025Mar25.RData")
+
+
 lake.list.plot.methane<-left_join(
   emissions_agg %>%
-    select(lake_id, visit,ch4_total_lake)%>%
+    select(lake_id, visit,ch4_ebullition_lake, ch4_diffusion_lake)%>%
     mutate(type="methane"),
   
   lake.list.all %>%
@@ -201,12 +205,15 @@ lake.list.plot.methane<-left_join(
                              TRUE ~ lake_id))%>%
   mutate(lake_id=as.numeric(lake_id))%>%
     select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
-  rename(emission = "ch4_total_lake")
+  #rename(emission = "ch4_total_lake") %>%
+  pivot_longer(values_to = "emission", names_to = "pathway",
+               cols = c(ch4_ebullition_lake, ch4_diffusion_lake))
 
 lake.list.plot.cd<-left_join(
   emissions_agg %>%
     select(lake_id, visit,co2_total_lake)%>%
-    mutate(type="carbon dioxide"),
+    mutate(type="carbon dioxide",
+           pathway = "total"),
   
   lake.list.all %>%
     mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
@@ -233,13 +240,18 @@ ecoregion<-lake.list.plot  %>%
         axis.text.y = element_text(size = 14),
         axis.title = element_text(size = 16),
         strip.text = element_text(size = 16),
-        legend.position="none")+
-  geom_boxplot(aes(fill=type))+
+        legend.text = element_text(size = 14),
+        legend.position="top"
+        )+
+  geom_boxplot(aes(fill=pathway))+
   geom_hline(yintercept = 0, linetype = 2) +
-  facet_wrap(~type, scales = "free_y") +
+  facet_wrap(~type, scales = "free") +
   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
-  xlab("")
+  xlab("") +
+  scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
+                                 expression(CH[4]~ebullition), 
+                                 expression(total~CO[2]~emissions)))
 ecoregion
 
 depth<-lake.list.plot %>%
@@ -251,13 +263,17 @@ depth<-lake.list.plot %>%
         axis.text = element_text(size = 14),
         axis.title = element_text(size = 16),
         strip.text = element_text(size = 16),
-        legend.position="none")+
-  geom_boxplot(aes(fill=type))+
+        legend.position="none"
+        )+
+  geom_boxplot(aes(fill=pathway))+
   geom_hline(yintercept = 0, linetype = 2) +
-  facet_wrap(~type, scales = "free_y") +
+  facet_wrap(~type, scales = "free") +
   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
-  xlab("")
+  xlab("")+
+  scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
+                                 expression(CH[4]~ebullition), 
+                                 expression(total~CO[2]~emissions)))
 depth
 
 productivity<-lake.list.plot %>%
@@ -269,17 +285,21 @@ productivity<-lake.list.plot %>%
         axis.text = element_text(size = 14),
         axis.title = element_text(size = 16),
         strip.text = element_text(size = 16),
-        legend.position="none")+
-  geom_boxplot(aes(fill=type))+
+        legend.position="none"
+        )+
+  geom_boxplot(aes(fill=pathway))+
   geom_hline(yintercept = 0, linetype = 2) +
-  facet_wrap(~type, scales = "free_y") +
+  facet_wrap(~type, scales = "free") +
   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
-  xlab("")
+  xlab("")+
+  scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
+                                 expression(CH[4]~ebullition), 
+                                 expression(total~CO[2]~emissions)))
 productivity
 
 top_row <- plot_grid(depth,productivity)
 
-strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,2))
+strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,1.75))
 strata_fig
 
