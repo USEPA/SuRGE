@@ -225,30 +225,55 @@ dev.off()
 
 # EXAMPLE RESERVOIR SURVEY-------------
 st_layers(paste0(userPath, "lakeDsn/CIN/CH4-013/merc013.gpkg")) # see layer names
-p_perimeter <- st_read(paste0(userPath, "lakeDsn/CIN/CH4-013/merc013.gpkg"), 
-                       layer = "merc013")
-p_points <- st_read(paste0(userPath, "lakeDsn/CIN/CH4-013/merc013.gpkg"), 
-                       layer = "MainSitesMerc013")
+p_polygon <- st_read(paste0("/vsizip/", userPath, "lakeDsn/2016_survey/brookville/brookevilleEqArea84.zip"))
+p_points <- st_read(paste0("/vsizip/", userPath, "lakeDsn/2016_survey/brookville/brookevilleMainSites84.zip")) %>%
+  mutate(site_type = case_when(siteID == "SU-07" ~ "index",
+                               TRUE ~ "routine"))
+p_bb <- st_read(paste0(userPath, "lakeDsn/2016_survey/brookville/brookville_bb.shp"))
 
 
+ggplot() +
+  
+  # bounding box to make room for scale, north arrow, etc
+  geom_sf(data = p_bb, fill = NA, color = NA) +
+  
+  # lake polygon
+  geom_sf(data = p_polygon, aes(fill = section)) + # color by section
+  scale_fill_manual(breaks = c("trib", "north", "south"), # reorder to spatially align with reservoir
+                    values = c("#CCCCFF", "#9999FF", "#6666FF")) + # custom colors
+  guides(fill = guide_legend(position = "inside")) + # put legend in plotting space
+  
+  # sites within reservoir
+  geom_sf(data = p_points, aes(size = site_type)) +
+  scale_size_manual(values = c(4,2)) +
+  guides(size = guide_legend(position = "inside")) + # put legend in plotting space
+  
+  # spatial-aware automagic scale bar
+  ggspatial::annotation_scale(location = "bl",
+                              pad_x = unit(2, "cm")) +
+  
+  # spatial-aware automagic north arrow
+  ggspatial::annotation_north_arrow(location = "br", 
+                                    which_north = "true",
+                                    pad_x = unit(2, "cm"),
+                                    height = unit(1, "cm"), 
+                                    width = unit(1, "cm")) +
+  
+  ggtitle("Brookville Reservoir, IN") +
+  
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.border = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        legend.position.inside = c(0.8, 0.5))
 
-mf_export(x = p_perimeter,
-          filename = "output/figures/exampleLakeDsn.png",
-          width = 600, 
-          expandBB = c(.1,.1,0.9,.1)) # (bottom, left, top, right)
-mf_map(p_perimeter, type ="base")
-mf_map(p_points, type = "base", add = TRUE)
-mf_scale(size = 0.25, pos = "bottomright", scale_units = "km",
-         cex = 1.5)
-mf_arrow(pos = "bottom", cex = 2)
-mf_title("Concord Pond, MA", 
-         bg = NA,
-         pos = "center",
-         tab = FALSE,
-         cex = 1.5,
-         line = 1.5,
-         inner = TRUE)
-
-dev.off()
+ggsave("output/figures/brookvilleDesign.png", width = 4.02, height = 6.64)
 
 
