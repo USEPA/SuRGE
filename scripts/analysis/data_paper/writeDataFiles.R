@@ -113,15 +113,16 @@ master_dictionary <- tribble(~variable, ~definition,
                              "ag_eco9_nm", "Full name of the 9 aggregated ecoregions used for the SuRGE survey design",
                              "depth_cat", "Depth category used for the SuRGE survey design",
                              "chla_cat", "Chlorophyll a category used for the SuRGE survery design",
+                             "study", "Survey effort the reservoir was included in. See data paper Figure 1.",
                              
                              #emissions (point)
-                             "ch4_diffusion_best","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
-                             "ch4_diffusion_units","ch4_diffusion_best units",
+                             "ch4_diffusion","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
+                             "ch4_diffusion_units","ch4_diffusion units",
                              "ch4_ebullition","areal ch4 ebullition flux from bubble traps",
                              "ch4_ebullition_units","ch4_ebullition units",
                              "ch4_total","the sum of ch4 diffusion and ch4 ebullition when both were measured",
                              "ch4_total_units","ch4_total units",
-                             "co2_diffusion_best","areal co2 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
+                             "co2_diffusion","areal co2 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
                              "co2_diffusion_units","co2_diffusion units",
                              "co2flag","Value of U if the floating chamber experienced an unstable start",
                              "co2_ebullition","areal co2 ebullition flux from bubble traps",
@@ -144,7 +145,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "ch4_total_lake", "lakewide total methane flux estimated using survey site weights",
                              "ch4_total_units_lake","units for ch4_total_lake",
                              "co2_ebullition_lake", "lakewide areal carbon dioxide ebullition flux estimated using survey site weights",
-                             "co2_ebulliiton_units_lake", "units for co2_ebullition_lake",
+                             "co2_ebullition_units_lake", "units for co2_ebullition_lake",
                              "co2_diffusion_lake", "lakewide areal carbon dioxide diffuion flux estimated using survey site weights",
                              "co2_diffusion_units_lake", "units for co2_diffusion_lake",
                              "co2_total_lake", "lakewide areal total carbon dioxide flux estimated using survey site weights",
@@ -155,12 +156,24 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_ebullition_std_error_lake", "standard error of co2_ebullition_lake",
                              "co2_diffusion_std_error_lake", "standard error of co2_diffusion_lake",
                              "co2_total_std_error_lake", "standard error of co2_total_lake",
-                             "ch4_ebullition_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale ch4 ebullition rate estimate.",
-                             "ch4_diffusion_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale ch4 diffusion rate estimate.",
-                             "ch4_total_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale total ch4 emission rate estimate",
-                             "co2_ebullition_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale co2 ebullition rate estimate",
-                             "co2_diffusion_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale co2 diffusion rate estimate",
-                             "co2_total_margin_of_error_lake", "The average half-width of the 95% confidence interval of the lake-scale total co2 emission rate estimate",
+                             "ch4_ebullition_margin_of_error_lake", paste("The average half-width of the 95% confidence interval of the lake-scale ch4 ebullition rate estimate.",
+                                                                          "See Michael Dumelle, Tom Kincaid, Anthony R. Olsen, Marc Weber (2023). spsurvey: Spatial Sampling Design",
+                                                                          "and Analysis in R. Journal of Statistical Software, 105(3), 1-29. doi:10.18637/jss.v105.i03"),
+                             "ch4_diffusion_margin_of_error_lake", paste("The average half-width of the 95% confidence interval of the lake-scale ch4 diffusion rate estimate.",
+                                                                         "See Michael Dumelle, Tom Kincaid, Anthony R. Olsen, Marc Weber (2023). spsurvey: Spatial Sampling Design",
+                                                                         "and Analysis in R. Journal of Statistical Software, 105(3), 1-29. doi:10.18637/jss.v105.i03"),
+                             "ch4_total_margin_of_error_lake", paste("The average half-width of the 95% confidence interval of the lake-scale total ch4 emission rate estimate.",
+                                                                     "See Michael Dumelle, Tom Kincaid, Anthony R. Olsen, Marc Weber (2023). spsurvey: Spatial Sampling Design",
+                                                                     "and Analysis in R. Journal of Statistical Software, 105(3), 1-29. doi:10.18637/jss.v105.i03"),
+                             "co2_ebullition_margin_of_error_lake", paste("The average half-width of the 95% confidence interval of the lake-scale co2 ebullition rate estimate.",
+                                                                          "See Michael Dumelle, Tom Kincaid, Anthony R. Olsen, Marc Weber (2023). spsurvey: Spatial Sampling Design",
+                                                                          "and Analysis in R. Journal of Statistical Software, 105(3), 1-29. doi:10.18637/jss.v105.i03"),
+                             "co2_diffusion_margin_of_error_lake", paste("The average half-width of the 95% confidence interval of the lake-scale co2 diffusion rate estimate.",
+                                                                         "See Michael Dumelle, Tom Kincaid, Anthony R. Olsen, Marc Weber (2023). spsurvey: Spatial Sampling Design",
+                                                                         "and Analysis in R. Journal of Statistical Software, 105(3), 1-29. doi:10.18637/jss.v105.i03"),
+                             "co2_total_margin_of_error_lake", paste("The average half-width of the 95% confidence interval of the lake-scale total co2 emission rate estimate.",
+                                                                     "See Michael Dumelle, Tom Kincaid, Anthony R. Olsen, Marc Weber (2023). spsurvey: Spatial Sampling Design",
+                                                                     "and Analysis in R. Journal of Statistical Software, 105(3), 1-29. doi:10.18637/jss.v105.i03"),
                              "ch4_ebullition_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_ebullition_lake",
                              "ch4_diffusion_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_diffusion_lake",
                              "ch4_total_lcb95pct_lake", "lower bound 95 percent confidence interval for ch4_total_lake",
@@ -176,23 +189,37 @@ master_dictionary <- tribble(~variable, ~definition,
                              
                              
                              #remote sensing (lake)
-                             "chl_predicted_sample_month", paste("predicted chlorophyll a concentration from the same month",
-                                                                  "and year that emissions were collected if available, otherwise mean predicted",
+                             "chl_predicted_sample_month_visit1", paste("predicted chlorophyll a concentration from the same month",
+                                                                  "and year that emissions were collected during the first site visit if available, otherwise mean predicted",
                                                                   "chlorophyll from 2018-2020 during the same month emissions were collected, ",
                                                                   "predictions are from LAGOS-US LANDSAT (1984-2020)"),
+                             "chl_predicted_sample_month_visit2", paste("predicted chlorophyll a concentration from the same month",
+                                                                        "and year that emissions were collected during the second site visit  if available, otherwise mean predicted",
+                                                                        "chlorophyll from 2018-2020 during the same month emissions were collected, ",
+                                                                        "predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "chl_predicted_sample_month_units", "units for chl_predicted_sample_month",
-                             "doc_predicted_sample_month", paste("predicted dissolved organic carbon concentration from the same month",
-                                                                  "and year that emissions were collected if available, otherwise mean predicted",
+                             "doc_predicted_sample_month_visit1", paste("predicted dissolved organic carbon concentration from the same month",
+                                                                  "and year that emissions were collected during the first site visit if available, otherwise mean predicted",
                                                                   "dissolved organic carbon concentration from 2018-2020 during the same month emissions",
                                                                   "were collected, predictions are from LAGOS-US LANDSAT (1984-2020)"),
+                             "doc_predicted_sample_month_visit2", paste("predicted dissolved organic carbon concentration from the same month",
+                                                                        "and year that emissions were collected during the second site visit if available, otherwise mean predicted",
+                                                                        "dissolved organic carbon concentration from 2018-2020 during the same month emissions",
+                                                                        "were collected, predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "doc_predicted_sample_month_units", "units for doc_predicted_sample_month",
-                             "chl_predicted_sample_season", paste("mean predicted chlorophyll a concentration during June to September",
-                                                                   "of the three years leading up to the emission sampling year as well as the samling year",
+                             "chl_predicted_sample_season_visit1", paste("mean predicted chlorophyll a concentration during June to September",
+                                                                   "of the three years leading up to the emission sampling year as well as the sampling year of the first visit",
                                                                    "when available, predictions are from LAGOS-US LANDSAT (1984-2020)"),
+                             "chl_predicted_sample_season_visit2", paste("mean predicted chlorophyll a concentration during June to September",
+                                                                         "of the three years leading up to the emission sampling year as well as the sampling year of the second visit",
+                                                                         "when available, predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "chl_predicted_sample_season_units","units for chl_predicted_sample_season",
-                             "doc_predicted_sample_season", paste("mean predicted dissolved organic carbon concentration during June to September",
-                                                                   "of the three years leading up to the emission sampling year as well as the sampling",
-                                                                   "year, when available, predictions are from LAGOS-US LANDSAT (1984-2020)"),
+                             "doc_predicted_sample_season_visit1", paste("mean predicted dissolved organic carbon concentration during June to September",
+                                                                   "of the three years leading up to the emission sampling year as well as the sampling year of the first visit,",
+                                                                   " when available, predictions are from LAGOS-US LANDSAT (1984-2020)"),
+                             "doc_predicted_sample_season_visit2", paste("mean predicted dissolved organic carbon concentration during June to September",
+                                                                         "of the three years leading up to the emission sampling year as well as the sampling year of the second visit,",
+                                                                         "when available, predictions are from LAGOS-US LANDSAT (1984-2020)"),
                              "doc_predicted_sample_season_units", "units for doc_predicted_sample_season",
 
                              # SITE DATA
@@ -231,7 +258,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "chla_lab", "Laboratory based chlorophyll a",
                              "nh4", "ammonium",
                              "no2_3", "nitrite + nitrate",
-                             "op", "orthophosphate",
+                             "op", "orthophosphate measured via colorimetry. Sometimes called reactive phosphorus.",
                              "tn", "total nitrogen",
                              "tp", "total phosphorus",
                              "no3", "nitrate",
@@ -278,16 +305,29 @@ lake_scale_data <- list(
     # most depth-based variables not ready 3/10/2025
     select(lake_id, surface_area, shoreline_length, shoreline_development, max_width, 
            mean_width, max_length, circularity, mean_depth_measured, max_depth_measured) %>%
+    mutate(across(c(surface_area, shoreline_length, max_width, mean_width, max_length), 
+           ~format(round(., 0), nsmall = 0)),
+           shoreline_development = format(round(shoreline_development, 2), nsmall = 2),
+           across(c(mean_depth_measured, max_depth_measured), ~ format(round(., 1), nsmall = 1)),
+           circularity = format(round(circularity, 3), nsmall = 3)) %>%
+    mutate(across(!lake_id, as.character)) %>% # needed to collapse into one column
     pivot_longer(!lake_id) %>%
     mutate(units = case_when(name == "surface_area" ~ "m2",
                              name == "shoreline_development" ~ "dimensionless",
                              name == "circularity" ~ "dimensionless",
-                             TRUE ~ "m")), # all others meters
+                             TRUE ~ "m")) %>% # all others meters
+    mutate(across(!lake_id, as.character)), # needed to collapse into one column
   
   # c.	Sedimentation rates
   sedimentation_link %>%
-    select(- c(sediment_predictor_type,sedimentation,sedimentation_units)) %>% # not sure about this variable or sedimentation numbers
-    mutate(across(!lake_id, as.character)) %>%
+    select(- c(sediment_predictor_type, sedimentation, sedimentation_units)) %>% # not sure about this variable or sedimentation numbers
+    mutate(
+      # Fix decimal places, otherwise many are shown when converted to character
+      basin_kfact = format(round(basin_kfact, 3), nsmall = 3),
+      across(c(basin_forest, basin_crop, basin_wetland, sediment_oc, basin_slope),
+             ~ format(round(., 2), nsmall = 2)),
+      across(c(clow_surface_area, basin_soc0_5), ~ format(round(., 0), nsmall = 0))
+      ) %>%
     # subset for development
     #filter(lake_id == 100) %>%
     #select(lake_id, contains("sedimentation"), contains("sediment")) %>%
@@ -310,6 +350,13 @@ lake_scale_data <- list(
   # f.	E:I and Residence Time estimates
   water_isotope_agg %>%
     mutate(lake_id = as.numeric(lake_id),
+           # decimals inherited from Renee's data release (10.23719/1531017)
+           e_i = format(round(e_i, 3), nsmall = 3),
+           sd_e_i = format(round(sd_e_i, 3), nsmall = 3),
+           retention_time = format(round(retention_time, 3), nsmall = 3),
+           sd_retention_time = case_when(is.na(sd_retention_time) ~ NA_character_,
+                                         TRUE ~ format(round(sd_retention_time, 3), nsmall = 3)),
+           
            across(-lake_id, as.character)) %>% # allow character and numeric in same column
     # all variables presenting a value must end with "_value". All variables
     # presenting units already end with "_units"
@@ -321,12 +368,16 @@ lake_scale_data <- list(
                  # breaking pattern in final _
                  names_pattern = "(.+)_(.+)"),
   
-  # survey design parameters
+  # survey design parameters and study 
   bind_rows(lake.list, lake.list.2016) %>%
     filter(eval_status_code == "S",
-           visit == 1) %>%
+           visit == 1) %>% 
     select(lake_id, wgt, ag_eco9, ag_eco9_nm, depth_cat, chla_cat) %>%
     mutate(wgt_units = "dimensionless",
+           study = case_when(lake_id %in% 1:998 ~ "SuRGE",
+                             lake_id %in% 1001:1032 ~ "2016 Regional Survey",
+                             lake_id %in% 999:1000 ~ "Hand picked",
+                             TRUE ~ "Fly you fools!"), # error code
            across(!lake_id, as.character)) %>% # needed to pivot all values to one column
     # all variables presenting a value must end with "_value". All variables
     # presenting units already end with "_units"
@@ -336,25 +387,61 @@ lake_scale_data <- list(
                  # every matching group to right creates new value column
                  names_to = c("name", ".value"), 
                  # breaking pattern in final _
-                 names_pattern = "(.+)_(.+)")
-    
+                 names_pattern = "(.+)_(.+)"),
+  
+  # LAGOS trophic status data
+  lagos_ts_agg_link %>%
+    select(lake_id, visit,
+           chl_predicted_sample_month, doc_predicted_sample_month,
+           chl_predicted_sample_season, doc_predicted_sample_season)%>%
+    mutate(chl_predicted_sample_month_units = "ug_l",
+           doc_predicted_sample_month_units = "mg_l",
+           chl_predicted_sample_season_units = "ug_l",
+           doc_predicted_sample_season_units = "mg_l") %>%
+    # all variables presenting a value must end with "_value". All variables
+    # presenting units already end with "_units"
+    rename_with(~ifelse(!grepl(c("units|lake_id|visit"), .x), paste0(.x, "_value"), .x)) %>%
+    pivot_longer(!c(lake_id, visit),
+                 # anything to left of pattern is "name"
+                 # every matching group to right creates new value column
+                 names_to = c("name", ".value"), 
+                 # breaking pattern in final _
+                 names_pattern = "(.+)_(.+)") %>%
+    # move visit from "visit" column to variable name. This is because this
+    # data object doesn't have a visit column
+    mutate(name = paste0(name, "_visit", visit)) %>%
+    select(-visit) %>%
+    # enforce digits, otherwise many digits are shown when converted to character below
+    mutate(value = format(round(value, 2), nsmall = 2))
+
   ) %>%
     map(., ~.x %>% mutate(value = as.character(value))) %>% # character to enable all to collapse into one column
-    map_dfr(., bind_rows) 
-
+    map_dfr(., bind_rows) %>%
+  filter(lake_id != 1033) # omit Falls Lake)
+  
 
 # Data dictionary
-#write.table(unique(lake_scale_data_paper$name), file = "clipboard", row.names = FALSE)
+# write.table(unique(lake_scale_data_paper$name), file = "clipboard", row.names = FALSE)
 lake_scale_dictionary <- master_dictionary %>%
   filter(variable %in% unique(lake_scale_data$name))
 
+# Are all values in data dictionary?
+ifelse (c(colnames(lake_scale_data) %in% site_data_dictionary$variable,
+          unique(lake_scale_data$name) %in% lake_scale_dictionary$variable) %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
+
 # write data
 write.csv(x = lake_scale_data, 
-          file = "../../../communications/manuscript/data_paper/3_lake_scale.csv")
+          file = "../../../communications/manuscript/data_paper/3_lake_scale.csv",
+          row.names = FALSE)
 
 # write dictionary
 write.csv(x = lake_scale_dictionary, 
-          file = "../../../communications/manuscript/data_paper/3_lake_scale_dictionary.csv")
+          file = "../../../communications/manuscript/data_paper/3_lake_scale_dictionary.csv",
+          row.names = FALSE)
 
 
 # 4. DEPTH PROFILES----
@@ -382,10 +469,16 @@ depth_profiles_data <- list(
                           TRUE ~ lake_id)),
   
   # 2016 data
-  depth_profile_2016) %>%
+  depth_profile_2016 %>%
+    select(-do_sat)) %>%
   map(., ~.x %>% 
         mutate(lake_id = as.numeric(lake_id),
-               site_id = as.character(site_id))) %>%
+               site_id = as.character(site_id),
+               temp = round(temp, 1),
+               do = round(do, 1),
+               sp_cond = round(sp_cond, 0),
+               turbidity = round(turbidity, 1)) %>%
+        relocate(lake_id, site_id, visit, sample_depth)) %>%
   map_dfr(., bind_rows) # rbinds into one df
 
 # Data dictionary
@@ -394,11 +487,13 @@ depth_profiles_dictionary <- master_dictionary %>%
 
 # write data
 write.csv(x = depth_profiles_data, 
-          file = "../../../communications/manuscript/data_paper/4_depth_profiles.csv")
+          file = "../../../communications/manuscript/data_paper/4_depth_profiles.csv",
+          row.names = FALSE)
 
 # write dictionary
 write.csv(x = depth_profiles_dictionary, 
-          file = "../../../communications/manuscript/data_paper/4_depth_profiles_dictionary.csv")
+          file = "../../../communications/manuscript/data_paper/4_depth_profiles_dictionary.csv",
+          row.names = FALSE)
 
 
 
@@ -440,16 +535,27 @@ site_data <-
                    names_pattern = "(.+)_(.+)") %>%
       mutate(sample_depth = sub("\\_.*", "", name), # move depth to new column
              name = gsub(c("deep_|shallow_"), "", name)) %>% # remove depth from name column
+      # fix turbidity name
+      mutate(name = case_when(name == "turb" ~ "turbidity",
+                              TRUE ~ name)) %>%
       # create units columns
       mutate(units = case_when(name == "chla_sonde" ~ "ug_l",
                                name == "phycocyanin_sonde" ~ "ug_l",
                                name == "do" ~ "mg_l",
                                name == "ph" ~ "ph",
                                name == "sp_cond" ~ "us_cm",
-                               name == "turb" ~ "ntu",
+                               name == "turbidity" ~ "ntu",
                                name == "temp" ~ "c",
                                TRUE ~ "FLY YOU FOOLS!"),
              value = as.numeric(value)) %>% # something in here is causing a character value?
+      # NLA conventions
+      mutate(value = case_when(name == "ph" ~ round(value, 2),
+                               name == "temp" ~ round(value, 1),
+                               name == "do" ~ round(value, 1),
+                               name == "sp_cond" ~ round(value, 0),
+                               name == "turbidity" ~ round(value, 1),
+                               name == "chla_sonde" ~ round(value, 1),
+                               TRUE ~ value)) %>%
       drop_na(value), # omit record if no value reported
     
     
@@ -536,7 +642,26 @@ site_data <-
                    names_pattern = "(.+)_(.+)") %>%
       mutate(sample_depth = "shallow") %>%
       drop_na(value) # omit record if no value reported
-  )
+  ) %>%
+  # enforce decimal points
+  filter(!(name == "po4")) %>% # omit IC based po4 from TTEB
+  mutate(value = case_when(
+    # nitrogen analytes reported in ug_n_l
+    name %in% c("nh4", "no2", "no2_3", "no3", "tn") ~ round(value, 1),
+    # TP and colorimetric base p in ug_p_l
+    name %in% c("op", "tp") ~ round(value, 1),
+    # 5 decimals reported for tteb data
+    name %in% metals ~ round(value, 5), # metals is from chemSampleList.R
+    # anions in mg_l. decimals based on MDL. See Wiki, 
+    # Anions: analytical methods, detection limits, and holding times/CIN-TTEB Table
+    name %in% c("br", "f") ~ round(value, 3), 
+    name %in% c("cl", "so4") ~ round(value, 2), 
+    # based on NLA convention
+    name %in% c("doc", "toc") ~ round(value, 2),
+    # based on NLA convention
+    name == "chla_lab" ~ round(value, 2),
+    # error flag
+    TRUE ~ value))
 
 #write.table(unique(site_data$name), file = "clipboard", row.names = FALSE)
 
@@ -555,14 +680,16 @@ ifelse (c(colnames(site_data) %in% site_data_dictionary$variable,
 
 # write data
 write.csv(x = site_data, 
-          file = "../../../communications/manuscript/data_paper/5_site_data.csv")
+          file = "../../../communications/manuscript/data_paper/5_site_data.csv",
+          row.names = FALSE)
 
 # write dictionary
 write.csv(x = site_data_dictionary, 
-          file = "../../../communications/manuscript/data_paper/5_site_data_dictionary.csv")
+          file = "../../../communications/manuscript/data_paper/5_site_data_dictionary.csv",
+          row.names = FALSE)
 
 
-# 6. EMISSIONS RATES (POINT)----
+# 6. EMISSION RATES (POINT)----
 
 #First need to compile correct chamber deployment times into an object
 #pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
@@ -630,19 +757,42 @@ emission_rate_points_data_paper <- left_join(
       co2_total_units
     ),
   dep
-)
+) %>%
+  # remove "best" from diffusion variable
+  rename_with(.cols = contains("best"), ~sub(pattern = "_best", replacement = "", x = .)) %>%
+  # enforce decimal points
+  mutate(
+    # smallest non-zero ch4 diffusive emission rate is 0.0277
+    ch4_diffusion = round(ch4_diffusion, 2),
+    # smallest non-zero ch4 ebullition emission rate is 4.906696e-06
+         ch4_ebullition = round(ch4_ebullition, 6),
+    # smallest non-zero ch4 total emission rate is 1.394003e-05
+    ch4_total = round(ch4_total, 5),
+    # smallest non-zero abs(co2 diffusive emission rate) is 2.519658
+    co2_diffusion = round(co2_diffusion, 2),   
+    # smallest non-zero co2 ebullition is 0.0001472518
+    co2_ebullition = round(co2_ebullition, 4),
+    # smallest non-zero abs(co2 total) is 0.0001876054
+    co2_total = round(co2_total, 4))
 
 # Data dictionary
 emission_rate_points_data_paper_dictionary <- master_dictionary %>%
   filter(variable %in% colnames(emission_rate_points_data_paper))
+
+# Are all values in data dictionary?
+ifelse (c(colnames(emission_rate_points_data_paper) %in% emission_rate_points_data_paper_dictionary$variable) %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
 
 # write data
 write.csv(
   x = emission_rate_points_data_paper,
   file = paste0(
     userPath,
-    "communications/manuscript/data_paper/6_emission_rate_points.csv"
-  )
+    "communications/manuscript/data_paper/6_emission_rate_points.csv"),
+  row.names = FALSE
 )
 
 # write dictionary
@@ -650,79 +800,58 @@ write.csv(
   x = emission_rate_points_data_paper_dictionary,
   file = paste0(
     userPath,
-    "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv"
-  )
+    "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv"),
+  row.names = FALSE
 )
 
 
-# 7. EMISSIONS AND REMOTE SENSING (LAKE)------
+# 7. EMISSION RATES LAKE------
 
-emission_remote_lake_data_paper<- left_join(
-  emissions_agg,
-  
-  lagos_ts_agg_link %>%
-    select(lake_id, visit,
-           chl_predicted_sample_month, doc_predicted_sample_month,
-           chl_predicted_sample_season, doc_predicted_sample_season)%>%
-    mutate(chl_predicted_sample_month_units = "micrograms per liter",
-           doc_predicted_sample_month_units = "milligrams per liter",
-           chl_predicted_sample_season_units = "micrograms per liter",
-           doc_predicted_sample_season_units = "milligrams per liter")
-)%>%
-  #reorder variables so they match the data dictionary
-  select("lake_id", "visit", "ch4_ebullition_lake","ch4_ebullition_units_lake","ch4_diffusion_lake",
-         "ch4_diffusion_units_lake", "ch4_total_lake", "ch4_total_units_lake","co2_ebullition_lake", 
-         "co2_ebullition_units_lake", "co2_diffusion_lake", "co2_diffusion_units_lake","co2_total_lake", 
-         "co2_total_units_lake","ch4_ebullition_std_error_lake", "ch4_diffusion_std_error_lake", 
-         "ch4_total_std_error_lake",  "co2_ebullition_std_error_lake", "co2_diffusion_std_error_lake",
-         "co2_total_std_error_lake", "ch4_ebullition_margin_of_error_lake", "ch4_diffusion_margin_of_error_lake",
-         "ch4_total_margin_of_error_lake", "co2_ebullition_margin_of_error_lake","co2_diffusion_margin_of_error_lake", 
-         "co2_total_margin_of_error_lake", "ch4_ebullition_lcb95pct_lake", "ch4_diffusion_lcb95pct_lake", "ch4_total_lcb95pct_lake", 
-         "co2_ebullition_lcb95pct_lake",  "co2_diffusion_lcb95pct_lake", "co2_total_lcb95pct_lake", "ch4_ebullition_ucb95pct_lake", 
-         "ch4_diffusion_ucb95pct_lake",  "ch4_total_ucb95pct_lake", "co2_ebullition_ucb95pct_lake", "co2_diffusion_ucb95pct_lake", 
-         "co2_total_ucb95pct_lake", "chl_predicted_sample_month",  "chl_predicted_sample_month_units", "doc_predicted_sample_month", 
-         "doc_predicted_sample_month_units", "chl_predicted_sample_season",  "chl_predicted_sample_season_units","doc_predicted_sample_season", 
-         "doc_predicted_sample_season_units")
+emissions_lake_data_paper <- emissions_agg
 
 
 # Data dictionary
-emission_remote_lake_data_paper_dictionary <- master_dictionary %>%
-  filter(variable %in% colnames(emission_remote_lake_data_paper))
+emissions_lake_data_paper_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(emissions_lake_data_paper))
+
+# Reorder variables so they match the data dictionary
+emissions_lake_data_paper <- emissions_lake_data_paper %>%
+  relocate(emissions_lake_data_paper_dictionary$variable)
+
+# Are all values in data dictionary?
+ifelse (c(colnames(emissions_lake_data_paper) %in% emissions_lake_data_paper_dictionary$variable) %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
 
 # write data
 write.csv(
-  x = emission_remote_lake_data_paper,
+  x = emissions_lake_data_paper,
   file = paste0(
     userPath,
-    "communications/manuscript/data_paper/7_emission_remote_lake.csv"
-  )
-)
+    "communications/manuscript/data_paper/7_emissions_lake.csv"),
+  row.names = FALSE)
 
 # write dictionary
 write.csv(
-  x = emission_remote_lake_data_paper_dictionary,
+  x = emissions_lake_data_paper_dictionary,
   file = paste0(
     userPath,
-    "communications/manuscript/data_paper/7_emission_remote_lake_dictionary.csv"
-  )
-)
+    "communications/manuscript/data_paper/7_emissions_lake_dictionary.csv"),
+  row.names = FALSE)
 
 # 8. SITE DESCRIPTORS--------------
-# 8.	Site Descriptors
-# a.	Lake_id
-# b.	Site_id
-# c.	Visit
-# d.	site_depth
-# e.	Units
-# f.	Lat
-# g.	Long
-# h.	Site weight from the survey design
-# i.	Sampling dates (or just starting date of sampling)
-# i.	Sonde sampling date
-# ii.	Water chemistry date
-# iii.	Filter based chlorophyll
-# iv.	This might make sense, but maybe easier to fit in files where the data are presented
-# j.	Sampling interval
+# -.	Site Descriptors
+# -.	Lake_id
+# -.	Site_id
+# -.	Visit
+# -.	site_depth
+# -.	Units
+# -.	Site weight from the survey design
+# -.	Start and end dates of lake-specific sampling campaign
+# -.	Filter based chlorophyll sampling date
+
 
 site_descriptors_data <- 
   left_join(
@@ -730,7 +859,8 @@ site_descriptors_data <-
     # DATA FIRST
     dat %>%
       select(lake_id, site_id, visit, site_depth, site_wgt) %>%
-      mutate(site_depth_units = "m",
+      mutate(site_depth = round(site_depth, 1),
+             site_depth_units = "m",
              site_wgt_units = "dimensionless"),
     
     # Gather all available information pertaining sample dates, then calculate sample duration
@@ -762,14 +892,14 @@ site_descriptors_data <-
         mutate(across(contains("date_time"), as.Date)) %>%
         pivot_longer(-c(lake_id, visit), values_to = "collection_date") %>%
         select(-name)
-      ) %>% # close bind_rows
+    ) %>% # close bind_rows
       # calculate first and last sampling date per lake
       group_by(lake_id, visit) %>%
       summarize(
         sample_start = min(collection_date, na.rm = TRUE),
         sample_end = max(collection_date, na.rm = TRUE))
   ) %>% # close left join
-# Now date of chlorophyll sampling
+  # Now date of chlorophyll sampling
   left_join(
     bind_rows(
       # ADD DATE SuRGE CHLOROPHYLL SAMPLES WERE COLLECTED
@@ -793,6 +923,7 @@ site_descriptors_data <-
         mutate(chla_collection_date = as.Date(chla_collection_date, format = "%m.%d.%Y")),
       
       # ADD DATE 2016 CHLOROPHYLL SAMPLES WERE COLLECTED
+      # transcribed from field sheets
       tribble(~lake_id, ~site_id, ~visit, ~chla_collection_date,
               1023, 1, 1, as.Date("2016-07-26"), 
               1023, 30, 1, as.Date("2016-07-26"),
@@ -862,7 +993,14 @@ site_descriptors_data <-
 
 # Data quality checks
 # Are all chl sample dates within sampling date range?
-
+if (site_descriptors_data %>%
+    filter(!is.na(chla_collection_date)) %>%
+    mutate(date_check = !((chla_collection_date >= sample_start) & (chla_collection_date <= sample_end))) %>%
+    summarize(date_check = sum(date_check)) %>% pull() > 1) {
+  "All dates are good"
+} else {
+    "problem with dates"
+  }
 
 
 # Data dictionary
@@ -880,11 +1018,13 @@ ifelse (
 
 # write data
 write.csv(x = site_descriptors_data, 
-          file = "../../../communications/manuscript/data_paper/8_site_descriptors_data.csv")
+          file = "../../../communications/manuscript/data_paper/8_site_descriptors_data.csv",
+          row.names = FALSE)
 
 # write dictionary
 write.csv(x = site_descriptors_dictionary, 
-          file = "../../../communications/manuscript/data_paper/8_site_descriptors_dictionary.csv")
+          file = "../../../communications/manuscript/data_paper/8_site_descriptors_dictionary.csv",
+          row.names = FALSE)
 
 # 9. PHYTOPLANKTON-------------------
 phyto_data <-  read_excel(paste0(userPath,
@@ -902,8 +1042,10 @@ phyto_data <-  read_excel(paste0(userPath,
                            lake_id == 148 & year_col == 2023 ~ 2,
                            lake_id == 250 ~ 2, # samples from visit 1 lost
                            lake_id == 281 ~ 2, # samples from visit 1 lost
-                           TRUE ~ 1)) %>% # visit 1 for all others
+                           TRUE ~ 1), # visit 1 for all others
+         density_units = "cells_ml") %>%
   select(-year_col) %>%
+  relocate(lake_id, visit) %>%
   filter(!is.na(lake_id))
 
 
@@ -923,9 +1065,11 @@ ifelse (
 
 # write data
 write.csv(x = phyto_data, 
-          file = "../../../communications/manuscript/data_paper/10_phyto_data.csv")
+          file = "../../../communications/manuscript/data_paper/10_phyto_data.csv",
+          row.names = FALSE)
 
 # write dictionary
 write.csv(x = phyto_dictionary, 
-          file = "../../../communications/manuscript/data_paper/10_phyto_dictionary.csv")
+          file = "../../../communications/manuscript/data_paper/10_phyto_dictionary.csv",
+          row.names = FALSE)
 
