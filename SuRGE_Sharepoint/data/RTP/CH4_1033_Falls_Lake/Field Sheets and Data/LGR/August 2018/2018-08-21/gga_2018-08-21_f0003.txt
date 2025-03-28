@@ -1,0 +1,2 @@
+VC:2f90039 BD:Oct  1 2014 SN:LGR-15-0016
+                     Time,      [CH4]_ppm,   [CH4]_ppm_sd,     [CH4L]_ppm,  [CH4L]_ppm_sd,     [CH4H]_ppm,  [CH4H]_ppm_sd,      [H2O]_ppm,   [H2O]_ppm_sd,      [CO2]_ppm,   [CO2]_ppm_sd,     [CH4]d_ppm,  [CH4]d_ppm_sd,     [CO2]d_ppm,  [CO2]d_ppm_sd,      GasP_torr,   GasP_torr_sd,         GasT_C,      GasT_C_sd,         AmbT_C,      AmbT_C_sd,         RD0_us,      RD0_us_sd,         RD1_us,      RD1_us_sd,       Fit_Flag,      MIU_VALVE,       MIU_DESC

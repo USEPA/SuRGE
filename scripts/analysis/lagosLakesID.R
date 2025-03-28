@@ -13,13 +13,12 @@
 
 # LOCUS-LAKE_LINK
 # [6/12/2024] working on Jake's machine!!  If acting up, skip to line 18
-# lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
+lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
 locus <- lagosus_load(modules = c("locus"))
 names(locus)
 locus_link <- locus$locus$lake_link
 
-
-# Read lake_link from SharePoint or web if the above isn't working.
+# Can also read file from stored file or web if the above isn't working.
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
 # ll <- read.csv(paste0(userPath, "data/siteDescriptors/lake_link_lagos.csv")) # downloded locally
 # ll <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.854.1&entityid=5488e333ce818597fa3dbfc9b4e0c131") # from web
@@ -39,6 +38,7 @@ locus_link_aggregated <- locus_link %>%
 
 # 2. READ LOCUS-LAKE_CHARACTERISTICS------------
 locus_characteristics <- locus$locus$lake_characteristics
+
 # object contains many variables we will get from other sources (e.g. morphometry from Jeff,
 # watershed from Alex).  Subset to connectivity variables unique to lagos
 locus_connectivity <- locus_characteristics %>% 
@@ -116,27 +116,28 @@ lagos_network<- ln %>%
 
 # lagos productivity estimates
 # preprint link is: https://www.biorxiv.org/content/10.1101/2024.05.10.593626v1
-# url_lagos <- "https://portal-s.edirepository.org/nis/dataviewer?packageid=edi.1427.3&entityid=3cb4f20440cbd7b8e828e4068d2ab734"
-
-# 7 GB, takes about 30 minutes to download via httr.  Download once, save to disk, 
+# data repository here: https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=1427
+# url_lagos <- "https://portal-s.edirepository.org/nis/dataviewer?packageid=edi.1427.3&entityid=3cb4f20440cbd7b8e828e4068d2ab734" # deprecated
+url_lagos <-  "https://pasta.lternet.edu/package/data/eml/edi/1427/1/3cb4f20440cbd7b8e828e4068d2ab734" 
+# 7 GB, takes about 15 minutes to download via httr.  Download once, save to disk, 
 # then load from disk.  Much faster.
-# httr::GET(url_lagos, progress(), write_disk(tf <- tempfile(fileext = ".csv"))) # about 30 minutes at AWBERC
-# lagos_ts <- read.csv(tf) # another 15 minutes
+httr::GET(url_lagos, progress(), write_disk(tf <- tempfile(fileext = ".csv"))) # about 30 minutes at AWBERC
+lagos_ts <- read.csv(tf) # another 15 minutes
 
 # Alternatively, load .csv stored locally
 # lagos_ts <- read_csv("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/LAGOS_US/LAGOS_US_LANDSAT_Predictions_v1_QAQC.csv")
 
 # enforce naming conventions, define time
 # this takes a few minutes
-# lagos_ts <- lagos_ts %>%
-#   janitor::clean_names() %>%
-#   mutate(month = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::month(.),
-#          year = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::year(.)) %>%
-#   select(-sensing_time)
+lagos_ts <- lagos_ts %>%
+   janitor::clean_names() %>%
+   mutate(month = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::month(.),
+         year = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::year(.)) %>%
+   select(-sensing_time)
 
 # save to SharePoint, read from SharePoint to save time.
 # saveRDS(lagos_ts, paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
-lagos_ts <- readRDS(paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
+# lagos_ts <- readRDS(paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
 
 
 # 6. READ SURGE LAKES-------
@@ -235,10 +236,10 @@ lagos_ts_small <- lagos_ts %>%
 # trophic status records
 lake_list_for_lagos_merge_ts_lagoslakeid %>%
   filter(!(lagoslakeid %in% lagos_ts_small$lagoslakeid)) # only 3 lakes without lagos trophic status records
-dim(lagos_ts_small) # 77,802 observations
+dim(lagos_ts_small) # 76,848 observations
 
 # inspect the trophic status data
-# minimum of 155 observations/lake, max of 1331/lake, median of 515/lake
+# minimum of 155 observations/lake, max of 1331/lake, median of 511/lake
 lagos_ts_small %>% 
   group_by(lagoslakeid) %>%
   summarise(n_obs = sum(!is.na(chl_predicted))) %>%

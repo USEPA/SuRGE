@@ -1,3 +1,6 @@
+
+#devtools::install_github("USEPA/StreamCatTools", build_vignettes=FALSE)
+
 # Names of lakeCat variables
 lake_cat_vars <- lc_get_params(param='name') %>% 
   as_tibble %>%

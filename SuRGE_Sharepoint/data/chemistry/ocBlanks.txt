@@ -1,0 +1,24 @@
+"lake_id" "doc" "doc_flag" "doc_units" "toc" "toc_flag" "toc_units" "sample_year"
+"1" "308" NA NA NA 0.308 NA "mg_c_l" 2018
+"2" "116" NA NA NA 0.08 "<" "mg_c_l" 2020
+"3" "138" NA NA NA 0.08 "<" "mg_c_l" 2020
+"4" "191" NA NA NA 0.08 "<" "mg_c_l" 2020
+"5" "210" NA NA NA 0.08 "<" "mg_c_l" 2020
+"6" "211" NA NA NA 0.08 "<" "mg_c_l" 2020
+"7" "235" NA NA NA 0.08 "<" "mg_c_l" 2020
+"8" "238" NA NA NA 0.08 "<" "mg_c_l" 2020
+"9" "249" NA NA NA 0.08 "<" "mg_c_l" 2020
+"10" "83" NA NA NA 0.08 "<" "mg_c_l" 2020
+"11" "137" 0.1 "<" "mg_c_l" 0.114 NA "mg_c_l" 2021
+"12" "233" 0.168 NA "mg_c_l" 0.128 NA "mg_c_l" 2021
+"13" "275" NA NA NA 0.235 NA "mg_c_l" 2021
+"14" "288" NA NA NA 1.99 NA "mg_c_l" 2021
+"15" "291" 0.35 NA "mg_c_l" 0.328 NA "mg_c_l" 2021
+"16" "298" 0.1 "<" "mg_c_l" 0.109 NA "mg_c_l" 2021
+"17" "68" 0.784 NA "mg_c_l" 0.778 NA "mg_c_l" 2021
+"18" "70_lacustrine" 0.736 NA "mg_c_l" 0.279 NA "mg_c_l" 2021
+"19" "75" 0.173 NA "mg_c_l" 0.219 NA "mg_c_l" 2021
+"20" "147" 0.341 NA "mg_c_l" 0.43 NA "mg_c_l" 2021
+"21" "148" 0.226 NA "mg_c_l" 0.236 NA "mg_c_l" 2021
+"22" "167" 0.637 NA "mg_c_l" 0.479 NA "mg_c_l" 2021
+"23" "146" 0.194 NA "mg_c_l" 0.239 NA "mg_c_l" 2022

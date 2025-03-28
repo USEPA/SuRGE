@@ -1,0 +1,6 @@
+[1217/113712.257:ERROR:directory_reader_win.cc(43)] FindFirstFile: The system cannot find the path specified. (0x3)
+[1217/113712.272:ERROR:filesystem_win.cc(129)] GetFileAttributes C:\Users\JBEAULIE\AppData\Local\Google\Chrome\User Data\Crashpad\attachments\feba7fa3-d49a-4af5-9fdb-be8d947bcecd: The system cannot find the path specified. (0x3)
+[1217/113712.288:ERROR:filesystem_win.cc(129)] GetFileAttributes C:\Users\JBEAULIE\AppData\Local\Google\Chrome\User Data\Crashpad\attachments\472e3429-b57d-4c86-b5ec-eef74939a671: The system cannot find the path specified. (0x3)
+[1217/113712.288:ERROR:filesystem_win.cc(129)] GetFileAttributes C:\Users\JBEAULIE\AppData\Local\Google\Chrome\User Data\Crashpad\attachments\6d6e2ff7-c5a6-48fd-a02b-62c878111219: The system cannot find the path specified. (0x3)
+[1217/113712.288:ERROR:filesystem_win.cc(129)] GetFileAttributes C:\Users\JBEAULIE\AppData\Local\Google\Chrome\User Data\Crashpad\attachments\45cb9095-9712-4d7a-8489-ce90ac0a7efa: The system cannot find the path specified. (0x3)
+[1217/113712.304:ERROR:filesystem_win.cc(129)] GetFileAttributes C:\Users\JBEAULIE\AppData\Local\Google\Chrome\User Data\Crashpad\attachments\39de32d2-1f7f-4313-af4f-5b8afc0b02b5: The system cannot find the path specified. (0x3)
