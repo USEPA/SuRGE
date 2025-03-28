@@ -1,10 +1,35 @@
 ## 2016 data
 # load 2016 data-----------
 load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaData
+load(paste0(userPath, "data/CIN/2016_survey/deplyTimes.RData")) # loads chamber deployment/retrieval times (deplyTimes)
 
-dat_2016 <- eqAreaData # rename to dat_2016
-remove(eqAreaData) # remove original object
+# calculate duration of chamber deployment for CO2 and CH4
+deplyTimes <- deplyTimes %>%
+  mutate(ch4_deployment_length = (ch4RetDtTm - ch4DeplyDtTm) %>% 
+           as.numeric, # convert from dttm object to numeric
+         ch4_deployment_length_units = "s",
+         co2_deployment_length = (co2RetDtTm - co2DeplyDtTm) %>% 
+           as.numeric, # convert from dttm object to numeric
+         co2_deployment_length_units = "s") %>%
+  select(Lake_Name, siteID, contains("deployment"))
 
+
+# Merge the two 2016 data objects
+dim(eqAreaData) # 1531 (includes oversample sites)
+dim(eqAreaData %>% filter(EvalStatus == "sampled")) # 543
+dim(deplyTimes) # 535 (only sampled sites)
+# any observations in deplyTimes not in eqAreaData?
+# this returns 0, so all are accounted for, good
+sum(
+  !(interaction(deplyTimes %>% select(Lake_Name, siteID)) %in% 
+      interaction(eqAreaData %>% select(Lake_Name, siteID)))
+)
+
+dat_2016 <- full_join(eqAreaData, deplyTimes) # rename to dat_2016
+
+# remove original objects
+remove(eqAreaData) 
+remove(deplyTimes)
 
 # Format-------------
 dat_2016 <- dat_2016 %>% 
@@ -27,6 +52,10 @@ dat_2016 <- dat_2016 %>%
          trap_deply_dt_tm, # trap_deply_date_time
          trap_rtrv_dt_tm, # trap_rtrvl_date_time
          chm_deply_dt_tm,
+         ch4_deployment_length,
+         ch4_deployment_length_units,
+         co2_deployment_length,
+         co2_deployment_length_units,
          chla_d, chla_s,
          do_l_d, do_l_s,
          p_h_d, p_h_s,

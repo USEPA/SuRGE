@@ -190,6 +190,8 @@ for(i in 1:length(data.gga.ch4.list)){
   nch4<-length(data.gga.ch4.list[[i]]$CH4._ppm)
   dh2o<-max(data.gga.ch4.list[[i]]$H2O._ppm)-min(data.gga.ch4.list[[i]]$H2O._ppm)
   mh2o<-mean(data.gga.ch4.list[[i]]$H2O._ppm)
+  co2_deployment_length<-ifelse(as.numeric(max(data.gga.co2.list[[i]]$elapTime))=="-Inf",NA, as.numeric(max(data.gga.co2.list[[i]]$elapTime)))
+  ch4_deployment_length<-ifelse(as.numeric(max(data.gga.ch4.list[[i]]$elapTime))=="-Inf",NA, as.numeric(max(data.gga.ch4.list[[i]]$elapTime)))
   
   out<-data.frame(site_id, lake_id, visit, 
                   ch4.lm.slope, ch4.lm.drate.mg.h, 
@@ -199,7 +201,8 @@ for(i in 1:length(data.gga.ch4.list)){
                   co2.lm.slope, co2.lm.drate.mg.h, 
                   co2.lm.aic, co2.lm.r2, co2.lm.se, co2.lm.pval,
                   co2.ex.aic, co2.ex.se, co2.ex.r2, co2.ex.slope, 
-                  co2.ex.k, co2.ex.drate.mg.h,co2Flag,nco2,nch4,dh2o,mh2o, row.names = i)
+                  co2.ex.k, co2.ex.drate.mg.h,co2Flag,nco2,nch4,dh2o,mh2o, 
+                  co2_deployment_length, ch4_deployment_length, row.names = i)
   colnames(out)<-c("site_id", "lake_id", "visit", 
                    "ch4.lm.slope", "ch4.lm.drate.mg.h", 
                    "ch4.lm.aic", "ch4.lm.r2", "ch4.lm.se", "ch4.lm.pval",
@@ -209,7 +212,7 @@ for(i in 1:length(data.gga.ch4.list)){
                    "co2.lm.aic", "co2.lm.r2", "co2.lm.se", "co2.lm.pval",
                    "co2.ex.aic", "co2.ex.se", "co2.ex.r2", "co2.ex.slope", 
                    "co2.ex.k", "co2.ex.drate.mg.h","co2Flag","nco2","nch4",
-                   "dh2o","mh2o")
+                   "dh2o","mh2o","co2_deployment_length","ch4_deployment_length")
 
   OUT[[i]] = out
   

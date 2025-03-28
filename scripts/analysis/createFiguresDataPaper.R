@@ -159,8 +159,32 @@ CO2<-unstable_plot_data %>%
                  color = "retrieval"), key_glyph = "path") +
   scale_color_discrete(breaks = c("deployment", "CO2 stabilizes", "retrieval"), name="") +
   xlab("") +
-  ylab(expression(paste("CH "[4]*" (ppm)")))
+  ylab(expression(paste("CO "[2]*" (ppm)")))
 CO2
+
+CH4<-unstable_plot_data %>%
+  filter(name == "CH4._ppm") %>%
+  ggplot(aes(RDateTime, value)) +
+  geom_point() +
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),legend.title=element_blank(),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16),
+        axis.text.x = element_blank(),
+        axis.labels.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position="none")+
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:16:22", tz = "UTC")),
+                 color = "deployment"), key_glyph = "path") +
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:43", tz = "UTC")),
+                 color = "CO2 stabilizes"), key_glyph = "path") + #CO2
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
+                 color = "retrieval"), key_glyph = "path") +
+  scale_color_discrete(breaks = c("deployment", "CO2 stabilizes", "retrieval"), name="") +
+  xlab("") +
+  ylab(expression(paste("CH "[4]*" (ppm)")))
+CH4
 
 H2O<-unstable_plot_data %>%
   filter(name == "H2O._ppm") %>%
@@ -184,7 +208,7 @@ H2O<-unstable_plot_data %>%
   ylab(expression(paste("H "[2]*"O (ppt)")))
 H2O
 
-unstab<-cowplot::plot_grid(CO2,H2O,ncol=1,align="v",labels=c("A","B"),rel_heights = c(1.1,1))
+unstab<-cowplot::plot_grid(CO2,CH4,H2O,ncol=1,align="v",labels=c("A","B","C"),rel_heights = c(1.1,1,1))
 unstab
 
 ## Plot of Variables that Survey was Designed on
@@ -199,8 +223,9 @@ lake.list.plot.methane<-left_join(
     mutate(type="methane"),
   
   lake.list.all %>%
-  mutate(lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
-                             lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+  mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
+                            lake_id %in% c( "69_lacustrine") ~ "69",
+                             lake_id %in% c( "70_lacustrine") ~ "70",
                              TRUE ~ lake_id))%>%
   mutate(lake_id=as.numeric(lake_id))%>%
     select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
@@ -215,19 +240,22 @@ lake.list.plot.cd<-left_join(
            pathway = "total"),
   
   lake.list.all %>%
-    mutate(lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
-                               lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+    mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
+                               lake_id %in% c( "69_lacustrine") ~ "69",
+                               lake_id %in% c( "70_lacustrine") ~ "70",
                                TRUE ~ lake_id))%>%
     mutate(lake_id=as.numeric(lake_id))%>%
     select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
   rename(emission = "co2_total_lake")
 
-lake.list.plot<-bind_rows(lake.list.plot.methane,lake.list.plot.cd)
-
-ecoregion<-lake.list.plot  %>%
+lake.list.plot<-bind_rows(lake.list.plot.methane,lake.list.plot.cd)%>%
   filter(!is.na(ag_eco9_nm))%>%
   filter(!is.na(emission))%>%
   mutate(emi_mg=emission*24)%>%
+  filter(!is.na(depth_cat))%>%
+  filter(!is.na(chla_cat))
+
+ecoregion<-lake.list.plot  %>%
   ggplot(aes(x=ag_eco9_nm, y=emi_mg))+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
@@ -251,9 +279,6 @@ ecoregion<-lake.list.plot  %>%
 ecoregion
 
 depth<-lake.list.plot %>%
-  filter(!is.na(depth_cat))%>%
-  filter(!is.na(emission))%>%
-  mutate(emi_mg=emission*24)%>%
   mutate(depth_cat=ifelse(depth_cat=="GT_6m","deep","shallow")) %>%
   ggplot(aes(x=depth_cat, y=emi_mg))+
   theme_bw()+
@@ -276,9 +301,6 @@ depth<-lake.list.plot %>%
 depth
 
 productivity<-lake.list.plot %>%
-  filter(!is.na(emission))%>%
-  mutate(emi_mg=emission*24)%>%
-  filter(!is.na(chla_cat))%>%
   mutate(chla_cat=ifelse(chla_cat=="GT_7","productive","unproductive")) %>%
   ggplot(aes(x=chla_cat, y=emi_mg))+
   theme_bw()+
@@ -305,3 +327,7 @@ top_row <- plot_grid(depth,productivity)
 strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,1.75))
 strata_fig
 
+#Comparison plot
+
+rosentreter<-read.csv("inputData/Rosentreter_aquatic_ecosystems_database.csv")
+reservoirs<-filter(rosentreter,type=="Reservoir")

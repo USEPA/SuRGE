@@ -13,7 +13,7 @@ names(all_obs)[!(names(all_obs) %in% names(dat_2016))] # lots, eval_status is fo
 
 dat <- bind_rows(dat_2016 %>% 
                    mutate(lake_id = as.character(lake_id)) %>% # converted to numeric below
-                   select(-chamb_deply_date_time, -site_wgt, -site_stratum), # these get added later
+                   select(-chamb_deply_date_time, -site_wgt, -site_stratum), # wgt and stratum get added later
                  all_obs %>%
                    # eval_status is inherited from fld_sheet and reflects
                    # site_id evaluations made during sampling. Changing name here,
@@ -25,23 +25,6 @@ dim(dat_2016) # 498
 dim(all_obs) # 1869
 dim(dat) # 2367, good
 
-# 1b. Summarize entire GHG dataset for data paper
-
-mes<-dat %>%
-  filter(!is.na(ch4_diffusion_best))%>%
-  mutate(ch4diff=ch4_diffusion_best*24)
-#2150 individual measurements
-mez<-mes %>%
-  filter(ch4_diffusion_best==0)
-#38 are zero values
-
-cas<-dat %>%
-  filter(!is.na(co2_diffusion_best))%>%
-  mutate(co2diff=co2_diffusion_best*24)
-#2083 individual measurements
-caz<-cas %>%
-  filter(co2_diffusion_best==0)
-#264 are zero values
 
 # 2. Fill chemistry variables----
 # chemistry variables measured at one location.  NA reported
@@ -479,13 +462,27 @@ ggplot(aes(lake_id, co2_total)) +
   geom_point(aes(color = source)) 
 
 
-# 10/10/2024 NOT WORKING, IN PROGRESS....
-# This should be done using grts algorithms and survey design weights.
-# Under a time crunch, so ignoring that step for now.
-
+# 10/10/2024 NOT WORKING, IN PROGRESS....---------
+# Might be better to start with: 
+# dat <- bind_rows(dat_2016 %>% 
+#                    mutate(lake_id = as.character(lake_id)) %>% # converted to numeric below
+#                    select(-chamb_deply_date_time, -site_wgt, -site_stratum), # these get added later
+#                  all_obs %>%
+#                    # eval_status is inherited from fld_sheet and reflects
+#                    # site_id evaluations made during sampling. Changing name here,
+#                    # rather than earlier, to avoid unanticipated consequences.
+#                    # eval_status is referenced in numerous existing lines of code
+#                    rename(site_eval_status = eval_status)) # consistent with dat_2016
+# then aggregate by lake below, then join with other tables.
 
 dat_agg <- dat %>%
-    select(-site_id, -site_eval_status, -trap_rtrvl_date_time, -trap_deply_date_time, 
+    select(-site_id, -site_wgt, -lat, - long, -site_depth,-site_eval_status, -trap_rtrvl_date_time, -trap_deply_date_time, 
+           -site_depth, 
+           -deep_chla_sonde_comment, -deep_do_mg_comment, -deep_ph_comment, -deep_phycocyanin_sonde_comment,
+           -deep_temp_comment, -deep_turb_comment, -shallow_chla_sonde_comment, -shallow_do_mg_comment,
+           -shallow_ph_comment, -shallow_phycocyanin_sonde_comment, -shallow_sp_cond_comment, -shallow_temp_comment,
+           -shallow_turb_comment, -sample_year, 
+           -E_I_type, 
            -contains("ch4"), -contains("co2")) %>% # recalc totals after aggregating by lake
     fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
     group_by(lake_id, visit) %>%

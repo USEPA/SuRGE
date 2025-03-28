@@ -67,7 +67,8 @@ tteb.SURGE2022 <- read_excel(paste0(
 
 tteb.SURGE2023 <- read_excel(paste0(
   userPath, 
-  "data/chemistry/tteb/SURGE_2023_05_06_2024_update.xlsx"))
+  "data/chemistry/tteb/SURGE_2023_10_24_2024_update.xlsx")) %>%
+  select(-NO2N) # new variable added 5/16/24. Duplicated with NO2IC, omit
 
 
 
@@ -87,7 +88,7 @@ tteb.SURGE2023 <- read_excel(paste0(
 #          across(everything(), 
 #                 ~ if_else(. == 0, NA_real_, .))) 
 
-# anions ic preliminary data (13 Nov 2023) [not in formal data report 5/15/24]
+# anions ic preliminary data (13 Nov 2023) [not in formal data report 3/20/2]
 tteb.prelim.anions.ic <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_anions_ic.xlsx")) %>%
@@ -258,9 +259,9 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake data)
 dim(ttebCoc) #854
-dim(tteb) #1211 [5/18/2024]
+dim(tteb) #1207 [3/20/2025]
 tteb.all <- inner_join(ttebCoc, tteb)
-nrow(tteb.all) # 847 records [5/18/2024] 
+nrow(tteb.all) # 849 records [3/20/2025] 
 
 
 # 5. DOC AND TOC ARE SUBMITTED TO TTEB AS TOC.   FIX HERE.
