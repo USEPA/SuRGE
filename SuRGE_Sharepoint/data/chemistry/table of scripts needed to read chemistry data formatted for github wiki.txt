@@ -1,0 +1,14 @@
+| Lab | Sample_year | Script                    |  Analytes   | Notes | Status |
+| --- |	----------- | ------------------------- |  --------   | ----- | ------ |
+|R10  | 2018        | readChlorophyllR10_2018.R	|  chlorophyll | Samples collect by Region 10 in 2018.| Script file exists, but no code written.|
+|R10   |	2018	    |readNutrientsR10_2018.R	|  Orthophosphate (op) <br />Nitrite (no2)<br />Nitrite+nitrate (no2_3)<br />Ammonium (nh4)<br />Total organic carbon (toc)<br />Total nitrogen (tn)<br />Total phosphorus (tp)<br />| Samples collect by Region 10 in 2018.|	In progress|
+| CIN<br />RTP<br />NAR<br />USGS<br /> | 2021<br />2022<br />2023<br />| readNutrientsAwberc.R|oP<br />no2<br />no2.3<br />tp<br />tn<br /> | Not all years for all labs<br /> (e.g., USGS only in 2021) | complete|
+|R10<br />CIN<br />RTP<br />ADA | 2020 for R10, CIN, and RTP<br />2021-2023 for ADA | readNutrientsAda.R | Orthophosphate (op)<br />Total nitrogen (tn)<br />total phosphorus (tp)<br />Nitrate + nitrite (no2.3)<br />ammonium (nh4) |Excel file name contains:<br />oP<br />TN,TP<br />NO3+NO2NH4| complete|
+| ADA |	2021, 2022, 2023 | readAnionsAda.R | Fluoride<br />Chloride (cl)<br />Bromide (br)<br />Sulfate (so4) | Excel file name contains<br />ClSO4BrF,NO3,NO2,oP | complete |
+|CIN<br />RTP<br />USGS | 2021 |readAnionsDaniels.R | -Fluoride<br />-Chloride (cl)<br />-Bromide (br)<br />-Sulfate (so4) | |	Script complete, but waiting for database update |
+| ADA | 2021<br />2022<br />2023 | readOcAda.R | -Non-purgeable organic carbon (NPOC)<br />-Non-purgeable dissolved organic carbon (NPDOC) |-NPOC is unflitered (TN)<br />-NPDOC is filtered (DN) | complete |
+| R10<br />CIN<br />RTP | 2020 | readOcMasi.R | TOC (no doc in 2020) | EPA labs shutdown.  MASI is external contract lab. | complete |
+| CIN<br />RTP<br />NAR<br />GB<br />USGS<br />DOE<br />R10 | 2018<br />2020<br />2021<br />2022<br />2023 | readTteb.R | -toc<br />-doc (>=2021)<br />-metals<br />-toc | -need analytical run date to calculate holding times<br />-Need database update | in progress |
+| CIN<br />RTP<br />NAR<br />GB<br />USGS<br />DOE<br />R10 | 2020<br />2021<br />2022<br />2023 | readPigmentsMicrocystin.R | -chlorophyll a (chla)<br />-phycocyanin (phyco)<br />-microcystin<br /> |-chla and phyco analyzed on material captured on filter<br />-microcystin in unfiltered water sample | Script file exists, but no code written and no data available as of 1/13/2022.|
+| CIN<br />RTP<br />NAR<br />GB<br />USGS<br />DOE<br />R10 | 2020<br />2021<br />2022<br />2023 | readTaxonomy.R | algal taxonomy | | No script or data.|
+| CIN<br />RTP<br />NAR<br />GB<br />USGS<br />DOE<br />R10 | 2020<br />2021<br />2022<br />2023 | readPhysiology.R | algal physiology | |No script or data. |

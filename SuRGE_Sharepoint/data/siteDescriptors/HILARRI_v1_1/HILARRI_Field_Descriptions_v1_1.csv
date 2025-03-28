@@ -1,0 +1,51 @@
+Field Name,Units,Data type,Description
+hilarriid,N/A,Integer,Unique identifier in the HILARRI database
+nididfull,N/A,Text,Concatenation of NIDID and OTHERSTRUCTUREID 
+nidid,N/A,Text,ID listed in NID
+otrstrctid,N/A,Text,ID listed in NID for auxiliary structures (OTHERSTRUCTUREID). Note that sometimes main structures have a 0 instead of being left blank in the original inventory. Those have been modified to be NULL instead.
+grand_id,N/A,Integer,ID from GRanD
+dam_name,N/A,Text,Dam name listed in dam inventory
+longitude,Decimal Degrees,Numeric,Longitude listed by dam inventory or plant inventory if the power plant wasn't referenced to an inventoried dam. Some features' coordinates have been updated during QA process. See LOC_FLAG for source of updated location. (EPSG: 4269)
+latitude,Decimal Degrees,Numeric,Latitude listed by dam inventory or plant inventory if the power plant wasn't referenced to an inventoried dam. Some features' coordinates have been updated during QA process. See LOC_FLAG for source of updated location. (EPSG: 4269)
+loc_flag,N/A,Text,"Description of the source for which dataset was used to help update coordinates of a feature. Possible values include:
+
+FERC Elib
+GRanDv1.3
+HydroLAKES
+NHDPlusV2
+NHDWB"
+state,N/A,Text,US State abbreviation
+eha_cmplx,N/A,Text,Root of the EHA ID. Describes the complex of power plants.
+eha_ptid,N/A,Text,Plant ID used by the EHA (EHA_PtID)
+pt_name,N/A,Text,Name of the plant reported by the EHA (PtName)
+pt_lat,Decimal Degrees,Numeric,Latitude reported by the EHA (Lat) (EPSG: 4269)
+pt_lon,Decimal Degrees,Numeric,Longitude reported by the EHA (Lon) (EPSG: 4269)
+eia_ptid,N/A,Text,EIA plant identification code reported by the EHA (EIA_PtID)
+fcdocket,N/A,Text,FERC license docket number reported by the EHA (FcDocket)
+ehadamflag,N/A,Text,Note to describe issues when linking the most recent EHA operational plant information to the most recent dam inventories. Describes: if a dam is listed multiple times in the inventory; if there are multiple power plants associated with a single dam; or if the project is composed of several related structures that are listed separately in the inventories.
+statusflag,N/A,Text,Summarizes which datasets confirmed hydropower. A feature  listed only in the NID or GRanD but not the EHA may not accurately describe current operational capabilities.
+ra2012_flag,N/A,Text,Flags whether a dam had been included in the 2012 ORNL Potential Hydropower at NPDs Resource Assessment
+nhdv2comid,N/A,Integer,COMID from the NHDPlusV2 river network that was joined based on QA/inspection
+nhdwbcomid,N/A,Integer,COMID of the matched NHD waterbody 
+hylake_id,N/A,Integer,HydroLAKE ID for the matched HydroLAKES waterbody
+nhdwbflag,N/A,Text,"Flags indicating possible issues associated with matching the dam/plant and water body. 
+
+Flags include:
+1) Infrastructure matched to multiple waterbodies. 
+2) Multiple infrastructure features matched to this waterbody.
+3) Waterbody is not accurate."
+hylakeflag,N/A,Text,"Flags indicating possible issues associated with matching the dam/plant and water body. 
+
+Flags include:
+1) Infrastructure matched to multiple waterbodies. 
+2) Multiple infrastructure features matched to this waterbody.
+3) Waterbody is not accurate."
+huc_12,N/A,Text,12-digit identifier for NHD Watershed Boundary Dataset Hydrologic Units (sub-watershed level). Note that all HUCs should be 12 digits. Those from Hydrologic Units 01 - 09 should include the leading zero. HUC12s are not included outside of the CONUS.
+huc_02,N/A,Text,2-digit identifier for NHD Watershed Boundary Dataset Hydrologic Unit (Region level). Note that all HUCs should be 2 digits. Those from Hydrologic Units 01 - 09 should include the leading zero.
+dataset,N/A,Text,"Basic descriptor of the type of relationships represented in each record. Possible values include: 
+1) Hydropower dam associated with power plant and reservoir
+2) Hydropower dam associated with power plant; no reservoir
+3) Hydropower dam associated with reservoir; no power plant
+4) Hydropower dam only; no reservoir or power plant
+5) Power plant associated with reservoir; no inventoried dam
+6) Power plant only; no reservoir or inventoried dam"

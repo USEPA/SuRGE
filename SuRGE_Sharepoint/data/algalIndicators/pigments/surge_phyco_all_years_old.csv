@@ -1,0 +1,162 @@
+﻿"date","waterbody","site","field_dups","variable","units","value","notes","phyco_flag"
+"2020-09-11","208","u1","unknown","phycocyanin","µg/L",2.978,NA,NA
+"2020-07-29","249","su06","unknown","phycocyanin","µg/L",2.629,NA,NA
+"2020-07-29","249","su06","duplicate","phycocyanin","µg/L",2.261,NA,NA
+"2020-07-29","211","u14","duplicate","phycocyanin","µg/L",1.452,NA,NA
+"2020-07-29","54","s5","unknown","phycocyanin","µg/L",26.604,NA,NA
+"2020-07-29","211","u14","unknown","phycocyanin","µg/L",1.266,NA,NA
+"2020-08-27","205","u7","unknown","phycocyanin","µg/L",2.047,NA,NA
+"2020-08-25","210","s5","duplicate","phycocyanin","µg/L",235.862,NA,NA
+"2020-08-25","210","s5","unknown","phycocyanin","µg/L",169.558,NA,NA
+"2020-07-06","238","su08","unknown","phycocyanin","µg/L",0,"held for 79 days","H"
+"2020-07-09","287","u13","unknown","phycocyanin","µg/L",0.085,"held for 76 days","H"
+"2020-07-12","265","u02","unknown","phycocyanin","µg/L",0,"held for 73 days","H"
+"2020-07-12","265","u02","duplicate","phycocyanin","µg/L",0,"held for 73 days","H"
+"2020-08-10","83","u18","unknown","phycocyanin","µg/L",1.016,NA,NA
+"2020-08-10","83","u18","duplicate","phycocyanin","µg/L",NA,"missing filter",NA
+"2020-08-12","209","u14","unknown","phycocyanin","µg/L",0.464,NA,NA
+"2020-08-19","116","u11","unknown","phycocyanin","µg/L",202.93,"5x dilution",NA
+"2020-08-19","116","u11","duplicate","phycocyanin","µg/L",221.19,"5x dilution",NA
+"2020-08-20","101","u15","unknown","phycocyanin","µg/L",0,NA,NA
+"2020-09-01","234","s20","unknown","phycocyanin","µg/L",1.639,NA,NA
+"2020-09-03","235","s3","duplicate","phycocyanin","µg/L",116.671,NA,NA
+"2020-09-03","235","s3","unknown","phycocyanin","µg/L",123.453,NA,NA
+"2020-09-04","138","11","unknown","phycocyanin","µg/L",1.372,NA,NA
+"2020-09-04","138","11","duplicate","phycocyanin","µg/L",1.714,NA,NA
+"2020-09-03","44","7","unknown","phycocyanin","µg/L",3.365,NA,NA
+"2020-09-02","102","3","unknown","phycocyanin","µg/L",0.865,NA,NA
+"2020-09-01","98","11","unknown","phycocyanin","µg/L",0,NA,NA
+"2020-09-12","207","s25","unknown","phycocyanin","µg/L",1.919,NA,NA
+"2020-09-09","191","u13","duplicate","phycocyanin","µg/L",9.235,NA,NA
+"2020-09-09","191","u13","unknown","phycocyanin","µg/L",34.211,NA,NA
+"2021-06-01","233","S-18","duplicate","phycocyanin","µg/L",1.825,"Badly thawed - warm",NA
+"2021-06-01","233","S-18","unknown","phycocyanin","µg/L",2.747,"Badly thawed - warm",NA
+"2021-06-03","237","U-15","unknown","phycocyanin","µg/L",4.551,"Badly thawed - warm",NA
+"2021-06-04","236","U-07","unknown","phycocyanin","µg/L",1.322,"Badly thawed - warm",NA
+"2021-06-11","149","SU-08","unknown","phycocyanin","µg/L",0,"Thawed but cool",NA
+"2021-06-14","155","SU-25","duplicate","phycocyanin","µg/L",0,"Thawed but cool",NA
+"2021-06-14","155","SU-25","unknown","phycocyanin","µg/L",0,"Thawed but cool",NA
+"2021-06-16","275","U-12","duplicate","phycocyanin","µg/L",0.169,"Thawed but cool",NA
+"2021-06-16","275","U-12","unknown","phycocyanin","µg/L",0.49,"Thawed but cool",NA
+"2021-06-18","240","1","unknown","phycocyanin","µg/L",0,"Thawed but cool",NA
+"2021-06-22","69_transitional","U-12","unknown","phycocyanin","µg/L",0,"Thawed but cool",NA
+"2021-06-24","69_lacustrine","U-04","unknown","phycocyanin","µg/L",0.196,"Thawed but cool",NA
+"2021-06-26","70_lacustrine","U-06","duplicate","phycocyanin","µg/L",0.205,"Frozen",NA
+"2021-06-26","70_lacustrine","U-06","unknown","phycocyanin","µg/L",0.31,"Frozen",NA
+"2021-06-29","70_riverine","U-06","unknown","phycocyanin","µg/L",0.122,"Frozen",NA
+"2021-07-07","79","U-12","unknown","phycocyanin","µg/L",7.781,"Frozen",NA
+"2021-07-08","298","U-01","duplicate","phycocyanin","µg/L",0.48,"Thawed - warm",NA
+"2021-07-08","298","U-01","unknown","phycocyanin","µg/L",1.316,"Thawed - warm",NA
+"2021-07-09","75","U-8","unknown","phycocyanin","µg/L",3.79,"Frozen",NA
+"2021-07-10","326","U-05","unknown","phycocyanin","µg/L",0,"Thawed - warm",NA
+"2021-07-11","327","U-05","unknown","phycocyanin","µg/L",0,"Thawed - warm",NA
+"2021-07-12","70_transitional","U-7","unknown","phycocyanin","µg/L",8.248,"Frozen",NA
+"2021-07-13","231","S-24","unknown","phycocyanin","µg/L",6.589,"Frozen",NA
+"2021-07-09","75","U-8","duplicate","phycocyanin","µg/L",73.189,"Frozen; 2x dilution",NA
+"2021-07-15","147","U-01","duplicate","phycocyanin","µg/L",11.645,"Thawed - warm - weekend out of freezer; 2x dilution",NA
+"2021-07-15","147","U-01","unknown","phycocyanin","µg/L",8.483,"Thawed - warm - weekend out of freezer; 2x dilution",NA
+"2021-06-29","288","U-10","unknown","phycocyanin","µg/L",1.31,"held for 63 days","H"
+"2021-06-29","288","U-10","duplicate","phycocyanin","µg/L",1.418,"held for 63 days","H"
+"2021-06-30","316","U-3","unknown","phycocyanin","µg/L",0.067,"held for 62 days","H"
+"2021-07-26","78","U-29","unknown","phycocyanin","µg/L",0,"held for 64 days","H"
+"2021-07-27","167","U-06","unknown","phycocyanin","µg/L",10.717,"Torn filter;held for 63 days","H"
+"2021-07-27","167","U-06","duplicate","phycocyanin","µg/L",11.512,"held for 63 days","H"
+"2021-07-28","232","U-13","unknown","phycocyanin","µg/L",3.208,"held for 62 days","H"
+"2021-07-29","68","SU-4","unknown","phycocyanin","µg/L",10.123,"held for 61 days","H"
+"2021-07-29","68","SU-4","duplicate","phycocyanin","µg/L",0.934,"held for 61 days","H"
+"2021-07-31","69_riverine","U-07","unknown","phycocyanin","µg/L",0,NA,NA
+"2021-08-16","148","7","unknown","phycocyanin","µg/L",0.933,NA,NA
+"2021-08-16","148","7","duplicate","phycocyanin","µg/L",2.711,NA,NA
+"2021-08-17","291","U-13","unknown","phycocyanin","µg/L",0.351,NA,NA
+"2021-08-17","291","U-13","duplicate","phycocyanin","µg/L",0.133,NA,NA
+"2021-08-09","71","U-29","unknown","phycocyanin","µg/L",0.107,NA,NA
+"2021-08-19","296","U-17","unknown","phycocyanin","µg/L",0.058,NA,NA
+"2021-08-20","317","U-18","unknown","phycocyanin","µg/L",0.167,NA,NA
+"2021-08-23","297","U-41","unknown","phycocyanin","µg/L",0.07,NA,NA
+"2021-08-24","119","O4","unknown","phycocyanin","µg/L",0.498,NA,NA
+"2021-08-25","67","O4","unknown","phycocyanin","µg/L",0.448,NA,NA
+"2021-08-25","67","O4","duplicate","phycocyanin","µg/L",0.415,NA,NA
+"2021-08-25","16","O8","unknown","phycocyanin","µg/L",1.985,NA,NA
+"2021-08-26","72","U-09","unknown","phycocyanin","µg/L",0.71,NA,NA
+"2021-08-26","82","O4","unknown","phycocyanin","µg/L",8.312,NA,NA
+"2021-08-28","137","O4","unknown","phycocyanin","µg/L",0.914,NA,NA
+"2021-08-28","137","O4","duplicate","phycocyanin","µg/L",1.281,NA,NA
+"2022-06-01","55","U14","unknown","phycocyanin","µg/L",0.021,NA,NA
+"2022-06-01","55","U14","duplicate","phycocyanin","µg/L",0.007,NA,NA
+"2022-06-06","146","SU04","unknown","phycocyanin","µg/L",0.143,NA,NA
+"2022-06-06","146","SU04","duplicate","phycocyanin","µg/L",0.235,NA,NA
+"2022-06-08","190","SU08","unknown","phycocyanin","µg/L",0.2,NA,NA
+"2022-06-13","184","U03","unknown","phycocyanin","µg/L",0.238,NA,NA
+"2022-06-15","166","U06","unknown","phycocyanin","µg/L",0.225,NA,NA
+"2022-06-22","76","U07","unknown","phycocyanin","µg/L",0.005,NA,NA
+"2022-06-22","76","U07","duplicate","phycocyanin","µg/L",0.004,NA,NA
+"2022-06-23","77","U12","unknown","phycocyanin","µg/L",0.035,NA,NA
+"2022-06-23","66","U16","unknown","phycocyanin","µg/L",0.587,NA,NA
+"2022-07-06","64","U02","unknown","phycocyanin","µg/L",0.075,NA,NA
+"2022-07-06","64","U02","duplicate","phycocyanin","µg/L",0.019,NA,NA
+"2022-07-14","117","U12","unknown","phycocyanin","µg/L",4.392,"held for 70 days","H"
+"2022-07-14","117","U12","duplicate","phycocyanin","µg/L",4.603,"held for 70 days","H"
+"2022-07-20","328","U07","unknown","phycocyanin","µg/L",0.168,"held for 64 days","H"
+"2022-07-20","328","U07","duplicate","phycocyanin","µg/L",0.075,"held for 64 days","H"
+"2022-07-21","136","U13","unknown","phycocyanin","µg/L",0.026,"held for 63 days","H"
+"2022-07-21","136","U13","duplicate","phycocyanin","µg/L",0.032,"held for 63 days","H"
+"2022-07-22","276","U20","unknown","phycocyanin","µg/L",0.011,"held for 62 days","H"
+"2022-07-23","100","U11","unknown","phycocyanin","µg/L",0.017,"held for 61 days","H"
+"2022-07-25","206","U02","unknown","phycocyanin","µg/L",1.189,NA,NA
+"2022-08-03","165","U06","unknown","phycocyanin","µg/L",0.03,NA,NA
+"2022-08-05","159","U12","unknown","phycocyanin","µg/L",0.031,NA,NA
+"2022-08-05","159","U12","duplicate","phycocyanin","µg/L",0,NA,NA
+"2022-08-09","2","U10","unknown","phycocyanin","µg/L",0.373,NA,NA
+"2022-08-09","2","U10","duplicate","phycocyanin","µg/L",1.043,NA,NA
+"2022-08-11","84","U03","unknown","phycocyanin","µg/L",23.182,NA,NA
+"2022-08-15","51","U02","unknown","phycocyanin","µg/L",0.059,NA,NA
+"2022-08-15","51","U02","duplicate","phycocyanin","µg/L",0,NA,NA
+"2022-08-19","45","U17","unknown","phycocyanin","µg/L",0.001,NA,NA
+"2022-08-19","45","U17","duplicate","phycocyanin","µg/L",0.001,NA,NA
+"2022-08-20","247","U06","unknown","phycocyanin","µg/L",0.027,NA,NA
+"2022-08-20","247","U06","duplicate","phycocyanin","µg/L",0.024,NA,NA
+"2022-08-30","65","U08","unknown","phycocyanin","µg/L",0,NA,NA
+"2022-08-30","65","U08","duplicate","phycocyanin","µg/L",0.006,NA,NA
+"2022-09-12","11","U03","unknown","phycocyanin","µg/L",0.025,NA,NA
+"2022-09-12","11","U03","duplicate","phycocyanin","µg/L",0.04,NA,NA
+"2022-08-23","157","U04","unknown","phycocyanin","µg/L",0.016,NA,NA
+"2022-08-23","157","U04","duplicate","phycocyanin","µg/L",0.075,NA,NA
+"2022-08-31","281","U12","unknown","phycocyanin","µg/L",0.003,NA,NA
+"2022-08-31","281","U12","duplicate","phycocyanin","µg/L",0.011,NA,NA
+"2022-08-18","10","U02","unknown","phycocyanin","µg/L",0.15,NA,NA
+"2022-08-25","188","U09","unknown","phycocyanin","µg/L",0.284,NA,NA
+"2022-09-02","250","U03","unknown","phycocyanin","µg/L",0,NA,NA
+"2022-09-15","3","U20","unknown","phycocyanin","µg/L",16.603,NA,NA
+"2022-08-18","264","U15","unknown","phycocyanin","µg/L",164.444,"3X",NA
+"2023-06-18","47","S02","unknown","phycocyanin","µg/L",0.167,NA,NA
+"2023-06-18","47","S03","duplicate","phycocyanin","µg/L",0.11,NA,NA
+"2023-06-19","49","S21","unknown","phycocyanin","µg/L",0.017,NA,NA
+"2023-06-24","13","U07","unknown","phycocyanin","µg/L",0.031,NA,NA
+"2023-06-22","46","U12","unknown","phycocyanin","µg/L",0.014,NA,NA
+"2023-06-27","103","U11","unknown","phycocyanin","µg/L",0,NA,NA
+"2023-06-27","103","U11","duplicate","phycocyanin","µg/L",0.014,NA,NA
+"2023-07-17","17","U02","unknown","phycocyanin","µg/L",14.665,NA,NA
+"2023-07-17","17","U02","duplicate","phycocyanin","µg/L",20.154,NA,NA
+"2023-07-25","186","U08","unknown","phycocyanin","µg/L",0.013,NA,NA
+"2023-07-28","18","S26","unknown","phycocyanin","µg/L",0.038,NA,NA
+"2023-07-28","18","S26","duplicate","phycocyanin","µg/L",0.06,NA,NA
+"2023-07-28","57","S04","unknown","phycocyanin","µg/L",0.025,NA,NA
+"2023-07-28","57","S04","duplicate","phycocyanin","µg/L",0.011,NA,NA
+"2023-08-01","14","U08","unknown","phycocyanin","µg/L",0.127,NA,NA
+"2023-08-01","14","U08","duplicate","phycocyanin","µg/L",0.669,NA,NA
+"2023-08-03","1","S08","unknown","phycocyanin","µg/L",0.323,NA,NA
+"2023-08-29","147","u01","unknown","phycocyanin","µg/L",0.289,NA,NA
+"2023-08-30","53","u06","unknown","phycocyanin","µg/L",0,NA,NA
+"2023-08-30","53","u06","duplicate","phycocyanin","µg/L",0,NA,NA
+"2023-08-24","148","u07","unknown","phycocyanin","µg/L",0.692,NA,NA
+"2023-08-24","148","u07","duplicate","phycocyanin","µg/L",1.579,NA,NA
+"2023-09-05","52","u09","unknown","phycocyanin","µg/L",0,NA,NA
+"2023-10-24","1000","S-03","unknown","phycocyanin","µg/L",0,NA,NA
+"2023-10-24","1000","S-03","duplicate","phycocyanin","µg/L",0.006,NA,NA
+"2023-06-04","195","S2","duplicate","phycocyanin","µg/L",0.25,NA,NA
+"2023-06-04","195","S3","unknown","phycocyanin","µg/L",0.639,NA,NA
+"2023-06-05","99","S5","duplicate","phycocyanin","µg/L",0,NA,NA
+"2023-06-05","99","S6","unknown","phycocyanin","µg/L",0,NA,NA
+"2023-06-06","214","S7","unknown","phycocyanin","µg/L",0.178,NA,NA
+"2023-06-08","230","S8","unknown","phycocyanin","µg/L",0,NA,NA
+"2023-06-08","4","S9","unknown","phycocyanin","µg/L",0.287,NA,NA
