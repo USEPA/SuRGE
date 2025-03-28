@@ -135,6 +135,10 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_deployment_length_units","co2_deployment_length units in seconds",
                              "chamb_deply_date_time","date and time of floating chamber deployment in UTC",
                              "chamb_deply_date_time_units","timezone for chamb_deply_date_time",
+                             "ch4_deployment_length", "Duration of CH4 time series used to calculate diffusive CH4 emissions",
+                             "ch4_deployment_length_units", "Units used to express duration of CH4 time series used to calculate diffusive CH4 emissions",
+                             "co2_deployment_length", "Duration of CO2 time series used to calculate diffusive CO2 emissions",
+                             "co2_deployment_length_units", "Units used to express duration of CO2 time series used to calculate diffusive CO2 emissions",
                              "trap_deply_date_time","date and time of bubble trap deployment in UTC",
                              "trap_deply_date_time_units","timezone for trap_deply_date_time",
                              "trap_rtrvl_date_time", "date and time of bubble trap retrieval in UTC",
@@ -695,9 +699,9 @@ write.csv(x = site_data_dictionary,
 
 # 6. EMISSION RATES (POINT)----
 
-#First need to compile correct chamber deployment times into an object
-#pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
-#and from the dat_2016 object for the 2016 sites
+# First need to compile correct chamber deployment times into an object
+# pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
+# and from the dat_2016 object for the 2016 sites
 chm_dep <- bind_rows (
   chm_deply %>%
     select(lake_id, site_id, visit, chamb_deply_date_time)%>%
@@ -709,74 +713,68 @@ chm_dep <- bind_rows (
            chamb_deply_date_time_units="UTC")
 )
 
-dep_len <- bind_rows (
-  all_obs %>%
-    select(lake_id,site_id,visit, ch4_deployment_length, ch4_deployment_length_units,
-           co2_deployment_length, co2_deployment_length_units)%>%
-    mutate( 
-      site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
-                          grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
-                          grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
-                          TRUE ~ as.character(site_id)),
-      # remove transitional, lacustrine, riverine from lake_id
-      # retain character class initially, then convert to numeric.
-      lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
-                          lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
-                          TRUE ~ lake_id),
-      lake_id = as.numeric(lake_id)),
-  
-  dat_2016%>%
-    select(lake_id,site_id,visit)%>%
-    mutate(ch4_deployment_length=as.numeric("NA"), ch4_deployment_length_units="s",
-           co2_deployment_length=as.numeric("NA"), co2_deployment_length_units="s",
-           site_id=as.character(site_id))
-)
-
-trp_dep <- bind_rows (
-  dat_surge_sf %>%
-    mutate (trap_deply_date_time_units="UTC",
-            trap_rtrvl_date_time_units="UTC")%>%
-    select(
-      lake_id,
-      site_id,
-      visit,
-      trap_deply_date_time,
-      trap_deply_date_time_units,
-      trap_rtrvl_date_time,
-      trap_rtrvl_date_time_units
-    ),
-  
-  dat_2016 %>%
-    select(
-      lake_id,
-      site_id,
-      visit,
-      trap_deply_date_time,
-      trap_rtrvl_date_time
-    ) %>%
-    mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id),
-           trap_deply_date_time_units="UTC",
-           trap_rtrvl_date_time_units="UTC")
-)
-
-dep <- left_join(chm_dep, trp_dep)
-dep <- left_join(dep, dep_len)
-dep <- as.data.frame(dep) %>%
-  select(-geom)
+# I believe this commented out code can be deleted.
+# # bind chamber deployment durations for SuRGE and 2016 study
+# dep_len <- bind_rows (
+#   all_obs %>% # SuRGE sites (no Falls Lake or 2016 data)
+#     select(lake_id, site_id, visit, 
+#            ch4_deployment_length, ch4_deployment_length_units,
+#            co2_deployment_length, co2_deployment_length_units) %>%
+#     mutate( 
+#       site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+#                           grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+#                           grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+#                           TRUE ~ as.character(site_id)),
+#       # remove transitional, lacustrine, riverine from lake_id
+#       # retain character class initially, then convert to numeric.
+#       lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+#                           lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+#                           TRUE ~ lake_id),
+#       lake_id = as.numeric(lake_id)),
+#   
+#   dat_2016 %>%
+#     select(lake_id, site_id, visit, 
+#            ch4_deployment_length, ch4_deployment_length_units,
+#            co2_deployment_length, co2_deployment_length_units) %>%
+#     mutate(site_id = as.character(site_id))
+# )
+# 
+# 
+# trp_dep <- bind_rows ( # these data are already in dat?
+#   dat_surge_sf %>%
+#     mutate (trap_deply_date_time_units="UTC",
+#             trap_rtrvl_date_time_units="UTC")%>%
+#     select(
+#       lake_id,
+#       site_id,
+#       visit,
+#       trap_deply_date_time,
+#       trap_deply_date_time_units,
+#       trap_rtrvl_date_time,
+#       trap_rtrvl_date_time_units
+#     ),
+#   
+#   dat_2016 %>%
+#     select(
+#       lake_id,
+#       site_id,
+#       visit,
+#       trap_deply_date_time,
+#       trap_rtrvl_date_time
+#     ) %>%
+#     mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id),
+#            trap_deply_date_time_units="UTC",
+#            trap_rtrvl_date_time_units="UTC")
+# )
+# 
+# dep <- left_join(chm_dep, trp_dep)
+# dep <- left_join(dep, dep_len)
+# dep <- as.data.frame(dep) %>%
+#   select(-geom)
 
 emission_rate_points_data_paper <- left_join(
+  # primary data first
   dat %>%
-    mutate( 
-      site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
-                          grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
-                          grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
-                          TRUE ~ as.character(site_id)),
-      # remove transitional, lacustrine, riverine from lake_id
-      # retain character class initially, then convert to numeric.
-      lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
-                          lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
-                          TRUE ~ lake_id),
-      lake_id = as.numeric(lake_id)) %>%
     select(
       lake_id,
       site_id,
@@ -797,18 +795,23 @@ emission_rate_points_data_paper <- left_join(
       co2_total,
       co2_total_units,
       co2_deployment_length,
-      co2_deployment_length_units
-    ),
-  dep
+      co2_deployment_length_units,
+      trap_deply_date_time,
+      trap_deply_date_time),
+  # bind with chamber deployment dates (not distinguished by gas)
+  chm_dep
 ) %>%
   # remove "best" from diffusion variable
   rename_with(.cols = contains("best"), ~sub(pattern = "_best", replacement = "", x = .)) %>%
+  # add units for trap deployment and retrieval
+  mutate(trap_deply_date_time_units="UTC",
+         trap_rtrvl_date_time_units="UTC") %>%
   # enforce decimal points
   mutate(
     # smallest non-zero ch4 diffusive emission rate is 0.0277
     ch4_diffusion = round(ch4_diffusion, 2),
     # smallest non-zero ch4 ebullition emission rate is 4.906696e-06
-         ch4_ebullition = round(ch4_ebullition, 6),
+    ch4_ebullition = round(ch4_ebullition, 6),
     # smallest non-zero ch4 total emission rate is 1.394003e-05
     ch4_total = round(ch4_total, 5),
     # smallest non-zero abs(co2 diffusive emission rate) is 2.519658
