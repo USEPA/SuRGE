@@ -121,6 +121,8 @@ master_dictionary <- tribble(~variable, ~definition,
                              "ch4_ebullition_units","ch4_ebullition units",
                              "ch4_total","the sum of ch4 diffusion and ch4 ebullition when both were measured",
                              "ch4_total_units","ch4_total units",
+                             "ch4_deployment_length","the length of floating chamber time for which a diffusive methane flux was calculated",
+                             "ch4_deployment_length_units","ch4_deployment_length units in seconds",
                              "co2_diffusion_best","areal co2 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
                              "co2_diffusion_units","co2_diffusion units",
                              "co2flag","Value of U if the floating chamber experienced an unstable start",
@@ -128,6 +130,8 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_ebullition_units","co2_ebullition units",
                              "co2_total","the sum of co2 diffusion and co2 ebullition when both were measured",
                              "co2_total_units","co2_total units",
+                             "co2_deployment_length","the length of floating chamber time for which a diffusive carbon dioxide flux was calculated",
+                             "co2_deployment_length_units","co2_deployment_length units in seconds",
                              "chamb_deply_date_time","date and time of floating chamber deployment in UTC",
                              "chamb_deply_date_time_units","timezone for chamb_deply_date_time",
                              "trap_deply_date_time","date and time of bubble trap deployment in UTC",
@@ -578,6 +582,29 @@ chm_dep <- bind_rows (
            chamb_deply_date_time_units="UTC")
 )
 
+dep_len <- bind_rows (
+  all_obs %>%
+    select(lake_id,site_id,visit, ch4_deployment_length, ch4_deployment_length_units,
+           co2_deployment_length, co2_deployment_length_units)%>%
+    mutate( 
+      site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                          grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                          grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                          TRUE ~ as.character(site_id)),
+      # remove transitional, lacustrine, riverine from lake_id
+      # retain character class initially, then convert to numeric.
+      lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                          lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                          TRUE ~ lake_id),
+      lake_id = as.numeric(lake_id)),
+  
+  dat_2016%>%
+    select(lake_id,site_id,visit)%>%
+    mutate(ch4_deployment_length=as.numeric("NA"), ch4_deployment_length_units="s",
+           co2_deployment_length=as.numeric("NA"), co2_deployment_length_units="s",
+           site_id=as.character(site_id))
+)
+
 trp_dep <- bind_rows (
   dat_surge_sf %>%
     mutate (trap_deply_date_time_units="UTC",
@@ -606,11 +633,23 @@ trp_dep <- bind_rows (
 )
 
 dep <- left_join(chm_dep, trp_dep)
+dep <- left_join(dep, dep_len)
 dep <- as.data.frame(dep) %>%
   select(-geom)
 
 emission_rate_points_data_paper <- left_join(
   dat %>%
+    mutate( 
+      site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                          grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                          grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                          TRUE ~ as.character(site_id)),
+      # remove transitional, lacustrine, riverine from lake_id
+      # retain character class initially, then convert to numeric.
+      lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                          lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                          TRUE ~ lake_id),
+      lake_id = as.numeric(lake_id)) %>%
     select(
       lake_id,
       site_id,
@@ -621,13 +660,17 @@ emission_rate_points_data_paper <- left_join(
       ch4_ebullition_units,
       ch4_total,
       ch4_total_units,
+      ch4_deployment_length,
+      ch4_deployment_length_units,
       co2_diffusion_best,
       co2_diffusion_units,
       co2flag,
       co2_ebullition,
       co2_ebullition_units,
       co2_total,
-      co2_total_units
+      co2_total_units,
+      co2_deployment_length,
+      co2_deployment_length_units
     ),
   dep
 )

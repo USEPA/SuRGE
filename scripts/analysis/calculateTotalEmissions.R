@@ -37,7 +37,9 @@ emissions <- emissions %>%
          ch4_diffusion_units = "mg_ch4_m2_h",
          co2_diffusion_units = "mg_co2_m2_h",
          ch4_total_units = "mg_ch4_m2_h",
-         co2_total_units = "mg_co2_m2_h") %>%
+         co2_total_units = "mg_co2_m2_h",
+         co2_deployment_length_units = "s",
+         ch4_deployment_length_units = "s") %>%
   # arrange columns
   select(lake_id, visit, site_id, # these first
          sort(tidyselect::peek_vars())) # all others alphabetical

@@ -159,8 +159,32 @@ CO2<-unstable_plot_data %>%
                  color = "retrieval"), key_glyph = "path") +
   scale_color_discrete(breaks = c("deployment", "CO2 stabilizes", "retrieval"), name="") +
   xlab("") +
-  ylab(expression(paste("CH "[4]*" (ppm)")))
+  ylab(expression(paste("CO "[2]*" (ppm)")))
 CO2
+
+CH4<-unstable_plot_data %>%
+  filter(name == "CH4._ppm") %>%
+  ggplot(aes(RDateTime, value)) +
+  geom_point() +
+  theme_bw()+
+  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+        axis.line=element_line(colour="black"),legend.title=element_blank(),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16),
+        axis.text.x = element_blank(),
+        axis.labels.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position="none")+
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:16:22", tz = "UTC")),
+                 color = "deployment"), key_glyph = "path") +
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:43", tz = "UTC")),
+                 color = "CO2 stabilizes"), key_glyph = "path") + #CO2
+  geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
+                 color = "retrieval"), key_glyph = "path") +
+  scale_color_discrete(breaks = c("deployment", "CO2 stabilizes", "retrieval"), name="") +
+  xlab("") +
+  ylab(expression(paste("CH "[4]*" (ppm)")))
+CH4
 
 H2O<-unstable_plot_data %>%
   filter(name == "H2O._ppm") %>%
@@ -184,7 +208,7 @@ H2O<-unstable_plot_data %>%
   ylab(expression(paste("H "[2]*"O (ppt)")))
 H2O
 
-unstab<-cowplot::plot_grid(CO2,H2O,ncol=1,align="v",labels=c("A","B"),rel_heights = c(1.1,1))
+unstab<-cowplot::plot_grid(CO2,CH4,H2O,ncol=1,align="v",labels=c("A","B","C"),rel_heights = c(1.1,1,1))
 unstab
 
 ## Plot of Variables that Survey was Designed on
@@ -303,3 +327,7 @@ top_row <- plot_grid(depth,productivity)
 strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,1.75))
 strata_fig
 
+#Comparison plot
+
+rosentreter<-read.csv("inputData/Rosentreter_aquatic_ecosystems_database.csv")
+reservoirs<-filter(rosentreter,type=="Reservoir")
