@@ -4,3 +4,6 @@
 
 userPath <- paste0(Sys.getenv("USERPROFILE"), 
                    "/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/")
+
+# Switch to this definition after all data have been moved to github repo
+# userPath <- ""
