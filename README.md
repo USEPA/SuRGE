@@ -13,7 +13,7 @@ This project uses the `renv` library to manage library versions.  After creating
 
 Please use caution when updating libraries already captured in the lock file.  The code runs succesfully with the suite of packages captured in the current lock file; updating package versions could cause problems with the existing code.  The whole point of `renv` is to  minimize the potential for code breakage due to differences among package versions.
 
-The R project was initiated by J Beaulieu using R.3.6.2 and `renv` will produce a warning message if a different version of R is used.  In theory, `renv` shouldn't be sensitive to the version of R, but in practice I have found that `renv::restore()` can take a very long time or even fail if a different version of R is used.  For example, `renv::restore()` took 1.5 hours when tested with R.4.1.0, then `readxl::read_excel()` threw an error related to the `Rcpp` package.  I suggest using R.3.6.2.  
+The R project was initiated by J Beaulieu using R.4.4.1 and `renv` will produce a warning message if a different version of R is used.  In theory, `renv` shouldn't be sensitive to the version of R, but in practice I have found that `renv::restore()` can take a very long time or even fail if a different version of R is used.
 
 Please note that the .Rprofile file is under version control in the repository.  This file contains an autoloader which automatically downloads and installs the appropriate version of `renv` into the project library.  It is best that users do not use the .Rprofile file to further customize the environment. 
 
