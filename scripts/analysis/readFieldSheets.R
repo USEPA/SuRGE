@@ -158,7 +158,7 @@ all_exet <- bind_rows(
 ) %>%
   mutate(trap_deply_date = case_when(type == "trap" ~ trap_deply_date,
                                      TRUE ~ dttr2::NA_Date_))
-dim(all_exet) #2713
+dim(all_exet) #2697
   
   
   

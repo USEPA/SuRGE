@@ -15,17 +15,16 @@ source("scripts/analysis/chamberVolume.R") # read surgeData...xlsx.  fld_sheet, 
 source("scripts/analysis/sampleDates.R") # df of lake_id, visit, and sample_date 
 
 # Read chemistry
-source("scripts/analysis/readAnionsAda.R") # read ADA lab anions.  ada.anions
-source("scripts/analysis/readAnionsDaniels.R") # read Kit Daniels anions. d.anions
-source("scripts/analysis/readNutrientsAda.R") # read nutrients ran in ADA lab. ada.nutrients
-source("scripts/analysis/readNutrientsAwberc.R") # read AWBERC lab nutrient results. chem21 
-source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2018 R10. chem18
-source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data.  ada.oc
-source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab. toc.masi
-source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  tteb.all
-source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin. pigments
-#source("scripts/analysis/readTaxonomy.R") # GB taxonomy
-source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. chl18
+source("scripts/analysis/readAnionsAda.R") # read ADA lab anions.  [ada.anions]
+source("scripts/analysis/readAnionsDaniels.R") # read Kit Daniels anions. [d.anions]
+source("scripts/analysis/readNutrientsAda.R") # read nutrients ran in ADA lab. [ada.nutrients]
+source("scripts/analysis/readNutrientsAwberc.R") # read AWBERC lab nutrient results. [chem21] 
+source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2018 R10. [chem18]
+source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data.  [ada.oc]
+source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab. [toc.masi]
+source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  [tteb.all]
+source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin. [pigments]
+source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. [chl18]
 source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
 # Get 2016 data
