@@ -5,7 +5,7 @@
 # note that as of 4/2/2024 only trap runs have been read into gc_lakeid_agg,
 # but a few dissolved gas samples slipped in
 eb_data <- full_join( # keep all data.  Will assume GC data if not present (e.g. insufficient volume for sample)
-  gc_lakeid_agg, # GC data
+  gc_lakeid_agg %>% filter(type == "trap"), # GC data
   # now select from fld_sheets
   fld_sheet %>% 
     select(lake_id, site_id, visit,
@@ -23,7 +23,7 @@ eb_data <- full_join( # keep all data.  Will assume GC data if not present (e.g.
               summarise(across(c(atm_pressure, air_temperature), mean), .by= c(lake_id, site_id, visit))
   )
 
-dim(eb_data) # 1798
+dim(eb_data) # 1797
 
 # 2. Calculate volumetric ebullition rate.  Straightforward operation
 # that can be vectorized across the entire df.
@@ -60,5 +60,5 @@ eb_results <- do.call("rbind", my_eb_list) %>%  # This coerces the list into a d
 
 
 
-str(eb_results)  # 1738 observations
+str(eb_results)  # 1797 observations
 

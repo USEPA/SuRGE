@@ -6,72 +6,45 @@ paths <-  paste0(userPath, "data/gases")
 get_gc <- function(paths){
   #d <-  #assign to object for code development
   fs::dir_ls(path = paths, # see above
-             #regexp = 'surgeData', # file names containing this pattern
+             regexp = 'gcMasterFile', # file names containing this pattern
              recurse = TRUE, # look in all subdirectories
              type = "file") %>% # only retain file names, not directory names
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     #.[5] %>% # subset one list element for testing
     # imap will read each file in fs_path list generated above
     # the "i" in imap allows the file name (.y) to be used in function.
-    purrr::imap(~read_excel(.x) %>% 
+    purrr::imap(~read_csv(.x) %>% 
                   # add file name, but omit everything before final "/"
                   # https://stackoverflow.com/questions/65312331/extract-all-text-after-last-occurrence-of-a-special-character
-                  mutate(file = sub(".*\\/", "", .y))) %>% 
-    # remove empty dataframes.  Pegasus put empty Excel files in each lake
-    # folder at beginning of season.  These files will be populated eventually,
-    # but are causing issues with code below
-    purrr::discard(~ nrow(.x) == 0) %>% 
-    # format data
-    #x %>% # for testing
-    map(., function(x) { 
-      # assign to temporary object foo.  Needed for `if` statement at end
-      # of function.
-      # only keep rows from Sample.code to end.  This omits standard
-      # curves, graphs, etc
-      x[which(x == "Sample.code"):nrow(x),] %>% 
-        janitor::row_to_names(., row_number = 1) %>% # elevate first row to names
-        janitor::clean_names(.) %>%
-        rename_with(.cols = last_col(), ~"file") %>% # GC file name is in last column
-        select(sample,
-               file,
-               contains("ppm"),
-               contains("percent"),
-               contains("flag")) %>%
-        filter(!(grepl("STD", sample, ignore.case = TRUE)), # remove standards
-               !(grepl("stop", sample, ignore.case = TRUE)), # remove 'stop' samples
-               !(grepl("chk", sample, ignore.case = TRUE)), # remove "check" standards
-               !(grepl("air", sample, ignore.case = TRUE)), # probably air standard checks
-               !(grepl("fl", sample, ignore.case = TRUE)), # Falls Lake
-               !(grepl("act", sample, ignore.case = TRUE)), # Acton Lake
-               sample != "") %>%  # exclude blank rows
-        mutate(across(-c(sample, file), as.numeric), # convert to numeric
-               # total = case_when(grepl("n2_percent", colnames(.)) ~ (ch4_ppm/10000) + (co2_ppm/10000) + (n2o_ppm/10000) + n2_percent + o2_percent + ar_percent,
-               #                   TRUE ~ NA_real_),
-               sample = str_remove(sample, '\\.'), # remove "." from exetainer codes
-               sample = str_remove(sample, '\\_'), # remove "_" from exetainer codes
-               sample = gsub("sg", "SG", sample, ignore.case = TRUE), # sg -> SG
-               sample = sub("\\R10+$", "", sample)) %>% # replace "R10" from the END of sample code.
-        # "flag" and "analyte" are in different orders across the spreadsheets.
-        # Need to make uniform
-        # case_when works even if the specified column isn't present
-        # https://stackoverflow.com/questions/68965823/rename-only-if-field-exists-otherwise-ignore
-        rename_with(
-          ~case_when(
-            . == "ch4_flag" ~ "flag_ch4",
-            . ==  "co2_flag" ~ "flag_co2",
-            . == "n2o_flag" ~ "flag_n2o",
-            . == "n2_flag" ~ "flag_n2",
-            . == "ar_flag" ~ "flag_ar",
-            . == "o2_flag" ~ "flag_o2",
-            TRUE ~ .))
-      
-    }) %>%
+                  mutate(file = sub(".*\\/", "", .y),
+                         sample = gsub("R10_", "R10", sample)) %>% # remove _
+                  filter(!(grepl(c("ACT|FL"), sample)))) %>% # omit acton and falls lake
     map_dfr(., identity) # rbinds into one df
 }
 
 # apply function
 gc <- get_gc(paths = paths) # warnings are ok
-dim(gc) # 1289 records [2/26/2024]
+dim(gc) # 2567 records [4/2/2025]
+
+# omit analyzed samples not needed here for various reasons
+gc <- gc %>%
+  filter(!(sample %in% 
+             # samples to strip:
+             c("SG210634", "SG210633", "SG210632", # extra air samples collected from 275. strip from GC data
+               "SG211409", # lake 16, 2 injections of 20 mL, sites 11 and 21 combined.
+               "SG221172", "SG221216",  # turned in by CIN on 8/26/2022 as a TRAP sample but not recorded on any data sheets and looks like air on GC
+               # PR samples delivered on 10/11/2023
+               paste0("SG23", c("0672", "0673", "0674", "0670", "0671", "0684",
+                                "0683", "0675", "0676", "0677", "0678", "0679",
+                                "0680", "0681", "0685", "0689", "0690", "0691",
+                                "0692", "0693", "0686", "0687", "0688")),
+               # paper records indicate SG210652 was collected as part of triplicate from 
+               # lake_id == 16 and site_id == 15 but sample rack and gc data contain
+               # SG2100526. I'm guessing 0652 was incorrectly recorded in field and again
+               # on sample tracking sheet, but not sure. This is one of a triplicate
+               # and will just omit from dataset.
+               "SG210526" 
+             )))
 
 # Check for duplicates.  Should be none.
 gc %>% janitor::get_dupes(sample) %>% 
@@ -79,12 +52,11 @@ gc %>% janitor::get_dupes(sample) %>%
   print(n=Inf)
 
 # Any negative values
-# yup, 148, write to clipboard for Kit to inspect
-# gc %>%
-#   select(-contains("flag")) %>%
-#   pivot_longer(-c(sample, file)) %>%
-#   filter(value < 0) %>%
-#   write.table(file = "clipboard", row.names = F)
+# yup, 27 See gas_lab RStudio project for code to 
+# write out a report for Kit to investigate
+gc %>%
+  pivot_longer(-c(sample, file)) %>%
+  filter(value < 0) 
 
 # lets replace any negative CH4 and CO2 with NA for
 # now
@@ -95,9 +67,10 @@ gc <- gc %>%
                              TRUE ~ co2_ppm))
 
 
-# MERGE EXETAINER CODES----------------------
+
+# INSPECT EXETAINER CODES FROM FIELD SHEETS----------------------
 # see readFieldSheets.R
-dim(all_exet) #2713
+dim(all_exet) #2696
 
 # List of exetainer codes !=8 characters long.
 # region 8 stuff plus SG2201, a short tube sample from NAR, so good
@@ -105,14 +78,14 @@ all_exet %>%
   filter(!is.na(sample), nchar(sample) != 8) %>%
   print(n=Inf)
 
-# Any duplicates
+# Any duplicates [124]
 # It appears that the Region 10 and Cincinnati field crews used exetainers 
-# with identical sample codes in 2020.  I asked Kit and Pegasus to investigate
+# with identical sample codes in 2020.  I asked Kit and Pegasus to investigate.
 # I asked Katie Buckler to check on duplicated codes from ADA # [2/28/2024]
-# Pegasus inadvertantly sent ADA two ...0153 exetainers in 2022 and 2023.
+# Pegasus inadvertently sent ADA two ...0153 exetainers in 2022 and 2023.
 # These are air and DG samples.  Probably discard the air and compare DG to
 # dups to determine which lakes they are from.
-all_exet %>% janitor::get_dupes(sample) %>% print(n=Inf) #136 dups
+all_exet %>% janitor::get_dupes(sample) %>% print(n=Inf) #
 # which are not from 2020,  just 0153, see above
 all_exet %>% janitor::get_dupes(sample) %>% 
   filter(!grepl("SG20", sample)) %>% # if interested in those other than 2020 codes
@@ -124,109 +97,72 @@ all_exet %>% janitor::get_dupes(sample) %>%
 # omit duplicates.  We can't determine which lake/site they came from.
 all_exet <- all_exet[!(duplicated(all_exet$sample) | duplicated(all_exet$sample, fromLast = TRUE)), ]
 
-dim(all_exet) #2577, down 136, good
+dim(all_exet) #2572, down some, good
+
+# omit exetainers that were delivered to my office but never analyzed.
+# labels fell off or technicians couldn't determine source of the samples
+all_exet <- all_exet %>%
+  filter(!(sample %in% 
+           c(
+             # Josh Fisher 9/21
+             # Exetainers 0414 and 0030 could not be identified on any datasheets.
+             # 0403 appers to on data from ch4-205 but has the exetainer code
+             # scratched out without comment.
+             "SG200030", "SG200403", "SG200414",
+             # Josh Fisher 9/18/2020
+             # These 6 exetainers had their labels fall off and cannot
+             # be individually identified.
+             "SG200727", "SG200736", "SG200739",
+             "SG200741", "SG200742", "SG200750"))
+  )
+
+
 
 # MERGE EXETAINER CODES AND GC DATA-----------------
 # [2/23/2026] need to come back and resolve
 # any unmatched records
-dim(gc) #1289 [2/26/24]
-dim(all_exet) #2577
-gc_lakeid <- full_join(gc, all_exet)
-dim(gc_lakeid) # 2755
+dim(gc) #2540 [4/7/25]
+dim(all_exet) #2573
+
+# any analyzed samples missing corresponding code from field sheet?
+# 76 samples
+# 75 are SG20 where sample codes were duplicated between
+# CIN and R10. These were stripped from the field sheets until we
+# can resolve the issue. See immediately above.
+# SG230238 was analyzed and looks like dissolved gas sample. Would have been in
+# lake 195, but not recorded. probably just delete
+gc %>% filter(!(sample %in% all_exet$sample)) 
+gc <- gc %>% filter(!(sample == "SG230238"))
+
+# any exetainer codes harvested from field sheets that are not included
+# in list of samples analyzed on GC?
+# 109!!!?
+all_exet %>% 
+  filter(!(sample %in% gc$sample)) %>%
+  mutate(sample_year = paste0("20", substr(sample, 3,4))) %>%
+  write.table("clipboard", row.names = FALSE)
+
+
+gc_lakeid <- inner_join(gc, all_exet)
+dim(gc_lakeid) # 2464
 
 # omit rows that don't have gas data.  
-# as of [4/2/2024] I haven't read in DG or AIR gc data
 # Note that some trap samples were run
 # on Shimadzu and therefore don't have n2, ar, or O2 percent.  Filter on ppm variables.
 # Had some trouble with this operation.  Ended up using tidyverse 1.3.1 approach
 # https://stackoverflow.com/questions/41609912/remove-rows-where-all-variables-are-na-using-dplyr
-gc_lakeid <- gc_lakeid %>% rowwise() %>%
-  filter(!all(is.na(c_across(contains("ppm"))))) # if all ppm columns are NA, then omit row
-dim(gc_lakeid) # 1289
-
-# How many are missing lake_id and/or site_id
-# 60 samples with GC data, but no matching code?  
-gc_lakeid %>% filter(is.na(lake_id), # no lake_id 
-                     !grepl("r", sample)) # exclude reruns which are indicated with an r and are not in field sheets  
-# How many are missing lake_id and/or site_id
-gc_lakeid %>% filter(is.na(site_id), # no site_id 
-                     !grepl("r", sample)) # no reruns.
-# the unmatched codes are from several years.  In a few cases the GC codes
-# were formatted incorrectly, Kit and Pegasus are working on these.  The
-# many 2020 codes were stripped out due to duplication and may account for some of these.
-# Have Pegasus look at 21, 22, and 23 codes.Need to revisit
-gc_lakeid %>% filter(is.na(site_id), 
-                     !grepl("r", sample),
-                     !grepl("SG20", sample)) %>% 
-  pull(sample) %>%
-  write.csv(., "output/exetainersCodesOnGcButNotFieldSheets.csv")
-  
-
-# remove records without lake_id, but gotta keep the repeat injections
-# from 1289 to 1229, dropped 60,  good (see row 144 above)
 gc_lakeid <- gc_lakeid %>% 
-  filter(case_when(
-    !is.na(lake_id) ~ TRUE, # retain observations that have a lake_id value
-    is.na(lake_id) & grepl("r", sample) ~ TRUE)) # keep if no lake_id but have "r'" in code (reruns)
-dim(gc_lakeid) #1229
+  rowwise() %>%
+  filter(!all(is.na(c_across(contains("ppm"))))) # if all ppm columns are NA, then omit row
 
-
-# DEAL WITH REPEAT INJECTIONS---------
-# samples that failed qa.qc were rerun.  The failed analyte has a value
-# of 1 in the corresponding flag column.  The rerun used the same sample
-# ID, but added an "r" somewhere in the name.  
-# 1. pull reruns into a new df
-rerun <- gc_lakeid %>% 
-  filter(grepl("r", sample)) %>% # pull out reruns
-  select(matches("ppm|percent"), sample) %>% # pull out data of interest
-  mutate(sample = gsub("r", replacement = "", x = sample, ignore.case = TRUE)) %>% # remove "r" from sample
-  rename_with(~paste0(., "_rerun"), .cols = matches("ppm|percent")) # append "rerun" to data
-dim(rerun) #118
-
-# 2.  Do all reruns have a value for the original analyses?
-# 10 reruns without corresponding initial run.  These are likely
-# samples where Kit needs to fix Exetainer codes.  Make sure these
-# get incorporated into final DF.
-rerun$sample[!(rerun$sample %in% gc_lakeid$sample)]
-
-# 3. remove reruns from gc_lakeid
-gc_lakeid <- gc_lakeid %>% filter(!grepl("r", sample))
-dim(gc_lakeid) #1111, down by 118 from 118, good
-
-# 4. Merge reruns into gc_lakeid
-gc_lakeid <- full_join(gc_lakeid, rerun)
-dim(gc_lakeid) #1121, up 10 from 1069, these are rerun samples without corresponding initial run.
-
-# 5. replace flagged values with rerun values
-gc_lakeid <- gc_lakeid %>%
-  mutate(ch4_ppm = case_when(flag_ch4 == 1 ~ ch4_ppm_rerun,
-                             is.na(ch4_ppm) & !is.na(ch4_ppm_rerun) ~ ch4_ppm_rerun,
-                             TRUE ~ ch4_ppm),
-         co2_ppm = case_when(flag_co2 == 1 ~ co2_ppm_rerun,
-                             is.na(co2_ppm) & !is.na(co2_ppm_rerun) ~ co2_ppm_rerun,
-                             TRUE ~ co2_ppm),
-         n2o_ppm = case_when(flag_n2o == 1 ~ n2o_ppm_rerun,
-                             is.na(n2o_ppm) & !is.na(n2o_ppm_rerun) ~ n2o_ppm_rerun,
-                             TRUE ~ n2o_ppm),
-         n2_percent = case_when(flag_n2 == 1 ~ n2_percent_rerun,
-                                is.na(n2_percent) & !is.na(n2_percent_rerun) ~ n2_percent_rerun,
-                                TRUE ~ n2_percent),
-         o2_percent = case_when(flag_o2 == 1 ~ o2_percent_rerun,
-                                is.na(o2_percent) & !is.na(o2_percent_rerun) ~ o2_percent_rerun,
-                                TRUE ~ o2_percent),
-         ar_percent = case_when(flag_ar == 1 ~ ar_percent_rerun,
-                                is.na(ar_percent) & !is.na(ar_percent_rerun) ~ ar_percent_rerun,
-                                TRUE ~ ar_percent),
-         total = sum((ch4_ppm/10000) + (co2_ppm/10000) + (n2o_ppm/10000) + n2_percent + o2_percent + ar_percent)) %>%
-  select(-matches("flag|rerun"))
-
-dim(gc_lakeid) #1121
+dim(gc_lakeid) # 2440
 
 
 
 
 # QA/QC GC REPS--------------
-
+##########################################################
+############################# FIX FOR DIFFERENT SAMPLE TYPES!!!!!!!!!!!!!!!
 #pdf("output/figures/scatterplot3dTrap.pdf",
  #   paper = "a4r", width = 11, height = 8)  # initiate landscape pdf file)
 par(mfrow = c(1,2))
@@ -295,7 +231,7 @@ ggplot(gc_lakeid, aes(paste(lake_id, site_id), ar_percent)) + geom_point()
 
 # Aggregate by lake_id, site_id, and visit----------------
 gc_lakeid_agg <- gc_lakeid %>%
-  group_by(lake_id, site_id, visit) %>%
+  group_by(lake_id, site_id, visit, type) %>%
   summarise(n2o_sd=sd(n2o_ppm, na.rm=TRUE),
             m_n2o_ppm=mean(n2o_ppm, na.rm=TRUE),
             n2o_cv= (n2o_sd/m_n2o_ppm) * 100,
@@ -327,10 +263,9 @@ gc_lakeid_agg <- gc_lakeid %>%
 
 
 ggplot(gc_lakeid_agg, aes(site_id, ch4_ppm)) + # Everything appears to have agg correctly
-  geom_point() 
+  geom_point() +
+  facet_wrap(~type, scales = "free")
 
-ggplot(gc_lakeid_agg, aes(ch4_ppm)) + # lots of low CH4
-  geom_freqpoly() 
 
 # # MERGE RAW GC DATA WITH eqAreaData---------------
 # # Merge all gas samples.  Will calculate dissolved concentrations downstream.
