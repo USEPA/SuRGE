@@ -16,7 +16,7 @@ get_data_sheet <- function(paths){
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway (add visit number to file name)
     .[!grepl(c("surgeData207_nlafill.xlsx"), .)] %>% # temp file Bridget is using to extrapolate sonde data
-    #.[53] %>%
+    #.[52] %>%
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
@@ -158,8 +158,10 @@ all_exet <- bind_rows(
 ) %>%
   mutate(trap_deply_date = case_when(type == "trap" ~ trap_deply_date,
                                      TRUE ~ dttr2::NA_Date_))
-dim(all_exet) #2697
-  
+dim(all_exet) #2699
+
+# check for error flag
+all_exet %>% filter(type == "Fly you fools") # none, good
   
   
 #  # BAROMETRIC PRESSURE----------------
