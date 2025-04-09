@@ -12,16 +12,17 @@
 # 1. READ LOCUS-LAKE_LINK--------
 
 # LOCUS-LAKE_LINK
-# [6/12/2024] working on Jake's machine!!  If acting up, skip to line 18
-lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
-locus <- lagosus_load(modules = c("locus"))
-names(locus)
-locus_link <- locus$locus$lake_link
+# Lines 18 - 20 use functions from LAGOSUS to grab lagos data.
+# as of 4/7/2025 the functions failed for Jake Beaulieu and Jeff
+# Hollister. Skip to line 26 and read data EDI
+# lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
+# locus <- lagosus_load(modules = c("locus"))
+# names(locus)
+# locus_link <- locus$locus$lake_link
 
-# Can also read file from stored file or web if the above isn't working.
+# Can also read file from EDI if LAGUS functions aren't working
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
-# ll <- read.csv(paste0(userPath, "data/siteDescriptors/lake_link_lagos.csv")) # downloded locally
-# ll <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.854.1&entityid=5488e333ce818597fa3dbfc9b4e0c131") # from web
+source("scripts/analysis/readLagosLocusLink.R") # read locus lake_link
 
 # Now create single record for each lake
 # There are multiple lagosus_legacysiteids and wqp_monitoringlocationidentifiers values per lake
@@ -37,7 +38,12 @@ locus_link_aggregated <- locus_link %>%
          nla12_site_id = nla2012_siteid)
 
 # 2. READ LOCUS-LAKE_CHARACTERISTICS------------
-locus_characteristics <- locus$locus$lake_characteristics
+# If LAGOSUS funcitons are working...
+## locus_characteristics <- locus$locus$lake_characteristics
+
+# Can also read file from EDI if LAGUS functions aren't working
+# https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
+source("scripts/analysis/readLagosLocusCharacteristics.R") # read locus lake_characteristics
 
 # object contains many variables we will get from other sources (e.g. morphometry from Jeff,
 # watershed from Alex).  Subset to connectivity variables unique to lagos

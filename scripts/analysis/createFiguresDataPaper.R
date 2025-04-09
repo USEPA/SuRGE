@@ -101,7 +101,8 @@ dat_all = dieb %>%
 
 
 ggplot() +
-  geom_density(data = dat_all, aes(x = rate_daily, y=..scaled.., fill = type, color = type), alpha = 0.3) +
+  geom_density(data = dat_all, aes(x = rate_daily, y=..scaled.., fill = type, color = type), alpha = 0.3,
+               trim = T) +
   geom_vline(xintercept = 0, linetype = 2) +
   facet_wrap(~ gas_name, scale = "free", ncol = 1, labeller = label_parsed) +
   scale_x_continuous(trans = "pseudo_log", breaks = breaks, expand = c(0.025, 0.025),

@@ -52,25 +52,24 @@ gc %>% janitor::get_dupes(sample) %>%
   print(n=Inf)
 
 # Any negative values
-# yup, 27 See gas_lab RStudio project for code to 
-# write out a report for Kit to investigate
+# only 13. These have all been checked and area counts of unknown are 
+# below that of Helium blank. Set to 0.
 gc %>%
   pivot_longer(-c(sample, file)) %>%
   filter(value < 0) 
 
-# lets replace any negative CH4 and CO2 with NA for
-# now
+# lets replace any negative values with 0
 gc <- gc %>%
-  mutate(ch4_ppm = case_when(ch4_ppm < 0 ~ NA_real_,
-                             TRUE ~ ch4_ppm),
-         co2_ppm = case_when(co2_ppm < 0 ~ NA_real_,
-                             TRUE ~ co2_ppm))
+  mutate(across(contains("ppm"),  ~ case_when(.x < 0 ~ 0,
+                                             TRUE ~ .x)),
+         across(contains("percent"),  ~ case_when(.x < 0 ~ 0,
+                                                     TRUE ~ .x)))
 
 
 
 # INSPECT EXETAINER CODES FROM FIELD SHEETS----------------------
 # see readFieldSheets.R
-dim(all_exet) #2696
+dim(all_exet) #2699
 
 # List of exetainer codes !=8 characters long.
 # region 8 stuff plus SG2201, a short tube sample from NAR, so good
@@ -78,21 +77,66 @@ all_exet %>%
   filter(!is.na(sample), nchar(sample) != 8) %>%
   print(n=Inf)
 
-# Any duplicates [124]
-# It appears that the Region 10 and Cincinnati field crews used exetainers 
-# with identical sample codes in 2020.  I asked Kit and Pegasus to investigate.
-# I asked Katie Buckler to check on duplicated codes from ADA # [2/28/2024]
-# Pegasus inadvertently sent ADA two ...0153 exetainers in 2022 and 2023.
-# These are air and DG samples.  Probably discard the air and compare DG to
-# dups to determine which lakes they are from.
+# Any duplicates [130]
 all_exet %>% janitor::get_dupes(sample) %>% print(n=Inf) #
-# which are not from 2020,  just 0153, see above
-all_exet %>% janitor::get_dupes(sample) %>% 
-  filter(!grepl("SG20", sample)) %>% # if interested in those other than 2020 codes
-  left_join(., lake.list %>% select(lake_id, lab) %>% 
-              mutate(lake_id = as.character(lake_id))) %>%
-  left_join(gc %>% select(sample, file)) %>%
-  select(-file)
+# It appears that the Region 10 and Cincinnati field crews used exetainers 
+# with identical sample codes in 2020.
+
+# I asked Katie Buckler to check on duplicated codes from ADA (18, 136, 166, 186)
+# Pegasus inadvertently sent ADA two ...0153 exetainers in 2022 and 2023.
+# These are air and DG samples. Discard these, they have dups.
+
+
+# lakes with duplicated exetainers (needed for list below)
+duplicated_exetainer_lakes <- all_exet %>%
+  filter(!(sample %in% c("SG220153", "SG230153"))) %>% # exclude duplicates sent to ADA
+  janitor::get_dupes(sample) %>% 
+  distinct(lake_id) %>%
+  pull() 
+
+# All exetainers collected from lakes with duplicated exetainers
+# compare list against Excel files. Attempt to determine which
+# samples were run
+full_join(
+  # missing exetainers
+  all_exet %>% 
+    filter(!(sample %in% c("SG220153", "SG230153"))) %>% # exclude duplicates sent to ADA
+    janitor::get_dupes(sample) %>%
+    distinct(sample) %>% # 52 duplicated codes
+    mutate(duplicate = TRUE),
+  # all exetainer codes from lakes with missing samples
+  all_exet %>% 
+    filter(lake_id %in% duplicated_exetainer_lakes)) %>%
+  left_join(., 
+            lake.list.all %>% 
+              filter(lake_id %in% duplicated_exetainer_lakes) %>%
+              select(lake_id, lab)
+  ) %>% 
+  mutate(across(!duplicate, as.character)) %>% # to facilitate pivot longer
+  pivot_longer(!c(sample, duplicate, lab)) %>%
+  pivot_wider(names_from = c(lab, name), values_from = value) %>%
+  print(n=Inf)
+
+# In many cases, but not all, I was able to resolve duplicates by carefully
+# reviewing GC data, sample IDs, assumed sample types, and patterns of reps
+# strip out samples that weren't run or duplicates couldn't be resolved.
+dim(all_exet) # 2699
+all_exet <- all_exet %>%
+  filter(
+    # duplicated sample IDs in Air_2021_01_19_FID_ECD_STD_UNK.xlsx
+    !(sample %in% c("SG200185", "SG200186", "SG200188") & lake_id == "238"), # CIN-235, not R10-238
+         !(sample == "SG200023" & lake_id == "249"), # CIN-234 not R10-249
+         !(sample %in% c("SG200213", "SG200211", "SG200212") & lake_id == "265"), # CIN-235 not R10-265 
+         !(sample %in% c("SG200206", "SG200198") & lake_id == "287"), # CIN-235 not R10 287
+    
+    # duplicated sample IDs in DG_2021_01_11_FID_ECD_STD_UNK.xlsx
+         )
+
+# exclude 9 samples 2699-9=2690
+
+
+
+
 
 # omit duplicates.  We can't determine which lake/site they came from.
 all_exet <- all_exet[!(duplicated(all_exet$sample) | duplicated(all_exet$sample, fromLast = TRUE)), ]
