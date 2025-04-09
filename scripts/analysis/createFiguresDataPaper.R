@@ -327,7 +327,4 @@ top_row <- plot_grid(depth,productivity)
 strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,1.75))
 strata_fig
 
-#Comparison plot
 
-rosentreter<-read.csv("inputData/Rosentreter_aquatic_ecosystems_database.csv")
-reservoirs<-filter(rosentreter,type=="Reservoir")
