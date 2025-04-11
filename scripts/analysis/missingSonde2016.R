@@ -26,7 +26,7 @@ dat2016sondeni<-dat_2016 %>%
 #Get a list of the uids that have missing deep sonde data
 dat_2016$uniqueid<-paste(dat_2016$lake_id,dat_2016$site_id)
 dat_2016_missing_sonde<-dat_2016 %>%
-  filter(site_depth>=1)%>%
+  filter(site_depth>1)%>%
   filter(!uniqueid %in% dat2016sondeni) %>%
   filter(!uniqueid %in% ind2016)
 
@@ -35,13 +35,13 @@ dat_2016_missing_sonde<-dat_2016 %>%
 
 #Dissolved Oxygen
 dat_2016$deep_do_mg_flags <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_do_mg),
   "l",
   NA
 )
 dat_2016$deep_do_mg <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_do_mg),
   dat_2016$shallow_do_mg,
   dat_2016$deep_do_mg
@@ -49,13 +49,13 @@ dat_2016$deep_do_mg <- ifelse(
 
 #Temperature
 dat_2016$deep_temp_flags <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_temp),
   "l",
   NA
 )
 dat_2016$deep_temp <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_temp),
   dat_2016$shallow_temp,
   dat_2016$deep_temp
@@ -63,14 +63,14 @@ dat_2016$deep_temp <- ifelse(
 
 #Conductivity
 dat_2016$deep_sp_cond_flags <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_sp_cond),
   "l",
   NA
 )
 
 dat_2016$deep_sp_cond <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_sp_cond),
   dat_2016$shallow_sp_cond,
   dat_2016$deep_sp_cond
@@ -78,14 +78,14 @@ dat_2016$deep_sp_cond <- ifelse(
 
 #Chlorophyll a
 dat_2016$deep_chla_sonde_flags <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_chla_sonde),
   "l",
   NA
 )
 
 dat_2016$deep_chla_sonde <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_chla_sonde),
   dat_2016$shallow_chla_sonde,
   dat_2016$deep_chla_sonde
@@ -93,14 +93,14 @@ dat_2016$deep_chla_sonde <- ifelse(
 
 #Turbidity
 dat_2016$deep_turb_flags <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_turb),
   "l",
   NA
 )
 
 dat_2016$deep_turb <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_turb),
   dat_2016$shallow_turb,
   dat_2016$deep_turb
@@ -108,14 +108,14 @@ dat_2016$deep_turb <- ifelse(
 
 #pH
 dat_2016$deep_ph_flags <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_ph),
   "l",
   NA
 )
 
 dat_2016$deep_ph <- ifelse(
-  dat_2016$site_depth < 1 &
+  dat_2016$site_depth <= 1 &
     is.na(dat_2016$deep_ph),
   dat_2016$shallow_ph,
   dat_2016$deep_ph
@@ -212,4 +212,7 @@ mcheck<-left_join(estisonde,dat2016sondeni,by="uid")
 plot(mcheck$inttemp~mcheck$deep_temp)
 abline(a=0,b=1)
 
+mcheck<-filter(mcheck,deep_temp>20)
+a<-lm(mcheck$inttemp~mcheck$deep_temp)
+summary(a)
 plot(mcheck$intchl~mcheck$deep_chla_sonde)
