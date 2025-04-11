@@ -1,4 +1,6 @@
-
+# Assumes raw GC data have been processed in RStudio project gas_lab 
+# (https://github.com/USEPA/gas_lab) (https://github.com/jbeaulie/gas_lab)
+# and consolidated text file posted to github
 
 # READ GC DATA----------------
 # Read individual files
@@ -24,7 +26,7 @@ get_gc <- function(paths){
 
 # apply function
 gc <- get_gc(paths = paths) # warnings are ok
-dim(gc) # 2567 records [4/2/2025]
+dim(gc) # 2570 records [4/2/2025]
 
 # omit analyzed samples not needed here for various reasons
 gc <- gc %>%
@@ -43,8 +45,13 @@ gc <- gc %>%
                # SG2100526. I'm guessing 0652 was incorrectly recorded in field and again
                # on sample tracking sheet, but not sure. This is one of a triplicate
                # and will just omit from dataset.
-               "SG210526" 
-             )))
+               "SG210526",
+               # SG230238 was analyzed and looks like dissolved gas sample. Would have been in
+               # lake 195, but not recorded. probably just delete
+               "SG230238"))
+             )
+
+dim(gc) # 2570 - 2539 = 31, good
 
 # Check for duplicates.  Should be none.
 gc %>% janitor::get_dupes(sample) %>% 
@@ -52,25 +59,24 @@ gc %>% janitor::get_dupes(sample) %>%
   print(n=Inf)
 
 # Any negative values
-# yup, 27 See gas_lab RStudio project for code to 
-# write out a report for Kit to investigate
+# only 13. These have all been checked and area counts of unknown are 
+# below that of Helium blank. Set to 0.
 gc %>%
   pivot_longer(-c(sample, file)) %>%
   filter(value < 0) 
 
-# lets replace any negative CH4 and CO2 with NA for
-# now
+# lets replace any negative values with 0
 gc <- gc %>%
-  mutate(ch4_ppm = case_when(ch4_ppm < 0 ~ NA_real_,
-                             TRUE ~ ch4_ppm),
-         co2_ppm = case_when(co2_ppm < 0 ~ NA_real_,
-                             TRUE ~ co2_ppm))
+  mutate(across(contains("ppm"),  ~ case_when(.x < 0 ~ 0,
+                                             TRUE ~ .x)),
+         across(contains("percent"),  ~ case_when(.x < 0 ~ 0,
+                                                     TRUE ~ .x)))
 
 
 
 # INSPECT EXETAINER CODES FROM FIELD SHEETS----------------------
 # see readFieldSheets.R
-dim(all_exet) #2696
+dim(all_exet) # 2713
 
 # List of exetainer codes !=8 characters long.
 # region 8 stuff plus SG2201, a short tube sample from NAR, so good
@@ -78,26 +84,81 @@ all_exet %>%
   filter(!is.na(sample), nchar(sample) != 8) %>%
   print(n=Inf)
 
-# Any duplicates [124]
-# It appears that the Region 10 and Cincinnati field crews used exetainers 
-# with identical sample codes in 2020.  I asked Kit and Pegasus to investigate.
-# I asked Katie Buckler to check on duplicated codes from ADA # [2/28/2024]
+# Any duplicates [130]
+all_exet %>% janitor::get_dupes(sample) %>% print(n=Inf) 
+# "SG220153", "SG230153" are duplicated codes from ADA (18, 136, 166, 186)
 # Pegasus inadvertently sent ADA two ...0153 exetainers in 2022 and 2023.
-# These are air and DG samples.  Probably discard the air and compare DG to
-# dups to determine which lakes they are from.
-all_exet %>% janitor::get_dupes(sample) %>% print(n=Inf) #
-# which are not from 2020,  just 0153, see above
-all_exet %>% janitor::get_dupes(sample) %>% 
-  filter(!grepl("SG20", sample)) %>% # if interested in those other than 2020 codes
-  left_join(., lake.list %>% select(lake_id, lab) %>% 
-              mutate(lake_id = as.character(lake_id))) %>%
-  left_join(gc %>% select(sample, file)) %>%
-  select(-file)
+# These are air and DG samples. Discard these, they have dups. Discarded from
+# GC data in gas_lab RStudio project (https://github.com/jbeaulie/gas_lab)
+# (https://github.com/USEPA/gas_lab)
+all_exet <- all_exet %>% filter(!(sample %in% c("SG220153", "SG230153")))
 
-# omit duplicates.  We can't determine which lake/site they came from.
-all_exet <- all_exet[!(duplicated(all_exet$sample) | duplicated(all_exet$sample, fromLast = TRUE)), ]
+# It appears that the Region 10 and Cincinnati field crews used exetainers 
+# with identical sample codes in 2020. Investigate these:
+# lakes with duplicated exetainers (needed for list below)
+duplicated_exetainer_lakes <- all_exet %>%
+  janitor::get_dupes(sample) %>% 
+  distinct(lake_id) %>%
+  pull() 
 
-dim(all_exet) #2572, down some, good
+# All exetainers collected from lakes with duplicated exetainers
+# compare list against Excel files. Attempt to determine which
+# samples were run
+full_join(
+  # missing exetainers
+  all_exet %>% 
+    filter(!(sample %in% c("SG220153", "SG230153"))) %>% # exclude duplicates sent to ADA
+    janitor::get_dupes(sample) %>%
+    distinct(sample) %>% # 52 duplicated codes
+    mutate(duplicate = TRUE),
+  # all exetainer codes from lakes with missing samples
+  all_exet %>% 
+    filter(lake_id %in% duplicated_exetainer_lakes)) %>%
+  left_join(., 
+            lake.list.all %>% 
+              filter(lake_id %in% duplicated_exetainer_lakes) %>%
+              select(lake_id, lab)
+  ) %>% 
+  mutate(across(!duplicate, as.character)) %>% # to facilitate pivot longer
+  pivot_longer(!c(sample, duplicate, lab)) %>%
+  pivot_wider(names_from = c(lab, name), values_from = value) %>% 
+  print(n=Inf)
+
+# In many cases, but not all, I was able to resolve duplicates by carefully
+# reviewing GC data, sample IDs, assumed sample types, and patterns of reps
+# strip out samples that weren't run or duplicates couldn't be resolved.
+# see "SuRGE\SuRGE_Sharepoint\data\gases\duplicated_exetainers.xlsx"
+dim(all_exet) # 2709
+all_exet <- all_exet %>%
+  filter(
+    # duplicated sample IDs in Air_2021_01_19_FID_ECD_STD_UNK.xlsx
+    !(sample %in% c("SG200185", "SG200186", "SG200188") & lake_id == "238"), # CIN-235, not R10-238, 3 samples
+    !(sample == "SG200023" & lake_id == "249"), # CIN-234 not R10-249, 1 sample
+    !(sample %in% c("SG200213", "SG200211", "SG200212") & lake_id == "265"), # CIN-235 not R10-265, 3 samples
+    !(sample %in% c("SG200202", "SG200206", "SG200198") & lake_id == "287"), # CIN-235 not R10 287, 3 samples
+    
+    # duplicated sample IDs in DG_2021_01_11_FID_ECD_STD_UNK.xlsx
+    !(sample %in% c("SG200181", "SG200182", "SG200183")), # could not determine which lab these are from, 6 samples
+    !(sample %in% c("SG200187", "SG200189", "SG200192") & lake_id == "235"), # R10 238 not CIN-235, 3 samples
+    !(sample %in% c("SG200013", "SG200014", "SG200015", "SG200024", "SG200025")), # could not determine which lab these are from, 10 samples
+    !(sample %in% c("SG200203", "SG200208", "SG200210") & lake_id == "265"), # CIN-235 not R10-265, 3 samples
+    !(sample %in% c("SG200214", "SG200215", "SG200216")), # could not determine which lab these are from, 6 samples
+    !(sample %in% c("SG200191", "SG200193", "SG200196", "SG200197", "SG200200", "SG200201") & lake_id == "287"), # CIN-235 not R10 287, 6 samples
+    
+    # duplicated sample IDs in T_2021_02_03_FID_ECD_STD_UNK.xlsx
+    !(sample %in% c("SG200019", "SG200020")), # could not determine which lab these are from, 4 samples
+    !(sample %in% c("SG200016", "SG200017", "SG200018", "SG200027", "SG200028", "SG200029",
+                    "SG200010", "SG200011", "SG200012") & lake_id == "234"), #R10 249 not CIN-234, 9 samples
+    !(sample %in% c("SG200001", "SG200002", "SG200003", "SG200004", "SG200005",
+                    "SG200006", "SG200007", "SG200008", "SG200009") & lake_id == "205"), #R10 265 not CIN-205, 9 samples
+    !(sample %in% c("SG200031", "SG200032", "SG200194", "SG200195", "SG200199",
+                    "SG200204", "SG200205", "SG200207", "SG200209") & lake_id == "235"), #R10 249/287 not CIN-235, 9 samples
+    
+    # duplicated sample IDs in T_2021_04_22_FID_ECD_TCD_STDshorttubes_.xlsx
+    !(sample == "SG200257")) # can't tell which lab, 2 samples  
+
+
+dim(all_exet) # 2709 - 2632 = 77, perfect
 
 # omit exetainers that were delivered to my office but never analyzed.
 # labels fell off or technicians couldn't determine source of the samples
@@ -116,46 +177,62 @@ all_exet <- all_exet %>%
              "SG200741", "SG200742", "SG200750"))
   )
 
-
+dim(all_exet) # 2625
 
 # MERGE EXETAINER CODES AND GC DATA-----------------
-# [2/23/2026] need to come back and resolve
 # any unmatched records
-dim(gc) #2540 [4/7/25]
-dim(all_exet) #2573
+dim(gc) # 2539 [4/7/25]
+dim(all_exet) # 2625
 
 # any analyzed samples missing corresponding code from field sheet?
-# 76 samples
-# 75 are SG20 where sample codes were duplicated between
-# CIN and R10. These were stripped from the field sheets until we
-# can resolve the issue. See immediately above.
-# SG230238 was analyzed and looks like dissolved gas sample. Would have been in
-# lake 195, but not recorded. probably just delete
-gc %>% filter(!(sample %in% all_exet$sample)) 
-gc <- gc %>% filter(!(sample == "SG230238"))
+# yes, but these correspond to 2020 duplicated codes that were stripped
+# from all_exet above. use an inner-join to exclude these from final data 
+gc %>% filter(!(sample %in% all_exet$sample)) %>% 
+  filter(!(sample %in% 
+             # list of excluded exetainers based on duplicated exetainer
+             # codes, see above
+             c("SG200185", "SG200186", "SG200188", "SG200023",
+               "SG200213", "SG200211", "SG200212", "SG200202", 
+               "SG200206", "SG200198", "SG200181", "SG200182", 
+               "SG200183", "SG200187", "SG200189", "SG200192",
+               "SG200013", "SG200014", "SG200015", "SG200024", 
+               "SG200025", "SG200203", "SG200208", "SG200210",
+               "SG200214", "SG200215", "SG200216", "SG200191", 
+               "SG200193", "SG200196", "SG200197", "SG200200", 
+               "SG200201", "SG200019", "SG200020", "SG200016", 
+               "SG200017", "SG200018", "SG200027", "SG200028", 
+               "SG200029", "SG200010", "SG200011", "SG200012",
+               "SG200001", "SG200002", "SG200003", "SG200004", 
+               "SG200005", "SG200006", "SG200007", "SG200008", 
+               "SG200009", "SG200031", "SG200032", "SG200194",
+               "SG200195", "SG200199", "SG200204", "SG200205", 
+               "SG200207", "SG200209", "SG200257")))
+
+
+
 
 # any exetainer codes harvested from field sheets that are not included
 # in list of samples analyzed on GC?
-# 109!!!?
+# 100  These have all been inspected and cannot be recovered. See
+# "SuRGE\SuRGE_Sharepoint\data\gases\review_of_missing_gas_samples.xlsx"
 all_exet %>% 
   filter(!(sample %in% gc$sample)) %>%
-  mutate(sample_year = paste0("20", substr(sample, 3,4))) %>%
-  write.table("clipboard", row.names = FALSE)
+  mutate(sample_year = paste0("20", substr(sample, 3,4))) 
 
 
 gc_lakeid <- inner_join(gc, all_exet)
-dim(gc_lakeid) # 2464
+dim(gc_lakeid) # 2525
 
-# omit rows that don't have gas data.  
-# Note that some trap samples were run
-# on Shimadzu and therefore don't have n2, ar, or O2 percent.  Filter on ppm variables.
+# omit rows that don't have gas data. [0 cases of this]
+# Note that some trap samples were run on Shimadzu and therefore don't have n2,
+# ar, or O2 percent.  Must filter on ppm and percent variables.
 # Had some trouble with this operation.  Ended up using tidyverse 1.3.1 approach
 # https://stackoverflow.com/questions/41609912/remove-rows-where-all-variables-are-na-using-dplyr
 gc_lakeid <- gc_lakeid %>% 
   rowwise() %>%
-  filter(!all(is.na(c_across(contains("ppm"))))) # if all ppm columns are NA, then omit row
+  filter(!all(is.na(c_across(matches(c("ppm|percent")))))) # if all ppm columns are NA, then omit row
 
-dim(gc_lakeid) # 2440
+dim(gc_lakeid) # 2525, no empty rows
 
 
 
