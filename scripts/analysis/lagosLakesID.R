@@ -14,15 +14,34 @@
 # LOCUS-LAKE_LINK
 # Lines 18 - 20 use functions from LAGOSUS to grab lagos data.
 # as of 4/7/2025 the functions failed for Jake Beaulieu and Jeff
-# Hollister. Skip to line 26 and read data EDI
+# Hollister. 
 # lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
 # locus <- lagosus_load(modules = c("locus"))
 # names(locus)
 # locus_link <- locus$locus$lake_link
 
-# Can also read file from EDI if LAGUS functions aren't working
+# As an alternative to LAGOSUS functions, the file was read directly from from 
+# the Environmental Data Initiative Respository on 4/11/2025 and stored locally.
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
-source("scripts/analysis/readLagosLocusLink.R") # read locus lake_link
+# Code below will load file if avaialable locally, download from EDI if not
+
+if(
+  # if file is available locally...
+  paste0(userPath, "data/siteDescriptors/locus_link.csv.gz") %in%
+   fs::dir_ls(paste0(userPath, "data/siteDescriptors/")) ) {
+  # then load file
+  locus_link <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_link.csv.gz"))
+} else {
+  # if local file not available: 
+  # 1. read file from Environmental Data Initiative Respository and save locally
+  # 2. load file
+  source("scripts/analysis/readLagosLocusLink.R") # read locus lake_link
+  locus_link <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_link.csv.gz"))
+}
+
+
 
 # Now create single record for each lake
 # There are multiple lagosus_legacysiteids and wqp_monitoringlocationidentifiers values per lake
@@ -41,9 +60,27 @@ locus_link_aggregated <- locus_link %>%
 # If LAGOSUS funcitons are working...
 ## locus_characteristics <- locus$locus$lake_characteristics
 
-# Can also read file from EDI if LAGUS functions aren't working
+# As an alternative to LAGOSUS functions, the file was read directly from from 
+# the Environmental Data Initiative Respository on 4/11/2025 and stored locally.
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
-source("scripts/analysis/readLagosLocusCharacteristics.R") # read locus lake_characteristics
+# Code below will load file if avaialable locally, download from EDI if not
+
+if(
+  # if file is available locally...
+  paste0(userPath, "data/siteDescriptors/locus_characteristics.csv.gz") %in%
+  fs::dir_ls(paste0(userPath, "data/siteDescriptors/")) ) {
+  # then load file
+  locus_characteristics <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_characteristics.csv.gz"))
+} else {
+  # if local file not available: 
+  # 1. read file from Environmental Data Initiative Respository and save locally
+  # 2. load file
+  source("scripts/analysis/readLagosLocusCharacteristics.R") # read locus lake_link
+  locus_characteristics <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_characteristics.csv.gz"))
+}
+
 
 # object contains many variables we will get from other sources (e.g. morphometry from Jeff,
 # watershed from Alex).  Subset to connectivity variables unique to lagos
@@ -104,7 +141,7 @@ locus_connectivity <- locus_characteristics %>%
 #downloaded the nets_networkmetrics_medres file from https://doi.org/10.6073/pasta/98c9f11df55958065985c3e84a4fe995
 #saved to the SuRGE site descriptors subfolder of the data folder
 
-ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_medres_LAGOS_NETWORKS.csv")))
+ln <- read_csv(file = (paste0(userPath, "data/siteDescriptors/nets_networkmetrics_medres_LAGOS_NETWORKS.csv")))
 #received email from Katelyn King about parsing issues on 8/7/2024... she explained that
 #this is due to their being multiple dam ids associated with lake_nets_nearestdamup_id
 #if we decide we want to use this column she gave some script for pulling out each id
@@ -115,7 +152,7 @@ ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_me
 
 
 lagos_network<- ln %>%
-  select(lagoslakeid,lake_nets_nearestdamup_km,lake_nets_totaldamup_n)
+  select(lagoslakeid, lake_nets_nearestdamup_km, lake_nets_totaldamup_n)
 
 
 # 5. READ LAGOS TROPHIC STATUS-----
