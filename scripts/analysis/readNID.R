@@ -9,12 +9,23 @@ nid_link <- read_csv(paste0(userPath, "data/siteDescriptors/nid_links_and_dam_ag
 
 dim(nid_link) #147
 
-#Pull Dam Latitudes and Longitudes
-nid <- read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
-   janitor::clean_names()%>%
-  select(federal_id,dam_name,latitude,longitude)
+# Pull Dam Latitudes and Longitudes
+# data originally downloaded on 4/11/2025, then written to disk
+# read_csv("https://nid.sec.usace.army.mil/api/nation/csv", skip = 1) %>%
+#   janitor::clean_names() %>%
+#   select(federal_id, name, latitude, longitude) %>% 
+#   write.csv(nid, paste0(userPath, "data/siteDescriptors/nid.csv"), row.names = FALSE)
+#   nid <- read_csv(paste0(userPath, "data/siteDescriptors/nid.csv"))
 
-colnames(nid)<-c("nid_id","dam_name","dam_latitude","dam_longitude")
-nid_link<- left_join(nid_link,nid, by= "nid_id")
-nid_link$lake_id<-as.numeric(nid_link$lake_id)
+# read and format local copy
+nid <- read_csv(paste0(userPath, "data/siteDescriptors/nid.csv")) %>%
+  rename(nid_id = federal_id,
+         dam_name = name,
+         dam_latitude = latitude,
+         dam_longitude = longitude)
+  
+
+# merge nid data with nid_link
+nid_link <- left_join(nid_link, nid, by= "nid_id")
+nid_link$lake_id <- as.numeric(nid_link$lake_id)
 nid_link <- ungroup(nid_link)
