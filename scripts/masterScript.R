@@ -52,7 +52,7 @@ source("scripts/analysis/readGriddedTemp.R") # ERA5 derived estimates of air, sh
 # Calculate derived quantities
 source("scripts/analysis/calculateStratification.R") # stratification indices
 source("scripts/analysis/getIndexSite.R") # extract index site location from depth_profiles_all
-
+source("scripts/analysis/calculateDissolvedGas.R") # dissolved_gas
 
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
