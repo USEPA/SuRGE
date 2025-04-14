@@ -306,9 +306,10 @@ ggplot(gc_lakeid, aes(paste(lake_id, site_id), o2_percent)) + geom_point()
 # A few Ar + O2 peaks were not separated.  I asked Kit to fix
 ggplot(gc_lakeid, aes(paste(lake_id, site_id), ar_percent)) + geom_point()
 
+
 # Aggregate by lake_id, site_id, and visit----------------
 gc_lakeid_agg <- gc_lakeid %>%
-  group_by(lake_id, site_id, visit, type) %>%
+  group_by(lake_id, site_id, visit, sample_depth_m, type) %>%
   summarise(n2o_sd=sd(n2o_ppm, na.rm=TRUE),
             m_n2o_ppm=mean(n2o_ppm, na.rm=TRUE),
             n2o_cv= (n2o_sd/m_n2o_ppm) * 100,

@@ -5,49 +5,91 @@
 source("scripts/analysis/def.calc.sdg.R")
 
 
-# def.calc.sdg.R
-# Get GC data from gc_lakeid_agg
-gc_lakeid_agg %>% 
-  filter(type %in% c("dg", "air")) %>%
-  select(lake_id, site_id, visit, type, n2o_ppm, co2_ppm, ch4_ppm) %>% 
-  # exetainer codes for air samples are arbitratirly written in first
-  # row of spreadsheet and may not correspond to correct site_id. Set 
-  # to NA here, then inherit site_id from dissolved gas sampling location
-  mutate(site_id = case_when(type == "air" ~ NA_real_,
-                             type == "dg" ~ site_id,
-                             TRUE ~ 999999999)) %>%
-  # assign dissolved gas sampling site to air sampling site
-  group_by(lake_id, visit) %>%
-  fill(site_id, .direction = "downup") %>%
-  #ungroup %>%
-  pivot_longer(!c(lake_id, site_id, visit, type)) %>% filter(lake_id == "239")
-  summarize(n=n())
+# Compile data needed to calculate dissolved gas
+# Information is distributed across gc_lake_agg, dg_sheet, and fld_sheet
+dissolved_gas_input <- left_join(
+  # left_join starting with GC data. Cant calculate dissolved gas concentration
+  # without GC data, so start here
   
-  #filter(lake_id == "1") %>% # development
-  pivot_wider(names_from = c(type, name), values_from = value)
+  # first compile the air and dissolved gas data
+  gc_lakeid_agg %>% 
+    # extract air and dissolved gas
+    filter(type %in% c("dg", "air")) %>%
+    select(lake_id, site_id, visit, type, sample_depth_m, 
+           n2o_ppm, co2_ppm, ch4_ppm) %>% 
+    rename(sample_depth = sample_depth_m) %>%
+    pivot_longer(!c(lake_id, site_id, visit, sample_depth, type)) %>%
+    pivot_wider(names_from = c(type, name), values_from = value) %>%
+    group_by(lake_id, site_id, visit) %>%
+    # need to fill "air" measurements
+    fill(contains("air"), .direction = "downup") %>%
+    # now get rid of row where air concentration data was stored
+    filter(if_all(c(sample_depth, dg_n2o_ppm), ~ !is.na(.x))) %>%
+    # generalize sampling depth to facilitate join with other data.
+    # minor discrepancies in depths recorded on "data" and "dissolved_gas"
+    # worksheets cause join to fail. 
+    mutate(sample_depth = case_when(sample_depth == 0.1 ~ "shallow",
+                                    TRUE ~ "deep")),
   
+  # Now get required data from dg_sheet
+  dg_sheet %>%
+    select(-dg_extn, -dg_notes) %>%
+    rename(sample_depth = sample_depth_m) %>%
+    group_by(lake_id, site_id, visit, sample_depth) %>%
+    summarise(across(everything(), mean)) %>%
+    # generalize sampling depth to facilitate join with other data.
+    # minor discrepancies in depths recorded on "data" and "dissolved_gas"
+    # worksheets cause join to fail. 
+    mutate(sample_depth = case_when(sample_depth == 0.1 ~ "shallow",
+                                    TRUE ~ "deep"))
+) %>% # end first left_join
+  left_join(.,
+            # Now get water temperature for fld_sheet
+            fld_sheet %>%
+              select(lake_id, site_id, visit, 
+                     sample_depth_s, sample_depth_d,
+                     temp_s, temp_d) %>%
+              #filter(lake_id == "3") %>% # for development
+              pivot_longer(-c(lake_id, site_id, visit)) %>%
+              # strip "_d" and "_s"
+              mutate(sample_depth_cat = str_sub(name, start = -1),
+                     name = str_sub(name, end = -3)) %>% # remove final 2 characters
+              pivot_wider(names_from = name, values_from = value) %>%
+              # generalize sampling depth to facilitate join with other data.
+              # minor discrepancies in depths recorded on "data" and "dissolved_gas"
+              # worksheets cause join to fail. 
+              mutate(sample_depth = case_when(sample_depth_cat == "s" ~ "shallow",
+                                              sample_depth_cat == "d" ~ "deep",
+                                              TRUE ~ "FLY YOU FOOLS!")) %>%
+              select(-sample_depth_cat) %>%
+              rename(water_temperature = temp) 
+  ) %>% # end second left_join
+  # deal with missing headspace equilibration temperature
+  mutate(dg_extn_temp = case_when(!is.na(dg_extn_temp) ~ dg_extn_temp,
+                                  is.na(dg_extn_temp) & is.na(water_temperature) ~ air_temperature,
+                                  is.na(dg_extn_temp) & !is.na(water_temperature) ~ mean(c(air_temperature, water_temperature)),
+                                  TRUE ~ 999999999)) # error code
 
+# check for error flag
+dissolved_gas_input %>% 
+  filter(dg_extn_temp == 999999999) # none, good
 
-dissolved_gas <- with(eqAreaData, def.calc.sdg(inputFile = eqAreaData, 
+dissolved_gas <- with(dissolved_gas_input, 
+                      def.calc.sdg(inputFile = dissolved_gas_input, 
                                             volGas = air_vol, volH2O = water_vol, 
                                             baro = atm_pressure, # units? 
-                                            waterTemp = Tmp_C_S, # lake temp     ###### update
-                                            headspaceTemp = dg_extn_temp, # use lake temp
-                                            eqCO2 = dissolved_co2.ppm,           ###### update
-                                            sourceCO2 = 0, # measured air CO2
-                                            airCO2 = 405, # measured air CO2
-                                            eqCH4 = dissolved_ch4.ppm,          ###### update
-                                            sourceCH4 = 0, # measured air ch4 
-                                            airCH4 = 1.85, # measured air ch4
-                                            eqN2O = dissolved_n2o.ppm, 
-                                            sourceN2O = 0, # measured air n2o 
-                                            airN2O = 0.33)) %>% # measured air n2o
-  mutate(co2.sat.ratio = dissolvedCO2 / satCO2,
-         ch4.sat.ratio = dissolvedCH4 / satCH4,
-         n2o.sat.ratio = dissolvedN2O / satN2O) %>%
-  rename(dissolved.co2 = dissolvedCO2,
-         sat.co2 = satCO2,
-         dissolved.ch4 = dissolvedCH4,
-         sat.ch4 = satCH4,
-         dissolved.n2o = dissolvedN2O,
-         sat.n2o = satN2O)
+                                            waterTemp = water_temperature, # lake temp     
+                                            headspaceTemp = dg_extn_temp, # 
+                                            eqCO2 = dg_co2_ppm, # co2 in equilibrated headspace
+                                            sourceCO2 = air_co2_ppm, # measured CO2 in gas used for headspace (air)
+                                            airCO2 = air_co2_ppm, # measured air CO2
+                                            eqCH4 = dg_ch4_ppm, # ch4 in equilibrated headspace
+                                            sourceCH4 = air_ch4_ppm, # measured Ch4 in gas used for headspace (air) 
+                                            airCH4 = air_ch4_ppm, # measured air ch4
+                                            eqN2O = dg_n2o_ppm, # n2o in equilibrated headspace
+                                            sourceN2O = air_n2o_ppm, # measured n2o in gas used for headspace (air)
+                                            airN2O = air_n2o_ppm)) %>% # measured air n2o
+  mutate(co2_sat_ratio = dissolvedCO2 / satCO2,
+         ch4_sat_ratio = dissolvedCH4 / satCH4,
+         n2o_sat_ratio = dissolvedN2O / satN2O) %>%
+  janitor::clean_names(.)

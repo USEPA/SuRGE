@@ -141,7 +141,7 @@ dg_sheet %>% filter(is.na(atm_pressure) | is.na(air_temperature) |
 # create object containing all exetainer codes for readGc.R
 all_exet <- bind_rows(
   dg_sheet %>% # DG exetainers
-    select(lake_id, site_id, visit, dg_extn) %>%
+    select(lake_id, site_id, visit, sample_depth_m, dg_extn) %>%
     rename(sample = dg_extn) %>%
     mutate(type = "dg"),
   fld_sheet %>% # air + trap exetainers
