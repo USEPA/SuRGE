@@ -151,7 +151,7 @@ ln <- read_csv(file = (paste0(userPath, "data/siteDescriptors/nets_networkmetric
 #                    sep = ";")
 
 
-lagos_network<- ln %>%
+lagos_network <- ln %>%
   select(lagoslakeid, lake_nets_nearestdamup_km, lake_nets_totaldamup_n)
 
 
@@ -193,7 +193,7 @@ lake_list_for_lagos_merge <- lake.list.all %>% # see readSurgeLakes.R
                              TRUE ~ lake_id),
          lake_id = as.numeric(lake_id)) %>%
   filter(lake_id != 1033) %>% # exclude Falls Lake, too complicated right now [10/18/2024]
-  mutate(nhdplusv2_comid = as.character(nhd_plus_waterbody_comid)) %>% # not sure why this is necessary
+  rename(nhdplusv2_comid = nhd_plus_waterbody_comid) %>% 
   select(lake_id, visit, nhdplusv2_comid) %>% # gnis_name, gnis_id included earlier. needed?
   distinct() # this collapses 69, 70, into one record each
 
