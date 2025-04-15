@@ -81,6 +81,8 @@ source("scripts/analysis/calculateEbullition.R") # eb_results
 # Merge diffusive and ebullitive rates --> calculate total
 source("scripts/analysis/calculateTotalEmissions.R")
 
+# calculate k600
+source("scripts/analysis/calculateK600.R")
 
 # Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs

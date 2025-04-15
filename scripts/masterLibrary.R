@@ -31,6 +31,7 @@ library(StreamCatTools) # read lakeCat
 library(jtools) # visualize regression models (effect_plot)
 #library(StepReg) # stepwise selection based on p-value (`stepwise`)
 library(cowplot) # arranging ggplot plots into grid
+library(scatterplot3d) # read_gc 
 library(ggh4x) # ggplot2 hacks
 library(ggallin) # pseudolog10_trans
 library(httr) #this is needed for downloading Lagos trophic status data

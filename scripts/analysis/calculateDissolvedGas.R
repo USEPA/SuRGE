@@ -68,12 +68,18 @@ dissolved_gas_input <- left_join(
   mutate(dg_extn_temp = case_when(!is.na(dg_extn_temp) ~ dg_extn_temp,
                                   is.na(dg_extn_temp) & is.na(water_temperature) ~ air_temperature,
                                   is.na(dg_extn_temp) & !is.na(water_temperature) ~ mean(c(air_temperature, water_temperature)),
-                                  TRUE ~ 999999999)) # error code
+                                  TRUE ~ 999999999), # error code
+         water_temperature = case_when(lake_id == "207" & site_id == "25" & sample_depth == "deep" ~ 9.4, # from NLA profile
+                                       TRUE ~ water_temperature)) %>%
+  ungroup()
 
-# check for error flag
+# check for error flags
 dissolved_gas_input %>% 
-  filter(dg_extn_temp == 999999999) # none, good
+  filter(dg_extn_temp == 999999999, # none, good
+         sample_depth == "FLY YOU FOOLS!")
 
+
+# calculate dissolved gas concentration
 dissolved_gas <- with(dissolved_gas_input, 
                       def.calc.sdg(inputFile = dissolved_gas_input, 
                                             volGas = air_vol, volH2O = water_vol, 
@@ -89,7 +95,27 @@ dissolved_gas <- with(dissolved_gas_input,
                                             eqN2O = dg_n2o_ppm, # n2o in equilibrated headspace
                                             sourceN2O = air_n2o_ppm, # measured n2o in gas used for headspace (air)
                                             airN2O = air_n2o_ppm)) %>% # measured air n2o
-  mutate(co2_sat_ratio = dissolvedCO2 / satCO2,
-         ch4_sat_ratio = dissolvedCH4 / satCH4,
-         n2o_sat_ratio = dissolvedN2O / satN2O) %>%
-  janitor::clean_names(.)
+  janitor::clean_names(.) 
+
+# Quick inspection of values before calculating derived quantities
+# a few negative CO2 concentrations. set to NA
+dissolved_gas %>%
+  filter(if_any(contains("dissolved"), ~ .x < 0))
+
+dissolved_gas <- dissolved_gas %>%
+  mutate(dissolved_co2 = case_when(dissolved_co2 < 0 ~ NA_real_,
+                                   TRUE ~ dissolved_co2))
+
+# Calculate a few derived quantities
+dissolved_gas <- dissolved_gas %>%
+  mutate(co2_sat_ratio = dissolved_co2 / sat_co2,
+         ch4_sat_ratio = dissolved_ch4 / sat_ch4,
+         n2o_sat_ratio = dissolved_n2o / sat_n2o) %>%
+  mutate(dissolved_co2_units = "mol co2 L-1",
+         dissolved_ch4_units = "mol ch4 L-1",
+         dissolved_n2o_units = "mol n2o L-1",
+         sat_co2_units = "mol co2 L-1",
+         sat_ch4_units = "mol ch4 L-1",
+         sat_n2o_units = "mol n2o L-1") %>%
+  ungroup()
+
