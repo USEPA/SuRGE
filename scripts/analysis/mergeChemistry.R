@@ -1,55 +1,25 @@
 
 
-# Bring in chemistry data objects----
-# 
-# localName <- if (grepl("JBEAULIE", userPath)) {
-#   "Jake/"
-# } else if (grepl("JCOR", userPath, ignore.case = TRUE)) {
-#   "Joe/"} 
-
-
-# # Can source scripts that generate data objects here, or run them from masterScript.R
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsAda.R")) # read ADA lab anions
-# # data object name: ada.anions
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readAnionsDaniels.R")) # read Kit Daniels anions
-# # data object name: d.anions, d anions.aggregated
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAda.R")) # read nutrients ran in ADA lab
-# # data object name: ada.nutrients
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsAwberc.R")) # read AWBERC lab nutrient results
-# # data object name: chem21
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readNutrientsR10_2018.R")) # read AWBERC nutrients for 2018 R10
-# # data object name: chem18
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcAda.R")) # read ADA TOC/DOC data
-# # data object name: ada.oc
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readOcMasi.R")) # read 2020 TOC run at MASI lab
-# # data object name: toc.masi
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readTteb.R")) # TTEB metals, TOC, DOC
-# # data object name: tteb.all
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readChlorophyllR10_2018.R")) # 2018 R10 chlorophyll
-# # data object name: chl18
-# source(paste0(userPath, "rProjects/", localName, "SuRGE/scripts/analysis/readPigmentsMicrocystin.R")) # 2020+ chloro/phyco
-# # data object name: pigments_20_21_22
-
-
 # Inspect objects----
 
 # inspect object to merge
-## each df contains 10 - 333 observations [1/24/2025]
+## each df contains 10 - 361 observations [4/16/2025]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments, microcystin, dissolved_gas) %>% 
   map_dfc(., nrow)
 
 # are the unique IDs formatted identically across the dfs?
 ## All have lake_id, site_id, sample_depth, sample_type
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments, microcystin, dissolved_gas) %>% 
   map(., function(x) select(
     x, lake_id, site_id, sample_depth, sample_type) %>% 
       str(.))
 ## which ones have a visit field?
-### ada.anions, ada.nutrients, ada.oc, chemCinNutrients, tteb.all, pigments
+### ada.anions, ada.nutrients, ada.oc, chemCinNutrients, tteb.all, pigments, 
+### microcystin dissolved_gas
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
-     ada.oc, toc.masi, tteb.all, chl18, pigments) %>% 
+     ada.oc, toc.masi, tteb.all, chl18, pigments, microcystin, dissolved_gas) %>% 
   map_lgl(., function(x) x %>% {"visit" %in% names(.)})
 
 
@@ -146,14 +116,30 @@ janitor::get_dupes(
   select(metal.pig.oc.anions, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dups
 
-chemistry_all <- nutrients2 %>%
+metal.pig.oc.anions.nutrients <- nutrients2 %>%
   full_join(metal.pig.oc.anions)
 # check for unexpected behavior
 janitor::get_dupes(
-  select(chemistry_all, lake_id, site_id, sample_depth, sample_type, visit)) 
+  select(metal.pig.oc.anions.nutrients, lake_id, site_id, sample_depth, sample_type, visit)) 
 # no dups
 
+metal.pig.oc.anions.nutrients.micro <- metal.pig.oc.anions.nutrients %>%
+  full_join(microcystin)
+# check for unexpected behavior
+janitor::get_dupes(
+  select(metal.pig.oc.anions.nutrients.micro, lake_id, site_id, sample_depth, 
+         sample_type, visit))
 
+chemistry_all <- metal.pig.oc.anions.nutrients.micro %>%
+  full_join(dissolved_gas %>%
+              select(lake_id, site_id, sample_depth, sample_type, visit,
+                     contains("dissolved"), contains("ratio")))
+# check for unexpected behavior
+janitor::get_dupes(
+  select(chemistry_all, lake_id, site_id, sample_depth, sample_type, visit)) 
+
+
+# no dups
 # The tteb.all object contains metals, anion, DOC, and TOC data.  To prevent erroneous duplicates
 # when joining tteb.all with other objects containing TOC, DOC, or anion data, we appended "tteb."
 # to TOC, DOC, and anion column names in tteb.all (see readTteb.R).  Any samples where TOC/DOC/anions were run
@@ -228,4 +214,4 @@ chemistry_all <- chemistry_all %>%
            sort(colnames(.))) # others arranged alphabetically
 
 
-dim(chemistry_all) # 368, 125 [1/24/2025]
+dim(chemistry_all) # 510, 146 [1/24/2025]

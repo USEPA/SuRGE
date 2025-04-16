@@ -106,16 +106,35 @@ dissolved_gas <- dissolved_gas %>%
   mutate(dissolved_co2 = case_when(dissolved_co2 < 0 ~ NA_real_,
                                    TRUE ~ dissolved_co2))
 
-# Calculate a few derived quantities
+# Calculate a few derived quantities and add units and flags
 dissolved_gas <- dissolved_gas %>%
   mutate(co2_sat_ratio = dissolved_co2 / sat_co2,
          ch4_sat_ratio = dissolved_ch4 / sat_ch4,
          n2o_sat_ratio = dissolved_n2o / sat_n2o) %>%
-  mutate(dissolved_co2_units = "mol co2 L-1",
-         dissolved_ch4_units = "mol ch4 L-1",
-         dissolved_n2o_units = "mol n2o L-1",
-         sat_co2_units = "mol co2 L-1",
-         sat_ch4_units = "mol ch4 L-1",
-         sat_n2o_units = "mol n2o L-1") %>%
+  mutate(
+    # units
+    dissolved_co2_units = "mol co2 L-1",
+    dissolved_ch4_units = "mol ch4 L-1",
+    dissolved_n2o_units = "mol n2o L-1",
+    sat_co2_units = "mol co2 L-1",
+    sat_ch4_units = "mol ch4 L-1",
+    sat_n2o_units = "mol n2o L-1",
+    ch4_sat_ratio_units = "unitless",
+    co2_sat_ratio_units = "unitless",
+    n2o_sat_ratio_units = "unitless",
+    
+    # flags
+    dissolved_co2_flags = NA,
+    dissolved_ch4_flags = NA,
+    dissolved_n2o_flags = NA,
+    sat_co2_flags = NA,
+    sat_ch4_flags = NA,
+    sat_n2o_flags = NA,
+    ch4_sat_ratio_flags = NA,
+    co2_sat_ratio_flags = NA,
+    n2o_sat_ratio_flags = NA,
+    
+    # identifier
+    sample_type = "unknown") %>%
   ungroup()
 

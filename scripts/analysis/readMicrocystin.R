@@ -12,7 +12,8 @@ get_microcystin_data <- function(path) {
            lake_id = str_remove(waterbody, "^0+")) %>% # remove leading 0 from character string
     rename(sample_type = field_dups,
            microcystin = value,
-           microcystin_units = units) %>%
+           microcystin_units = units,
+           microcystin_flags = flag) %>%
 
     # Create visit field
     mutate(visit = case_when(lake_id %in% c("281", "250") &
@@ -25,7 +26,7 @@ get_microcystin_data <- function(path) {
                                        as.Date("2023-08-30")) ~ 2,
                              TRUE ~ 1)) %>%
     select(lake_id, site_id, sample_type, sample_depth, visit,
-           microcystin, microcystin_units) %>%
+           microcystin, microcystin_units, microcystin_flags) %>%
     filter(sample_type != "blank")
 
   
@@ -35,3 +36,13 @@ get_microcystin_data <- function(path) {
 
 path <- paste0(userPath, "data/algalIndicators/surge_microcystin.csv")
 microcystin <- get_microcystin_data(path)
+
+# check for dups
+# 20 on 4/16/2025. Asked Jeff to investigate. Will strip out for now
+microcystin %>% janitor::get_dupes(lake_id, lake_id, site_id, sample_depth, sample_type, visit)
+
+# remove dups for now
+microcystin <- microcystin[!duplicated(microcystin[c("lake_id", "lake_id", "site_id", "sample_depth", "sample_type", "visit")]), ]
+
+# confirm no dups
+microcystin %>% janitor::get_dupes(lake_id, lake_id, site_id, sample_depth, sample_type, visit)
