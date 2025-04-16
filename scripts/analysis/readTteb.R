@@ -72,23 +72,7 @@ tteb.SURGE2023 <- read_excel(paste0(
 
 
 
-# Anions preliminary data (18 Oct 2023)
-# 2/22/2024: Commented out; data duplicated in SURGE_2023_02_14_2024_update.xlsx
-# tteb.prelim.anions <- read_excel(
-#   paste0(userPath, 
-#          "data/chemistry/tteb/tteb_prelim_anions.xlsx")) %>%
-#   filter(!str_detect(lab_id, "DUP")) %>% # remove lab dupes for now
-#   filter(across(-lab_id, ~ !str_detect(., "n.a."))) %>% # remove any 'n.a.' rows
-#   mutate(across(everything(), 
-#                 ~ str_extract(., "[0-9]+") %>% # remove non-numeric 
-#                   as.numeric()), # make class numeric
-#          # The function below replaces all zeroes with NA. Note that any
-#          # values below the det. limit are zero, so they become NA as well. 
-#          # We can change this if desired. 
-#          across(everything(), 
-#                 ~ if_else(. == 0, NA_real_, .))) 
-
-# anions ic preliminary data (13 Nov 2023) [not in formal data report 3/20/2]
+# anions ic preliminary data (13 Nov 2023) [not in formal data report 3/20/25]
 tteb.prelim.anions.ic <- read_excel(
   paste0(userPath, 
          "data/chemistry/tteb/tteb_prelim_anions_ic.xlsx")) %>%
@@ -191,14 +175,16 @@ tteb <- bind_rows(tteb.BEAULIEU, tteb.SURGE2021, tteb.SURGE2022,
   select(order(colnames(.))) %>% # alphabetize column names
   select(lab_id, sampid, colldate, flag, 
          comment, everything()) %>% # put these columns first
-  filter(!(lab_id == 214171)) # extra shallow collected.  See note in ttebSampleIds.xlsx
-# and chemistry065NARtoCIN06September2022.pdf.  Easier
-# to delete than integrate into analysis
+  # extra shallow collected.  See note in ttebSampleIds.xlsx
+  # and chemistry065NARtoCIN06September2022.pdf.  Easier
+  # to delete than integrate into analysis
+  filter(!(lab_id == 214171),
+         !(lab_id == 0)) # lab qaqc sample 
 
 # Add the tteb prelim data, which already has matching column names
 tteb <- bind_rows(tteb, tteb.prelim.toc, tteb.prelim.anions.ic)
 
-# tteb.prelim.anions contains duplicates of SURGE_2023_02_14_2024_update.xlsx
+
 
 # 2. READ CHAIN OF CUSTODY----------------
 # Read in chain on custody data for SuRGE samples submitted to TTEB
@@ -259,7 +245,7 @@ setdiff(chem.samples.foo %>%
 # we are matching with SuRGE CoC, only SuRGE samples will be retained.
 # tteb contains data from other studies too (i.e. Falls Lake data)
 dim(ttebCoc) #854
-dim(tteb) #1207 [3/20/2025]
+dim(tteb) #1203 [4/16/2025]
 tteb.all <- inner_join(ttebCoc, tteb)
 nrow(tteb.all) # 849 records [3/20/2025] 
 
