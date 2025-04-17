@@ -3,7 +3,7 @@
 # Inspect objects----
 
 # inspect object to merge
-## each df contains 10 - 361 observations [4/16/2025]
+## each df contains 10 - 333 observations [4/16/2025]
 list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18, 
      ada.oc, toc.masi, tteb.all, chl18, pigments, microcystin, dissolved_gas) %>% 
   map_dfc(., nrow)
@@ -15,6 +15,7 @@ list(ada.anions, d.anions, ada.nutrients, chemCinNutrients, chem18,
   map(., function(x) select(
     x, lake_id, site_id, sample_depth, sample_type) %>% 
       str(.))
+
 ## which ones have a visit field?
 ### ada.anions, ada.nutrients, ada.oc, chemCinNutrients, tteb.all, pigments, 
 ### microcystin dissolved_gas
@@ -214,4 +215,4 @@ chemistry_all <- chemistry_all %>%
            sort(colnames(.))) # others arranged alphabetically
 
 
-dim(chemistry_all) # 510, 146 [1/24/2025]
+dim(chemistry_all) # 410, 146 [4/17/2025]

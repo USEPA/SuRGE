@@ -47,5 +47,6 @@ chemistry_all <-
 
 # Arrange columns----
 chemistry_all <- chemistry_all %>%
+  select(-analyte_group) %>% # inherited from shipping_data, not needed
   relocate(lake_id, site_id, sample_depth, sample_type, visit, 
            sort(colnames(.))) # others arranged alphabetically

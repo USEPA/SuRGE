@@ -20,6 +20,7 @@ library(tmap) # mapping
 library(tigris) # get states data. Alternative to USABoundaries
 library(mapsf) # map with Puerto Rico inset
 library(tictoc) # timing operations
+library(fs) # file management
 library(gridExtra) # grid.arrange() for multiple panels per page on .pdf
 library(lubridate) #for adjusting time offsets in readLGR
 library(minpack.lm) #for the exponential modeling of diffusive flux

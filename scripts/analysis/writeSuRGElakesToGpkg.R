@@ -9,6 +9,7 @@
 # 1. CREATE A LIST FILE PATHS WHERE THE SURGE LAKE POLYGONS ARE STORED.  
 labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
 paths <- paste0(userPath,  "lakeDsn/", labs)
+# paths <- paste0("C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/lakeDsn/", labs)
 
 # 2. LIST OF .gdb TO READ
 gdb_list <- lake.list %>%
@@ -112,7 +113,7 @@ missouri_river <- map(list(paste0(userPath, "lakeDsn/CIN/CH4-070/merc070dissolve
 
 
 return(bind_rows(surge_lakes, missouri_river))
-}
+} # close get_surge function
 
 # get SuRGE lakes (2018, 2020-2023)
 surge_lakes <- get_surge(paths)
@@ -137,6 +138,7 @@ get_2016 <- function(paths){
     # I couldn't dissolve intra-reservoir boundaries for these lakes in R. dissolved in Pro. Ignore original .shp
     # and read in dissolved polygons. Specified lake name below.
     .[!(grepl("fallsLakeSitesEqArea|fallsLakeEqArea.shp|miltonEqArea.shp|senecavilleEqArea.shp|caesarCreekEqArea.shp", .))] %>%
+    .[!grepl("brookville_bb.shp", .)] %>% # omit brookeville bounding box used for data paper figure
     #.[15] %>% # subset for code development
     #imap: .x is object piped into imap, .y is object index (name of list element)
     imap(~st_read(.x, stringsAsFactors = FALSE) %>% # read shapefiles
@@ -180,7 +182,7 @@ get_2016 <- function(paths){
 }
 
 lakes_2016 <- get_2016(paths)
-dim(lakes_2016) #33 lakes (32 from 2016 + Falls Lake)
+dim(lakes_2016) # 33 lakes (32 from 2016 + Falls Lake)
 
 
 # GET POINTS AND TRAP DEPOLYMENT/RETRIEVAL TIMES-----------------
@@ -392,7 +394,7 @@ is.na(site_wgt)
 # general geopackage for collaborators
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_make_valid() %>%
-  st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
+  st_write(., file.path(userPath, "/lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "all_lakes",
            append = FALSE)
 
@@ -400,10 +402,13 @@ bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
 bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   select(-lake_name) %>%
   st_make_valid() %>%
-  st_write(., file.path( "../../../communications/manuscript/data_paper/", 
-                         "lake_polygons.gpkg"), # write to .gpkg
-           layer = "lake_polygons",
-           append = FALSE)
+  st_write(., file.path( 
+    "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/",
+    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/",
+    "communications/manuscript/data_paper/", 
+    "lake_polygons.gpkg"), # write to .gpkg
+    layer = "lake_polygons",
+    append = FALSE)
 
 dim(surge_lakes) #114
 dim(lakes_2016) #33
@@ -414,16 +419,19 @@ dim(lakes_2016) #33
 # general geopackage for collaborators: add to all_lakes.gpkg
 bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
   left_join(dat %>% select(lake_id, site_id, visit, site_wgt)) %>% # add site weights
-  st_write(., file.path( "../../../lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
+  st_write(., file.path(userPath, "/lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
            layer = "points",
            append = FALSE)
 
 # geopackage for data paper
 bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
   left_join(dat %>% select(lake_id, site_id, visit)) %>%  
-  st_write(., file.path( "../../../communications/manuscript/data_paper/", 
-                         "sample_points.gpkg"), # write to .gpkg
-           layer = "sample_points",
-           append = FALSE)
+  st_write(., file.path(
+    "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/",
+    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/",
+    "communications/manuscript/data_paper/", 
+    "sample_points.gpkg"), # write to .gpkg
+    layer = "sample_points",
+    append = FALSE)
 
 bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% dim #2816 observations

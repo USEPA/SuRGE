@@ -17,7 +17,7 @@ chem_fld_wide <- chem_fld %>%
   select(-(contains("units") & contains("shallow"))) %>% # strip shallow units
   rename_with(~sub("deep_", "", .), # strip "deep_
               .cols = (contains("units") & contains("deep"))) %>%
-  select(-matches("deep_phycocyanin_lab|deep_chla_lab")) %>% # lab pigments only measured in shallow
+  select(-matches("deep_phycocyanin_lab|deep_chla_lab|deep_microcystin")) %>% # lab pigments only measured in shallow
   # trap deply and rtrvl times duplicated for deep and shallow.  delete shallow, strip "deep" from deep
   # could have renamed shallow, deleted deep, doesn't matter
   select(-matches("shallow_trap")) %>% # omit shallow_trap_ rtrvl and deply times
@@ -44,17 +44,18 @@ all_obs <- full_join(chem_fld_wide, # keep all observations
          matches("diffusion|ebullition|total|volumetric"), # then these
          everything()) # then everything else, unchanged
 
-dim(chem_fld_wide) # 1869, 250
-dim(emissions) # 1867, 54
-dim(all_obs) # 1869, 269
+dim(chem_fld_wide) # 1869, 283
+dim(emissions) # 1867, 56
+dim(all_obs) # 1869, 304
 
 # all observations from emissions are in chem
 emissions[!(with(emissions, paste(lake_id, site_id, visit)) %in% 
             with(chem_fld_wide, paste(lake_id, site_id, visit))),]
 
-# 1 observations from chem_fld not in emissions
+# observations from chem_fld not in emissions
 # lake_id == 148, site_id == 14, visit == 1
 # lake_id == 71, site_id == 1, visit == 1
+
 # tube fell off trap. No good diffusion data.
 chem_fld_wide[!(with(chem_fld_wide, paste(lake_id, site_id, visit)) %in%
                   with(emissions, paste(lake_id, site_id, visit))),

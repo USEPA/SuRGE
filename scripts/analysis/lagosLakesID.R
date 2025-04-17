@@ -160,27 +160,33 @@ lagos_network <- ln %>%
 # lagos productivity estimates
 # preprint link is: https://www.biorxiv.org/content/10.1101/2024.05.10.593626v1
 # data repository here: https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=1427
-# url_lagos <- "https://portal-s.edirepository.org/nis/dataviewer?packageid=edi.1427.3&entityid=3cb4f20440cbd7b8e828e4068d2ab734" # deprecated
-url_lagos <-  "https://pasta.lternet.edu/package/data/eml/edi/1427/1/3cb4f20440cbd7b8e828e4068d2ab734" 
 # 7 GB, takes about 15 minutes to download via httr.  Download once, save to disk, 
 # then load from disk.  Much faster.
-httr::GET(url_lagos, progress(), write_disk(tf <- tempfile(fileext = ".csv"))) # about 30 minutes at AWBERC
-lagos_ts <- read.csv(tf) # another 15 minutes
+if (any(grepl("lagos_ts.rds", fs::dir_ls(paste0(userPath, "data/siteDescriptors"))))) {
+  # if available locally, load
+  lagos_ts <- readRDS(paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
+  
+} else {
+  # read from cloud
+  url_lagos <-  "https://pasta.lternet.edu/package/data/eml/edi/1427/1/3cb4f20440cbd7b8e828e4068d2ab734" 
+  httr::GET(url_lagos, progress(), write_disk(tf <- tempfile(fileext = ".csv"))) # about 30 minutes at AWBERC
+  lagos_ts <- read.csv(tf) # another 15 minutes
+  
+  # Alternatively, load .csv stored locally
+  # lagos_ts <- read_csv("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/LAGOS_US/LAGOS_US_LANDSAT_Predictions_v1_QAQC.csv")
+  
+  # enforce naming conventions, define time
+  # this takes a few minutes
+  lagos_ts <- lagos_ts %>%
+    janitor::clean_names() %>%
+    mutate(month = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::month(.),
+           year = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::year(.)) %>%
+    select(-sensing_time)
+  
+  # save to disk, read from disk in future to save time.
+  saveRDS(lagos_ts, paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
+}
 
-# Alternatively, load .csv stored locally
-# lagos_ts <- read_csv("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/LAGOS_US/LAGOS_US_LANDSAT_Predictions_v1_QAQC.csv")
-
-# enforce naming conventions, define time
-# this takes a few minutes
-lagos_ts <- lagos_ts %>%
-   janitor::clean_names() %>%
-   mutate(month = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::month(.),
-         year = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::year(.)) %>%
-   select(-sensing_time)
-
-# save to SharePoint, read from SharePoint to save time.
-# saveRDS(lagos_ts, paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
-# lagos_ts <- readRDS(paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
 
 
 # 6. READ SURGE LAKES-------

@@ -105,6 +105,13 @@ dim(clow_missing) # 33 missing lakes
 
 # 2.1 BASIN POLYGONS-------
 # Needed for basin slope and soil OM content
+
+# Should switch to SuRGE basins provided by Marc Weber:
+# "...\SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\lakeDsn\basins\SuRGE_watersheds.zip"
+# and
+# "...SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents\lakeDsn\basins\1009_basin.shp"
+
+
 # Can get basin polygon from terminal NHDPlusV2 flow line or a NWIS
 # feature (see stream stats website for NWIS features)
 
@@ -446,7 +453,7 @@ clow_surge$sedimentOC<-ifelse(clow_surge$sedimentOC<0,0.1,clow_surge$sedimentOC)
 method_comparison<-inner_join(derived_surge,clow_predictors,by="lake_id")
 
 #We don't have any way to compare our method to the Clow dataset here...
-mc_plot<-method_comparison %>%
-  ggplot(aes(x=sedimentation,y=log_sedimentation)) +
-  geom_point()
-# mc_plot this throws error
+# mc_plot<-method_comparison %>%
+#   ggplot(aes(x=sedimentation,y=log_sedimentation)) +
+#   geom_point()
+# # mc_plot this throws error

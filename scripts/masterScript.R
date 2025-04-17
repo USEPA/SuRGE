@@ -23,7 +23,8 @@ source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2
 source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data.  [ada.oc]
 source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab. [toc.masi]
 source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  [tteb.all]
-source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin. [pigments]
+source("scripts/analysis/readPigments.R") # NAR chl, phyco. [pigments]
+source("scripts/analysis/readMicrocystin.R") # [microcystin]
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. [chl18]
 source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
