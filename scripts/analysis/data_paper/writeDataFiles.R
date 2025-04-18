@@ -293,6 +293,8 @@ master_dictionary <- tribble(~variable, ~definition,
                              "site_depth_units", "Units of site_depth measurement",
                              "site_wgt", "Weight for lake-specific probabilistic survey design.",
                              "site_wgt_units", "Units for site_wgt",
+                             "lat", "Latitude of sampling location in decimal degrees",
+                             "long", "Longitude of sampling location in decimal degrees",
                              "sample_start", "First day of sampling campaign at lake",
                              "sample_end", "Last day of sampling campaign at lake",
                              "chla_collection_date", "Date that sample was collected for laboratory-based chlorophyll a measurement",
@@ -836,6 +838,7 @@ write.csv(
 # -.	Lake_id
 # -.	Site_id
 # -.	Visit
+# -.  Coordinates
 # -.	site_depth
 # -.	Units
 # -.	Site weight from the survey design
@@ -848,10 +851,11 @@ site_descriptors_data <-
     # keep all unique IDs in dat
     # DATA FIRST
     dat %>%
-      select(lake_id, site_id, visit, site_depth, site_wgt) %>%
+      select(lake_id, site_id, visit, site_depth, site_wgt, lat, long) %>%
       mutate(site_depth = round(site_depth, 1),
              site_depth_units = "m",
-             site_wgt_units = "dimensionless"),
+             site_wgt_units = "dimensionless",
+             across(matches(c("lon|lat")), ~format(round(., 6), nsmall =6))),
     
     # Gather all available information pertaining sample dates, then calculate sample duration
     bind_rows(
@@ -1015,6 +1019,9 @@ write.csv(x = site_descriptors_data,
 write.csv(x = site_descriptors_dictionary, 
           file = "communications/manuscript/data_paper/8_site_descriptors_dictionary.csv",
           row.names = FALSE)
+
+
+
 
 # 9. PHYTOPLANKTON-------------------
 phyto_data <-  read_excel(paste0(userPath,

@@ -6,6 +6,8 @@
 "site_depth_units","Units of site_depth measurement"
 "site_wgt","Weight for lake-specific probabilistic survey design."
 "site_wgt_units","Units for site_wgt"
+"lat","Latitude of sampling location in decimal degrees"
+"long","Longitude of sampling location in decimal degrees"
 "sample_start","First day of sampling campaign at lake"
 "sample_end","Last day of sampling campaign at lake"
 "chla_collection_date","Date that sample was collected for laboratory-based chlorophyll a measurement"
