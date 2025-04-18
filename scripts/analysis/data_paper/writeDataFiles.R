@@ -299,7 +299,17 @@ master_dictionary <- tribble(~variable, ~definition,
                              "sample_end", "Last day of sampling campaign at lake",
                              "chla_collection_date", "Date that sample was collected for laboratory-based chlorophyll a measurement",
                              
-                             # phytoplankton
+                             # 9. meteorology
+                             "date_time", "Date and time (hour) of floating chamber deployment and associated meteoroligcal observations",
+                             "date_time_units", "Time zone of date_time values",
+                             "precipitation", "Total precipitation during hour of chamber deployment",
+                             "precipitation_units", "Units of precipitation values",
+                             "wind_speed", "Mean wind speed during hour of floating chamber deployment",
+                             "wind_speed_units", "Units of wind speed",
+                             "temp_air_2m", "Air temperature 2m above the water surface during hour of floating chamber deployment",
+                             "temp_air_2m_units", "2m air temperature units",
+                             
+                             # 10. phytoplankton
                              "algal_group", "Broad algal group classification",
                              "phylum", "Phylum of taxon",
                              "class", "Class of taxon",
@@ -1020,10 +1030,38 @@ write.csv(x = site_descriptors_dictionary,
           file = "communications/manuscript/data_paper/8_site_descriptors_dictionary.csv",
           row.names = FALSE)
 
+# 9. METEOROLOGY-----------
+# 4/18/2025 only have wind speed, air temp, and precipitation
+met_data <- met_chamber %>%
+  select(-temp_lake_mix_layer_c) %>%
+  relocate(lake_id, site_id, visit, date_time, precipitation, wind_speed, temp_air_2m)
+
+# Data dictionary
+met_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(met_data))
+
+# Are all values in data dictionary?
+ifelse (
+  #TRUE if variable is in dictionary, FALSE if not
+  colnames(met_data) %in% met_dictionary$variable %>% # TRUE if variable is present 
+    {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
+    sum(.) == 0, # all TRUE add up
+  "Site data dictionary is complete", # if 0 (all variables are present) 
+  "Site data dictionary is incomplete") # if not 0 (>=1 variable missing)
+
+# write data
+write.csv(x = met_data, 
+          file = "communications/manuscript/data_paper/9_met_data.csv",
+          row.names = FALSE)
+
+# write dictionary
+write.csv(x = met_dictionary, 
+          file = "communications/manuscript/data_paper/9_met_dictionary.csv",
+          row.names = FALSE)
 
 
 
-# 9. PHYTOPLANKTON-------------------
+# 10. PHYTOPLANKTON-------------------
 phyto_data <-  read_excel(paste0(userPath,
                                  "data/algalIndicators/SuRGE Taxonomy 2021-23 v4.xlsx"), 
                           sheet = "SuRGE Taxonomy- 2021-23") %>%
