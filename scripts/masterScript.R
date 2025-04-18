@@ -23,7 +23,8 @@ source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2
 source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data.  [ada.oc]
 source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab. [toc.masi]
 source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  [tteb.all]
-source("scripts/analysis/readPigmentsMicrocystin.R") # NAR chl, phyco, and microcystin. [pigments]
+source("scripts/analysis/readPigments.R") # NAR chl, phyco. [pigments]
+source("scripts/analysis/readMicrocystin.R") # [microcystin]
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. [chl18]
 source("scripts/analysis/readGc.R") # gc_lakeid_agg
 
@@ -37,22 +38,22 @@ source("scripts/analysis/readMorpho.R") # morpho
 source("scripts/analysis/readNla17.R") # nla17_chem
 source("scripts/analysis/hydroLakesID.R") # hylak_link
 source("scripts/analysis/lagosLakesID.R") # lagos_links
-source("scripts/analysis/readNID.R") #national inventory of dams and manual age assignments
-source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Time data
-source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
-source("scripts/analysis/readIpccClimateZones.R") #surge_climate
-source("scripts/analysis/readLakeCat.R")#read in LakeCat 
-source("scripts/analysis/readSedimentation.R")#read in reservoir sedimentation data (requires lagosLakesID.R)
-source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
-source("scripts/analysis/readNWIS.R")#read water level data for subset of reservoirs
+source("scripts/analysis/readNID.R") # national inventory of dams and manual age assignments
+source("scripts/analysis/readWaterIsotope.R") # Renee Brooks Isotope/Residence Time data
+source("scripts/analysis/readNWI.R") # NWI attributes from Mark Mitchell
+source("scripts/analysis/readIpccClimateZones.R") # surge_climate
+source("scripts/analysis/readLakeCat.R")# read in LakeCat 
+source("scripts/analysis/readSedimentation.R") # read in reservoir sedimentation data (requires lagosLakesID.R)
+source("scripts/analysis/readPhytos.R") # read in data from Avery Tatters
+source("scripts/analysis/readNWIS.R") # read water level data for subset of reservoirs
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
-source("scripts/analysis/missingSonde2016.R") #Interpolate based on profiles
+source("scripts/analysis/missingSonde2016.R") # Interpolate based on profiles
 source("scripts/analysis/readGriddedTemp.R") # ERA5 derived estimates of air, shallow, and deep temperature
 
 # Calculate derived quantities
 source("scripts/analysis/calculateStratification.R") # stratification indices
 source("scripts/analysis/getIndexSite.R") # extract index site location from depth_profiles_all
-
+source("scripts/analysis/calculateDissolvedGas.R") # dissolved_gas
 
 # Aggregate and review chemistry
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
@@ -63,7 +64,6 @@ source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blan
 
 # Merge chemistry and field sheets
 source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.
-# need to do something with dg_sheet
 
 # Prep 2020 and 2021 data sets for RAPID reporting
 #source("scripts/analysis/rapidReport.R")
@@ -81,6 +81,8 @@ source("scripts/analysis/calculateEbullition.R") # eb_results
 # Merge diffusive and ebullitive rates --> calculate total
 source("scripts/analysis/calculateTotalEmissions.R")
 
+# calculate k600
+source("scripts/analysis/calculateK600.R")
 
 # Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs

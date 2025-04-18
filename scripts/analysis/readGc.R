@@ -238,22 +238,23 @@ dim(gc_lakeid) # 2525, no empty rows
 
 
 # QA/QC GC REPS--------------
-##########################################################
-############################# FIX FOR DIFFERENT SAMPLE TYPES!!!!!!!!!!!!!!!
-#pdf("output/figures/scatterplot3dTrap.pdf",
- #   paper = "a4r", width = 11, height = 8)  # initiate landscape pdf file)
+# Inspect trap data
+pdf("output/figures/scatterplot3dTrap.pdf",
+  paper = "a4r", width = 11, height = 8)  # initiate landscape pdf file)
 par(mfrow = c(1,2))
 
 uniqueCases <- filter(gc_lakeid, 
                        !is.na(ch4_ppm), # has GC data
-                       !is.na(lake_id)) %>% # is connected with Lake and station
-  distinct(lake_id, site_id) # unique combinations of lake and site
+                       !is.na(lake_id), # is connected with Lake and station
+                      type == "trap") %>%
+  distinct(lake_id, site_id, visit) # unique combinations of lake and site
 
 for(i in 1:nrow(uniqueCases)) {
   site.i <- uniqueCases$site_id[i]
   lake.i <- uniqueCases$lake_id[i]
+  visit.i <- uniqueCases$visit[i]
   data.i <- filter(gc_lakeid,
-                   site_id == site.i, lake_id == lake.i,
+                   site_id == site.i, lake_id == lake.i, visit == visit.i,
                    !is.na(ch4_ppm))
   
   # CO2, CH4, N2 scatterplot
@@ -290,25 +291,43 @@ for(i in 1:nrow(uniqueCases)) {
 dev.off()
 
 # Basic plots
-ggplot(gc_lakeid, aes(paste(lake_id, site_id), (co2_ppm/10000))) + geom_point()
-gc_lakeid %>%
-  select(-contains("trap")) %>%
-  pivot_longer(!c(sample, lake_id, site_id, visit, file, type)) %>%
-  filter(value < 0) %>%
-  arrange(sample) %>%
-  print(n=Inf)
+# CO2
+p <- ggplot(gc_lakeid, aes(label = lake_id, label1 = site_id, lable2 = visit)) + 
+  geom_point(aes(paste(lake_id, site_id), co2_ppm)) +
+  facet_wrap(~type, scales = "free")
+ggplotly(p)
+
+# CH4
+p <- ggplot(gc_lakeid, aes(label = lake_id, label1 = site_id, lable2 = visit)) + 
+  geom_point(aes(paste(lake_id, site_id), ch4_ppm)) +
+  facet_wrap(~type, scales = "free")
+ggplotly(p)
+
+# closer look at dissolved gas reps
+p <- gc_lakeid %>%
+  select(sample, lake_id, site_id, visit, type, matches(c("co2_ppm|ch4_ppm|n2o_ppm"))) %>%
+  pivot_longer(!c(sample, lake_id, site_id, visit, type)) %>%
+  filter(type == "dg") %>%
+  ggplot(aes(label = lake_id, label1 = site_id, lable2 = visit)) + 
+  geom_point(aes(paste(lake_id), value)) +
+  scale_y_log10() +
+  facet_wrap(~name, scales = "free")
+ggplotly(p)
 
 
-ggplot(gc_lakeid, aes(paste(lake_id, site_id), (ch4_ppm/10000))) + geom_point()
-ggplot(gc_lakeid, aes(paste(lake_id, site_id), (n2o_ppm/10000))) + geom_point()
-ggplot(gc_lakeid, aes(paste(lake_id, site_id), n2_percent)) + geom_point()
-ggplot(gc_lakeid, aes(paste(lake_id, site_id), o2_percent)) + geom_point()
-# A few Ar + O2 peaks were not separated.  I asked Kit to fix
-ggplot(gc_lakeid, aes(paste(lake_id, site_id), ar_percent)) + geom_point()
+
+# ch4 data fixes
+gc_lakeid <- gc_lakeid %>%
+  mutate( # strip our erroneous air values
+    ch4_ppm = case_when(ch4_ppm > 10 & type == "air" ~ NA_real_, # a few samples
+                        ch4_ppm < 1 & type == "dg" ~ NA_real_, # one sample
+                            TRUE ~ ch4_ppm),
+    co2_ppm = case_when(co2_ppm > 1000 & type == "air" ~ NA_real_,
+                        TRUE ~ co2_ppm))
 
 # Aggregate by lake_id, site_id, and visit----------------
 gc_lakeid_agg <- gc_lakeid %>%
-  group_by(lake_id, site_id, visit, type) %>%
+  group_by(lake_id, site_id, visit, sample_depth_m, type) %>%
   summarise(n2o_sd=sd(n2o_ppm, na.rm=TRUE),
             m_n2o_ppm=mean(n2o_ppm, na.rm=TRUE),
             n2o_cv= (n2o_sd/m_n2o_ppm) * 100,
@@ -342,32 +361,5 @@ gc_lakeid_agg <- gc_lakeid %>%
 ggplot(gc_lakeid_agg, aes(site_id, ch4_ppm)) + # Everything appears to have agg correctly
   geom_point() +
   facet_wrap(~type, scales = "free")
-
-
-# # MERGE RAW GC DATA WITH eqAreaData---------------
-# # Merge all gas samples.  Will calculate dissolved concentrations downstream.
-# # 1) Need to melt, which requires a data.frame, not a dplyr tbl_df.
-# # 2) melt creates a 'variable' column, already have 'variable' column
-# # in xtrCodes.gas.agg. Must rename first.
-# xtrCodes.gas.agg <- rename(xtrCodes.gas.agg, type = variable) # rename 'variable'
-# 
-# xtrCodes.gas.agg.m <- melt(as.data.frame(xtrCodes.gas.agg), # convert tbl_df to df
-# id.vars = c("Lake_Name", "siteID", "type")) # specify id variable
-# 
-# xtrCodes.gas.agg.m <- mutate(xtrCodes.gas.agg.m, type =  # adopt more intuitive names
-#                              ifelse(type == "tp.xtr", "trap",
-#                                     ifelse(type == "ar.xtr", "air", 
-#                                            ifelse(type == "dg.xtr", "dissolved",
-#                                                   type))))
-#   
-# xtrCodes.gas.agg.c <- dcast(xtrCodes.gas.agg.m,  # cast
-#                             Lake_Name + siteID ~ type + variable) %>%
-#   select(-air_o2.sd, -air_o2, -air_o2.cv, -air_ar.sd, -air_ar, -air_ar.cv, -air_n2.sd,
-#          -air_n2, -air_n2.cv, -air_total,
-#          -dissolved_o2.sd, -dissolved_o2, -dissolved_o2.cv, -dissolved_ar.sd, -dissolved_ar, 
-#          -dissolved_ar.cv, -dissolved_n2.sd, -dissolved_n2, -dissolved_n2.cv, -dissolved_total)
-# 
-# # Merge
-# eqAreaData <- merge(xtrCodes.gas.agg.c, eqAreaData, all = TRUE)
 
 

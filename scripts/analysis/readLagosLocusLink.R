@@ -144,6 +144,7 @@ suppressWarnings(dt4$wqp_sites_n <- ifelse(!is.na(as.numeric("NA")) & (trimws(as
 dt4$lagosus_legacyids_n <- ifelse((trimws(as.character(dt4$lagosus_legacyids_n))==trimws("NA")),NA,dt4$lagosus_legacyids_n)               
 suppressWarnings(dt4$lagosus_legacyids_n <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(dt4$lagosus_legacyids_n))==as.character(as.numeric("NA"))),NA,dt4$lagosus_legacyids_n))
 
+# write compressed version of .csv
+write_csv(dt4, paste0(userPath, "data/siteDescriptors/locus_link.csv.gz"))
 
-locus_link <- dt4
 rm(dt4)

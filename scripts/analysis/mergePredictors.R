@@ -7,13 +7,13 @@
 
 # 1. Merge 2016 and SuRGE data----------
 # Names in dat_2016, but not in all_obs
-names(dat_2016)[!(names(dat_2016) %in% names(all_obs))] # chamb_deply_date_time, site_wgt, site_stratum, site_eval_status
+names(dat_2016)[!(names(dat_2016) %in% names(all_obs))] # chamb_deply_date_time, site_wgt, site_stratum, site_eval_status, uniqueid
 # names in all_obs, but not in dat_2016
 names(all_obs)[!(names(all_obs) %in% names(dat_2016))] # lots, eval_status is for points= 
 
 dat <- bind_rows(dat_2016 %>% 
                    mutate(lake_id = as.character(lake_id)) %>% # converted to numeric below
-                   select(-chamb_deply_date_time, -site_wgt, -site_stratum), # wgt and stratum get added later
+                   select(-chamb_deply_date_time, -site_wgt, -site_stratum, -uniqueid), # wgt and stratum get added later
                  all_obs %>%
                    # eval_status is inherited from fld_sheet and reflects
                    # site_id evaluations made during sampling. Changing name here,
@@ -208,7 +208,7 @@ dim(dat) # 2367
    left_join(.,
              morpho)
 
- dim(morpho) # 147
+ dim(morpho) # 156
  dim(dat) # 2367
 
 # 12. Merge hydroLakes ID----
@@ -254,7 +254,7 @@ dat <- dat %>%
  dim(dat) # 2367
  
 # 18. Water level change indices----
-dat<- dat %>%
+dat <- dat %>%
   left_join(walev_link, by = c("lake_id","visit"))
  
 dim(walev_link) #21

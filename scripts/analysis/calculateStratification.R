@@ -2,17 +2,13 @@
 # 10/20/2024
 # Going to try with RLakeAnalyzer
 
-
-depth_profiles_all$uniqueid = paste(depth_profiles_all$lake_id, depth_profiles_all$visit)
-
 sites <- depth_profiles_all %>%
-  group_by(uniqueid) %>%
-  summarise(lake_id = lake_id[1], visit = visit[1])
+  distinct(lake_id, visit)
 
 buoyf <- NULL
 
-for (i in 1:165) {
-  prol <- filter(depth_profiles_all, uniqueid == sites$uniqueid[i])
+for (i in 1:nrow(sites)) {
+  prol <- filter(depth_profiles_all, lake_id == sites$lake_id[i], visit == sites$visit[i])
   wtr <- as.vector(prol$temp)
   depths <- as.vector(prol$sample_depth)
   buoyf[i] <- center.buoyancy(wtr, depths)
@@ -20,8 +16,8 @@ for (i in 1:165) {
 
 thermdep <- NULL
 
-for (i in 1:165) {
-  prol <- filter(depth_profiles_all, uniqueid == sites$uniqueid[i])
+for (i in 1:nrow(sites)) {
+  prol <- filter(depth_profiles_all, lake_id == sites$lake_id[i], visit == sites$visit[i])
   temp <- c(prol$temp)
   dep <- c(prol$sample_depth)
   thermdep[i] <- thermo.depth(temp, dep, Smin = 0.1, )

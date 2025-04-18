@@ -98,6 +98,7 @@ depth_profile_surge <- get_depth_profile(paths)
 # 70 here.
 
 depth_profile_69_70 <- read_excel(path = paste0(userPath, 
+                                                # file contains both 69 and 70 data
                                                 "data/CIN/CH4_070_francis_case_lacustrine/dataSheets/OAHFTR_LakeProfiles_2021_Jake.xlsx"),
                                   sheet = "data", skip = 9) %>%
   # fix names
@@ -163,7 +164,7 @@ depth_profile_2016 <- read_csv(paste0(userPath, "data/CIN/2016_survey/depthProfi
   # bring in SuRGE lake_id
   left_join(lake.list.2016 %>% select(lake_id, eval_status_code_comment), 
             by = c("lake_name" = "eval_status_code_comment")) %>%
-  select(-lake_name, -sample_date, -sample_depth_ft, -orp_m_v)
+  select(-lake_name, -sample_depth_ft, -orp_m_v)
 
   
  
@@ -175,8 +176,20 @@ depth_profile_falls <- read_csv(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/f
 # 5. MERGE DEPTH PROFILES----
 depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_profile_falls, depth_profile_69_70),
                           ~.x %>% mutate(lake_id = as.character(lake_id))) %>% # 69_lacustrine, etc
-  map_dfr(., bind_rows) # rbinds into one df
+  map_dfr(., bind_rows) %>% # rbinds into one df
+  relocate(lake_id, site_id, visit, sample_depth, sample_date)
 
 
+# 6. GET SAMPLE DATES-----
+depth_profile_dates <- read_csv("SuRGE_Sharepoint/data/depth_profile_dates.csv") %>%
+  mutate(sample_date = as.Date(observation_date, format = "%m/%d/%Y")) %>%
+  select(-observation_date)
 
  
+# 7. MERGE SAMPLE DATES WITH DEPTH PROFILES
+# depth_profiles_all contains a sample_date column from the 2016 data, but
+# it contains NA for all other lakes. sample_dates for other lakes are in
+# depth_profile_dates. use dplry::rows_update to replace NA with sample dates
+# for all non 2016 lakes
+depth_profiles_all <- depth_profiles_all %>%
+  rows_update(., depth_profile_dates, by = c("lake_id", "site_id", "visit"))

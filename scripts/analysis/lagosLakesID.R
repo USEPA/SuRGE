@@ -14,15 +14,34 @@
 # LOCUS-LAKE_LINK
 # Lines 18 - 20 use functions from LAGOSUS to grab lagos data.
 # as of 4/7/2025 the functions failed for Jake Beaulieu and Jeff
-# Hollister. Skip to line 26 and read data EDI
+# Hollister. 
 # lagosus_get(dest_folder = lagosus_path()) # run once, then hash out
 # locus <- lagosus_load(modules = c("locus"))
 # names(locus)
 # locus_link <- locus$locus$lake_link
 
-# Can also read file from EDI if LAGUS functions aren't working
+# As an alternative to LAGOSUS functions, the file was read directly from from 
+# the Environmental Data Initiative Respository on 4/11/2025 and stored locally.
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
-source("scripts/analysis/readLagosLocusLink.R") # read locus lake_link
+# Code below will load file if avaialable locally, download from EDI if not
+
+if(
+  # if file is available locally...
+  paste0(userPath, "data/siteDescriptors/locus_link.csv.gz") %in%
+   fs::dir_ls(paste0(userPath, "data/siteDescriptors/")) ) {
+  # then load file
+  locus_link <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_link.csv.gz"))
+} else {
+  # if local file not available: 
+  # 1. read file from Environmental Data Initiative Respository and save locally
+  # 2. load file
+  source("scripts/analysis/readLagosLocusLink.R") # read locus lake_link
+  locus_link <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_link.csv.gz"))
+}
+
+
 
 # Now create single record for each lake
 # There are multiple lagosus_legacysiteids and wqp_monitoringlocationidentifiers values per lake
@@ -41,9 +60,27 @@ locus_link_aggregated <- locus_link %>%
 # If LAGOSUS funcitons are working...
 ## locus_characteristics <- locus$locus$lake_characteristics
 
-# Can also read file from EDI if LAGUS functions aren't working
+# As an alternative to LAGOSUS functions, the file was read directly from from 
+# the Environmental Data Initiative Respository on 4/11/2025 and stored locally.
 # https://portal.edirepository.org/nis/mapbrowse?packageid=edi.854.1
-source("scripts/analysis/readLagosLocusCharacteristics.R") # read locus lake_characteristics
+# Code below will load file if avaialable locally, download from EDI if not
+
+if(
+  # if file is available locally...
+  paste0(userPath, "data/siteDescriptors/locus_characteristics.csv.gz") %in%
+  fs::dir_ls(paste0(userPath, "data/siteDescriptors/")) ) {
+  # then load file
+  locus_characteristics <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_characteristics.csv.gz"))
+} else {
+  # if local file not available: 
+  # 1. read file from Environmental Data Initiative Respository and save locally
+  # 2. load file
+  source("scripts/analysis/readLagosLocusCharacteristics.R") # read locus lake_link
+  locus_characteristics <- readr::read_csv(paste0(userPath, 
+                                       "data/siteDescriptors/locus_characteristics.csv.gz"))
+}
+
 
 # object contains many variables we will get from other sources (e.g. morphometry from Jeff,
 # watershed from Alex).  Subset to connectivity variables unique to lagos
@@ -104,7 +141,7 @@ locus_connectivity <- locus_characteristics %>%
 #downloaded the nets_networkmetrics_medres file from https://doi.org/10.6073/pasta/98c9f11df55958065985c3e84a4fe995
 #saved to the SuRGE site descriptors subfolder of the data folder
 
-ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_medres_LAGOS_NETWORKS.csv")))
+ln <- read_csv(file = (paste0(userPath, "data/siteDescriptors/nets_networkmetrics_medres_LAGOS_NETWORKS.csv")))
 #received email from Katelyn King about parsing issues on 8/7/2024... she explained that
 #this is due to their being multiple dam ids associated with lake_nets_nearestdamup_id
 #if we decide we want to use this column she gave some script for pulling out each id
@@ -114,8 +151,8 @@ ln<-read_csv(file=(paste0(userPath, "data/siteDescriptors/nets_networkmetrics_me
 #                    sep = ";")
 
 
-lagos_network<- ln %>%
-  select(lagoslakeid,lake_nets_nearestdamup_km,lake_nets_totaldamup_n)
+lagos_network <- ln %>%
+  select(lagoslakeid, lake_nets_nearestdamup_km, lake_nets_totaldamup_n)
 
 
 # 5. READ LAGOS TROPHIC STATUS-----
@@ -123,27 +160,33 @@ lagos_network<- ln %>%
 # lagos productivity estimates
 # preprint link is: https://www.biorxiv.org/content/10.1101/2024.05.10.593626v1
 # data repository here: https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=1427
-# url_lagos <- "https://portal-s.edirepository.org/nis/dataviewer?packageid=edi.1427.3&entityid=3cb4f20440cbd7b8e828e4068d2ab734" # deprecated
-url_lagos <-  "https://pasta.lternet.edu/package/data/eml/edi/1427/1/3cb4f20440cbd7b8e828e4068d2ab734" 
 # 7 GB, takes about 15 minutes to download via httr.  Download once, save to disk, 
 # then load from disk.  Much faster.
-httr::GET(url_lagos, progress(), write_disk(tf <- tempfile(fileext = ".csv"))) # about 30 minutes at AWBERC
-lagos_ts <- read.csv(tf) # another 15 minutes
+if (any(grepl("lagos_ts.rds", fs::dir_ls(paste0(userPath, "data/siteDescriptors"))))) {
+  # if available locally, load
+  lagos_ts <- readRDS(paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
+  
+} else {
+  # read from cloud
+  url_lagos <-  "https://pasta.lternet.edu/package/data/eml/edi/1427/1/3cb4f20440cbd7b8e828e4068d2ab734" 
+  httr::GET(url_lagos, progress(), write_disk(tf <- tempfile(fileext = ".csv"))) # about 30 minutes at AWBERC
+  lagos_ts <- read.csv(tf) # another 15 minutes
+  
+  # Alternatively, load .csv stored locally
+  # lagos_ts <- read_csv("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/LAGOS_US/LAGOS_US_LANDSAT_Predictions_v1_QAQC.csv")
+  
+  # enforce naming conventions, define time
+  # this takes a few minutes
+  lagos_ts <- lagos_ts %>%
+    janitor::clean_names() %>%
+    mutate(month = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::month(.),
+           year = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::year(.)) %>%
+    select(-sensing_time)
+  
+  # save to disk, read from disk in future to save time.
+  saveRDS(lagos_ts, paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
+}
 
-# Alternatively, load .csv stored locally
-# lagos_ts <- read_csv("C:/Users/JBEAULIE/OneDrive - Environmental Protection Agency (EPA)/GIS_data/LAGOS_US/LAGOS_US_LANDSAT_Predictions_v1_QAQC.csv")
-
-# enforce naming conventions, define time
-# this takes a few minutes
-lagos_ts <- lagos_ts %>%
-   janitor::clean_names() %>%
-   mutate(month = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::month(.),
-         year = gsub( " .*$", "", sensing_time) %>% as.Date(., format = "%Y-%m-%d") %>% lubridate::year(.)) %>%
-   select(-sensing_time)
-
-# save to SharePoint, read from SharePoint to save time.
-# saveRDS(lagos_ts, paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
-# lagos_ts <- readRDS(paste0(userPath, "data/siteDescriptors/lagos_ts.rds"))
 
 
 # 6. READ SURGE LAKES-------
@@ -156,7 +199,7 @@ lake_list_for_lagos_merge <- lake.list.all %>% # see readSurgeLakes.R
                              TRUE ~ lake_id),
          lake_id = as.numeric(lake_id)) %>%
   filter(lake_id != 1033) %>% # exclude Falls Lake, too complicated right now [10/18/2024]
-  mutate(nhdplusv2_comid = as.character(nhd_plus_waterbody_comid)) %>% # not sure why this is necessary
+  rename(nhdplusv2_comid = nhd_plus_waterbody_comid) %>% 
   select(lake_id, visit, nhdplusv2_comid) %>% # gnis_name, gnis_id included earlier. needed?
   distinct() # this collapses 69, 70, into one record each
 

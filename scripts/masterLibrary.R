@@ -20,6 +20,7 @@ library(tmap) # mapping
 library(tigris) # get states data. Alternative to USABoundaries
 library(mapsf) # map with Puerto Rico inset
 library(tictoc) # timing operations
+library(fs) # file management
 library(gridExtra) # grid.arrange() for multiple panels per page on .pdf
 library(lubridate) #for adjusting time offsets in readLGR
 library(minpack.lm) #for the exponential modeling of diffusive flux
@@ -31,6 +32,7 @@ library(StreamCatTools) # read lakeCat
 library(jtools) # visualize regression models (effect_plot)
 #library(StepReg) # stepwise selection based on p-value (`stepwise`)
 library(cowplot) # arranging ggplot plots into grid
+library(scatterplot3d) # read_gc 
 library(ggh4x) # ggplot2 hacks
 library(ggallin) # pseudolog10_trans
 library(httr) #this is needed for downloading Lagos trophic status data

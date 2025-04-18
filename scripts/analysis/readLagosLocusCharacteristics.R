@@ -146,5 +146,7 @@ dt2$lake_lakes10ha_upstream_ha <- ifelse((trimws(as.character(dt2$lake_lakes10ha
 suppressWarnings(dt2$lake_lakes10ha_upstream_ha <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(dt2$lake_lakes10ha_upstream_ha))==as.character(as.numeric("NA"))),NA,dt2$lake_lakes10ha_upstream_ha))
 dt2$lake_glaciatedlatewisc <- as.factor(ifelse((trimws(as.character(dt2$lake_glaciatedlatewisc))==trimws("NA")),NA,as.character(dt2$lake_glaciatedlatewisc)))
 
-locus_characteristics <- dt2
+# write compressed version of .csv
+write_csv(dt2, paste0(userPath, "data/siteDescriptors/locus_characteristics.csv.gz"))
+
 rm(dt2)

@@ -21,3 +21,10 @@ surgeOverview.html
 /scripts/analysis/*.pdf
 Peer Nomination Award SuRGE.pdf
 Peer Nomination Award SuRGE signed.pdf
+
+# some output files
+## dat_2025_01-16.RData, dat_2025_02-25.RData,....
+## output/chem_fld_2025_01-16.RData, dat_2025_02-25.RData
+output/dat*
+output/chem_fld_*
+output/all_obs_*
