@@ -67,12 +67,19 @@ master_dictionary <- tribble(~variable, ~definition,
                              "surface_area", "Waterbody surface area",
                              "shoreline_length", "Length of waterbody shoreline",
                              "shoreline_development", "Waterbody perimeter (m) to area (m2) ratio. Area is square-rooted to account for size dependency.",
-                             "max_width", "Maximum lake width is defined as the maximum in lake distance that is perpendicular to the fetch.",
+                             "max_width", "Maximum lake width is defined as the maximum shore to shore distance that is perpendicular to the maximum lake length.",
                              "mean_width", "Lake surface area divided by fetch",
                              "max_length", "Maximum lake length is defined as the longest open water distance of a lake.",
                              "circularity", "Circularity compares the area of the lake (m2) with the area of the minimum boundary circle (MBC; m2) around it. It differentiates between circular (value approaches 1) and elongated lakes (value approaches 0).",
-                             "mean_depth_measured", "Mean of depth measured at probabilistic survey sites within a lake",
-                             "max_depth_measured", "Maximum measured depth at probabilistic survey sites within a lake",
+                             "mean_depth", "Mean lake depth",
+                             "max_depth", "Maximum lake depth",
+                             "volume", "Volume of lake",
+                             "major_axis", "The major axis of a lake is defined as the longest line intersecting the convex hull formed around its polygon while passing through its center. Its value represents the distance across a lake without regard to land-water configuration.",
+                             "minor_axis", "The minor axis of a lake is defined as the shortest line intersecting the convex hull formed around the lake polygon while passing through its center. In contrast to max width, its value represents the distance across a lake with regard to the the convex hull and without consideration of the land-water configuration.",
+                             "axis_ratio", "The ratio of the lake major axis length to the minor axis length is also known as the aspect ratio",
+                             "fetch", "Fetch is the maximum open water distance",
+                             "dynamic_ratio", "Surface area to mean depth ratio of the lake. Low values indicate lakes that are bowlshaped, whereas high values are associated to dish-like lakes.",
+                             "littoral_fraction", "Relative proportion of lake surface area that is shallower than 2.5 m",
                              
                              # sedimentation
                              "sedimentation", "Total sedimentation rate.",
@@ -270,6 +277,13 @@ master_dictionary <- tribble(~variable, ~definition,
                              "tn", "total nitrogen",
                              "tp", "total phosphorus",
                              "no3", "nitrate",
+                             "microcystin", "microcystin",
+                             "dissolved_n2o", "dissolved nitrous oxide concentration",
+                             "dissolved_ch4", "dissolved methane concentration",
+                             "dissolved_co2", "dissolved carbon dioxide concentration",
+                             "n2o_sat_ratio", "Ratio of observed to equilibrium dissolved nitrous oxide concentration",
+                             "ch4_sat_ratio", "Ratio of observed to equilibrium dissolved methane concentration",
+                             "co2_sat_ratio", "Ratio of observed to equilibrium dissolved carbon dioxide concentration",
                              "flags", "1: failed post-deployment calibration check or value was otherwise suspicious. L: value is < reporting limit but > minimum detection limit. ND: analyte not detected and minimum detection limit reported. H: holding time violation. S: sampled warmed during shipping",
                              
 
@@ -310,19 +324,25 @@ lake_scale_data <- list(
 
     # b.	Morphometry indices
   morpho %>% 
-    # most depth-based variables not ready 3/10/2025
-    select(lake_id, surface_area, shoreline_length, shoreline_development, max_width, 
-           mean_width, max_length, circularity, mean_depth_measured, max_depth_measured) %>%
-    mutate(across(c(surface_area, shoreline_length, max_width, mean_width, max_length), 
+    select(-lake_name) %>%
+    mutate(
+      # variables with no decimals
+      across(c(surface_area, shoreline_length, max_width, mean_width, max_length), 
            ~format(round(., 0), nsmall = 0)),
-           shoreline_development = format(round(shoreline_development, 2), nsmall = 2),
-           across(c(mean_depth_measured, max_depth_measured), ~ format(round(., 1), nsmall = 1)),
-           circularity = format(round(circularity, 3), nsmall = 3)) %>%
+      # variables with 1 decimal
+      across(c(mean_depth, max_depth), ~ format(round(., 1), nsmall = 1)),
+      # variables with two decimals
+      across(c(shoreline_development, littoral_fraction), ~ format(round(., 2), nsmall = 2)),
+      # variables with three decimals
+      circularity = format(round(circularity, 3), nsmall = 3)) %>%
     mutate(across(!lake_id, as.character)) %>% # needed to collapse into one column
     pivot_longer(!lake_id) %>%
     mutate(units = case_when(name == "surface_area" ~ "m2",
                              name == "shoreline_development" ~ "dimensionless",
                              name == "circularity" ~ "dimensionless",
+                             name == "volume" ~ "m3",
+                             name == "axis_ratio" ~ "dimensionless",
+                             name == "dynamic_ratio" ~ "dimensionless",
                              TRUE ~ "m")) %>% # all others meters
     mutate(across(!lake_id, as.character)), # needed to collapse into one column
   
@@ -443,12 +463,12 @@ ifelse (c(colnames(lake_scale_data) %in% site_data_dictionary$variable,
 
 # write data
 write.csv(x = lake_scale_data, 
-          file = "../../../communications/manuscript/data_paper/3_lake_scale.csv",
+          file = "communications/manuscript/data_paper/3_lake_scale.csv",
           row.names = FALSE)
 
 # write dictionary
 write.csv(x = lake_scale_dictionary, 
-          file = "../../../communications/manuscript/data_paper/3_lake_scale_dictionary.csv",
+          file = "communications/manuscript/data_paper/3_lake_scale_dictionary.csv",
           row.names = FALSE)
 
 
@@ -493,14 +513,21 @@ depth_profiles_data <- list(
 depth_profiles_dictionary <- master_dictionary %>%
   filter(variable %in% colnames(depth_profiles_data))
 
+# Are all values in data dictionary?
+ifelse (colnames(depth_profiles_data) %in% depth_profiles_dictionary$variable %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
+
 # write data
 write.csv(x = depth_profiles_data, 
-          file = "../../../communications/manuscript/data_paper/4_depth_profiles.csv",
+          file = "communications/manuscript/data_paper/4_depth_profiles.csv",
           row.names = FALSE)
 
 # write dictionary
 write.csv(x = depth_profiles_dictionary, 
-          file = "../../../communications/manuscript/data_paper/4_depth_profiles_dictionary.csv",
+          file = "communications/manuscript/data_paper/4_depth_profiles_dictionary.csv",
           row.names = FALSE)
 
 
@@ -513,7 +540,7 @@ write.csv(x = depth_profiles_dictionary,
 # d.	site_id
 # e.	visit
 # f. chemistry
-# h.	Dissolved gas not ready [3/12/2025]
+# h.	Dissolved gas not ready
 
 site_data <- 
   bind_rows(
@@ -570,7 +597,7 @@ site_data <-
     # SuRGE CHEMISTRY DATA
     chemistry_all %>%
       filter(sample_type != "blank") %>% # omit blanks
-      select(-sample_type, -analyte_group,
+      select(-sample_type,
              -contains("phycocyanin_lab")) %>%
       # move transitional, lacustrine, riverine from lake_id to site_id
       mutate( 
@@ -688,12 +715,13 @@ ifelse (c(colnames(site_data) %in% site_data_dictionary$variable,
 
 # write data
 write.csv(x = site_data, 
-          file = "../../../communications/manuscript/data_paper/5_site_data.csv",
+          # writing data to repo rather than SharePoint
+          file = "communications/manuscript/data_paper/5_site_data.csv",
           row.names = FALSE)
 
 # write dictionary
 write.csv(x = site_data_dictionary, 
-          file = "../../../communications/manuscript/data_paper/5_site_data_dictionary.csv",
+          file = "communications/manuscript/data_paper/5_site_data_dictionary.csv",
           row.names = FALSE)
 
 
@@ -776,18 +804,14 @@ ifelse (c(colnames(emission_rate_points_data_paper) %in% emission_rate_points_da
 # write data
 write.csv(
   x = emission_rate_points_data_paper,
-  file = paste0(
-    userPath,
-    "communications/manuscript/data_paper/6_emission_rate_points.csv"),
+  file = "communications/manuscript/data_paper/6_emission_rate_points.csv",
   row.names = FALSE
 )
 
 # write dictionary
 write.csv(
   x = emission_rate_points_data_paper_dictionary,
-  file = paste0(
-    userPath,
-    "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv"),
+  file = "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv",
   row.names = FALSE
 )
 
@@ -815,17 +839,13 @@ ifelse (c(colnames(emissions_lake_data_paper) %in% emissions_lake_data_paper_dic
 # write data
 write.csv(
   x = emissions_lake_data_paper,
-  file = paste0(
-    userPath,
-    "communications/manuscript/data_paper/7_emissions_lake.csv"),
+  file = "communications/manuscript/data_paper/7_emissions_lake.csv",
   row.names = FALSE)
 
 # write dictionary
 write.csv(
   x = emissions_lake_data_paper_dictionary,
-  file = paste0(
-    userPath,
-    "communications/manuscript/data_paper/7_emissions_lake_dictionary.csv"),
+  file = "communications/manuscript/data_paper/7_emissions_lake_dictionary.csv",
   row.names = FALSE)
 
 # 8. SITE DESCRIPTORS--------------
@@ -1005,12 +1025,12 @@ ifelse (
 
 # write data
 write.csv(x = site_descriptors_data, 
-          file = "../../../communications/manuscript/data_paper/8_site_descriptors_data.csv",
+          file = "communications/manuscript/data_paper/8_site_descriptors_data.csv",
           row.names = FALSE)
 
 # write dictionary
 write.csv(x = site_descriptors_dictionary, 
-          file = "../../../communications/manuscript/data_paper/8_site_descriptors_dictionary.csv",
+          file = "communications/manuscript/data_paper/8_site_descriptors_dictionary.csv",
           row.names = FALSE)
 
 # 9. PHYTOPLANKTON-------------------
@@ -1052,11 +1072,11 @@ ifelse (
 
 # write data
 write.csv(x = phyto_data, 
-          file = "../../../communications/manuscript/data_paper/10_phyto_data.csv",
+          file = "communications/manuscript/data_paper/10_phyto_data.csv",
           row.names = FALSE)
 
 # write dictionary
 write.csv(x = phyto_dictionary, 
-          file = "../../../communications/manuscript/data_paper/10_phyto_dictionary.csv",
+          file = "communications/manuscript/data_paper/10_phyto_dictionary.csv",
           row.names = FALSE)
 

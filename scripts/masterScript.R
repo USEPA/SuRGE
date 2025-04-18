@@ -38,16 +38,16 @@ source("scripts/analysis/readMorpho.R") # morpho
 source("scripts/analysis/readNla17.R") # nla17_chem
 source("scripts/analysis/hydroLakesID.R") # hylak_link
 source("scripts/analysis/lagosLakesID.R") # lagos_links
-source("scripts/analysis/readNID.R") #national inventory of dams and manual age assignments
-source("scripts/analysis/readWaterIsotope.R") #Renee Brooks Isotope/Residence Time data
-source("scripts/analysis/readNWI.R") #NWI attributes from Mark Mitchell
-source("scripts/analysis/readIpccClimateZones.R") #surge_climate
-source("scripts/analysis/readLakeCat.R")#read in LakeCat 
-source("scripts/analysis/readSedimentation.R")#read in reservoir sedimentation data (requires lagosLakesID.R)
-source("scripts/analysis/readPhytos.R")#read in data from Avery Tatters
-source("scripts/analysis/readNWIS.R")#read water level data for subset of reservoirs
+source("scripts/analysis/readNID.R") # national inventory of dams and manual age assignments
+source("scripts/analysis/readWaterIsotope.R") # Renee Brooks Isotope/Residence Time data
+source("scripts/analysis/readNWI.R") # NWI attributes from Mark Mitchell
+source("scripts/analysis/readIpccClimateZones.R") # surge_climate
+source("scripts/analysis/readLakeCat.R")# read in LakeCat 
+source("scripts/analysis/readSedimentation.R") # read in reservoir sedimentation data (requires lagosLakesID.R)
+source("scripts/analysis/readPhytos.R") # read in data from Avery Tatters
+source("scripts/analysis/readNWIS.R") # read water level data for subset of reservoirs
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
-source("scripts/analysis/missingSonde2016.R") #Interpolate based on profiles
+source("scripts/analysis/missingSonde2016.R") # Interpolate based on profiles
 source("scripts/analysis/readGriddedTemp.R") # ERA5 derived estimates of air, shallow, and deep temperature
 
 # Calculate derived quantities
@@ -64,7 +64,6 @@ source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blan
 
 # Merge chemistry and field sheets
 source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.
-# need to do something with dg_sheet
 
 # Prep 2020 and 2021 data sets for RAPID reporting
 #source("scripts/analysis/rapidReport.R")
