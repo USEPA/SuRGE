@@ -31,3 +31,25 @@ cas<-dat %>%
 caz<-cas %>%
   filter(co2_diffusion_best==0)
 #264 are zero values
+
+meb<-dat %>%
+  filter(!is.na(ch4_ebullition))
+ceb<-dat %>%
+  filter(!is.na(co2_ebullition))
+#2288 measurements of ebullition
+
+mt<-dat %>%
+  filter(!is.na(ch4_total))
+#2124 measurements of total methane flux
+ct<-dat %>%
+  filter(!is.na(co2_total))
+#2027 measurements of total carbon dioxide flux
+
+#Proportion of diffusive emissions that were zero:
+zm<-dat%>%
+  filter(ch4_diffusion_best==0)
+38/2150
+
+zc<-dat%>%
+  filter(co2_diffusion_best==0)
+270/2083

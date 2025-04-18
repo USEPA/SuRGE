@@ -20,7 +20,7 @@ missing_bottom_temps <- fld_sheet %>%
     sp_cond_d,
     turb_d
   )
-#21 missing deep sonde data overall
+#22 missing deep sonde data overall
 
 
 #Lake 207 is missing sonde data from most sites.
@@ -72,6 +72,19 @@ for (i in 1:12) {
   fld_sheet$chla_sonde_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
   fld_sheet$do_mg_d[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- miss207$nlado[i]
   fld_sheet$do_mg_d_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+  #and the shallow sites too
+  fld_sheet$sp_cond_s[match(miss207$uniqueid[i],fld_sheet$uniqueid)] <-nla207$sp.cond.us.cm[1]
+  fld_sheet$sp_cond_s_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+  fld_sheet$temp_s[match(miss207$uniqueid[i],fld_sheet$uniqueid)] <-nla207$temp.C[1]
+  fld_sheet$temp_s_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+  fld_sheet$turb_s[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- nla207$turbidity.ntu[1]
+  fld_sheet$turb_s_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+  fld_sheet$ph_s[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- nla207$pH[1]
+  fld_sheet$ph_s_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+  fld_sheet$chla_sonde_s[match(miss207$uniqueid[i], fld_sheet$uniqueid)]<- nla207$chl.a.ug.l[1]
+  fld_sheet$chla_sonde_s_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
+  fld_sheet$do_mg_s[match(miss207$uniqueid[i], fld_sheet$uniqueid)]<- nla207$do.mg.l[1]
+  fld_sheet$do_mg_s_flags[match(miss207$uniqueid[i], fld_sheet$uniqueid)] <- "l"
 }
 
 #Now look at how many additional missing sonde data there are
@@ -115,7 +128,7 @@ sitematch <- NULL
 depmatch <- NULL
 uidmatch <- NULL
 
-for (i in 1:7) {
+for (i in 1:8) {
   datmp <- points[points$lake_id == missing_bottom_temp$lake_id[i], ]
   datmp$distance <- st_distance(datmp)
   uniqueid <- paste(
@@ -140,7 +153,7 @@ missing_bottom_temp$sitematch <- sitematch
 missing_bottom_temp$depmatch <- depmatch
 missing_bottom_temp$uidmatch <- uidmatch
 
-for (i in 1:7) {
+for (i in 1:8) {
   fld_sheet$sp_cond_d[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- fld_sheet$sp_cond_d[match(missing_bottom_temp$uidmatch[i], fld_sheet$uniqueid)]
   fld_sheet$sp_cond_d_flags[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- "l"
   fld_sheet$temp_d[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- fld_sheet$temp_d[match(missing_bottom_temp$uidmatch[i], fld_sheet$uniqueid)]
