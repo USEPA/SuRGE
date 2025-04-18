@@ -14,6 +14,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              # DEPTH PROFILES
                              "sample_depth", "Measurement depth",
                              "sample_depth_units", "Units for sample depth",
+                             "sample_date", "Observation date",
                              
                              "temp", "Water temperature",
                              "temp_units", "Units for temp field",
@@ -475,39 +476,21 @@ write.csv(x = lake_scale_dictionary,
 # 4. DEPTH PROFILES----
 # WIDE FORMAT
 # see readDepthProfiles.R for primary data source
-# depth_profile_69_70 is just lacustrine sites. depth_profile_surge includes
-# riverine and transitional. Although all other lakes only have a single
-# depth profile, lets report all zones in the paper.
-depth_profiles_data <- list(
-  # lacustrine zone first
-  depth_profile_69_70 %>%
-    mutate(lake_id = sub("_.*", "", lake_id), # extract string before first _
-           site_id = paste0(site_id, "_lacustrine")), # move lacustrine to site_id
-  
-  # riverine and transitional zones
-  depth_profile_surge %>%
-    mutate(
-      site_id = case_when(grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
-                          grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
-                          TRUE ~ as.character(site_id)),
-      # remove transitional, riverine from lake_id
-      # retain character class initially, then convert to numeric.
-      lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional") ~ "69",
-                          lake_id %in% c("70_riverine", "70_transitional") ~ "70",
-                          TRUE ~ lake_id)),
-  
-  # 2016 data
-  depth_profile_2016 %>%
-    select(-do_sat)) %>%
-  map(., ~.x %>% 
-        mutate(lake_id = as.numeric(lake_id),
-               site_id = as.character(site_id),
-               temp = round(temp, 1),
-               do = round(do, 1),
-               sp_cond = round(sp_cond, 0),
-               turbidity = round(turbidity, 1)) %>%
-        relocate(lake_id, site_id, visit, sample_depth)) %>%
-  map_dfr(., bind_rows) # rbinds into one df
+# depth_profile_all includes riverine, transitional, and lacustine. Although all
+# other lakes only have a single depth profile, lets report all zones in the paper.
+
+depth_profiles_data <- depth_profiles_all %>%
+  mutate(
+    # riverine and transitional zones. Move habitat from lake to site_id
+    site_id = case_when(grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                        grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                        grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                        TRUE ~ as.character(site_id)),
+    # remove transitional, riverine, lacustrine from lake_id
+    # retain character class initially, then convert to numeric.
+    lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
+                        lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+                        TRUE ~ lake_id))
 
 # Data dictionary
 depth_profiles_dictionary <- master_dictionary %>%
