@@ -128,7 +128,7 @@ sitematch <- NULL
 depmatch <- NULL
 uidmatch <- NULL
 
-for (i in 1:8) {
+for (i in 1:7) {
   datmp <- points[points$lake_id == missing_bottom_temp$lake_id[i], ]
   datmp$distance <- st_distance(datmp)
   uniqueid <- paste(
@@ -153,7 +153,7 @@ missing_bottom_temp$sitematch <- sitematch
 missing_bottom_temp$depmatch <- depmatch
 missing_bottom_temp$uidmatch <- uidmatch
 
-for (i in 1:8) {
+for (i in 1:7) {
   fld_sheet$sp_cond_d[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- fld_sheet$sp_cond_d[match(missing_bottom_temp$uidmatch[i], fld_sheet$uniqueid)]
   fld_sheet$sp_cond_d_flags[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- "l"
   fld_sheet$temp_d[match(missing_bottom_temp$uniqueid[i], fld_sheet$uniqueid)] <- fld_sheet$temp_d[match(missing_bottom_temp$uidmatch[i], fld_sheet$uniqueid)]
