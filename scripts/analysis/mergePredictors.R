@@ -182,7 +182,7 @@ dim(dat) # 2367
  
 # 9. Phytoplankton Composition from Avery----
  dat <- dat %>%
-   left_join(phyto_SuRGE_link, by="lake_id")
+   left_join(phyto_data_link, by="lake_id")
  dim(dat) # 2367
  
 # 10. Move lacustrine, transitional, and riverine to site_id.----

@@ -55,7 +55,7 @@ zc<-dat%>%
   filter(co2_diffusion_best==0)
 270/2083
 
-# 3. K600 TECHNICAL VALIDATION
+# 3. K600 TECHNICAL VALIDATION--------------
 # 3.1 CO2 direction and gas under/supersaturation
 dissolved_gas_k %>%
   # only observations with dissolved co2 and co2 diffusion
@@ -158,4 +158,93 @@ bind_rows(
 ggsave(filename = "scripts/analysis/data_paper/k600.tiff", width = 3, height = 2, units = "in")
   
 
+# 4. EBULLITION DEPLOYMENT TIMES
+# deployment times in fld_sheet are UTC. Probably want to report in 
+# local time zone for paper. Read in all files, but this time don't
+# specify a time zone. R will retain the clock time from the spreadsheet
+# and incorrectly specify UTC. For data paper, we just want to know min/max
+# deployment cloct time, so tz doesn't matter.
 
+# 1. Create a list of file paths where the data are stored.  
+labs <- c("ADA", "CIN", "DOE", "NAR", "R10", "RTP", "USGS", "PR")
+paths <- paste0(userPath,  "data/", labs)
+
+
+# Function for reading 'data' tab of surgeData files.
+
+get_data_sheet <- function(paths){
+  #d <-  
+  fs::dir_ls(path = paths, # see above
+             regexp = 'surgeData', # file names containing this pattern
+             recurse = TRUE) %>% # look in all subdirectories
+    .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
+    .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway (add visit number to file name)
+    .[!grepl(c("surgeData207_nlafill.xlsx"), .)] %>% # temp file Bridget is using to extrapolate sonde data
+    #.[grepl("191", .)] %>%
+    # map will read each file in fs_path list generated above
+    # imap passes the element name (here, the filename) to the function
+    purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
+                            na = c("NA", "", "N/A", "n/a")) %>%
+                  # Assign the filename to the visit column for now
+                  mutate(visit = .y)) %>% # assign file name
+    purrr::discard(~ nrow(.x) == 0) %>% 
+    # format data
+    map(., function(x) { 
+      janitor::clean_names(x) %>%
+        select(lake_id, visit, site_id, eval_status,
+               trap_deply_date, trap_deply_time,
+               trap_rtrvl_date, trap_rtrvl_time, 
+               chamb_deply_date, chamb_deply_time) %>%
+        # Assign value to visit based on the Excel file name
+        mutate(visit = if_else(str_detect(visit, "visit2"),
+                               2, 1, missing = 1), 
+               # format lake_id and site_id.  See Wiki
+               lake_id = as.character(lake_id) %>%
+                 tolower(.) %>% # i.e. Lacustrine -> lacustrine
+                 str_remove(., "ch4_") %>% # remove any ch4_ from lake_id
+                 str_remove(., "^0+"), #remove leading zeroes i.e. 078->78
+               site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>% # round to nearest tenth of meter
+        # remove unused sites
+        filter(eval_status == "TS") %>% # keep "Target/Sampled". Exclude all others
+        # Format date and time objects
+        mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+               across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
+               trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                                 format = "%Y-%m-%d%H:%M:%S"),
+               trap_rtrvl_date_time = as.POSIXct(x = paste0(trap_rtrvl_date, trap_rtrvl_time),
+                                                 format = "%Y-%m-%d%H:%M:%S"),
+               chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
+                                                  format = "%Y-%m-%d%H:%M:%S"))
+      }) %>%
+    map_dfr(., bind_rows) # rbinds into one df
+    
+}
+
+
+# 2. Read 'data' tab of surgeData files.
+fld_sheet_tm <- get_data_sheet(paths = paths) 
+
+# 3. Min/max/median trap deployment/retrieval times
+fld_sheet_tm %>%
+  mutate(trap_duration = trap_rtrvl_date_time - trap_deply_date_time) %>%
+  summarize(
+    # deployment
+    min_trap_deply = min(format(trap_deply_date_time, format = "%H:%M"), na.rm = TRUE),
+    max_trap_deply = max(format(trap_deply_date_time, format = "%H:%M"), na.rm = TRUE),
+    median_trap_deply = median(format(trap_deply_date_time, format = "%H:%M"), na.rm = TRUE),
+    # retrieval
+    min_trap_rtrvl = min(format(trap_rtrvl_date_time, format = "%H:%M"), na.rm = TRUE),
+    max_trap_rtrvl = max(format(trap_rtrvl_date_time, format = "%H:%M"), na.rm = TRUE),
+    median_trap_rtrvl = median(format(trap_rtrvl_date_time, format = "%H:%M"), na.rm = TRUE),
+    # duration
+    min_trap_duration = min(trap_rtrvl_date_time - trap_deply_date_time, na.rm = TRUE),
+    max_trap_duration = max(trap_rtrvl_date_time - trap_deply_date_time, na.rm = TRUE),
+    median_trap_duration = median(trap_rtrvl_date_time - trap_deply_date_time, na.rm = TRUE))
+
+fld_sheet_tm %>% 
+  mutate(max_trap_duration = trap_rtrvl_date_time - trap_deply_date_time,
+    trap_deply_date_time = format(trap_deply_date_time, format = "%H:%M")) %>%
+  filter(trap_deply_date_time == "20:17" | # double check max deployment time, confirmed
+         trap_deply_date_time == "07:31" | # double check min deployment time, confirmed
+         max_trap_duration  > 40) %>% # double check long deployments, confirmed
+  print(n=Inf)
