@@ -239,6 +239,7 @@ dim(gc_lakeid) # 2525, no empty rows
 
 # QA/QC GC REPS--------------
 # Inspect trap data
+fs::dir_create("output/figures") # make sure directory exists
 pdf("output/figures/scatterplot3dTrap.pdf",
   paper = "a4r", width = 11, height = 8)  # initiate landscape pdf file)
 par(mfrow = c(1,2))
