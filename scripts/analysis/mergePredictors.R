@@ -456,12 +456,12 @@ ggplot(aes(lake_id, ch4_total)) +
   scale_y_log10()
 
 
-ggplot(aes(lake_id, co2_diffusion)) +
-  geom_point(aes(color = source)) 
-
-
-ggplot(aes(lake_id, co2_total)) +
-  geom_point(aes(color = source)) 
+# ggplot(aes(lake_id, co2_diffusion)) +
+#   geom_point(aes(color = source)) 
+# 
+# 
+# ggplot(aes(lake_id, co2_total)) +
+#   geom_point(aes(color = source)) 
 
 
 # 10/10/2024 NOT WORKING, IN PROGRESS....---------
@@ -476,71 +476,71 @@ ggplot(aes(lake_id, co2_total)) +
 #                    # eval_status is referenced in numerous existing lines of code
 #                    rename(site_eval_status = eval_status)) # consistent with dat_2016
 # then aggregate by lake below, then join with other tables.
-
-dat_agg <- dat %>%
-    select(-site_id, -site_wgt, -lat, - long, -site_depth,-site_eval_status, -trap_rtrvl_date_time, -trap_deply_date_time, 
-           -site_depth, 
-           -deep_chla_sonde_comment, -deep_do_mg_comment, -deep_ph_comment, -deep_phycocyanin_sonde_comment,
-           -deep_temp_comment, -deep_turb_comment, -shallow_chla_sonde_comment, -shallow_do_mg_comment,
-           -shallow_ph_comment, -shallow_phycocyanin_sonde_comment, -shallow_sp_cond_comment, -shallow_temp_comment,
-           -shallow_turb_comment, -sample_year, 
-           -E_I_type, 
-           -contains("ch4"), -contains("co2")) %>% # recalc totals after aggregating by lake
-    fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
-    group_by(lake_id, visit) %>%
-    summarise(across(where(is.numeric), \(x) mean(x, na.rm = TRUE)), # calculate arithmetic mean
-              # NA in flags and units cause headaches.  If NA and non-NA values are present
-              # for any analyte in a unique lake x visit combination, "unique" returns
-              # multiple values (e.g. NA, mg/l) and the lake x visit combination is
-              # collapsed into 2 rows rather than 1.  Here we use na.omit to exlcude
-              # NA and return only the unit (e.g. mg/l).  This fails, however, when
-              # no units are present for any analyte in a unique lake x visit combination.
-              # under this condition, identified by length(na.omit(.)) == 0, we return
-              # NA.
-              across(contains("flags"), \(x) case_when(length(na.omit(x)) >= 1 ~ paste(unique(na.omit(x)), collapse = " "), # If >1 flag, then concatenate
-                                                    length(na.omit(x)) == 0 ~ NA_character_, # only NA present, return NA
-                                                          TRUE ~ "fly you fools!")), # look out for the Balrog!!
-              # `fill` above ensures no NA for units
-              across(contains("unit"), ~ unique(.) %>% pluck(1)), # If >1 unit present (e.g. cond, cond@25) display first one
-              sample_date = unique(na.omit(sample_date)) %>% pluck(1), # if multiple, choose earliest
-              lake_name = case_when(all(is.na(lake_name)) ~ NA_character_, # only NA present (Puerto Rico), return NA
-                                    !all(is.na(lake_name)) ~ unique(lake_name), # if any values, then grab one, only one name per lake
-                                    TRUE ~ "fly you fools!"), # look out for the Balrog 
-              lab = case_when(all(is.na(lab)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
-                              !all(is.na(lab)) ~ unique(lab), # if any values, then grab one, only one lab per lake, 
-                              TRUE ~ "fly you fools!"), # look out for the Balrog,
-              nla17_site_id = case_when(all(is.na(nla17_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
-                                 !all(is.na(nla17_site_id)) ~ unique(nla17_site_id), # if any values, then grab one, only one nla_id per lake, 
-                                 TRUE ~ "fly you fools!"), # look out for the Balrog,
-              nla07_site_id = case_when(all(is.na(nla07_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
-                                        !all(is.na(nla07_site_id)) ~ unique(nla07_site_id), # if any values, then grab one, only one nla_id per lake, 
-                                        TRUE ~ "fly you fools!"), # look out for the Balrog,
-              nla12_site_id = case_when(all(is.na(nla12_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
-                                        !all(is.na(nla12_site_id)) ~ unique(nla12_site_id), # if any values, then grab one, only one nla_id per lake, 
-                                        TRUE ~ "fly you fools!"), # look out for the Balrog,
-              nla_unique_id = case_when(all(is.na(nla_unique_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
-                                        !all(is.na(nla_unique_id)) ~ unique(nla_unique_id), # if any values, then grab one, only one nla_id per lake, 
-                                        TRUE ~ "fly you fools!"), # look out for the Balrog,
-              ag_eco9_nm = case_when(all(is.na(ag_eco9_nm)) ~ NA_character_, # only NA present (Puerto Rico), return NA
-                                     !all(is.na(ag_eco9_nm)) ~ unique(ag_eco9_nm), # if any values, then grab one,  only one level per lake
-                                     TRUE ~ "fly you fools!"), # look out for the Balrog,
-              lake_nhdid = case_when(all(is.na(lake_nhdid)) ~ NA_character_, # only NA present (Puerto Rico), return NA
-                                     !all(is.na(lake_nhdid)) == 0 ~ unique(lake_nhdid), # if any values, then grab one,  only one level per lake
-                                     TRUE ~ "fly you fools!")) %>% # look out for the Balrog
-  mutate(ch4_total = ch4_diffusion_best + ch4_ebullition,
-         co2_total = co2_diffusion_best + co2_ebullition) %>%
-    ungroup 
-
-
-
-dim(all_obs) #2057
-dim(dat) #3486
-dim(dat_agg) # 122
-
-
-# write lake ID's to disk
-write_csv(x = dat_agg %>% 
-            select(lake_id, contains("site_id"), hylak_id, lagoslakeid, grand_id,
-                               lagoslakeid, nhd_plus_waterbody_comid),
-          file = paste0(userPath, "data/siteDescriptors/surge_master_crosswalk_wide_beaulieu.csv"))
+# 
+# dat_agg <- dat %>%
+#     select(-site_id, -site_wgt, -lat, - long, -site_depth,-site_eval_status, -trap_rtrvl_date_time, -trap_deply_date_time, 
+#            -site_depth, 
+#            -deep_chla_sonde_comment, -deep_do_mg_comment, -deep_ph_comment, -deep_phycocyanin_sonde_comment,
+#            -deep_temp_comment, -deep_turb_comment, -shallow_chla_sonde_comment, -shallow_do_mg_comment,
+#            -shallow_ph_comment, -shallow_phycocyanin_sonde_comment, -shallow_sp_cond_comment, -shallow_temp_comment,
+#            -shallow_turb_comment, -sample_year, 
+#            -E_I_type, 
+#            -contains("ch4"), -contains("co2")) %>% # recalc totals after aggregating by lake
+#     fill(contains("units")) %>% # populates every row with a value.  This simplifies some of the aggregation below
+#     group_by(lake_id, visit) %>%
+#     summarise(across(where(is.numeric), \(x) mean(x, na.rm = TRUE)), # calculate arithmetic mean
+#               # NA in flags and units cause headaches.  If NA and non-NA values are present
+#               # for any analyte in a unique lake x visit combination, "unique" returns
+#               # multiple values (e.g. NA, mg/l) and the lake x visit combination is
+#               # collapsed into 2 rows rather than 1.  Here we use na.omit to exlcude
+#               # NA and return only the unit (e.g. mg/l).  This fails, however, when
+#               # no units are present for any analyte in a unique lake x visit combination.
+#               # under this condition, identified by length(na.omit(.)) == 0, we return
+#               # NA.
+#               across(contains("flags"), \(x) case_when(length(na.omit(x)) >= 1 ~ paste(unique(na.omit(x)), collapse = " "), # If >1 flag, then concatenate
+#                                                     length(na.omit(x)) == 0 ~ NA_character_, # only NA present, return NA
+#                                                           TRUE ~ "fly you fools!")), # look out for the Balrog!!
+#               # `fill` above ensures no NA for units
+#               across(contains("unit"), ~ unique(.) %>% pluck(1)), # If >1 unit present (e.g. cond, cond@25) display first one
+#               sample_date = unique(na.omit(sample_date)) %>% pluck(1), # if multiple, choose earliest
+#               lake_name = case_when(all(is.na(lake_name)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+#                                     !all(is.na(lake_name)) ~ unique(lake_name), # if any values, then grab one, only one name per lake
+#                                     TRUE ~ "fly you fools!"), # look out for the Balrog 
+#               lab = case_when(all(is.na(lab)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+#                               !all(is.na(lab)) ~ unique(lab), # if any values, then grab one, only one lab per lake, 
+#                               TRUE ~ "fly you fools!"), # look out for the Balrog,
+#               nla17_site_id = case_when(all(is.na(nla17_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+#                                  !all(is.na(nla17_site_id)) ~ unique(nla17_site_id), # if any values, then grab one, only one nla_id per lake, 
+#                                  TRUE ~ "fly you fools!"), # look out for the Balrog,
+#               nla07_site_id = case_when(all(is.na(nla07_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+#                                         !all(is.na(nla07_site_id)) ~ unique(nla07_site_id), # if any values, then grab one, only one nla_id per lake, 
+#                                         TRUE ~ "fly you fools!"), # look out for the Balrog,
+#               nla12_site_id = case_when(all(is.na(nla12_site_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+#                                         !all(is.na(nla12_site_id)) ~ unique(nla12_site_id), # if any values, then grab one, only one nla_id per lake, 
+#                                         TRUE ~ "fly you fools!"), # look out for the Balrog,
+#               nla_unique_id = case_when(all(is.na(nla_unique_id)) ~ NA_character_, # only NA present (Puerto Rico), return NA 
+#                                         !all(is.na(nla_unique_id)) ~ unique(nla_unique_id), # if any values, then grab one, only one nla_id per lake, 
+#                                         TRUE ~ "fly you fools!"), # look out for the Balrog,
+#               ag_eco9_nm = case_when(all(is.na(ag_eco9_nm)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+#                                      !all(is.na(ag_eco9_nm)) ~ unique(ag_eco9_nm), # if any values, then grab one,  only one level per lake
+#                                      TRUE ~ "fly you fools!"), # look out for the Balrog,
+#               lake_nhdid = case_when(all(is.na(lake_nhdid)) ~ NA_character_, # only NA present (Puerto Rico), return NA
+#                                      !all(is.na(lake_nhdid)) == 0 ~ unique(lake_nhdid), # if any values, then grab one,  only one level per lake
+#                                      TRUE ~ "fly you fools!")) %>% # look out for the Balrog
+#   mutate(ch4_total = ch4_diffusion_best + ch4_ebullition,
+#          co2_total = co2_diffusion_best + co2_ebullition) %>%
+#     ungroup 
+# 
+# 
+# 
+# dim(all_obs) #2057
+# dim(dat) #3486
+# dim(dat_agg) # 122
+# 
+# 
+# # write lake ID's to disk
+# write_csv(x = dat_agg %>% 
+#             select(lake_id, contains("site_id"), hylak_id, lagoslakeid, grand_id,
+#                                lagoslakeid, nhd_plus_waterbody_comid),
+#           file = paste0(userPath, "data/siteDescriptors/surge_master_crosswalk_wide_beaulieu.csv"))
 

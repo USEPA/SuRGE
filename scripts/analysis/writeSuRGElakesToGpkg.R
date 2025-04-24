@@ -403,8 +403,6 @@ bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   select(-lake_name) %>%
   st_make_valid() %>%
   st_write(., file.path( 
-    "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/",
-    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/",
     "communications/manuscript/data_paper/", 
     "lake_polygons.gpkg"), # write to .gpkg
     layer = "lake_polygons",
@@ -427,8 +425,6 @@ bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
 bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
   left_join(dat %>% select(lake_id, site_id, visit)) %>%  
   st_write(., file.path(
-    "C:/Users/JBEAULIE/Environmental Protection Agency (EPA)/",
-    "SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/",
     "communications/manuscript/data_paper/", 
     "sample_points.gpkg"), # write to .gpkg
     layer = "sample_points",

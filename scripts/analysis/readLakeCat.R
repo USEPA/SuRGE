@@ -2,6 +2,16 @@
 # DATA PULLED FROM API, THEN STORED LOCALLY
 # CODE TO PULL FROM API IS COMMENTED OUT
 
+# SuRGE comid
+surge_comid <- rbind(lake.list, lake.list.2016) %>%
+  filter(!is.na(sample_year)) %>%
+  select(nhd_plus_waterbody_comid, lake_id) %>%
+  distinct %>% # values repeated for revisits
+  filter(!is.na(nhd_plus_waterbody_comid)) %>% # NA breaks lc_get_data
+  rename(comid = nhd_plus_waterbody_comid)
+
+dim(surge_comid) # 148 unique values
+
 # # devtools::install_github("USEPA/StreamCatTools", build_vignettes=FALSE)
 # # download from API
 # # Names of lakeCat variables
@@ -12,18 +22,6 @@
 #   # ignore older data
 #   filter(!grepl(paste0(1984:2018, collapse = "|"), value)) %>%
 #   pull
-# 
-# 
-# 
-# # SuRGE comid
-# surge_comid <- rbind(lake.list, lake.list.2016) %>%
-#   filter(!is.na(sample_year)) %>%
-#   select(nhd_plus_waterbody_comid, lake_id) %>%
-#   distinct %>% # values repeated for revisits
-#   filter(!is.na(nhd_plus_waterbody_comid)) %>% # NA breaks lc_get_data
-#   rename(comid = nhd_plus_waterbody_comid)
-# 
-# dim(surge_comid) # 148 unique values
 # 
 # # Get lakeCat data
 # lake_cat <- lc_get_data(metric = paste(lake_cat_vars, collapse=","),
