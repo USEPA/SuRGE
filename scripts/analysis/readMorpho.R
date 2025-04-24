@@ -3,20 +3,24 @@
 
 
 # Read from surge_morpho github repo
-morpho <- read.csv(paste0(userPath, "data/siteDescriptors/all_lakes_lakemorpho.csv")) %>% # do not use outdated spreadsheet
-  janitor::clean_names() %>% # lake_id is integer
+morpho <- read.csv(paste0(userPath, "data/siteDescriptors/morphometry/surge_morpho.csv")) %>% 
   as_tibble() %>% 
+  select(-source) %>%
+  pivot_wider(names_from = variables, values_from = values) %>%
+  janitor::clean_names() %>% # lake_id is integer
   # calculate additional metrics. Casas-Ruiz et al 2021
-  mutate(circularity = case_when(
-    # major_axis  is defined as the longest line intersecting the convex hull formed 
-    # around its polygon while passing through its center. In contrast to max_length, 
-    # its value represents the distance across a lake without regard to land-water 
-    # configuration. max_length is the longest open water distance within a lake 
-    !is.na(major_axis) ~ surface_area / (pi * (major_axis/2)^2), # use major_axis if available
-    !is.na(major_axis) & is.na(max_length) ~ surface_area / (pi * (max_length/2)^2), # max_length if no major axis
-    TRUE ~ NA_real_),
+  mutate(
+    # circularity = case_when(
+    # # major_axis  is defined as the longest line intersecting the convex hull formed 
+    # # around its polygon while passing through its center. In contrast to max_length, 
+    # # its value represents the distance across a lake without regard to land-water 
+    # # configuration. max_length is the longest open water distance within a lake 
+    # !is.na(major_axis) ~ surface_area / (pi * (major_axis/2)^2), # use major_axis if available
+    # !is.na(major_axis) & is.na(max_length) ~ surface_area / (pi * (max_length/2)^2), # max_length if no major axis
+    # TRUE ~ NA_real_),
     dynamic_ratio = shoreline_length / mean_depth,
-    littoral_fraction = 1 - ((1 - (3/max_depth))^((max_depth/mean_depth) - 1))) %>%
+    #littoral_fraction = 1 - ((1 - (3/max_depth))^((max_depth/mean_depth) - 1)) # Jeff provides this metric
+    ) %>%
   # replace NaN, Inf with NA
   mutate(across(where(is.numeric), ~na_if(., is.infinite(.))))
 
@@ -42,9 +46,10 @@ cor(use = "pairwise.complete.obs") %>%
 #present longer water residence times.
 
 # here are the morpho variables used in Cass Ruiz
-# surface_area and volume are correlated at rho=0.79
+# surface_area and volume are correlated at rho=0.99
 morpho %>%
-  select(surface_area, volume, shoreline_development, circularity,
+  # add circularity when ready
+  select(surface_area, volume, shoreline_development, 
          dynamic_ratio) %>%
   cor(use = "pairwise.complete.obs") %>% 
   corrplot(method = "number") 

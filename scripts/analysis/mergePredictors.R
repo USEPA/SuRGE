@@ -180,12 +180,8 @@ dim(dat) # 2367
  
  dim(dat) # 2367
  
-# 9. Phytoplankton Composition from Avery----
- dat <- dat %>%
-   left_join(phyto_data_link, by="lake_id")
- dim(dat) # 2367
- 
-# 10. Move lacustrine, transitional, and riverine to site_id.----
+
+# 9. Move lacustrine, transitional, and riverine to site_id.----
  # this will facilitate merging with variables the pertain to 
  # entire lake
  dat <- dat %>%
@@ -203,7 +199,13 @@ dim(dat) # 2367
  
  dim(dat) # 2367
  
-# 11. Merge lakeMorpho data (readMorpho.R)----
+ # 10. Phytoplankton Composition from Avery----
+ dat <- dat %>%
+   left_join(phyto_data_link, by="lake_id")
+ dim(dat) # 2367
+ 
+# 11. Merge lakeMorpho data ----
+ # (readMorpho.R)
  dat <- dat %>%
    left_join(.,
              morpho)

@@ -1,0 +1,1471 @@
+lake_id,lake_name,source,variables,values
+1,French Creek,surge_morpho,surfaceArea,929186.45
+1,French Creek,surge_morpho,shorelineLength,10139.38
+1,French Creek,surge_morpho,shorelineDevelopment,2.97
+1,French Creek,surge_morpho,maxWidth,937.79
+1,French Creek,surge_morpho,meanWidth,565.36
+1,French Creek,surge_morpho,maxLength,1797.09
+1,French Creek,surge_sites,mean_depth,2.86
+1,French Creek,surge_sites,max_depth,4.5
+1,French Creek,surge_sites,volume,2718894.12
+1,French Creek,surge_sites,littoral_fraction,71.39
+2,Arkabutla,surge_morpho,surfaceArea,29862125
+2,Arkabutla,surge_morpho,shorelineLength,60728.54
+2,Arkabutla,surge_morpho,shorelineDevelopment,3.13
+2,Arkabutla,surge_morpho,maxWidth,5979.88
+2,Arkabutla,surge_morpho,meanWidth,2781.7
+2,Arkabutla,surge_morpho,maxLength,10750.21
+2,Arkabutla,surge_sites,mean_depth,3.14
+2,Arkabutla,surge_sites,max_depth,6.5
+2,Arkabutla,surge_sites,volume,106963316.42
+2,Arkabutla,surge_sites,littoral_fraction,35.97
+3,Lake O' the Pines,surge_morpho,surfaceArea,65999784.34
+3,Lake O' the Pines,surge_morpho,shorelineLength,178192.11
+3,Lake O' the Pines,surge_morpho,shorelineDevelopment,6.19
+3,Lake O' the Pines,surge_morpho,maxWidth,6048.23
+3,Lake O' the Pines,surge_morpho,meanWidth,3423.4
+3,Lake O' the Pines,surge_morpho,maxLength,19813.49
+3,Lake O' the Pines,surge_sites,mean_depth,3.1
+3,Lake O' the Pines,surge_sites,max_depth,8.4
+3,Lake O' the Pines,surge_sites,volume,228051912.12
+3,Lake O' the Pines,surge_sites,littoral_fraction,12.59
+4,Cotile Lake,surge_morpho,surfaceArea,6395043.99
+4,Cotile Lake,surge_morpho,shorelineLength,41272.22
+4,Cotile Lake,surge_morpho,shorelineDevelopment,4.6
+4,Cotile Lake,surge_morpho,maxWidth,2352.54
+4,Cotile Lake,surge_morpho,meanWidth,1286.69
+4,Cotile Lake,surge_morpho,maxLength,4978.3
+4,Cotile Lake,surge_sites,mean_depth,3.69
+4,Cotile Lake,surge_sites,max_depth,6.9
+4,Cotile Lake,surge_sites,volume,27349207.78
+4,Cotile Lake,surge_sites,littoral_fraction,41.42
+10,okeheelee,surge_morpho,surfaceArea,178149.44
+10,okeheelee,surge_morpho,shorelineLength,6867.51
+10,okeheelee,surge_morpho,shorelineDevelopment,4.59
+10,okeheelee,surge_morpho,maxWidth,588.61
+10,okeheelee,surge_morpho,meanWidth,358.92
+10,okeheelee,surge_morpho,maxLength,809.86
+10,okeheelee,surge_sites,mean_depth,3.05
+10,okeheelee,surge_sites,max_depth,6.7
+10,okeheelee,surge_sites,volume,606465.16
+10,okeheelee,surge_sites,littoral_fraction,30.81
+11,Lake Jacksonville,surge_morpho,surfaceArea,4814400.11
+11,Lake Jacksonville,surge_morpho,shorelineLength,34192.57
+11,Lake Jacksonville,surge_morpho,shorelineDevelopment,4.4
+11,Lake Jacksonville,surge_morpho,maxWidth,1862.37
+11,Lake Jacksonville,surge_morpho,meanWidth,1324.05
+11,Lake Jacksonville,surge_morpho,maxLength,3960.6
+11,Lake Jacksonville,surge_sites,mean_depth,7.35
+11,Lake Jacksonville,surge_sites,max_depth,16.3
+11,Lake Jacksonville,surge_sites,volume,37613613.39
+11,Lake Jacksonville,surge_sites,littoral_fraction,10.22
+13,Concord Pond,surge_morpho,surfaceArea,215802.72
+13,Concord Pond,surge_morpho,shorelineLength,3394.67
+13,Concord Pond,surge_morpho,shorelineDevelopment,2.06
+13,Concord Pond,surge_morpho,maxWidth,354.3
+13,Concord Pond,surge_morpho,meanWidth,298.59
+13,Concord Pond,surge_morpho,maxLength,779.14
+13,Concord Pond,surge_sites,mean_depth,1
+13,Concord Pond,surge_sites,max_depth,1.4
+13,Concord Pond,surge_sites,volume,209882.83
+13,Concord Pond,surge_sites,littoral_fraction,126.1
+14,Johnson Family Boating Lake,surge_morpho,surfaceArea,302343.54
+14,Johnson Family Boating Lake,surge_morpho,shorelineLength,3493.37
+14,Johnson Family Boating Lake,surge_morpho,shorelineDevelopment,1.79
+14,Johnson Family Boating Lake,surge_morpho,maxWidth,632.54
+14,Johnson Family Boating Lake,surge_morpho,meanWidth,329.69
+14,Johnson Family Boating Lake,surge_morpho,maxLength,924.52
+14,Johnson Family Boating Lake,surge_sites,mean_depth,3.67
+14,Johnson Family Boating Lake,surge_sites,max_depth,6
+14,Johnson Family Boating Lake,surge_sites,volume,1142368.94
+14,Johnson Family Boating Lake,surge_sites,littoral_fraction,57.29
+16,jolly pond,surge_morpho,surfaceArea,104885.87
+16,jolly pond,surge_morpho,shorelineLength,2981.56
+16,jolly pond,surge_morpho,shorelineDevelopment,2.6
+16,jolly pond,surge_morpho,maxWidth,266.46
+16,jolly pond,surge_morpho,meanWidth,157.9
+16,jolly pond,surge_morpho,maxLength,726.25
+16,jolly pond,surge_sites,mean_depth,1.59
+16,jolly pond,surge_sites,max_depth,2.2
+16,jolly pond,surge_sites,volume,161785.91
+16,jolly pond,surge_sites,littoral_fraction,104.99
+17,Blue Lake,surge_morpho,surfaceArea,78747
+17,Blue Lake,surge_morpho,shorelineLength,1062.76
+17,Blue Lake,surge_morpho,shorelineDevelopment,1.07
+17,Blue Lake,surge_morpho,maxWidth,313.06
+17,Blue Lake,surge_morpho,meanWidth,235.73
+17,Blue Lake,surge_morpho,maxLength,338.9
+17,Blue Lake,surge_sites,mean_depth,1.84
+17,Blue Lake,surge_sites,max_depth,2
+17,Blue Lake,surge_sites,volume,147018.54
+17,Blue Lake,surge_sites,littoral_fraction,101.96
+18,Crooked Creek Reservoir,surge_morpho,surfaceArea,1476989.3
+18,Crooked Creek Reservoir,surge_morpho,shorelineLength,12448.48
+18,Crooked Creek Reservoir,surge_morpho,shorelineDevelopment,2.89
+18,Crooked Creek Reservoir,surge_morpho,maxWidth,1319.3
+18,Crooked Creek Reservoir,surge_morpho,meanWidth,622.7
+18,Crooked Creek Reservoir,surge_morpho,maxLength,2402.13
+18,Crooked Creek Reservoir,surge_sites,mean_depth,1.2
+18,Crooked Creek Reservoir,surge_sites,max_depth,3.2
+18,Crooked Creek Reservoir,surge_sites,volume,1778313.08
+18,Crooked Creek Reservoir,surge_sites,littoral_fraction,66.27
+44,lake juniper,surge_morpho,surfaceArea,993997.89
+44,lake juniper,surge_morpho,shorelineLength,10534.65
+44,lake juniper,surge_morpho,shorelineDevelopment,2.98
+44,lake juniper,surge_morpho,maxWidth,480.98
+44,lake juniper,surge_morpho,meanWidth,534.8
+44,lake juniper,surge_morpho,maxLength,1909.03
+44,lake juniper,surge_sites,mean_depth,2.28
+44,lake juniper,surge_sites,max_depth,4.7
+44,lake juniper,surge_sites,volume,2362376.16
+44,lake juniper,surge_sites,littoral_fraction,51.24
+45,Four Prong Lake,surge_morpho,surfaceArea,66339.12
+45,Four Prong Lake,surge_morpho,shorelineLength,1189.59
+45,Four Prong Lake,surge_morpho,shorelineDevelopment,1.3
+45,Four Prong Lake,surge_morpho,maxWidth,264.67
+45,Four Prong Lake,surge_morpho,meanWidth,162.57
+45,Four Prong Lake,surge_morpho,maxLength,421.33
+45,Four Prong Lake,surge_sites,mean_depth,1.98
+45,Four Prong Lake,surge_sites,max_depth,3.7
+45,Four Prong Lake,surge_sites,volume,126682.57
+45,Four Prong Lake,surge_sites,littoral_fraction,71.14
+46,Maple Lake,surge_morpho,surfaceArea,87361.14
+46,Maple Lake,surge_morpho,shorelineLength,1860.55
+46,Maple Lake,surge_morpho,shorelineDevelopment,1.78
+46,Maple Lake,surge_morpho,maxWidth,239.88
+46,Maple Lake,surge_morpho,meanWidth,154.17
+46,Maple Lake,surge_morpho,maxLength,600.28
+46,Maple Lake,surge_sites,mean_depth,1.06
+46,Maple Lake,surge_sites,max_depth,1.5
+46,Maple Lake,surge_sites,volume,95027.67
+46,Maple Lake,surge_sites,littoral_fraction,123.62
+47,Mirror Lake,surge_morpho,surfaceArea,478552.28
+47,Mirror Lake,surge_morpho,shorelineLength,11977.03
+47,Mirror Lake,surge_morpho,shorelineDevelopment,4.88
+47,Mirror Lake,surge_morpho,maxWidth,744.78
+47,Mirror Lake,surge_morpho,meanWidth,257.21
+47,Mirror Lake,surge_morpho,maxLength,1903.69
+47,Mirror Lake,surge_sites,mean_depth,1.64
+47,Mirror Lake,surge_sites,max_depth,3.4
+47,Mirror Lake,surge_sites,volume,884452.75
+47,Mirror Lake,surge_sites,littoral_fraction,71.89
+49,Lake Stockwell,surge_morpho,surfaceArea,91137.04
+49,Lake Stockwell,surge_morpho,shorelineLength,3797.19
+49,Lake Stockwell,surge_morpho,shorelineDevelopment,3.55
+49,Lake Stockwell,surge_morpho,maxWidth,312.07
+49,Lake Stockwell,surge_morpho,meanWidth,168.67
+49,Lake Stockwell,surge_morpho,maxLength,708.49
+49,Lake Stockwell,surge_sites,mean_depth,1.5
+49,Lake Stockwell,surge_sites,max_depth,2
+49,Lake Stockwell,surge_sites,volume,133062.08
+49,Lake Stockwell,surge_sites,littoral_fraction,107.72
+51,Tully Lake,surge_morpho,surfaceArea,893425.95
+51,Tully Lake,surge_morpho,shorelineLength,13611.68
+51,Tully Lake,surge_morpho,shorelineDevelopment,4.06
+51,Tully Lake,surge_morpho,maxWidth,1154.47
+51,Tully Lake,surge_morpho,meanWidth,725.08
+51,Tully Lake,surge_morpho,maxLength,1417.82
+51,Tully Lake,surge_sites,mean_depth,2.28
+51,Tully Lake,surge_sites,max_depth,4.5
+51,Tully Lake,surge_sites,volume,2207497.68
+51,Tully Lake,surge_sites,littoral_fraction,56.28
+52,Lake Zoar,surge_morpho,surfaceArea,3499518.59
+52,Lake Zoar,surge_morpho,shorelineLength,37546.47
+52,Lake Zoar,surge_morpho,shorelineDevelopment,5.66
+52,Lake Zoar,surge_morpho,maxWidth,1186.62
+52,Lake Zoar,surge_morpho,meanWidth,1104.33
+52,Lake Zoar,surge_morpho,maxLength,3238.73
+52,Lake Zoar,surge_sites,mean_depth,8.86
+52,Lake Zoar,surge_sites,max_depth,16.1
+52,Lake Zoar,surge_sites,volume,29473950.67
+52,Lake Zoar,surge_sites,littoral_fraction,21.83
+53,Morris Reservoir,surge_morpho,surfaceArea,546245.33
+53,Morris Reservoir,surge_morpho,shorelineLength,6088.43
+53,Morris Reservoir,surge_morpho,shorelineDevelopment,2.32
+53,Morris Reservoir,surge_morpho,maxWidth,602.35
+53,Morris Reservoir,surge_morpho,meanWidth,268.71
+53,Morris Reservoir,surge_morpho,maxLength,2066.89
+53,Morris Reservoir,surge_sites,mean_depth,12.08
+53,Morris Reservoir,surge_sites,max_depth,24.7
+53,Morris Reservoir,surge_sites,volume,6873520.02
+53,Morris Reservoir,surge_sites,littoral_fraction,9.14
+54,Spencer Lake,surge_morpho,surfaceArea,329664.85
+54,Spencer Lake,surge_morpho,shorelineLength,4660.86
+54,Spencer Lake,surge_morpho,shorelineDevelopment,2.29
+54,Spencer Lake,surge_morpho,maxWidth,452.6
+54,Spencer Lake,surge_morpho,meanWidth,426.13
+54,Spencer Lake,surge_morpho,maxLength,849.16
+54,Spencer Lake,surge_sites,mean_depth,1.79
+54,Spencer Lake,surge_sites,max_depth,2.5
+54,Spencer Lake,surge_sites,volume,608355.08
+54,Spencer Lake,surge_sites,littoral_fraction,100
+55,Zepernick Lake,surge_morpho,surfaceArea,113288.2
+55,Zepernick Lake,surge_morpho,shorelineLength,2235.82
+55,Zepernick Lake,surge_morpho,shorelineDevelopment,1.87
+55,Zepernick Lake,surge_morpho,maxWidth,421.07
+55,Zepernick Lake,surge_morpho,meanWidth,281.21
+55,Zepernick Lake,surge_morpho,maxLength,515.68
+55,Zepernick Lake,surge_sites,mean_depth,2.11
+55,Zepernick Lake,surge_sites,max_depth,2.9
+55,Zepernick Lake,surge_sites,volume,244299.92
+55,Zepernick Lake,surge_sites,littoral_fraction,94.63
+57,Slatersville Reservoir,surge_morpho,surfaceArea,565772.07
+57,Slatersville Reservoir,surge_morpho,shorelineLength,6933.55
+57,Slatersville Reservoir,surge_morpho,shorelineDevelopment,2.6
+57,Slatersville Reservoir,surge_morpho,maxWidth,683.24
+57,Slatersville Reservoir,surge_morpho,meanWidth,441.72
+57,Slatersville Reservoir,surge_morpho,maxLength,1828.37
+57,Slatersville Reservoir,surge_sites,mean_depth,1.98
+57,Slatersville Reservoir,surge_sites,max_depth,3.7
+57,Slatersville Reservoir,surge_sites,volume,1252695.37
+57,Slatersville Reservoir,surge_sites,littoral_fraction,71.14
+64,Halls pond,surge_morpho,surfaceArea,314236.86
+64,Halls pond,surge_morpho,shorelineLength,5018.19
+64,Halls pond,surge_morpho,shorelineDevelopment,2.53
+64,Halls pond,surge_morpho,maxWidth,490.14
+64,Halls pond,surge_morpho,meanWidth,346.06
+64,Halls pond,surge_morpho,maxLength,1008.5
+64,Halls pond,surge_sites,mean_depth,2.33
+64,Halls pond,surge_sites,max_depth,3.7
+64,Halls pond,surge_sites,volume,718093.54
+64,Halls pond,surge_sites,littoral_fraction,79.48
+65,Weatherhead Hollow,surge_morpho,surfaceArea,112468.81
+65,Weatherhead Hollow,surge_morpho,shorelineLength,2866.4
+65,Weatherhead Hollow,surge_morpho,shorelineDevelopment,2.41
+65,Weatherhead Hollow,surge_morpho,maxWidth,125.95
+65,Weatherhead Hollow,surge_morpho,meanWidth,115.87
+65,Weatherhead Hollow,surge_morpho,maxLength,1248.94
+65,Weatherhead Hollow,surge_sites,mean_depth,1.28
+65,Weatherhead Hollow,surge_sites,max_depth,1.6
+65,Weatherhead Hollow,surge_sites,volume,141697.82
+65,Weatherhead Hollow,surge_sites,littoral_fraction,111.8
+66,Norton Reservoir,surge_morpho,surfaceArea,1787945.44
+66,Norton Reservoir,surge_morpho,shorelineLength,10429.07
+66,Norton Reservoir,surge_morpho,shorelineDevelopment,2.2
+66,Norton Reservoir,surge_morpho,maxWidth,1504.92
+66,Norton Reservoir,surge_morpho,meanWidth,815.27
+66,Norton Reservoir,surge_morpho,maxLength,2214.82
+66,Norton Reservoir,surge_sites,mean_depth,1.62
+66,Norton Reservoir,surge_sites,max_depth,2.4
+66,Norton Reservoir,surge_sites,volume,2955514.24
+66,Norton Reservoir,surge_sites,littoral_fraction,102
+67,Fort Peck Trout pond,surge_morpho,surfaceArea,200158.69
+67,Fort Peck Trout pond,surge_morpho,shorelineLength,2248.65
+67,Fort Peck Trout pond,surge_morpho,shorelineDevelopment,1.42
+67,Fort Peck Trout pond,surge_morpho,maxWidth,339.8
+67,Fort Peck Trout pond,surge_morpho,meanWidth,235.85
+67,Fort Peck Trout pond,surge_morpho,maxLength,939.82
+67,Fort Peck Trout pond,surge_sites,mean_depth,5.75
+67,Fort Peck Trout pond,surge_sites,max_depth,7.6
+67,Fort Peck Trout pond,surge_sites,volume,1230456.51
+67,Fort Peck Trout pond,surge_sites,littoral_fraction,69.99
+68,Tschida Lake,surge_morpho,surfaceArea,12226594.04
+68,Tschida Lake,surge_morpho,shorelineLength,53419.11
+68,Tschida Lake,surge_morpho,shorelineDevelopment,4.31
+68,Tschida Lake,surge_morpho,maxWidth,2487.81
+68,Tschida Lake,surge_morpho,meanWidth,2930.31
+68,Tschida Lake,surge_morpho,maxLength,4632.91
+68,Tschida Lake,surge_sites,mean_depth,6.63
+68,Tschida Lake,surge_sites,max_depth,26
+68,Tschida Lake,surge_sites,volume,91161883.86
+68,Tschida Lake,surge_sites,littoral_fraction,0.11
+69,Lake Oahe,surge_morpho,surfaceArea,1239606742.49
+69,Lake Oahe,surge_morpho,shorelineLength,3329202.76
+69,Lake Oahe,surge_morpho,shorelineDevelopment,26.67
+69,Lake Oahe,surge_morpho,maxWidth,43011
+69,Lake Oahe,surge_morpho,meanWidth,73551.6
+69,Lake Oahe,surge_morpho,maxLength,33969.98
+69,Lake Oahe,surge_sites,mean_depth,27.97
+69,Lake Oahe,surge_sites,max_depth,113.3
+69,Lake Oahe,surge_sites,volume,33300990690.65
+69,Lake Oahe,surge_sites,littoral_fraction,0
+70,Lake Francis Case,surge_morpho,surfaceArea,328286204.77
+70,Lake Francis Case,surge_morpho,shorelineLength,627129.13
+70,Lake Francis Case,surge_morpho,shorelineDevelopment,9.76
+70,Lake Francis Case,surge_morpho,maxWidth,12109
+70,Lake Francis Case,surge_morpho,meanWidth,18093.09
+70,Lake Francis Case,surge_morpho,maxLength,27581.42
+70,Lake Francis Case,surge_sites,mean_depth,12.16
+70,Lake Francis Case,surge_sites,max_depth,24.9
+70,Lake Francis Case,surge_sites,volume,3762338870.27
+70,Lake Francis Case,surge_sites,littoral_fraction,9.01
+71,willow creek,surge_morpho,surfaceArea,2554619.46
+71,willow creek,surge_morpho,shorelineLength,9390.12
+71,willow creek,surge_morpho,shorelineDevelopment,1.66
+71,willow creek,surge_morpho,maxWidth,1620.71
+71,willow creek,surge_morpho,meanWidth,1015.84
+71,willow creek,surge_morpho,maxLength,2580.71
+71,willow creek,surge_sites,mean_depth,6.34
+71,willow creek,surge_sites,max_depth,11
+71,willow creek,surge_sites,volume,16505109.69
+71,willow creek,surge_sites,littoral_fraction,33.66
+72,Nelson,surge_morpho,surfaceArea,8177579.78
+72,Nelson,surge_morpho,shorelineLength,25441.67
+72,Nelson,surge_morpho,shorelineDevelopment,2.51
+72,Nelson,surge_morpho,maxWidth,2564.33
+72,Nelson,surge_morpho,meanWidth,1243.44
+72,Nelson,surge_morpho,maxLength,6725.45
+72,Nelson,surge_sites,mean_depth,5.89
+72,Nelson,surge_sites,max_depth,9.9
+72,Nelson,surge_sites,volume,48654364.21
+72,Nelson,surge_sites,littoral_fraction,39.13
+75,freeman lake,surge_morpho,surfaceArea,203723.97
+75,freeman lake,surge_morpho,shorelineLength,3502.09
+75,freeman lake,surge_morpho,shorelineDevelopment,2.19
+75,freeman lake,surge_morpho,maxWidth,411.39
+75,freeman lake,surge_morpho,meanWidth,187.52
+75,freeman lake,surge_morpho,maxLength,1171.87
+75,freeman lake,surge_sites,mean_depth,2.68
+75,freeman lake,surge_sites,max_depth,5.1
+75,freeman lake,surge_sites,volume,605986.01
+75,freeman lake,surge_sites,littoral_fraction,52.53
+76,Eureka Reservoir,surge_morpho,surfaceArea,350680.2
+76,Eureka Reservoir,surge_morpho,shorelineLength,4962.95
+76,Eureka Reservoir,surge_morpho,shorelineDevelopment,2.36
+76,Eureka Reservoir,surge_morpho,maxWidth,427.21
+76,Eureka Reservoir,surge_morpho,meanWidth,312.57
+76,Eureka Reservoir,surge_morpho,maxLength,1129.69
+76,Eureka Reservoir,surge_sites,mean_depth,7.12
+76,Eureka Reservoir,surge_sites,max_depth,10.6
+76,Eureka Reservoir,surge_sites,volume,2581880.82
+76,Eureka Reservoir,surge_sites,littoral_fraction,49.36
+77,Cottonwood Reservoir,surge_morpho,surfaceArea,270307.64
+77,Cottonwood Reservoir,surge_morpho,shorelineLength,3661.9
+77,Cottonwood Reservoir,surge_morpho,shorelineDevelopment,1.99
+77,Cottonwood Reservoir,surge_morpho,maxWidth,597.9
+77,Cottonwood Reservoir,surge_morpho,meanWidth,251.74
+77,Cottonwood Reservoir,surge_morpho,maxLength,1091.74
+77,Cottonwood Reservoir,surge_sites,mean_depth,2.24
+77,Cottonwood Reservoir,surge_sites,max_depth,5.3
+77,Cottonwood Reservoir,surge_sites,volume,736560.11
+77,Cottonwood Reservoir,surge_sites,littoral_fraction,35.83
+78,owens lake,surge_morpho,surfaceArea,493911.38
+78,owens lake,surge_morpho,shorelineLength,6979.85
+78,owens lake,surge_morpho,shorelineDevelopment,2.8
+78,owens lake,surge_morpho,maxWidth,452.02
+78,owens lake,surge_morpho,meanWidth,370.19
+78,owens lake,surge_morpho,maxLength,1676.12
+78,owens lake,surge_sites,mean_depth,2.39
+78,owens lake,surge_sites,max_depth,4.3
+78,owens lake,surge_sites,volume,1064671.59
+78,owens lake,surge_sites,littoral_fraction,64.74
+79,Roosevelt Lake,surge_morpho,surfaceArea,317888.31
+79,Roosevelt Lake,surge_morpho,shorelineLength,4802.2
+79,Roosevelt Lake,surge_morpho,shorelineDevelopment,2.4
+79,Roosevelt Lake,surge_morpho,maxWidth,852.44
+79,Roosevelt Lake,surge_morpho,meanWidth,377.03
+79,Roosevelt Lake,surge_morpho,maxLength,896.96
+79,Roosevelt Lake,surge_sites,mean_depth,1.99
+79,Roosevelt Lake,surge_sites,max_depth,4.3
+79,Roosevelt Lake,surge_sites,volume,734968.29
+79,Roosevelt Lake,surge_sites,littoral_fraction,53.18
+82,lake montclair,surge_morpho,surfaceArea,388246.99
+82,lake montclair,surge_morpho,shorelineLength,9399
+82,lake montclair,surge_morpho,shorelineDevelopment,4.26
+82,lake montclair,surge_morpho,maxWidth,813.84
+82,lake montclair,surge_morpho,meanWidth,444.25
+82,lake montclair,surge_morpho,maxLength,902.53
+82,lake montclair,surge_sites,mean_depth,5
+82,lake montclair,surge_sites,max_depth,14.5
+82,lake montclair,surge_sites,volume,2029616.4
+82,lake montclair,surge_sites,littoral_fraction,3.54
+83,Monroe,surge_morpho,surfaceArea,42430271.5
+83,Monroe,surge_morpho,shorelineLength,156676.2
+83,Monroe,surge_morpho,shorelineDevelopment,6.79
+83,Monroe,surge_morpho,maxWidth,5625.19
+83,Monroe,surge_morpho,meanWidth,5279.4
+83,Monroe,surge_morpho,maxLength,8078.76
+83,Monroe,surge_sites,mean_depth,4.53
+83,Monroe,surge_sites,max_depth,9.8
+83,Monroe,surge_sites,volume,204905758.54
+83,Monroe,surge_sites,littoral_fraction,20.41
+84,Marrowbone Lake,surge_morpho,surfaceArea,194509.33
+84,Marrowbone Lake,surge_morpho,shorelineLength,5293.31
+84,Marrowbone Lake,surge_morpho,shorelineDevelopment,3.39
+84,Marrowbone Lake,surge_morpho,maxWidth,449.31
+84,Marrowbone Lake,surge_morpho,meanWidth,273.31
+84,Marrowbone Lake,surge_morpho,maxLength,877.81
+84,Marrowbone Lake,surge_sites,mean_depth,5.1
+84,Marrowbone Lake,surge_sites,max_depth,10.5
+84,Marrowbone Lake,surge_sites,volume,1083891.85
+84,Marrowbone Lake,surge_sites,littoral_fraction,21.88
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_morpho,surfaceArea,86892.87
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_morpho,shorelineLength,2374.45
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_morpho,shorelineDevelopment,2.27
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_morpho,maxWidth,313.6
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_morpho,meanWidth,160.86
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_morpho,maxLength,645.39
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_sites,mean_depth,5.44
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_sites,max_depth,8.5
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_sites,volume,477568.31
+98,Hickory Nut Upper Lake_Big Mirror Lake,surge_sites,littoral_fraction,50.24
+99,Lake Hamilton,surge_morpho,surfaceArea,16891555.68
+99,Lake Hamilton,surge_morpho,shorelineLength,124258.84
+99,Lake Hamilton,surge_morpho,shorelineDevelopment,8.53
+99,Lake Hamilton,surge_morpho,maxWidth,4100.41
+99,Lake Hamilton,surge_morpho,meanWidth,4179.62
+99,Lake Hamilton,surge_morpho,maxLength,4809.03
+99,Lake Hamilton,surge_sites,mean_depth,9.44
+99,Lake Hamilton,surge_sites,max_depth,27
+99,Lake Hamilton,surge_sites,volume,191615361.71
+99,Lake Hamilton,surge_sites,littoral_fraction,1.2
+100,Lake Hanna,surge_morpho,surfaceArea,552757.01
+100,Lake Hanna,surge_morpho,shorelineLength,6179.4
+100,Lake Hanna,surge_morpho,shorelineDevelopment,2.34
+100,Lake Hanna,surge_morpho,maxWidth,865.55
+100,Lake Hanna,surge_morpho,meanWidth,570.62
+100,Lake Hanna,surge_morpho,maxLength,993.24
+100,Lake Hanna,surge_sites,mean_depth,3.67
+100,Lake Hanna,surge_sites,max_depth,7.4
+100,Lake Hanna,surge_sites,volume,2166183.16
+100,Lake Hanna,surge_sites,littoral_fraction,33.26
+101,Hammertown Lake,surge_morpho,surfaceArea,604720.29
+101,Hammertown Lake,surge_morpho,shorelineLength,10098.85
+101,Hammertown Lake,surge_morpho,shorelineDevelopment,3.66
+101,Hammertown Lake,surge_morpho,maxWidth,781.34
+101,Hammertown Lake,surge_morpho,meanWidth,430.13
+101,Hammertown Lake,surge_morpho,maxLength,1505.1
+101,Hammertown Lake,surge_sites,mean_depth,7.83
+101,Hammertown Lake,surge_sites,max_depth,15.2
+101,Hammertown Lake,surge_sites,volume,5232071.32
+101,Hammertown Lake,surge_sites,littoral_fraction,18.26
+102,Atagahi,surge_morpho,surfaceArea,302470.72
+102,Atagahi,surge_morpho,shorelineLength,6049.58
+102,Atagahi,surge_morpho,shorelineDevelopment,3.1
+102,Atagahi,surge_morpho,maxWidth,424.7
+102,Atagahi,surge_morpho,meanWidth,327.61
+102,Atagahi,surge_morpho,maxLength,1190.44
+102,Atagahi,surge_sites,mean_depth,5.64
+102,Atagahi,surge_sites,max_depth,12.2
+102,Atagahi,surge_sites,volume,1802127.59
+102,Atagahi,surge_sites,littoral_fraction,15.82
+103,Piney Run Lake,surge_morpho,surfaceArea,1036850.25
+103,Piney Run Lake,surge_morpho,shorelineLength,11809.28
+103,Piney Run Lake,surge_morpho,shorelineDevelopment,3.27
+103,Piney Run Lake,surge_morpho,maxWidth,871.35
+103,Piney Run Lake,surge_morpho,meanWidth,434.64
+103,Piney Run Lake,surge_morpho,maxLength,2656.31
+103,Piney Run Lake,surge_sites,mean_depth,5.59
+103,Piney Run Lake,surge_sites,max_depth,12
+103,Piney Run Lake,surge_sites,volume,6899846.99
+103,Piney Run Lake,surge_sites,littoral_fraction,16.52
+116,Krodel Park,surge_morpho,surfaceArea,83224.09
+116,Krodel Park,surge_morpho,shorelineLength,1896.07
+116,Krodel Park,surge_morpho,shorelineDevelopment,1.85
+116,Krodel Park,surge_morpho,maxWidth,196.12
+116,Krodel Park,surge_morpho,meanWidth,360.52
+116,Krodel Park,surge_morpho,maxLength,573.09
+116,Krodel Park,surge_sites,mean_depth,2.11
+116,Krodel Park,surge_sites,max_depth,2.8
+116,Krodel Park,surge_sites,volume,182775.9
+116,Krodel Park,surge_sites,littoral_fraction,96.34
+117,acworth lake,surge_morpho,surfaceArea,999359.2
+117,acworth lake,surge_morpho,shorelineLength,8050.01
+117,acworth lake,surge_morpho,shorelineDevelopment,2.27
+117,acworth lake,surge_morpho,maxWidth,851.38
+117,acworth lake,surge_morpho,meanWidth,476.54
+117,acworth lake,surge_morpho,maxLength,2135
+117,acworth lake,surge_sites,mean_depth,2.31
+117,acworth lake,surge_sites,max_depth,4.6
+117,acworth lake,surge_sites,volume,2356767.52
+117,acworth lake,surge_sites,littoral_fraction,54.54
+119,Beaver Pond,surge_morpho,surfaceArea,98318.8
+119,Beaver Pond,surge_morpho,shorelineLength,3213.17
+119,Beaver Pond,surge_morpho,shorelineDevelopment,2.89
+119,Beaver Pond,surge_morpho,maxWidth,161.35
+119,Beaver Pond,surge_morpho,meanWidth,311.88
+119,Beaver Pond,surge_morpho,maxLength,473.49
+119,Beaver Pond,surge_sites,mean_depth,1.85
+119,Beaver Pond,surge_sites,max_depth,2.9
+119,Beaver Pond,surge_sites,volume,180405.59
+119,Beaver Pond,surge_sites,littoral_fraction,91.88
+136,Arrow Head Lake,surge_morpho,surfaceArea,221926.31
+136,Arrow Head Lake,surge_morpho,shorelineLength,2564.91
+136,Arrow Head Lake,surge_morpho,shorelineDevelopment,1.54
+136,Arrow Head Lake,surge_morpho,maxWidth,405.98
+136,Arrow Head Lake,surge_morpho,meanWidth,286.62
+136,Arrow Head Lake,surge_morpho,maxLength,848.11
+136,Arrow Head Lake,surge_sites,mean_depth,2.53
+136,Arrow Head Lake,surge_sites,max_depth,5.6
+136,Arrow Head Lake,surge_sites,volume,597607.96
+136,Arrow Head Lake,surge_sites,littoral_fraction,37.67
+137,Burnsville Lake,surge_morpho,surfaceArea,2762603.45
+137,Burnsville Lake,surge_morpho,shorelineLength,38843.33
+137,Burnsville Lake,surge_morpho,shorelineDevelopment,6.59
+137,Burnsville Lake,surge_morpho,maxWidth,1626.46
+137,Burnsville Lake,surge_morpho,meanWidth,1050.57
+137,Burnsville Lake,surge_morpho,maxLength,2941.14
+137,Burnsville Lake,surge_sites,mean_depth,4.82
+137,Burnsville Lake,surge_sites,max_depth,10
+137,Burnsville Lake,surge_sites,volume,14402940.54
+137,Burnsville Lake,surge_sites,littoral_fraction,22.54
+138,Suck cr,surge_morpho,surfaceArea,195363.54
+138,Suck cr,surge_morpho,shorelineLength,4969.85
+138,Suck cr,surge_morpho,shorelineDevelopment,3.17
+138,Suck cr,surge_morpho,maxWidth,526.14
+138,Suck cr,surge_morpho,meanWidth,216.88
+138,Suck cr,surge_morpho,maxLength,934.45
+138,Suck cr,surge_sites,mean_depth,3.21
+138,Suck cr,surge_sites,max_depth,5.3
+138,Suck cr,surge_sites,volume,617326.81
+138,Suck cr,surge_sites,littoral_fraction,61.39
+146,Canton Lake,surge_morpho,surfaceArea,28399736.64
+146,Canton Lake,surge_morpho,shorelineLength,47899.23
+146,Canton Lake,surge_morpho,shorelineDevelopment,2.54
+146,Canton Lake,surge_morpho,maxWidth,4886.55
+146,Canton Lake,surge_morpho,meanWidth,2986.87
+146,Canton Lake,surge_morpho,maxLength,9654.35
+146,Canton Lake,surge_sites,mean_depth,4.08
+146,Canton Lake,surge_sites,max_depth,8.3
+146,Canton Lake,surge_sites,volume,136718197.65
+146,Canton Lake,surge_sites,littoral_fraction,28.91
+147,Lake Jean Neustadt,surge_morpho,surfaceArea,1705197.2
+147,Lake Jean Neustadt,surge_morpho,shorelineLength,16055.85
+147,Lake Jean Neustadt,surge_morpho,shorelineDevelopment,3.47
+147,Lake Jean Neustadt,surge_morpho,maxWidth,1795.72
+147,Lake Jean Neustadt,surge_morpho,meanWidth,786.3
+147,Lake Jean Neustadt,surge_morpho,maxLength,2328.44
+147,Lake Jean Neustadt,surge_sites,mean_depth,3.22
+147,Lake Jean Neustadt,surge_sites,max_depth,7.3
+147,Lake Jean Neustadt,surge_sites,volume,5482465.41
+147,Lake Jean Neustadt,surge_sites,littoral_fraction,25.79
+148,Keystone,surge_morpho,surfaceArea,64886666.35
+148,Keystone,surge_morpho,shorelineLength,275250.53
+148,Keystone,surge_morpho,shorelineDevelopment,9.64
+148,Keystone,surge_morpho,maxWidth,10734.99
+148,Keystone,surge_morpho,meanWidth,5536.14
+148,Keystone,surge_morpho,maxLength,12268.54
+148,Keystone,surge_sites,mean_depth,6.65
+148,Keystone,surge_sites,max_depth,13.5
+148,Keystone,surge_sites,volume,433202084.8
+148,Keystone,surge_sites,littoral_fraction,17.57
+149,Sherman Reservoir,surge_morpho,surfaceArea,10405058.38
+149,Sherman Reservoir,surge_morpho,shorelineLength,60381.05
+149,Sherman Reservoir,surge_morpho,shorelineDevelopment,5.28
+149,Sherman Reservoir,surge_morpho,maxWidth,3208.1
+149,Sherman Reservoir,surge_morpho,meanWidth,1557.77
+149,Sherman Reservoir,surge_morpho,maxLength,6684.3
+149,Sherman Reservoir,surge_sites,mean_depth,4.57
+149,Sherman Reservoir,surge_sites,max_depth,11
+149,Sherman Reservoir,surge_sites,volume,57390905.93
+149,Sherman Reservoir,surge_sites,littoral_fraction,12.4
+155,Lake Minatare,surge_morpho,surfaceArea,6690345.77
+155,Lake Minatare,surge_morpho,shorelineLength,16817.62
+155,Lake Minatare,surge_morpho,shorelineDevelopment,1.83
+155,Lake Minatare,surge_morpho,maxWidth,3061.24
+155,Lake Minatare,surge_morpho,meanWidth,2024.33
+155,Lake Minatare,surge_morpho,maxLength,3316.71
+155,Lake Minatare,surge_sites,mean_depth,8.09
+155,Lake Minatare,surge_sites,max_depth,13.8
+155,Lake Minatare,surge_sites,volume,63094787.1
+155,Lake Minatare,surge_sites,littoral_fraction,29.91
+157,Storrie Lake,surge_morpho,surfaceArea,1560850.24
+157,Storrie Lake,surge_morpho,shorelineLength,7584.54
+157,Storrie Lake,surge_morpho,shorelineDevelopment,1.71
+157,Storrie Lake,surge_morpho,maxWidth,1139.34
+157,Storrie Lake,surge_morpho,meanWidth,881.36
+157,Storrie Lake,surge_morpho,maxLength,1803.4
+157,Storrie Lake,surge_sites,mean_depth,2.33
+157,Storrie Lake,surge_sites,max_depth,4.4
+157,Storrie Lake,surge_sites,volume,3848976.95
+157,Storrie Lake,surge_sites,littoral_fraction,60.61
+159,Eaglewatch Lake,surge_morpho,surfaceArea,174674.41
+159,Eaglewatch Lake,surge_morpho,shorelineLength,2348.6
+159,Eaglewatch Lake,surge_morpho,shorelineDevelopment,1.59
+159,Eaglewatch Lake,surge_morpho,maxWidth,326.77
+159,Eaglewatch Lake,surge_morpho,meanWidth,207.58
+159,Eaglewatch Lake,surge_morpho,maxLength,886.15
+159,Eaglewatch Lake,surge_sites,mean_depth,7.35
+159,Eaglewatch Lake,surge_sites,max_depth,10.8
+159,Eaglewatch Lake,surge_sites,volume,1331338.96
+159,Eaglewatch Lake,surge_sites,littoral_fraction,50.27
+165,Beaver pond,surge_morpho,surfaceArea,132922.2
+165,Beaver pond,surge_morpho,shorelineLength,2269.53
+165,Beaver pond,surge_morpho,shorelineDevelopment,1.76
+165,Beaver pond,surge_morpho,maxWidth,274.82
+165,Beaver pond,surge_morpho,meanWidth,190.58
+165,Beaver pond,surge_morpho,maxLength,750.91
+165,Beaver pond,surge_sites,mean_depth,2.88
+165,Beaver pond,surge_sites,max_depth,4
+165,Beaver pond,surge_sites,volume,399649.93
+165,Beaver pond,surge_sites,littoral_fraction,83.3
+166,Cloud Southern Plains,surge_morpho,surfaceArea,29141.58
+166,Cloud Southern Plains,surge_morpho,shorelineLength,1126.35
+166,Cloud Southern Plains,surge_morpho,shorelineDevelopment,1.86
+166,Cloud Southern Plains,surge_morpho,maxWidth,189.99
+166,Cloud Southern Plains,surge_morpho,meanWidth,130.96
+166,Cloud Southern Plains,surge_morpho,maxLength,278.69
+166,Cloud Southern Plains,surge_sites,mean_depth,1.83
+166,Cloud Southern Plains,surge_sites,max_depth,3.3
+166,Cloud Southern Plains,surge_sites,volume,62910.84
+166,Cloud Southern Plains,surge_sites,littoral_fraction,79.94
+167,Lake Overholser,surge_morpho,surfaceArea,6043737.67
+167,Lake Overholser,surge_morpho,shorelineLength,10533.46
+167,Lake Overholser,surge_morpho,shorelineDevelopment,1.21
+167,Lake Overholser,surge_morpho,maxWidth,2829.68
+167,Lake Overholser,surge_morpho,meanWidth,1655.19
+167,Lake Overholser,surge_morpho,maxLength,3667.66
+167,Lake Overholser,surge_sites,mean_depth,2.78
+167,Lake Overholser,surge_sites,max_depth,4.1
+167,Lake Overholser,surge_sites,volume,16519155.5
+167,Lake Overholser,surge_sites,littoral_fraction,79.07
+184,Rush Cr. Site 17 Reservoir,surge_morpho,surfaceArea,48455.75
+184,Rush Cr. Site 17 Reservoir,surge_morpho,shorelineLength,1123.35
+184,Rush Cr. Site 17 Reservoir,surge_morpho,shorelineDevelopment,1.44
+184,Rush Cr. Site 17 Reservoir,surge_morpho,maxWidth,173.05
+184,Rush Cr. Site 17 Reservoir,surge_morpho,meanWidth,130.87
+184,Rush Cr. Site 17 Reservoir,surge_morpho,maxLength,428.02
+184,Rush Cr. Site 17 Reservoir,surge_sites,mean_depth,3.19
+184,Rush Cr. Site 17 Reservoir,surge_sites,max_depth,5.1
+184,Rush Cr. Site 17 Reservoir,surge_sites,volume,163704.28
+184,Rush Cr. Site 17 Reservoir,surge_sites,littoral_fraction,65.33
+186,Boulder Reservoir,surge_morpho,surfaceArea,2043089.45
+186,Boulder Reservoir,surge_morpho,shorelineLength,6663.33
+186,Boulder Reservoir,surge_morpho,shorelineDevelopment,1.32
+186,Boulder Reservoir,surge_morpho,maxWidth,1507.81
+186,Boulder Reservoir,surge_morpho,meanWidth,979.27
+186,Boulder Reservoir,surge_morpho,maxLength,2126.87
+186,Boulder Reservoir,surge_sites,mean_depth,5.83
+186,Boulder Reservoir,surge_sites,max_depth,7.7
+186,Boulder Reservoir,surge_sites,volume,11659789.88
+186,Boulder Reservoir,surge_sites,littoral_fraction,69.65
+188,Stubblefield,surge_morpho,surfaceArea,1022310.85
+188,Stubblefield,surge_morpho,shorelineLength,6421.28
+188,Stubblefield,surge_morpho,shorelineDevelopment,1.79
+188,Stubblefield,surge_morpho,maxWidth,754.57
+188,Stubblefield,surge_morpho,meanWidth,832.51
+188,Stubblefield,surge_morpho,maxLength,2247.55
+188,Stubblefield,surge_sites,mean_depth,1.9
+188,Stubblefield,surge_sites,max_depth,3.5
+188,Stubblefield,surge_sites,volume,2044830.73
+188,Stubblefield,surge_sites,littoral_fraction,75.33
+190,Bluestem Lake,surge_morpho,surfaceArea,3024877.36
+190,Bluestem Lake,surge_morpho,shorelineLength,25097.65
+190,Bluestem Lake,surge_morpho,shorelineDevelopment,4.07
+190,Bluestem Lake,surge_morpho,maxWidth,1442.42
+190,Bluestem Lake,surge_morpho,meanWidth,659.74
+190,Bluestem Lake,surge_morpho,maxLength,4624.48
+190,Bluestem Lake,surge_sites,mean_depth,7.65
+190,Bluestem Lake,surge_sites,max_depth,15.2
+190,Bluestem Lake,surge_sites,volume,21430586.19
+190,Bluestem Lake,surge_sites,littoral_fraction,16.87
+191,Lake Fisher,surge_morpho,surfaceArea,280530.42
+191,Lake Fisher,surge_morpho,shorelineLength,4219.56
+191,Lake Fisher,surge_morpho,shorelineDevelopment,2.25
+191,Lake Fisher,surge_morpho,maxWidth,656.26
+191,Lake Fisher,surge_morpho,meanWidth,301.52
+191,Lake Fisher,surge_morpho,maxLength,1074.83
+191,Lake Fisher,surge_sites,mean_depth,3.57
+191,Lake Fisher,surge_sites,max_depth,6.1
+191,Lake Fisher,surge_sites,volume,1071602.82
+191,Lake Fisher,surge_sites,littoral_fraction,53.07
+195,Monee Reservoir,surge_morpho,surfaceArea,139098.59
+195,Monee Reservoir,surge_morpho,shorelineLength,3016.56
+195,Monee Reservoir,surge_morpho,shorelineDevelopment,2.28
+195,Monee Reservoir,surge_morpho,maxWidth,357.89
+195,Monee Reservoir,surge_morpho,meanWidth,194.72
+195,Monee Reservoir,surge_morpho,maxLength,753.29
+195,Monee Reservoir,surge_sites,mean_depth,3.3
+195,Monee Reservoir,surge_sites,max_depth,6.1
+195,Monee Reservoir,surge_sites,volume,465629.18
+195,Monee Reservoir,surge_sites,littoral_fraction,46.91
+204,Beaver Creek Upground,surge_morpho,surfaceArea,437119.15
+204,Beaver Creek Upground,surge_morpho,shorelineLength,2597.48
+204,Beaver Creek Upground,surge_morpho,shorelineDevelopment,1.11
+204,Beaver Creek Upground,surge_morpho,maxWidth,843.66
+204,Beaver Creek Upground,surge_morpho,meanWidth,489.24
+204,Beaver Creek Upground,surge_morpho,maxLength,904.62
+204,Beaver Creek Upground,surge_sites,mean_depth,5.92
+204,Beaver Creek Upground,surge_sites,max_depth,9.2
+204,Beaver Creek Upground,surge_sites,volume,2533155.43
+204,Beaver Creek Upground,surge_sites,littoral_fraction,48.58
+205,Lake Station,surge_morpho,surfaceArea,119601.74
+205,Lake Station,surge_morpho,shorelineLength,1999.64
+205,Lake Station,surge_morpho,shorelineDevelopment,1.63
+205,Lake Station,surge_morpho,maxWidth,302.11
+205,Lake Station,surge_morpho,meanWidth,189.74
+205,Lake Station,surge_morpho,maxLength,634.73
+205,Lake Station,surge_sites,mean_depth,4.51
+205,Lake Station,surge_sites,max_depth,9.1
+205,Lake Station,surge_sites,volume,403618.89
+205,Lake Station,surge_sites,littoral_fraction,26.9
+206,Wyandotte County Lake,surge_morpho,surfaceArea,1278623.67
+206,Wyandotte County Lake,surge_morpho,shorelineLength,13284.95
+206,Wyandotte County Lake,surge_morpho,shorelineDevelopment,3.31
+206,Wyandotte County Lake,surge_morpho,maxWidth,1115.46
+206,Wyandotte County Lake,surge_morpho,meanWidth,620.41
+206,Wyandotte County Lake,surge_morpho,maxLength,2211
+206,Wyandotte County Lake,surge_sites,mean_depth,9.65
+206,Wyandotte County Lake,surge_sites,max_depth,16.4
+206,Wyandotte County Lake,surge_sites,volume,13236617.7
+206,Wyandotte County Lake,surge_sites,littoral_fraction,26.8
+207,Old Mans Lake,surge_morpho,surfaceArea,488690.92
+207,Old Mans Lake,surge_morpho,shorelineLength,21130.16
+207,Old Mans Lake,surge_morpho,shorelineDevelopment,8.53
+207,Old Mans Lake,surge_morpho,maxWidth,468.57
+207,Old Mans Lake,surge_morpho,meanWidth,172.01
+207,Old Mans Lake,surge_morpho,maxLength,4489.39
+207,Old Mans Lake,surge_sites,mean_depth,5.67
+207,Old Mans Lake,surge_sites,max_depth,14.4
+207,Old Mans Lake,surge_sites,volume,2726263.87
+207,Old Mans Lake,surge_sites,littoral_fraction,6.73
+208,Lake Lancelot,surge_morpho,surfaceArea,175142.25
+208,Lake Lancelot,surge_morpho,shorelineLength,4644.69
+208,Lake Lancelot,surge_morpho,shorelineDevelopment,3.13
+208,Lake Lancelot,surge_morpho,maxWidth,385.77
+208,Lake Lancelot,surge_morpho,meanWidth,225.3
+208,Lake Lancelot,surge_morpho,maxLength,855.57
+208,Lake Lancelot,surge_sites,mean_depth,3.85
+208,Lake Lancelot,surge_sites,max_depth,7.6
+208,Lake Lancelot,surge_sites,volume,752229.22
+208,Lake Lancelot,surge_sites,littoral_fraction,33.92
+209,Otter Lake,surge_morpho,surfaceArea,102732.01
+209,Otter Lake,surge_morpho,shorelineLength,2767.72
+209,Otter Lake,surge_morpho,shorelineDevelopment,2.44
+209,Otter Lake,surge_morpho,maxWidth,478.65
+209,Otter Lake,surge_morpho,meanWidth,166.88
+209,Otter Lake,surge_morpho,maxLength,667.33
+209,Otter Lake,surge_sites,mean_depth,3.99
+209,Otter Lake,surge_sites,max_depth,7.1
+209,Otter Lake,surge_sites,volume,433920.9
+209,Otter Lake,surge_sites,littoral_fraction,44.26
+210,Lake Dalercarlia,surge_morpho,surfaceArea,671629.63
+210,Lake Dalercarlia,surge_morpho,shorelineLength,9782.72
+210,Lake Dalercarlia,surge_morpho,shorelineDevelopment,3.37
+210,Lake Dalercarlia,surge_morpho,maxWidth,645.99
+210,Lake Dalercarlia,surge_morpho,meanWidth,451.19
+210,Lake Dalercarlia,surge_morpho,maxLength,1489.53
+210,Lake Dalercarlia,surge_sites,mean_depth,1.46
+210,Lake Dalercarlia,surge_sites,max_depth,1.9
+210,Lake Dalercarlia,surge_sites,volume,993216.98
+210,Lake Dalercarlia,surge_sites,littoral_fraction,108.62
+211,Madison Lake,surge_morpho,surfaceArea,376172.55
+211,Madison Lake,surge_morpho,shorelineLength,7276.92
+211,Madison Lake,surge_morpho,shorelineDevelopment,3.35
+211,Madison Lake,surge_morpho,maxWidth,415.7
+211,Madison Lake,surge_morpho,meanWidth,263.08
+211,Madison Lake,surge_morpho,maxLength,1443.08
+211,Madison Lake,surge_sites,mean_depth,1
+211,Madison Lake,surge_sites,max_depth,1.3
+211,Madison Lake,surge_sites,volume,382966.46
+211,Madison Lake,surge_sites,littoral_fraction,121.67
+214,Lake of the Woods,surge_morpho,surfaceArea,108345.7
+214,Lake of the Woods,surge_morpho,shorelineLength,2915.32
+214,Lake of the Woods,surge_morpho,shorelineDevelopment,2.5
+214,Lake of the Woods,surge_morpho,maxWidth,308.14
+214,Lake of the Woods,surge_morpho,meanWidth,170.07
+214,Lake of the Woods,surge_morpho,maxLength,642.7
+214,Lake of the Woods,surge_sites,mean_depth,2.49
+214,Lake of the Woods,surge_sites,max_depth,4.8
+214,Lake of the Woods,surge_sites,volume,259586.1
+214,Lake of the Woods,surge_sites,littoral_fraction,54.51
+230,Yellow Banks Lake,surge_morpho,surfaceArea,92220.22
+230,Yellow Banks Lake,surge_morpho,shorelineLength,2027.75
+230,Yellow Banks Lake,surge_morpho,shorelineDevelopment,1.88
+230,Yellow Banks Lake,surge_morpho,maxWidth,417.69
+230,Yellow Banks Lake,surge_morpho,meanWidth,168.43
+230,Yellow Banks Lake,surge_morpho,maxLength,581.3
+230,Yellow Banks Lake,surge_sites,mean_depth,3.8
+230,Yellow Banks Lake,surge_sites,max_depth,5.8
+230,Yellow Banks Lake,surge_sites,volume,344540.89
+230,Yellow Banks Lake,surge_sites,littoral_fraction,64.22
+231,mina lake,surge_morpho,surfaceArea,2976649.73
+231,mina lake,surge_morpho,shorelineLength,30227.37
+231,mina lake,surge_morpho,shorelineDevelopment,4.94
+231,mina lake,surge_morpho,maxWidth,1488.74
+231,mina lake,surge_morpho,meanWidth,1159.33
+231,mina lake,surge_morpho,maxLength,3071.21
+231,mina lake,surge_sites,mean_depth,3.92
+231,mina lake,surge_sites,max_depth,6.3
+231,mina lake,surge_sites,volume,12099325.62
+231,mina lake,surge_sites,littoral_fraction,57.05
+232,harvey dam,surge_morpho,surfaceArea,1012783.06
+232,harvey dam,surge_morpho,shorelineLength,13736.58
+232,harvey dam,surge_morpho,shorelineDevelopment,3.85
+232,harvey dam,surge_morpho,maxWidth,438.05
+232,harvey dam,surge_morpho,meanWidth,402.48
+232,harvey dam,surge_morpho,maxLength,2566.17
+232,harvey dam,surge_sites,mean_depth,2.63
+232,harvey dam,surge_sites,max_depth,4.7
+232,harvey dam,surge_sites,volume,2636439.29
+232,harvey dam,surge_sites,littoral_fraction,60.76
+233,Redstone Lake,surge_morpho,surfaceArea,2469941.7
+233,Redstone Lake,surge_morpho,shorelineLength,28016.73
+233,Redstone Lake,surge_morpho,shorelineDevelopment,5.03
+233,Redstone Lake,surge_morpho,maxWidth,1266.64
+233,Redstone Lake,surge_morpho,meanWidth,740.41
+233,Redstone Lake,surge_morpho,maxLength,3380.8
+233,Redstone Lake,surge_sites,mean_depth,4.36
+233,Redstone Lake,surge_sites,max_depth,7.9
+233,Redstone Lake,surge_sites,volume,12497806.31
+233,Redstone Lake,surge_sites,littoral_fraction,39.29
+234,Palmer Lake,surge_morpho,surfaceArea,1950895.3
+234,Palmer Lake,surge_morpho,shorelineLength,11286.74
+234,Palmer Lake,surge_morpho,shorelineDevelopment,2.28
+234,Palmer Lake,surge_morpho,maxWidth,1388.43
+234,Palmer Lake,surge_morpho,meanWidth,813.43
+234,Palmer Lake,surge_morpho,maxLength,2519.64
+234,Palmer Lake,surge_sites,mean_depth,4.7
+234,Palmer Lake,surge_sites,max_depth,13.5
+234,Palmer Lake,surge_sites,volume,9740400.38
+234,Palmer Lake,surge_sites,littoral_fraction,4.25
+235,Sylvan Lake,surge_morpho,surfaceArea,2371370.66
+235,Sylvan Lake,surge_morpho,shorelineLength,21307.63
+235,Sylvan Lake,surge_morpho,shorelineDevelopment,3.9
+235,Sylvan Lake,surge_morpho,maxWidth,1282.63
+235,Sylvan Lake,surge_morpho,meanWidth,1067.69
+235,Sylvan Lake,surge_morpho,maxLength,2240.16
+235,Sylvan Lake,surge_sites,mean_depth,2.69
+235,Sylvan Lake,surge_sites,max_depth,9.9
+235,Sylvan Lake,surge_sites,volume,7504847.19
+235,Sylvan Lake,surge_sites,littoral_fraction,2.48
+236,Meyer Lake,surge_morpho,surfaceArea,124598.88
+236,Meyer Lake,surge_morpho,shorelineLength,2526.73
+236,Meyer Lake,surge_morpho,shorelineDevelopment,2.02
+236,Meyer Lake,surge_morpho,maxWidth,337.91
+236,Meyer Lake,surge_morpho,meanWidth,172.33
+236,Meyer Lake,surge_morpho,maxLength,728.07
+236,Meyer Lake,surge_sites,mean_depth,4.47
+236,Meyer Lake,surge_sites,max_depth,7.5
+236,Meyer Lake,surge_sites,volume,559246.9
+236,Meyer Lake,surge_sites,littoral_fraction,47.42
+237,Sidie Hollow Lake,surge_morpho,surfaceArea,123432.3
+237,Sidie Hollow Lake,surge_morpho,shorelineLength,2818.04
+237,Sidie Hollow Lake,surge_morpho,shorelineDevelopment,2.26
+237,Sidie Hollow Lake,surge_morpho,maxWidth,668.1
+237,Sidie Hollow Lake,surge_morpho,meanWidth,184.88
+237,Sidie Hollow Lake,surge_morpho,maxLength,766.96
+237,Sidie Hollow Lake,surge_sites,mean_depth,4.27
+237,Sidie Hollow Lake,surge_sites,max_depth,6.3
+237,Sidie Hollow Lake,surge_sites,volume,513488.45
+237,Sidie Hollow Lake,surge_sites,littoral_fraction,64.37
+238,beulah,surge_morpho,surfaceArea,4765759.52
+238,beulah,surge_morpho,shorelineLength,9587.35
+238,beulah,surge_morpho,shorelineDevelopment,1.24
+238,beulah,surge_morpho,maxWidth,2025.92
+238,beulah,surge_morpho,meanWidth,1409.38
+238,beulah,surge_morpho,maxLength,3383.29
+238,beulah,surge_sites,mean_depth,8.43
+238,beulah,surge_sites,max_depth,15.8
+238,beulah,surge_sites,volume,44559812.84
+238,beulah,surge_sites,littoral_fraction,19.98
+239,Philips,surge_morpho,surfaceArea,2196013.78
+239,Philips,surge_morpho,shorelineLength,10336.7
+239,Philips,surge_morpho,shorelineDevelopment,1.97
+239,Philips,surge_morpho,maxWidth,893.67
+239,Philips,surge_morpho,meanWidth,710.14
+239,Philips,surge_morpho,maxLength,3119.04
+239,Philips,surge_sites,mean_depth,15.06
+239,Philips,surge_sites,max_depth,27.2
+239,Philips,surge_sites,volume,37743384.23
+239,Philips,surge_sites,littoral_fraction,14.6
+240,stockade lake,surge_morpho,surfaceArea,498980.36
+240,stockade lake,surge_morpho,shorelineLength,5379.8
+240,stockade lake,surge_morpho,shorelineDevelopment,2.15
+240,stockade lake,surge_morpho,maxWidth,1004.16
+240,stockade lake,surge_morpho,meanWidth,399.92
+240,stockade lake,surge_morpho,maxLength,1360.88
+240,stockade lake,surge_sites,mean_depth,5.83
+240,stockade lake,surge_sites,max_depth,11.7
+240,stockade lake,surge_sites,volume,3181747.62
+240,stockade lake,surge_sites,littoral_fraction,21.18
+247,Heron Reservoir,surge_morpho,surfaceArea,4132986.63
+247,Heron Reservoir,surge_morpho,shorelineLength,25713.36
+247,Heron Reservoir,surge_morpho,shorelineDevelopment,3.57
+247,Heron Reservoir,surge_morpho,maxWidth,1960.19
+247,Heron Reservoir,surge_morpho,meanWidth,978.92
+247,Heron Reservoir,surge_morpho,maxLength,4622.94
+247,Heron Reservoir,surge_sites,mean_depth,18.97
+247,Heron Reservoir,surge_sites,max_depth,28.3
+247,Heron Reservoir,surge_sites,volume,78475550.46
+247,Heron Reservoir,surge_sites,littoral_fraction,30.34
+249,Emigrant,surge_morpho,surfaceArea,1864879.38
+249,Emigrant,surge_morpho,shorelineLength,14260.68
+249,Emigrant,surge_morpho,shorelineDevelopment,2.95
+249,Emigrant,surge_morpho,maxWidth,1540.83
+249,Emigrant,surge_morpho,meanWidth,663.59
+249,Emigrant,surge_morpho,maxLength,2856.46
+249,Emigrant,surge_sites,mean_depth,10.11
+249,Emigrant,surge_sites,max_depth,26.6
+249,Emigrant,surge_sites,volume,21991820.54
+249,Emigrant,surge_sites,littoral_fraction,2.11
+250,East Fork Reservoir,surge_morpho,surfaceArea,1311273.81
+250,East Fork Reservoir,surge_morpho,shorelineLength,6617.83
+250,East Fork Reservoir,surge_morpho,shorelineDevelopment,1.63
+250,East Fork Reservoir,surge_morpho,maxWidth,679.8
+250,East Fork Reservoir,surge_morpho,meanWidth,443.5
+250,East Fork Reservoir,surge_morpho,maxLength,2958.95
+250,East Fork Reservoir,surge_sites,mean_depth,10.46
+250,East Fork Reservoir,surge_sites,max_depth,20.1
+250,East Fork Reservoir,surge_sites,volume,13083441.46
+250,East Fork Reservoir,surge_sites,littoral_fraction,14.65
+253,Lost_Valley,surge_morpho,surfaceArea,2662158.81
+253,Lost_Valley,surge_morpho,shorelineLength,8484.49
+253,Lost_Valley,surge_morpho,shorelineDevelopment,1.47
+253,Lost_Valley,surge_morpho,maxWidth,1460.44
+253,Lost_Valley,surge_morpho,meanWidth,837.87
+253,Lost_Valley,surge_morpho,maxLength,3201.93
+253,Lost_Valley,surge_sites,mean_depth,3.29
+253,Lost_Valley,surge_sites,max_depth,5.1
+253,Lost_Valley,surge_sites,volume,9426162.25
+253,Lost_Valley,surge_sites,littoral_fraction,67.48
+263,Swofford,surge_morpho,surfaceArea,538631.01
+263,Swofford,surge_morpho,shorelineLength,4245.75
+263,Swofford,surge_morpho,shorelineDevelopment,1.63
+263,Swofford,surge_morpho,maxWidth,576.84
+263,Swofford,surge_morpho,meanWidth,325.57
+263,Swofford,surge_morpho,maxLength,1687.99
+263,Swofford,surge_sites,mean_depth,3.57
+263,Swofford,surge_sites,max_depth,4.8
+263,Swofford,surge_sites,volume,1957277.26
+263,Swofford,surge_sites,littoral_fraction,79.94
+264,Troutvale Reservoir #1,surge_morpho,surfaceArea,201429.35
+264,Troutvale Reservoir #1,surge_morpho,shorelineLength,1899.38
+264,Troutvale Reservoir #1,surge_morpho,shorelineDevelopment,1.19
+264,Troutvale Reservoir #1,surge_morpho,maxWidth,455.21
+264,Troutvale Reservoir #1,surge_morpho,meanWidth,303.89
+264,Troutvale Reservoir #1,surge_morpho,maxLength,742.28
+264,Troutvale Reservoir #1,surge_sites,mean_depth,1.25
+264,Troutvale Reservoir #1,surge_sites,max_depth,1.8
+264,Troutvale Reservoir #1,surge_sites,volume,255274.12
+264,Troutvale Reservoir #1,surge_sites,littoral_fraction,115.41
+265,elk cr,surge_morpho,surfaceArea,311568.81
+265,elk cr,surge_morpho,shorelineLength,3368.16
+265,elk cr,surge_morpho,shorelineDevelopment,1.7
+265,elk cr,surge_morpho,maxWidth,696.64
+265,elk cr,surge_morpho,meanWidth,363.49
+265,elk cr,surge_morpho,maxLength,867.04
+265,elk cr,surge_sites,mean_depth,2.93
+265,elk cr,surge_sites,max_depth,4.5
+265,elk cr,surge_sites,volume,961160.64
+265,elk cr,surge_sites,littoral_fraction,73.06
+275,Willow Lake,surge_morpho,surfaceArea,490674.65
+275,Willow Lake,surge_morpho,shorelineLength,4837.22
+275,Willow Lake,surge_morpho,shorelineDevelopment,1.95
+275,Willow Lake,surge_morpho,maxWidth,801.09
+275,Willow Lake,surge_morpho,meanWidth,359.02
+275,Willow Lake,surge_morpho,maxLength,1524.36
+275,Willow Lake,surge_sites,mean_depth,1.76
+275,Willow Lake,surge_sites,max_depth,4.4
+275,Willow Lake,surge_sites,volume,729638.28
+275,Willow Lake,surge_sites,littoral_fraction,42.83
+276,gooseberry reservoir,surge_morpho,surfaceArea,203982.11
+276,gooseberry reservoir,surge_morpho,shorelineLength,3097.86
+276,gooseberry reservoir,surge_morpho,shorelineDevelopment,1.93
+276,gooseberry reservoir,surge_morpho,maxWidth,328.76
+276,gooseberry reservoir,surge_morpho,meanWidth,190.13
+276,gooseberry reservoir,surge_morpho,maxLength,1093.35
+276,gooseberry reservoir,surge_sites,mean_depth,2.48
+276,gooseberry reservoir,surge_sites,max_depth,4.3
+276,gooseberry reservoir,surge_sites,volume,416409.99
+276,gooseberry reservoir,surge_sites,littoral_fraction,67.17
+281,Upper Twin Lake,surge_morpho,surfaceArea,109367.53
+281,Upper Twin Lake,surge_morpho,shorelineLength,1408.06
+281,Upper Twin Lake,surge_morpho,shorelineDevelopment,1.2
+281,Upper Twin Lake,surge_morpho,maxWidth,230.23
+281,Upper Twin Lake,surge_morpho,meanWidth,191.08
+281,Upper Twin Lake,surge_morpho,maxLength,588.53
+281,Upper Twin Lake,surge_sites,mean_depth,3.72
+281,Upper Twin Lake,surge_sites,max_depth,7.6
+281,Upper Twin Lake,surge_sites,volume,481397.52
+281,Upper Twin Lake,surge_sites,littoral_fraction,31.42
+287,owyhee,surge_morpho,surfaceArea,46572212.43
+287,owyhee,surge_morpho,shorelineLength,211054.73
+287,owyhee,surge_morpho,shorelineDevelopment,8.72
+287,owyhee,surge_morpho,maxWidth,5845.29
+287,owyhee,surge_morpho,meanWidth,8527.65
+287,owyhee,surge_morpho,maxLength,5646.18
+287,owyhee,surge_sites,mean_depth,18
+287,owyhee,surge_sites,max_depth,75.3
+287,owyhee,surge_sites,volume,827801101.21
+287,owyhee,surge_sites,littoral_fraction,0
+288,Saguaro,surge_morpho,surfaceArea,4672795.02
+288,Saguaro,surge_morpho,shorelineLength,32234.22
+288,Saguaro,surge_morpho,shorelineDevelopment,4.21
+288,Saguaro,surge_morpho,maxWidth,2111.19
+288,Saguaro,surge_morpho,meanWidth,1285.99
+288,Saguaro,surge_morpho,maxLength,3678.32
+288,Saguaro,surge_sites,mean_depth,14.61
+288,Saguaro,surge_sites,max_depth,25.2
+288,Saguaro,surge_sites,volume,73504362.61
+288,Saguaro,surge_sites,littoral_fraction,18.72
+291,Upper San Leandro Reservoir,surge_morpho,surfaceArea,1669355.06
+291,Upper San Leandro Reservoir,surge_morpho,shorelineLength,23586.94
+291,Upper San Leandro Reservoir,surge_morpho,shorelineDevelopment,5.15
+291,Upper San Leandro Reservoir,surge_morpho,maxWidth,844.04
+291,Upper San Leandro Reservoir,surge_morpho,meanWidth,674.03
+291,Upper San Leandro Reservoir,surge_morpho,maxLength,2494.63
+291,Upper San Leandro Reservoir,surge_sites,mean_depth,12.79
+291,Upper San Leandro Reservoir,surge_sites,max_depth,27.9
+291,Upper San Leandro Reservoir,surge_sites,volume,24810806.91
+291,Upper San Leandro Reservoir,surge_sites,littoral_fraction,5.78
+296,Shadow Cliffs Lake,surge_morpho,surfaceArea,356452.81
+296,Shadow Cliffs Lake,surge_morpho,shorelineLength,3030.47
+296,Shadow Cliffs Lake,surge_morpho,shorelineDevelopment,1.43
+296,Shadow Cliffs Lake,surge_morpho,maxWidth,626.22
+296,Shadow Cliffs Lake,surge_morpho,meanWidth,290.5
+296,Shadow Cliffs Lake,surge_morpho,maxLength,1236.97
+296,Shadow Cliffs Lake,surge_sites,mean_depth,5.96
+296,Shadow Cliffs Lake,surge_sites,max_depth,10.7
+296,Shadow Cliffs Lake,surge_sites,volume,1983582.05
+296,Shadow Cliffs Lake,surge_sites,littoral_fraction,31.46
+297,New Melones,surge_morpho,surfaceArea,43298347.96
+297,New Melones,surge_morpho,shorelineLength,175448.8
+297,New Melones,surge_morpho,shorelineDevelopment,7.52
+297,New Melones,surge_morpho,maxWidth,8403.99
+297,New Melones,surge_morpho,meanWidth,3693.09
+297,New Melones,surge_morpho,maxLength,12224.98
+297,New Melones,surge_sites,mean_depth,31.25
+297,New Melones,surge_sites,max_depth,85.6
+297,New Melones,surge_sites,volume,1399272412.11
+297,New Melones,surge_sites,littoral_fraction,0.21
+298,Wild Horse Reservoir,surge_morpho,surfaceArea,8380425.67
+298,Wild Horse Reservoir,surge_morpho,shorelineLength,31853.76
+298,Wild Horse Reservoir,surge_morpho,shorelineDevelopment,3.1
+298,Wild Horse Reservoir,surge_morpho,maxWidth,2962.36
+298,Wild Horse Reservoir,surge_morpho,meanWidth,1494.65
+298,Wild Horse Reservoir,surge_morpho,maxLength,5626.84
+298,Wild Horse Reservoir,surge_sites,mean_depth,6.61
+298,Wild Horse Reservoir,surge_sites,max_depth,14.6
+298,Wild Horse Reservoir,surge_sites,volume,55491979.7
+298,Wild Horse Reservoir,surge_sites,littoral_fraction,11.87
+302,Lower Goose,surge_morpho,surfaceArea,2430627.11
+302,Lower Goose,surge_morpho,shorelineLength,12758.47
+302,Lower Goose,surge_morpho,shorelineDevelopment,2.31
+302,Lower Goose,surge_morpho,maxWidth,964.68
+302,Lower Goose,surge_morpho,meanWidth,640.45
+302,Lower Goose,surge_morpho,maxLength,3813.91
+302,Lower Goose,surge_sites,mean_depth,9.77
+302,Lower Goose,surge_sites,max_depth,18.7
+302,Lower Goose,surge_sites,volume,29023513.78
+302,Lower Goose,surge_sites,littoral_fraction,15.91
+308,Wapato Lake,surge_morpho,surfaceArea,766529.08
+308,Wapato Lake,surge_morpho,shorelineLength,4397.66
+308,Wapato Lake,surge_morpho,shorelineDevelopment,1.42
+308,Wapato Lake,surge_morpho,maxWidth,568.33
+308,Wapato Lake,surge_morpho,meanWidth,433.85
+308,Wapato Lake,surge_morpho,maxLength,1939.06
+308,Wapato Lake,surge_sites,mean_depth,13.13
+308,Wapato Lake,surge_sites,max_depth,19
+308,Wapato Lake,surge_sites,volume,11732486.17
+308,Wapato Lake,surge_sites,littoral_fraction,40.41
+316,Mitry,surge_morpho,surfaceArea,1099251.92
+316,Mitry,surge_morpho,shorelineLength,16889
+316,Mitry,surge_morpho,shorelineDevelopment,4.54
+316,Mitry,surge_morpho,maxWidth,1012.44
+316,Mitry,surge_morpho,meanWidth,656.83
+316,Mitry,surge_morpho,maxLength,1683.54
+316,Mitry,surge_sites,mean_depth,2.29
+316,Mitry,surge_sites,max_depth,3.5
+316,Mitry,surge_sites,volume,2477248.58
+316,Mitry,surge_sites,littoral_fraction,83.65
+317,Lake Greenhaven,surge_morpho,surfaceArea,214240.17
+317,Lake Greenhaven,surge_morpho,shorelineLength,4605.95
+317,Lake Greenhaven,surge_morpho,shorelineDevelopment,2.81
+317,Lake Greenhaven,surge_morpho,maxWidth,603.66
+317,Lake Greenhaven,surge_morpho,meanWidth,349.57
+317,Lake Greenhaven,surge_morpho,maxLength,717.88
+317,Lake Greenhaven,surge_sites,mean_depth,1.97
+317,Lake Greenhaven,surge_sites,max_depth,3.3
+317,Lake Greenhaven,surge_sites,volume,422763.51
+317,Lake Greenhaven,surge_sites,littoral_fraction,82.97
+323,Mormon Lake,surge_morpho,surfaceArea,505164.44
+323,Mormon Lake,surge_morpho,shorelineLength,3725.47
+323,Mormon Lake,surge_morpho,shorelineDevelopment,1.48
+323,Mormon Lake,surge_morpho,maxWidth,851.44
+323,Mormon Lake,surge_morpho,meanWidth,470.03
+323,Mormon Lake,surge_morpho,maxLength,1121.52
+323,Mormon Lake,surge_sites,mean_depth,3.65
+323,Mormon Lake,surge_sites,max_depth,4.9
+323,Mormon Lake,surge_sites,volume,1940146.1
+323,Mormon Lake,surge_sites,littoral_fraction,79.48
+326,Comins Lake,surge_morpho,surfaceArea,1092535.11
+326,Comins Lake,surge_morpho,shorelineLength,7025.9
+326,Comins Lake,surge_morpho,shorelineDevelopment,1.9
+326,Comins Lake,surge_morpho,maxWidth,678.61
+326,Comins Lake,surge_morpho,meanWidth,545.01
+326,Comins Lake,surge_morpho,maxLength,2030.17
+326,Comins Lake,surge_sites,mean_depth,1.78
+326,Comins Lake,surge_sites,max_depth,3.1
+326,Comins Lake,surge_sites,volume,1760585.04
+326,Comins Lake,surge_sites,littoral_fraction,85.26
+327,Dacey Reservoir,surge_morpho,surfaceArea,460354.83
+327,Dacey Reservoir,surge_morpho,shorelineLength,4430.87
+327,Dacey Reservoir,surge_morpho,shorelineDevelopment,1.84
+327,Dacey Reservoir,surge_morpho,maxWidth,394.96
+327,Dacey Reservoir,surge_morpho,meanWidth,324.15
+327,Dacey Reservoir,surge_morpho,maxLength,1510.98
+327,Dacey Reservoir,surge_sites,mean_depth,1.46
+327,Dacey Reservoir,surge_sites,max_depth,2
+327,Dacey Reservoir,surge_sites,volume,700458.12
+327,Dacey Reservoir,surge_sites,littoral_fraction,108.6
+328,Kemmerer Reservoir,surge_morpho,surfaceArea,693211.56
+328,Kemmerer Reservoir,surge_morpho,shorelineLength,4649.58
+328,Kemmerer Reservoir,surge_morpho,shorelineDevelopment,1.58
+328,Kemmerer Reservoir,surge_morpho,maxWidth,612.93
+328,Kemmerer Reservoir,surge_morpho,meanWidth,417.13
+328,Kemmerer Reservoir,surge_morpho,maxLength,1671.27
+328,Kemmerer Reservoir,surge_sites,mean_depth,3.78
+328,Kemmerer Reservoir,surge_sites,max_depth,6.7
+328,Kemmerer Reservoir,surge_sites,volume,2528839.96
+328,Kemmerer Reservoir,surge_sites,littoral_fraction,46.7
+331,Springfield,surge_morpho,surfaceArea,211637.82
+331,Springfield,surge_morpho,shorelineLength,4108.18
+331,Springfield,surge_morpho,shorelineDevelopment,2.52
+331,Springfield,surge_morpho,maxWidth,412.53
+331,Springfield,surge_morpho,meanWidth,247.35
+331,Springfield,surge_morpho,maxLength,968.03
+331,Springfield,surge_sites,mean_depth,1.8
+331,Springfield,surge_sites,max_depth,3.2
+331,Springfield,surge_sites,volume,346640.32
+331,Springfield,surge_sites,littoral_fraction,82.53
+999,Baker Lake,surge_morpho,surfaceArea,19417530.39
+999,Baker Lake,surge_morpho,shorelineLength,44791.3
+999,Baker Lake,surge_morpho,shorelineDevelopment,2.87
+999,Baker Lake,surge_morpho,maxWidth,3902.57
+999,Baker Lake,surge_morpho,meanWidth,2077.26
+999,Baker Lake,surge_morpho,maxLength,9714.91
+999,Baker Lake,surge_sites,mean_depth,19.87
+999,Baker Lake,surge_sites,max_depth,61.1
+999,Baker Lake,surge_sites,volume,408136724.4
+999,Baker Lake,surge_sites,littoral_fraction,0.13
+1000,Las Curias,surge_morpho,surfaceArea,150452.62
+1000,Las Curias,surge_morpho,shorelineLength,4341.74
+1000,Las Curias,surge_morpho,shorelineDevelopment,3.16
+1000,Las Curias,surge_morpho,maxWidth,392.12
+1000,Las Curias,surge_morpho,meanWidth,207.47
+1000,Las Curias,surge_morpho,maxLength,1034.39
+1000,Las Curias,surge_sites,mean_depth,7.33
+1000,Las Curias,surge_sites,max_depth,13.6
+1000,Las Curias,surge_sites,volume,1218520.76
+1000,Las Curias,surge_sites,littoral_fraction,23.45
+1001,Acton Lake,surge_morpho,surfaceArea,2222185.58
+1001,Acton Lake,surge_morpho,shorelineLength,8810.96
+1001,Acton Lake,surge_morpho,shorelineDevelopment,1.67
+1001,Acton Lake,surge_morpho,maxWidth,809.93
+1001,Acton Lake,surge_morpho,meanWidth,599.15
+1001,Acton Lake,surge_morpho,maxLength,3717.66
+1001,Acton Lake,surge_sites,mean_depth,4.34
+1001,Acton Lake,surge_sites,max_depth,8.04
+1001,Acton Lake,surge_sites,volume,10078077.93
+1001,Acton Lake,surge_sites,littoral_fraction,36.96
+1002,Alum Creek Lake,surge_morpho,surfaceArea,11899924.83
+1002,Alum Creek Lake,surge_morpho,shorelineLength,87259.46
+1002,Alum Creek Lake,surge_morpho,shorelineDevelopment,7.14
+1002,Alum Creek Lake,surge_morpho,maxWidth,2190.39
+1002,Alum Creek Lake,surge_morpho,meanWidth,1575.81
+1002,Alum Creek Lake,surge_morpho,maxLength,7575.18
+1002,Alum Creek Lake,surge_sites,mean_depth,5.83
+1002,Alum Creek Lake,surge_sites,max_depth,14.58
+1002,Alum Creek Lake,surge_sites,volume,75712486.71
+1002,Alum Creek Lake,surge_sites,littoral_fraction,7.08
+1003,Apple Valley Lake,surge_morpho,surfaceArea,2017654.25
+1003,Apple Valley Lake,surge_morpho,shorelineLength,18306.55
+1003,Apple Valley Lake,surge_morpho,shorelineDevelopment,3.64
+1003,Apple Valley Lake,surge_morpho,maxWidth,849.58
+1003,Apple Valley Lake,surge_morpho,meanWidth,444.57
+1003,Apple Valley Lake,surge_morpho,maxLength,4554.67
+1003,Apple Valley Lake,surge_sites,mean_depth,6.29
+1003,Apple Valley Lake,surge_sites,max_depth,15.73
+1003,Apple Valley Lake,surge_sites,volume,15676990.09
+1003,Apple Valley Lake,surge_sites,littoral_fraction,6.34
+1004,Atwood Lake,surge_morpho,surfaceArea,6035505.62
+1004,Atwood Lake,surge_morpho,shorelineLength,43486.43
+1004,Atwood Lake,surge_morpho,shorelineDevelopment,4.99
+1004,Atwood Lake,surge_morpho,maxWidth,2032.3
+1004,Atwood Lake,surge_morpho,meanWidth,1380.08
+1004,Atwood Lake,surge_morpho,maxLength,5064.96
+1004,Atwood Lake,surge_sites,mean_depth,2.59
+1004,Atwood Lake,surge_sites,max_depth,6.34
+1004,Atwood Lake,surge_sites,volume,18168660.01
+1004,Atwood Lake,surge_sites,littoral_fraction,26.06
+1005,Brookville Lake,surge_morpho,surfaceArea,20376960.36
+1005,Brookville Lake,surge_morpho,shorelineLength,86994.44
+1005,Brookville Lake,surge_morpho,shorelineDevelopment,5.44
+1005,Brookville Lake,surge_morpho,maxWidth,2861.36
+1005,Brookville Lake,surge_morpho,meanWidth,1975.28
+1005,Brookville Lake,surge_morpho,maxLength,10395.11
+1005,Brookville Lake,surge_sites,mean_depth,8.42
+1005,Brookville Lake,surge_sites,max_depth,25.91
+1005,Brookville Lake,surge_sites,volume,210744958.74
+1005,Brookville Lake,surge_sites,littoral_fraction,0.78
+1006,Buckhorn Lake,surge_morpho,surfaceArea,4095585.35
+1006,Buckhorn Lake,surge_morpho,shorelineLength,75918.26
+1006,Buckhorn Lake,surge_morpho,shorelineDevelopment,10.58
+1006,Buckhorn Lake,surge_morpho,maxWidth,1762.67
+1006,Buckhorn Lake,surge_morpho,meanWidth,1951.18
+1006,Buckhorn Lake,surge_morpho,maxLength,2425.26
+1006,Buckhorn Lake,surge_sites,mean_depth,6.04
+1006,Buckhorn Lake,surge_sites,max_depth,10.06
+1006,Buckhorn Lake,surge_sites,volume,27880767.2
+1006,Buckhorn Lake,surge_sites,littoral_fraction,39.54
+1007,Burr Oak Reservoir,surge_morpho,surfaceArea,2524543.93
+1007,Burr Oak Reservoir,surge_morpho,shorelineLength,26247.53
+1007,Burr Oak Reservoir,surge_morpho,shorelineDevelopment,4.66
+1007,Burr Oak Reservoir,surge_morpho,maxWidth,1602.17
+1007,Burr Oak Reservoir,surge_morpho,meanWidth,1665.76
+1007,Burr Oak Reservoir,surge_morpho,maxLength,1743.75
+1007,Burr Oak Reservoir,surge_sites,mean_depth,4.4
+1007,Burr Oak Reservoir,surge_sites,max_depth,8.84
+1007,Burr Oak Reservoir,surge_sites,volume,12505724.96
+1007,Burr Oak Reservoir,surge_sites,littoral_fraction,27.96
+1008,Caesar Creek Lake,surge_morpho,surfaceArea,10158257.22
+1008,Caesar Creek Lake,surge_morpho,shorelineLength,53710.82
+1008,Caesar Creek Lake,surge_morpho,shorelineDevelopment,4.75
+1008,Caesar Creek Lake,surge_morpho,maxWidth,3586.31
+1008,Caesar Creek Lake,surge_morpho,meanWidth,1965.25
+1008,Caesar Creek Lake,surge_morpho,maxLength,5178.74
+1008,Caesar Creek Lake,surge_sites,mean_depth,6.4
+1008,Caesar Creek Lake,surge_sites,max_depth,23.35
+1008,Caesar Creek Lake,surge_sites,volume,88627236.22
+1008,Caesar Creek Lake,surge_sites,littoral_fraction,0.27
+1009,Carr Fork Lake,surge_morpho,surfaceArea,2092337.78
+1009,Carr Fork Lake,surge_morpho,shorelineLength,34281.88
+1009,Carr Fork Lake,surge_morpho,shorelineDevelopment,6.69
+1009,Carr Fork Lake,surge_morpho,maxWidth,1747.48
+1009,Carr Fork Lake,surge_morpho,meanWidth,1222.33
+1009,Carr Fork Lake,surge_morpho,maxLength,1759.87
+1009,Carr Fork Lake,surge_sites,mean_depth,5.33
+1009,Carr Fork Lake,surge_sites,max_depth,12.65
+1009,Carr Fork Lake,surge_sites,volume,10890610.51
+1009,Carr Fork Lake,surge_sites,littoral_fraction,10.79
+1010,Cave Run Lake,surge_morpho,surfaceArea,31225811.27
+1010,Cave Run Lake,surge_morpho,shorelineLength,239560.72
+1010,Cave Run Lake,surge_morpho,shorelineDevelopment,12.09
+1010,Cave Run Lake,surge_morpho,maxWidth,7848.28
+1010,Cave Run Lake,surge_morpho,meanWidth,5124.46
+1010,Cave Run Lake,surge_morpho,maxLength,6491.65
+1010,Cave Run Lake,surge_sites,mean_depth,7.76
+1010,Cave Run Lake,surge_sites,max_depth,17.98
+1010,Cave Run Lake,surge_sites,volume,282868728.1
+1010,Cave Run Lake,surge_sites,littoral_fraction,7.43
+1011,Charles Mill Lake,surge_morpho,surfaceArea,4595307.6
+1011,Charles Mill Lake,surge_morpho,shorelineLength,36849.7
+1011,Charles Mill Lake,surge_morpho,shorelineDevelopment,4.85
+1011,Charles Mill Lake,surge_morpho,maxWidth,1588.52
+1011,Charles Mill Lake,surge_morpho,meanWidth,1282.95
+1011,Charles Mill Lake,surge_morpho,maxLength,3738.6
+1011,Charles Mill Lake,surge_sites,mean_depth,1.11
+1011,Charles Mill Lake,surge_sites,max_depth,1.61
+1011,Charles Mill Lake,surge_sites,volume,4729621.22
+1011,Charles Mill Lake,surge_sites,littoral_fraction,121.75
+1012,Cowan Lake,surge_morpho,surfaceArea,2669000.9
+1012,Cowan Lake,surge_morpho,shorelineLength,20853.03
+1012,Cowan Lake,surge_morpho,shorelineDevelopment,3.6
+1012,Cowan Lake,surge_morpho,maxWidth,1320.93
+1012,Cowan Lake,surge_morpho,meanWidth,688.43
+1012,Cowan Lake,surge_morpho,maxLength,3988.35
+1012,Cowan Lake,surge_sites,mean_depth,4.68
+1012,Cowan Lake,surge_sites,max_depth,7.8
+1012,Cowan Lake,surge_sites,volume,11809372.33
+1012,Cowan Lake,surge_sites,littoral_fraction,46.95
+1013,Delaware Reservoir,surge_morpho,surfaceArea,4234662.87
+1013,Delaware Reservoir,surge_morpho,shorelineLength,37290.52
+1013,Delaware Reservoir,surge_morpho,shorelineDevelopment,5.11
+1013,Delaware Reservoir,surge_morpho,maxWidth,1194.47
+1013,Delaware Reservoir,surge_morpho,meanWidth,1021.15
+1013,Delaware Reservoir,surge_morpho,maxLength,4464.33
+1013,Delaware Reservoir,surge_sites,mean_depth,2.51
+1013,Delaware Reservoir,surge_sites,max_depth,6.4
+1013,Delaware Reservoir,surge_sites,volume,10978433.25
+1013,Delaware Reservoir,surge_sites,littoral_fraction,23.21
+1014,Dillon Lake,surge_morpho,surfaceArea,4160768.99
+1014,Dillon Lake,surge_morpho,shorelineLength,24496.24
+1014,Dillon Lake,surge_morpho,shorelineDevelopment,3.39
+1014,Dillon Lake,surge_morpho,maxWidth,2104.98
+1014,Dillon Lake,surge_morpho,meanWidth,1243.84
+1014,Dillon Lake,surge_morpho,maxLength,3428.09
+1014,Dillon Lake,surge_sites,mean_depth,3.33
+1014,Dillon Lake,surge_sites,max_depth,5.88
+1014,Dillon Lake,surge_sites,volume,14329687
+1014,Dillon Lake,surge_sites,littoral_fraction,51.95
+1015,Hocking County Lake,surge_morpho,surfaceArea,1263196.76
+1015,Hocking County Lake,surge_morpho,shorelineLength,13434.07
+1015,Hocking County Lake,surge_morpho,shorelineDevelopment,3.37
+1015,Hocking County Lake,surge_morpho,maxWidth,844.09
+1015,Hocking County Lake,surge_morpho,meanWidth,550.2
+1015,Hocking County Lake,surge_morpho,maxLength,2551.93
+1015,Hocking County Lake,surge_sites,mean_depth,2.6
+1015,Hocking County Lake,surge_sites,max_depth,4.78
+1015,Hocking County Lake,surge_sites,volume,3335257.68
+1015,Hocking County Lake,surge_sites,littoral_fraction,57.92
+1016,Kiser Lake,surge_morpho,surfaceArea,1566168.06
+1016,Kiser Lake,surge_morpho,shorelineLength,9042.76
+1016,Kiser Lake,surge_morpho,shorelineDevelopment,2.04
+1016,Kiser Lake,surge_morpho,maxWidth,658.91
+1016,Kiser Lake,surge_morpho,meanWidth,481.06
+1016,Kiser Lake,surge_morpho,maxLength,3307.49
+1016,Kiser Lake,surge_sites,mean_depth,1.97
+1016,Kiser Lake,surge_sites,max_depth,2.74
+1016,Kiser Lake,surge_sites,volume,3152216.11
+1016,Kiser Lake,surge_sites,littoral_fraction,96.39
+1017,Knox Lake,surge_morpho,surfaceArea,1368095.64
+1017,Knox Lake,surge_morpho,shorelineLength,13201.84
+1017,Knox Lake,surge_morpho,shorelineDevelopment,3.18
+1017,Knox Lake,surge_morpho,maxWidth,1051.02
+1017,Knox Lake,surge_morpho,meanWidth,939.07
+1017,Knox Lake,surge_morpho,maxLength,1522.44
+1017,Knox Lake,surge_sites,mean_depth,3.09
+1017,Knox Lake,surge_sites,max_depth,7.32
+1017,Knox Lake,surge_sites,volume,3961550.36
+1017,Knox Lake,surge_sites,littoral_fraction,23.08
+1018,La Due Reservoir,surge_morpho,surfaceArea,5587987.45
+1018,La Due Reservoir,surge_morpho,shorelineLength,42130.19
+1018,La Due Reservoir,surge_morpho,shorelineDevelopment,5.03
+1018,La Due Reservoir,surge_morpho,maxWidth,2257.53
+1018,La Due Reservoir,surge_morpho,meanWidth,1929.66
+1018,La Due Reservoir,surge_morpho,maxLength,3386.62
+1018,La Due Reservoir,surge_sites,mean_depth,3.21
+1018,La Due Reservoir,surge_sites,max_depth,6.16
+1018,La Due Reservoir,surge_sites,volume,19989431.8
+1018,La Due Reservoir,surge_sites,littoral_fraction,43.65
+1019,Lake Loramie,surge_morpho,surfaceArea,3348780.26
+1019,Lake Loramie,surge_morpho,shorelineLength,62697.67
+1019,Lake Loramie,surge_morpho,shorelineDevelopment,9.66
+1019,Lake Loramie,surge_morpho,maxWidth,1552.04
+1019,Lake Loramie,surge_morpho,meanWidth,903.66
+1019,Lake Loramie,surge_morpho,maxLength,4977.41
+1019,Lake Loramie,surge_sites,mean_depth,1.21
+1019,Lake Loramie,surge_sites,max_depth,1.86
+1019,Lake Loramie,surge_sites,volume,4012353.81
+1019,Lake Loramie,surge_sites,littoral_fraction,117.18
+1020,Lake Milton,surge_morpho,surfaceArea,6453622.66
+1020,Lake Milton,surge_morpho,shorelineLength,28958.85
+1020,Lake Milton,surge_morpho,shorelineDevelopment,3.22
+1020,Lake Milton,surge_morpho,maxWidth,2138.39
+1020,Lake Milton,surge_morpho,meanWidth,1503.42
+1020,Lake Milton,surge_morpho,maxLength,4617.73
+1020,Lake Milton,surge_sites,mean_depth,3.74
+1020,Lake Milton,surge_sites,max_depth,8.44
+1020,Lake Milton,surge_sites,volume,28767772.68
+1020,Lake Milton,surge_sites,littoral_fraction,21.69
+1021,Lake Mohawk,surge_morpho,surfaceArea,2039455.09
+1021,Lake Mohawk,surge_morpho,shorelineLength,14657.85
+1021,Lake Mohawk,surge_morpho,shorelineDevelopment,2.9
+1021,Lake Mohawk,surge_morpho,maxWidth,1162.25
+1021,Lake Mohawk,surge_morpho,meanWidth,661.2
+1021,Lake Mohawk,surge_morpho,maxLength,3095.55
+1021,Lake Mohawk,surge_sites,mean_depth,2.36
+1021,Lake Mohawk,surge_sites,max_depth,6.1
+1021,Lake Mohawk,surge_sites,volume,6202942.43
+1021,Lake Mohawk,surge_sites,littoral_fraction,24.37
+1022,Lake Roaming Rock,surge_morpho,surfaceArea,1825341.73
+1022,Lake Roaming Rock,surge_morpho,shorelineLength,27681.15
+1022,Lake Roaming Rock,surge_morpho,shorelineDevelopment,5.78
+1022,Lake Roaming Rock,surge_morpho,maxWidth,972.13
+1022,Lake Roaming Rock,surge_morpho,meanWidth,861.48
+1022,Lake Roaming Rock,surge_morpho,maxLength,2497.49
+1022,Lake Roaming Rock,surge_sites,mean_depth,3.81
+1022,Lake Roaming Rock,surge_sites,max_depth,7.62
+1022,Lake Roaming Rock,surge_sites,volume,7131112.14
+1022,Lake Roaming Rock,surge_sites,littoral_fraction,32.89
+1023,Lake Waynoka,surge_morpho,surfaceArea,1116469.93
+1023,Lake Waynoka,surge_morpho,shorelineLength,25871.58
+1023,Lake Waynoka,surge_morpho,shorelineDevelopment,6.91
+1023,Lake Waynoka,surge_morpho,maxWidth,1030.14
+1023,Lake Waynoka,surge_morpho,meanWidth,506.96
+1023,Lake Waynoka,surge_morpho,maxLength,2555.43
+1023,Lake Waynoka,surge_sites,mean_depth,2.86
+1023,Lake Waynoka,surge_sites,max_depth,9.14
+1023,Lake Waynoka,surge_sites,volume,4067275.96
+1023,Lake Waynoka,surge_sites,littoral_fraction,5.75
+1024,Michael J Kirwan Reservoir,surge_morpho,surfaceArea,10442809.13
+1024,Michael J Kirwan Reservoir,surge_morpho,shorelineLength,82813.91
+1024,Michael J Kirwan Reservoir,surge_morpho,shorelineDevelopment,7.23
+1024,Michael J Kirwan Reservoir,surge_morpho,maxWidth,2131.87
+1024,Michael J Kirwan Reservoir,surge_morpho,meanWidth,2294.27
+1024,Michael J Kirwan Reservoir,surge_morpho,maxLength,4782.34
+1024,Michael J Kirwan Reservoir,surge_sites,mean_depth,5.34
+1024,Michael J Kirwan Reservoir,surge_sites,max_depth,11.58
+1024,Michael J Kirwan Reservoir,surge_sites,volume,69740100.32
+1024,Michael J Kirwan Reservoir,surge_sites,littoral_fraction,16.66
+1025,Paint Creek Lake,surge_morpho,surfaceArea,4505314.83
+1025,Paint Creek Lake,surge_morpho,shorelineLength,41050.31
+1025,Paint Creek Lake,surge_morpho,shorelineDevelopment,5.46
+1025,Paint Creek Lake,surge_morpho,maxWidth,1732.55
+1025,Paint Creek Lake,surge_morpho,meanWidth,1049
+1025,Paint Creek Lake,surge_morpho,maxLength,4514.25
+1025,Paint Creek Lake,surge_sites,mean_depth,3.01
+1025,Paint Creek Lake,surge_sites,max_depth,7.04
+1025,Paint Creek Lake,surge_sites,volume,18519883.61
+1025,Paint Creek Lake,surge_sites,littoral_fraction,24.98
+1026,Piedmont Lake,surge_morpho,surfaceArea,8532250.56
+1026,Piedmont Lake,surge_morpho,shorelineLength,52866.4
+1026,Piedmont Lake,surge_morpho,shorelineDevelopment,5.11
+1026,Piedmont Lake,surge_morpho,maxWidth,2033.49
+1026,Piedmont Lake,surge_morpho,meanWidth,2608.22
+1026,Piedmont Lake,surge_morpho,maxLength,3338.69
+1026,Piedmont Lake,surge_sites,mean_depth,3.91
+1026,Piedmont Lake,surge_sites,max_depth,7.77
+1026,Piedmont Lake,surge_sites,volume,41322601.41
+1026,Piedmont Lake,surge_sites,littoral_fraction,32.61
+1027,Pleasant Hill Lake,surge_morpho,surfaceArea,3039392.35
+1027,Pleasant Hill Lake,surge_morpho,shorelineLength,15504.79
+1027,Pleasant Hill Lake,surge_morpho,shorelineDevelopment,2.51
+1027,Pleasant Hill Lake,surge_morpho,maxWidth,2032.22
+1027,Pleasant Hill Lake,surge_morpho,meanWidth,865.7
+1027,Pleasant Hill Lake,surge_morpho,maxLength,3531.63
+1027,Pleasant Hill Lake,surge_sites,mean_depth,4.22
+1027,Pleasant Hill Lake,surge_sites,max_depth,9.2
+1027,Pleasant Hill Lake,surge_sites,volume,14281912.7
+1027,Pleasant Hill Lake,surge_sites,littoral_fraction,21.48
+1028,Rocky Fork Lake,surge_morpho,surfaceArea,7352942.38
+1028,Rocky Fork Lake,surge_morpho,shorelineLength,42361.48
+1028,Rocky Fork Lake,surge_morpho,shorelineDevelopment,4.41
+1028,Rocky Fork Lake,surge_morpho,maxWidth,1615.38
+1028,Rocky Fork Lake,surge_morpho,meanWidth,1126.72
+1028,Rocky Fork Lake,surge_morpho,maxLength,6762.04
+1028,Rocky Fork Lake,surge_sites,mean_depth,4.1
+1028,Rocky Fork Lake,surge_sites,max_depth,9.78
+1028,Rocky Fork Lake,surge_sites,volume,39608829.15
+1028,Rocky Fork Lake,surge_sites,littoral_fraction,15.08
+1029,Senecaville Lake,surge_morpho,surfaceArea,12280529.41
+1029,Senecaville Lake,surge_morpho,shorelineLength,52799.66
+1029,Senecaville Lake,surge_morpho,shorelineDevelopment,4.25
+1029,Senecaville Lake,surge_morpho,maxWidth,3065.78
+1029,Senecaville Lake,surge_morpho,meanWidth,1796.51
+1029,Senecaville Lake,surge_morpho,maxLength,5277.06
+1029,Senecaville Lake,surge_sites,mean_depth,3.5
+1029,Senecaville Lake,surge_sites,max_depth,6.16
+1029,Senecaville Lake,surge_sites,volume,52408285.33
+1029,Senecaville Lake,surge_sites,littoral_fraction,50.38
+1030,Tappan Lake,surge_morpho,surfaceArea,8277015.77
+1030,Tappan Lake,surge_morpho,shorelineLength,50697.47
+1030,Tappan Lake,surge_morpho,shorelineDevelopment,4.97
+1030,Tappan Lake,surge_morpho,maxWidth,2832.83
+1030,Tappan Lake,surge_morpho,meanWidth,1953.34
+1030,Tappan Lake,surge_morpho,maxLength,4260.16
+1030,Tappan Lake,surge_sites,mean_depth,2.97
+1030,Tappan Lake,surge_sites,max_depth,7.07
+1030,Tappan Lake,surge_sites,volume,32996943.25
+1030,Tappan Lake,surge_sites,littoral_fraction,23.89
+1031,William H Harsha Lake,surge_morpho,surfaceArea,7992553.27
+1031,William H Harsha Lake,surge_morpho,shorelineLength,56063.66
+1031,William H Harsha Lake,surge_morpho,shorelineDevelopment,5.59
+1031,William H Harsha Lake,surge_morpho,maxWidth,3645.82
+1031,William H Harsha Lake,surge_morpho,meanWidth,2298.71
+1031,William H Harsha Lake,surge_morpho,maxLength,3448.56
+1031,William H Harsha Lake,surge_sites,mean_depth,10.41
+1031,William H Harsha Lake,surge_sites,max_depth,25.76
+1031,William H Harsha Lake,surge_sites,volume,111648869.28
+1031,William H Harsha Lake,surge_sites,littoral_fraction,3.21
+1032,Wingfoot Lake,surge_morpho,surfaceArea,1567670.17
+1032,Wingfoot Lake,surge_morpho,shorelineLength,14401.57
+1032,Wingfoot Lake,surge_morpho,shorelineDevelopment,3.24
+1032,Wingfoot Lake,surge_morpho,maxWidth,1585.49
+1032,Wingfoot Lake,surge_morpho,meanWidth,893.86
+1032,Wingfoot Lake,surge_morpho,maxLength,2078.86
+1032,Wingfoot Lake,surge_sites,mean_depth,2.37
+1032,Wingfoot Lake,surge_sites,max_depth,3.6
+1032,Wingfoot Lake,surge_sites,volume,3462243.47
+1032,Wingfoot Lake,surge_sites,littoral_fraction,82.77
+1033,Falls Lake,surge_morpho,surfaceArea,48144851.69
+1033,Falls Lake,surge_morpho,shorelineLength,281460.08
+1033,Falls Lake,surge_morpho,shorelineDevelopment,11.44
+1033,Falls Lake,surge_morpho,maxWidth,7662.33
+1033,Falls Lake,surge_morpho,meanWidth,5407.09
+1033,Falls Lake,surge_morpho,maxLength,7642.42
+1033,Falls Lake,surge_sites,mean_depth,3.34
+1033,Falls Lake,surge_sites,max_depth,25
+1033,Falls Lake,surge_sites,volume,2177088634.83
+1033,Falls Lake,surge_sites,littoral_fraction,0

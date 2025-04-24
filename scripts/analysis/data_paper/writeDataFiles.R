@@ -340,22 +340,23 @@ lake_scale_data <- list(
     select(-lake_name) %>%
     mutate(
       # variables with no decimals
-      across(c(surface_area, shoreline_length, max_width, mean_width, max_length), 
+      across(c(surface_area, shoreline_length, max_width, mean_width, max_length, volume), 
            ~format(round(., 0), nsmall = 0)),
       # variables with 1 decimal
       across(c(mean_depth, max_depth), ~ format(round(., 1), nsmall = 1)),
       # variables with two decimals
       across(c(shoreline_development, littoral_fraction), ~ format(round(., 2), nsmall = 2)),
-      # variables with three decimals
-      circularity = format(round(circularity, 3), nsmall = 3)) %>%
+      # variables with three decimals, not including circularity in data paper
+      #circularity = format(round(circularity, 3), nsmall = 3)
+      ) %>%
     mutate(across(!lake_id, as.character)) %>% # needed to collapse into one column
     pivot_longer(!lake_id) %>%
     mutate(units = case_when(name == "surface_area" ~ "m2",
                              name == "shoreline_development" ~ "dimensionless",
-                             name == "circularity" ~ "dimensionless",
+                             #name == "circularity" ~ "dimensionless",
                              name == "volume" ~ "m3",
-                             name == "axis_ratio" ~ "dimensionless",
-                             name == "dynamic_ratio" ~ "dimensionless",
+                             #name == "axis_ratio" ~ "dimensionless",
+                             #name == "dynamic_ratio" ~ "dimensionless",
                              TRUE ~ "m")) %>% # all others meters
     mutate(across(!lake_id, as.character)), # needed to collapse into one column
   
