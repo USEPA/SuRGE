@@ -88,6 +88,9 @@ source("scripts/analysis/calculateK600.R")
 source("scripts/analysis/mergeChemEmissions.R") #all_obs
 source("scripts/analysis/mergePredictors.R") # dat
 
+#Implement sonde criteria 
+source("scripts/analysis/sonde_criteria.R")
+
 # Annualize emissions
 source("scripts/analysis/annualizeEmissions.R")
 
