@@ -33,8 +33,13 @@ lake.list.all %>%
   filter(!(lake_id %in% as.character(phyto_data$lake_id))) %>% # pyto_data doesn't contain any 69 or 70 data
   arrange(sample_year) %>%
   select(lake_id, lab, sample_year) %>%
-  print(n=Inf) %>%
-  write_csv(., "output/missing_phyto.csv")
+  print(n=Inf) 
+
+# Avery's response
+# For the 2021 samples, they lacked any fixative and in many cases were sitting
+# around for weeks before I received them. The 2022 samples contained no 
+# countable/identifiable cells, somehow. 
+
 
 # CONDENSED VERSION FOR MERGE_PREDICTORS----------
 phyto_data_link <- phyto_data %>%
