@@ -42,4 +42,3 @@ phyto_data_link <- phyto_data %>%
   group_by(lake_id, visit) %>%
   summarize(density = sum(density),
             density_units = "cells_ml")
-  group_by

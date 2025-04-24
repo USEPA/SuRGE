@@ -10,14 +10,7 @@ morpho <- read.csv(paste0(userPath, "data/siteDescriptors/morphometry/surge_morp
   janitor::clean_names() %>% # lake_id is integer
   # calculate additional metrics. Casas-Ruiz et al 2021
   mutate(
-    # circularity = case_when(
-    # # major_axis  is defined as the longest line intersecting the convex hull formed 
-    # # around its polygon while passing through its center. In contrast to max_length, 
-    # # its value represents the distance across a lake without regard to land-water 
-    # # configuration. max_length is the longest open water distance within a lake 
-    # !is.na(major_axis) ~ surface_area / (pi * (major_axis/2)^2), # use major_axis if available
-    # !is.na(major_axis) & is.na(max_length) ~ surface_area / (pi * (max_length/2)^2), # max_length if no major axis
-    # TRUE ~ NA_real_),
+    circularity = (4 * pi * surface_area) / shoreline_length^2,
     dynamic_ratio = shoreline_length / mean_depth,
     #littoral_fraction = 1 - ((1 - (3/max_depth))^((max_depth/mean_depth) - 1)) # Jeff provides this metric
     ) %>%
@@ -48,8 +41,7 @@ cor(use = "pairwise.complete.obs") %>%
 # here are the morpho variables used in Cass Ruiz
 # surface_area and volume are correlated at rho=0.99
 morpho %>%
-  # add circularity when ready
-  select(surface_area, volume, shoreline_development, 
+  select(surface_area, volume, shoreline_development, circularity,
          dynamic_ratio) %>%
   cor(use = "pairwise.complete.obs") %>% 
   corrplot(method = "number") 
