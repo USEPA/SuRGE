@@ -82,6 +82,18 @@ master_dictionary <- tribble(~variable, ~definition,
                              "dynamic_ratio", "Surface area to mean depth ratio of the lake. Low values indicate lakes that are bowlshaped, whereas high values are associated to dish-like lakes.",
                              "littoral_fraction", "Relative proportion of lake surface area that is shallower than 2.5 m",
                              
+                             # national wetlands inventory
+                             "lacustrine", "percent of reservoir classified as a lacustrine system in the National Wetlands Inventory",
+                             "palustrine", "percent of reservoir classified as a palustrine system in the National Wetlands Inventory",
+                             "riverine", "percent of reservoir classified as a riverine system in the National Wetlands Inventory",
+                             "limnetic", "percent of reservoir classified as a limnetic subsystem of lacustrine in the National Wetlands Inventory",
+                             "littoral", "percent of reservoir classified as a littoral subsystem of lacustrine in the National Wetlands Inventory",
+                             "intermittent", "percent of reservoir classified as intermittent subsystem of riverine in the National Wetlands Inventory",
+                             "lower_perennial", "percent of reservoir classified as lower perennial subsystem of riverine in the National Wetlands Inventory",
+                             "upper_perennial", "percent of reservoir classified as upper perennial subsystem of riverine in the National Wetlands Inventory",
+                             "emergent", "percent of reservoir classified as emergent class, can come from combination of lacustrine, palustrine, and riverine systems, in the National Wetlands Inventory",
+                             "aquatic_bed", "percent of reservoir classified as aquatic bed, can come from combination of lacustrine, palustrine, and riverine systems, in the National Wetlands Inventory",     
+                             
                              # sedimentation
                              "sedimentation", "Total sedimentation rate.",
                              "sedimentation_units", "Units for sedimentation",
@@ -360,28 +372,35 @@ lake_scale_data <- list(
                              TRUE ~ "m")) %>% # all others meters
     mutate(across(!lake_id, as.character)), # needed to collapse into one column
   
-  # c.	Sedimentation rates
-  sedimentation_link %>%
-    select(- c(sediment_predictor_type, sedimentation, sedimentation_units)) %>% # not sure about this variable or sedimentation numbers
-    mutate(
-      # Fix decimal places, otherwise many are shown when converted to character
-      basin_kfact = format(round(basin_kfact, 3), nsmall = 3),
-      across(c(basin_forest, basin_crop, basin_wetland, sediment_oc, basin_slope),
-             ~ format(round(., 2), nsmall = 2)),
-      across(c(clow_surface_area, basin_soc0_5), ~ format(round(., 0), nsmall = 0))
-      ) %>%
-    # subset for development
-    #filter(lake_id == 100) %>%
-    #select(lake_id, contains("sedimentation"), contains("sediment")) %>%
-    # all variables presenting a value must end with "_value". All variables
-    # presenting units already end with "_units"
-    rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
-    pivot_longer(-lake_id, 
-                 # anything to left of pattern is "name"
-                 # every matching group to right creates new value column
-                 names_to = c("name", ".value"), 
-                 # breaking pattern in final _
-                 names_pattern = "(.+)_(.+)"),
+  # c.  NWI
+  
+  nwi_link %>%
+    pivot_longer(!lake_id)%>%
+    mutate(value = format(round ((value * 100),2), nsmall=2)) %>%
+    mutate (units = "percent"),
+  
+  # X.	Sedimentation rates
+  # sedimentation_link %>%
+  #   select(- c(sediment_predictor_type, sedimentation, sedimentation_units)) %>% # not sure about this variable or sedimentation numbers
+  #   mutate(
+  #     # Fix decimal places, otherwise many are shown when converted to character
+  #     basin_kfact = format(round(basin_kfact, 3), nsmall = 3),
+  #     across(c(basin_forest, basin_crop, basin_wetland, sediment_oc, basin_slope),
+  #            ~ format(round(., 2), nsmall = 2)),
+  #     across(c(clow_surface_area, basin_soc0_5), ~ format(round(., 0), nsmall = 0))
+  #     ) %>%
+  #   # subset for development
+  #   #filter(lake_id == 100) %>%
+  #   #select(lake_id, contains("sedimentation"), contains("sediment")) %>%
+  #   # all variables presenting a value must end with "_value". All variables
+  #   # presenting units already end with "_units"
+  #   rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
+  #   pivot_longer(-lake_id, 
+  #                # anything to left of pattern is "name"
+  #                # every matching group to right creates new value column
+  #                names_to = c("name", ".value"), 
+  #                # breaking pattern in final _
+  #                names_pattern = "(.+)_(.+)"),
   
   # d.	Year of construction
   nid_link %>%

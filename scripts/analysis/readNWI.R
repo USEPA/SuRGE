@@ -51,11 +51,16 @@ nwi<-rbind(nwi_SuRGE,nwi_2016)%>%
          rocky_shore=ifelse(is.na(rocky_shore),0,rocky_shore/totper),
          #need to check on how to tease apart the riverine class from the lacustrine class data here
          #rusty also suggested including all intermittent riverine
-         riverine_unconsolidated_shore=ifelse(is.na(unconsolidated_shore_y),0,100*(unconsolidated_shore_y/totper)),
-         shallow=100*(palustrineper+littoralper+riverine_unconsolidated_shore))
+         riverine_unconsolidated_shore=ifelse(is.na(unconsolidated_shore_y),0,100*(unconsolidated_shore_y/totper)))
+         #This was an attempt at getting at shallow habitat, but we are waiting for reclassification from Mark to do better with this
+         #shallow=100*(palustrineper+littoralper+riverine_unconsolidated_shore))
 
 nwi_link <- nwi %>%
-  select(lake_id, shallow, emergent, aquatic_bed)
+  select(lake_id, lacustrineper, palustrineper, riverineper, limneticper, littoralper, intermittentper, lower_perennialper,
+         upper_perennialper, emergent, aquatic_bed)
+
+colnames(nwi_link)<-c("lake_id", "lacustrine", "palustrine","riverine", "limnetic", "littoral", "intermittent", "lower_perennial",
+                      "upper_perennial", "emergent", "aquatic_bed")
 
 #link nwi to surge site info
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
