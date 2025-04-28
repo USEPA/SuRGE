@@ -57,7 +57,7 @@ nwi<-rbind(nwi_SuRGE,nwi_2016)%>%
 
 nwi_link <- nwi %>%
   select(lake_id, lacustrineper, palustrineper, riverineper, limneticper, littoralper, intermittentper, lower_perennialper,
-         upper_perennialper, emergent, aquatic_bed)
+         upper_perennialper, emergent, aquatic_bed) 
 
 colnames(nwi_link)<-c("lake_id", "lacustrine", "palustrine","riverine", "limnetic", "littoral", "intermittent", "lower_perennial",
                       "upper_perennial", "emergent", "aquatic_bed")
