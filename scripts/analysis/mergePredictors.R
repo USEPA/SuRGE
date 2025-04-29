@@ -249,11 +249,11 @@ dat <- dat %>%
  dim(dat) # 2367
  
 # 17. Reservoir Sedimentaion----
-dat <- dat %>%
-  left_join(sedimentation_link, by = "lake_id")
-
- dim(sedimentation_link) # 139, 5
- dim(dat) # 2367
+# dat <- dat %>%
+#   left_join(sedimentation_link, by = "lake_id")
+# 
+#  dim(sedimentation_link) # 139, 5
+#  dim(dat) # 2367
  
 # 18. Water level change indices----
 dat <- dat %>%

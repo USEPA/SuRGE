@@ -43,7 +43,7 @@ source("scripts/analysis/readWaterIsotope.R") # Renee Brooks Isotope/Residence T
 source("scripts/analysis/readNWI.R") # NWI attributes from Mark Mitchell
 source("scripts/analysis/readIpccClimateZones.R") # surge_climate
 source("scripts/analysis/readLakeCat.R")# read in LakeCat 
-source("scripts/analysis/readSedimentation.R") # read in reservoir sedimentation data (requires lagosLakesID.R)
+#source("scripts/analysis/readSedimentation.R") # read in reservoir sedimentation data (requires lagosLakesID.R)
 source("scripts/analysis/readPhytos.R") # read in data from Avery Tatters
 source("scripts/analysis/readNWIS.R") # read water level data for subset of reservoirs
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
@@ -110,8 +110,4 @@ source("scripts/analysis/inspectMeasurementValues.R")
 
 # Manuscripts
 source("scripts/analysis/data_paper/writeDataFiles.R")
-
-
-
-
 

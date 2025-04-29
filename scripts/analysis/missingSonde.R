@@ -107,7 +107,7 @@ missing_bottom_temp <- missing_bottom_tem %>%
 lakes <- st_read(
   paste0(
     userPath,
-    "lakeDsn/all_lakes_2025-01-16.gpkg"),
+    "lakeDsn/all_lakes_2025-04-24.gpkg"),
     layer = "all_lakes",
     quiet = TRUE
   )
@@ -116,7 +116,7 @@ head(lakes)
 
 points <- st_read(paste0(
   userPath,
-  "lakeDsn/all_lakes_2025-01-16.gpkg"),
+  "lakeDsn/all_lakes_2025-04-24.gpkg"),
   layer = "points",
   quiet = TRUE
 )
