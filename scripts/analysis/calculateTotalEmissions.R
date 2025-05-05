@@ -39,9 +39,10 @@ emissions <- emissions %>%
          ch4_total_units = "mg_ch4_m2_h",
          co2_total_units = "mg_co2_m2_h",
          co2_deployment_length_units = "s",
-         ch4_deployment_length_units = "s") %>%
+         ch4_deployment_length_units = "s",
+         air_temp_units = "degrees celcius") %>%
   # arrange columns
-  select(lake_id, visit, site_id, # these first
+  select(lake_id, visit, site_id, air_temp, air_temp_units, # these first
          sort(tidyselect::peek_vars())) # all others alphabetical
 
 # # CO2 EQUIVALENTS------------------
