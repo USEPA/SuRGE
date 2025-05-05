@@ -136,6 +136,8 @@ master_dictionary <- tribble(~variable, ~definition,
                              "study", "Survey effort the reservoir was included in. See data paper Figure 1.",
                              
                              #emissions (point)
+                             "air_temp", "temperature of the air at the time the floating chamber was deployed",
+                             "air_temp_units", "units for air_temp",
                              "ch4_diffusion","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
                              "ch4_diffusion_units","ch4_diffusion units",
                              "ch4_ebullition","areal ch4 ebullition flux from bubble traps",
@@ -766,6 +768,8 @@ emission_rate_points_data_paper <- left_join(
       lake_id,
       site_id,
       visit,
+      air_temp,
+      air_temp_units,
       ch4_diffusion_best,
       ch4_diffusion_units,
       ch4_ebullition,

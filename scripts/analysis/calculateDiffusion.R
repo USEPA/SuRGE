@@ -202,7 +202,7 @@ for(i in 1:length(data.gga.ch4.list)){
                   co2.lm.aic, co2.lm.r2, co2.lm.se, co2.lm.pval,
                   co2.ex.aic, co2.ex.se, co2.ex.r2, co2.ex.slope, 
                   co2.ex.k, co2.ex.drate.mg.h,co2Flag,nco2,nch4,dh2o,mh2o, 
-                  co2_deployment_length, ch4_deployment_length, row.names = i)
+                  co2_deployment_length, ch4_deployment_length, temp.i, row.names = i)
   colnames(out)<-c("site_id", "lake_id", "visit", 
                    "ch4.lm.slope", "ch4.lm.drate.mg.h", 
                    "ch4.lm.aic", "ch4.lm.r2", "ch4.lm.se", "ch4.lm.pval",
@@ -212,7 +212,8 @@ for(i in 1:length(data.gga.ch4.list)){
                    "co2.lm.aic", "co2.lm.r2", "co2.lm.se", "co2.lm.pval",
                    "co2.ex.aic", "co2.ex.se", "co2.ex.r2", "co2.ex.slope", 
                    "co2.ex.k", "co2.ex.drate.mg.h","co2Flag","nco2","nch4",
-                   "dh2o","mh2o","co2_deployment_length","ch4_deployment_length")
+                   "dh2o","mh2o","co2_deployment_length","ch4_deployment_length",
+                   "air_temp")
 
   OUT[[i]] = out
   
