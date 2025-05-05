@@ -23,6 +23,7 @@ dat <- bind_rows(dat_2016 %>%
 
 dim(dat_2016) # 498
 dim(all_obs) # 1869
+nrow(dat_2016) + nrow(all_obs) # 2367
 dim(dat) # 2367, good
 
 
@@ -201,7 +202,7 @@ dim(dat) # 2367
  
  # 10. Phytoplankton Composition from Avery----
  dat <- dat %>%
-   left_join(phyto_data_link, by="lake_id")
+   left_join(phyto_data_link)
  dim(dat) # 2367
  
 # 11. Merge lakeMorpho data ----

@@ -2,7 +2,7 @@
 # load 2016 data-----------
 load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaData
 load(paste0(userPath, "data/CIN/2016_survey/deplyTimes.RData")) # loads chamber deployment/retrieval times (deplyTimes)
-
+air_temp_2016 <- read_csv(paste0(userPath, "data/CIN/2016_survey/air_temp.csv"))
 
 # recode diffusive emission rate data from NA to 0 if r2 < 0.9 to be consistent 
 # with SuRGE conventions
@@ -34,7 +34,7 @@ deplyTimes <- deplyTimes %>%
   select(Lake_Name, siteID, contains("deployment"))
 
 
-# Merge the two 2016 data objects
+# Merge eqAreaData and deplyTimes
 dim(eqAreaData) # 1531 (includes oversample sites)
 dim(eqAreaData %>% filter(EvalStatus == "sampled")) # 543
 dim(deplyTimes) # 535 (only sampled sites)
@@ -50,6 +50,13 @@ dat_2016 <- full_join(eqAreaData, deplyTimes) # rename to dat_2016
 # remove original objects
 remove(eqAreaData) 
 remove(deplyTimes)
+
+# Join air temp data
+dim(dat_2016) # 498
+dim(air_temp_2016) # 535
+
+dat_2016 <- full_join(dat_2016, air_temp_2016) 
+dim(dat_2016) # 1531
 
 # Format-------------
 dat_2016 <- dat_2016 %>% 
@@ -76,6 +83,8 @@ dat_2016 <- dat_2016 %>%
          ch4_deployment_length_units,
          co2_deployment_length,
          co2_deployment_length_units,
+         air_temp,
+         air_temp_units,
          chla_d, chla_s,
          do_l_d, do_l_s,
          p_h_d, p_h_s,

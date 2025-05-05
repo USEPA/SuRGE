@@ -2,6 +2,8 @@
 "site_id","Unique identifier for sample site within a waterbody"
 "lake_id","Unique identifier for each waterbody"
 "visit","First (1) or second (2) site visit"
+"air_temp","temperature of the air at the time the floating chamber was deployed"
+"air_temp_units","units for air_temp"
 "ch4_diffusion","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)"
 "ch4_diffusion_units","ch4_diffusion units"
 "ch4_ebullition","areal ch4 ebullition flux from bubble traps"
