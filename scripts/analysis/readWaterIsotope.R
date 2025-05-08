@@ -125,16 +125,16 @@ water_isotope_agg <- water_isotope_long %>%
     nla_unique_id = nla_unique_id[1],
     e_i = mean(e_i, na.rm = TRUE),
     sd_e_i = sd(e_i),
-    retention_time = mean(rt_iso, na.rm = TRUE),
-    sd_retention_time = sd(rt_iso),
-    retention_time_ei_repeat_visits = n() - 1
+    residence_time = mean(rt_iso, na.rm = TRUE),
+    sd_residence_time = sd(rt_iso),
+    residence_time_ei_repeat_visits = n() - 1
   ) %>%
   select(-nla_unique_id) %>% # get from SuRGE design file
-  mutate(retention_time_units = "years",
-         sd_retention_time_units = "years",
+  mutate(residence_time_units = "years",
+         sd_residence_time_units = "years",
          e_i_units = "dimensionless",
          sd_e_i_units = "dimensionless",
-         retention_time_ei_repeat_visits_units = "dimensionless",
+         residence_time_ei_repeat_visits_units = "dimensionless",
          e_i_type_units = "dimensionless")
 summary(water_isotope_agg)
 
