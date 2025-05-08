@@ -418,9 +418,9 @@ lake_scale_data <- list(
            # decimals inherited from Renee's data release (10.23719/1531017)
            e_i = format(round(e_i, 3), nsmall = 3),
            sd_e_i = format(round(sd_e_i, 3), nsmall = 3),
-           residence_time = format(round(retention_time, 3), nsmall = 3),
-           sd_residence_time = case_when(is.na(sd_retention_time) ~ NA_character_,
-                                         TRUE ~ format(round(sd_retention_time, 3), nsmall = 3)),
+           residence_time = format(round(residence_time, 3), nsmall = 3),
+           sd_residence_time = case_when(is.na(sd_residence_time) ~ NA_character_,
+                                         TRUE ~ format(round(sd_residence_time, 3), nsmall = 3)),
            across(-lake_id, as.character)) %>% # allow character and numeric in same column
     # all variables presenting a value must end with "_value". All variables
     # presenting units already end with "_units"
