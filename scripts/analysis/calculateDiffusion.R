@@ -371,6 +371,9 @@ OUT2 <- mutate(OUT2,
                 (ch4.ex.aic < ch4.lm.aic) & ch4.ex.r2 < 0.9 ~ 0,
                 TRUE ~ ch4_drate_mg_h_best))
 
+#If floating chamber is set to NA then deployment length should also be NA
+# OUT2$ch4_deployment_length<-ifelse(is.na(OUT2$ch4_best_model),NA,OUT2$ch4_deployment_length)
+# OUT2$co2_deployment_length<-ifelse(is.na(OUT2$co2_best_model),NA,OUT2$co2_deployment_length)
 
 # Run through janitor to enforce SuRGE name conventions
 OUT2 <- janitor::clean_names(OUT2) %>%

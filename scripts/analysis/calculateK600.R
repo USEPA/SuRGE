@@ -55,3 +55,6 @@ ggplotly(p)
 # inspect some outliers
 gc_lakeid %>% filter(lake_id == "188", site_id == 9)
 
+# check what the k would be for the high diffusion site at Comins
+k_ch4_comins=48.04/916.4949
+k_ch4_600= k_ch4_comins * (1/(562.8052/600)^-2/3)
