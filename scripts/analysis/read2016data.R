@@ -81,6 +81,11 @@ dat_2016 <- dat_2016 %>%
     # can't calculate total is diffusion is NA
     ch4_trate_mg_h = case_when(is.na(ch4_drate_mg_h_best) ~ NA,
                                TRUE ~ ch4_trate_mg_h),
+    # set deployment time to NA if < 30 seconds
+    ch4_deployment_length = case_when(ch4_deployment_length >= 30 ~ ch4_deployment_length,
+                                      ch4_deployment_length < 30 ~ NA_real_,
+                                      is.na(ch4_deployment_length) ~ NA_real_,
+                                      TRUE ~ 999999999), # error flag
     
     # CO2 next
     co2_drate_mg_h_best = case_when(co2_deployment_length >= 30 ~ co2_drate_mg_h_best,
@@ -89,7 +94,12 @@ dat_2016 <- dat_2016 %>%
                                     TRUE ~ 999999999), # error flag
     # can't calculate total is diffusion is NA
     co2_trate_mg_h = case_when(is.na(co2_drate_mg_h_best) ~ NA,
-                               TRUE ~ co2_trate_mg_h)) %>%
+                               TRUE ~ co2_trate_mg_h),
+    # set deployment time to NA if < 30 seconds
+    co2_deployment_length = case_when(co2_deployment_length >= 30 ~ co2_deployment_length,
+                                      co2_deployment_length < 30 ~ NA_real_,
+                                      is.na(co2_deployment_length) ~ NA_real_,
+                                      TRUE ~ 999999999)) %>% # error flag 
   # grab required variables
   select(lake_name, site_id, 
          chla_sample, tn, tnh4, tno2, tno2_3, toc, tp, trp, 
