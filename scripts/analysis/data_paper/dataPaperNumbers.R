@@ -20,18 +20,18 @@ lake.list.all %>%
 mes<-dat %>%
   filter(!is.na(ch4_diffusion_best))%>%
   mutate(ch4diff=ch4_diffusion_best*24)
-#2150 individual measurements
+#2188 individual methane measurements
 mez<-mes %>%
   filter(ch4_diffusion_best==0)
-#38 are zero values
+#80 are zero values
 
 cas<-dat %>%
   filter(!is.na(co2_diffusion_best))%>%
   mutate(co2diff=co2_diffusion_best*24)
-#2083 individual measurements
+#2141 individual measurements
 caz<-cas %>%
   filter(co2_diffusion_best==0)
-#264 are zero values
+#317 are zero values
 
 meb<-dat %>%
   filter(!is.na(ch4_ebullition))
@@ -41,19 +41,35 @@ ceb<-dat %>%
 
 mt<-dat %>%
   filter(!is.na(ch4_total))
-#2124 measurements of total methane flux
+#2111 measurements of total methane flux
 ct<-dat %>%
   filter(!is.na(co2_total))
-#2027 measurements of total carbon dioxide flux
+#2066 measurements of total carbon dioxide flux
 
 #Proportion of diffusive emissions that were zero:
 zm<-dat%>%
   filter(ch4_diffusion_best==0)
-38/2150
+80/2188
 
 zc<-dat%>%
   filter(co2_diffusion_best==0)
-270/2083
+317/2141
+
+#Smallest detectable diffusive fluxes
+ms<-mes %>%
+  filter(ch4_diffusion_best>0)
+min(ms$ch4_diffusion_best)*24
+
+cs<-cas %>%
+  filter(co2_diffusion_best>0)
+min(cs$co2_diffusion_best)*24
+
+#deployment lengths
+summary(dat$co2_deployment_length)
+summary(dat$ch4_deployment_length)
+
+#unstable starts
+nrow(filter(dat, co2flag=="U"))
 
 # 3. K600 TECHNICAL VALIDATION--------------
 # 3.1 CO2 direction and gas under/supersaturation
