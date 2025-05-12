@@ -342,7 +342,8 @@ lake_scale_data <- list(
   # this needs to be long due to numerous nhdplus_comid, lagos, etc values per lake
   read.csv(paste0(userPath, "data\\siteDescriptors\\surge_master_crosswalk_long_hollister.csv"), header = T) %>% 
     select(-lake_name) %>% 
-    # these are duplicated in nl07_site_id and nhdplus_comid
+    # A few variables are duplicated in this dataset: nl07_site_id == lmorpho_nla07, lmorpho_comid == hylak_comid == nhdplus_comid
+    # omit the ones we don't want (e.g. getting NLA07 from nl07_site_id variable; comid from nhdplus_comid variable)
     filter(!(join_id_name %in% c("lmorpho_comid", "lmorpho_nla07", "hylak_comid"))) %>% 
     mutate(join_id_name = replace(join_id_name, join_id_name == "nl07_site_id", "nla07_site_id")) %>%
     rename(name = join_id_name,
@@ -489,8 +490,7 @@ lake_scale_dictionary <- master_dictionary %>%
   filter(variable %in% unique(lake_scale_data$name))
 
 # Are all values in data dictionary?
-ifelse (c(colnames(lake_scale_data) %in% site_data_dictionary$variable,
-          unique(lake_scale_data$name) %in% lake_scale_dictionary$variable) %>% 
+ifelse (unique(lake_scale_data$name) %in% lake_scale_dictionary$variable %>% 
           {!.} %>%
           sum(.) == 0,
         "Site data dictionary is complete", 

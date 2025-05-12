@@ -25,14 +25,21 @@ eqAreaData <- eqAreaData %>%
 
 # calculate duration of chamber deployment for CO2 and CH4
 deplyTimes <- deplyTimes %>%
-  mutate(ch4_deployment_length = (ch4RetDtTm - ch4DeplyDtTm) %>% 
-           as.numeric, # convert from dttm object to numeric
-         ch4_deployment_length_units = "s",
-         co2_deployment_length = (co2RetDtTm - co2DeplyDtTm) %>% 
-           as.numeric, # convert from dttm object to numeric
-         co2_deployment_length_units = "s") %>%
+  mutate(
+    # CH4 deployment time
+    ch4_deployment_length = (ch4RetDtTm - ch4DeplyDtTm), # duration object (drtn)
+    co2_deployment_length = (co2RetDtTm - co2DeplyDtTm), # duration object (drtn)
+    # ensure all deployment_lengths are in seconds
+    across(contains("deployment_length"), ~ case_when(units(.x) == "secs" ~ as.numeric(.x),
+                                                      units(.x) == "mins" ~ as.numeric(.x) * 60,
+                                                      TRUE ~ 999999999)), # error code
+    ch4_deployment_length_units = "seconds",
+    co2_deployment_length_units = "seconds") %>%
   select(Lake_Name, siteID, contains("deployment"))
 
+# check for error code
+deplyTimes %>% 
+  filter_all(any_vars(. == 999999999)) # none, good
 
 # Merge eqAreaData and deplyTimes
 dim(eqAreaData) # 1531 (includes oversample sites)
@@ -52,7 +59,7 @@ remove(eqAreaData)
 remove(deplyTimes)
 
 # Join air temp data
-dim(dat_2016) # 498
+dim(dat_2016) # 1531
 dim(air_temp_2016) # 535
 
 dat_2016 <- full_join(dat_2016, air_temp_2016) 
@@ -64,6 +71,25 @@ dat_2016 <- dat_2016 %>%
   # remove extra Acton Lake observations
   filter(!(lake_name %in% c("Acton Lake Aug", "Acton Lake July", "Acton Lake Oct")),
          eval_status == "sampled") %>% # only sampled sites
+  mutate(
+    # if duration < 30 seconds, then NA
+    # CH4 first
+    ch4_drate_mg_h_best = case_when(ch4_deployment_length >= 30 ~ ch4_drate_mg_h_best,
+                                    ch4_deployment_length < 30 ~ NA_real_,
+                                    is.na(ch4_deployment_length) ~ NA_real_,
+                                    TRUE ~ 999999999), # error flag
+    # can't calculate total is diffusion is NA
+    ch4_trate_mg_h = case_when(is.na(ch4_drate_mg_h_best) ~ NA,
+                               TRUE ~ ch4_trate_mg_h),
+    
+    # CO2 next
+    co2_drate_mg_h_best = case_when(co2_deployment_length >= 30 ~ co2_drate_mg_h_best,
+                                    co2_deployment_length < 30 ~ NA_real_,
+                                    is.na(co2_deployment_length) ~ NA_real_,
+                                    TRUE ~ 999999999), # error flag
+    # can't calculate total is diffusion is NA
+    co2_trate_mg_h = case_when(is.na(co2_drate_mg_h_best) ~ NA,
+                               TRUE ~ co2_trate_mg_h)) %>%
   # grab required variables
   select(lake_name, site_id, 
          chla_sample, tn, tnh4, tno2, tno2_3, toc, tp, trp, 
@@ -253,6 +279,9 @@ dat_2016 <- dat_2016 %>%
                         lake_id == 1016 & site_id == 10 & visit == 1, 
                         -83.97523)) # just this one instance
   
+# look for emission rate flags
+dat_2016 %>%
+  filter_all(any_vars( . == 999999999)) # none, good
 
 # site depth wasn't measured in first few lakes (oops) but we have bathymetry data
 # for those lakes. need to add depth estimates for 2016 lakes missing this measurement 
