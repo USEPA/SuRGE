@@ -158,9 +158,10 @@ CO2<-unstable_plot_data %>%
                  color = "CO2 stabilizes"), key_glyph = "path") + #CO2
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
                  color = "retrieval"), key_glyph = "path") +
-  scale_color_discrete(breaks = c("deployment", "CH4 stabilizes", "CO2 stabilizes", "retrieval"), name="") +
+  scale_color_discrete(breaks = c("deployment", "CH4 stabilizes","CO2 stabilizes", "retrieval"), name="",
+                       labels = c("deployment", expression("stabilized CH"[4]), expression("stabilized CO"[2]),"retrieval")) +
   xlab("") +
-  ylab(expression(paste("CO "[2]*" (ppm)")))
+  ylab(expression(paste("CO"[2]*" (ppm)")))
 CO2
 
 CH4<-unstable_plot_data %>%
@@ -175,7 +176,7 @@ CH4<-unstable_plot_data %>%
         axis.text.x = element_blank(),
         axis.labels.x = element_blank(),
         axis.ticks.x = element_blank(),
-        legend.position="top")+
+        legend.position="none")+
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:16:22", tz = "UTC")),
                  color = "deployment"), key_glyph = "path") +
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:08", tz = "UTC")),
@@ -185,7 +186,7 @@ CH4<-unstable_plot_data %>%
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
                  color = "retrieval"), key_glyph = "path") +
   scale_color_discrete(breaks = c("deployment", "CH4 stabilizes","CO2 stabilizes", "retrieval"), name="",
-                       labels = c("deployment", bquote("CH[4]~stabilizes"),"CO2 stabilizes", "retrieval")) +
+                       labels = c("deployment", expression("stabilized CH"[4]), expression("stabilized CO"[2]),"retrieval")) +
   xlab("") +
   ylab(expression(paste("CH "[4]*" (ppm)")))
 CH4
@@ -209,7 +210,8 @@ H2O<-unstable_plot_data %>%
                  color = "CO2 stabilizes"), key_glyph = "path") + #CO2
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
                  color = "retrieval"), key_glyph = "path") +
-  scale_color_discrete(breaks = c("deployment", "CH4 stabilizes","CO2 stabilizes", "retrieval"), name="") +
+  scale_color_discrete(breaks = c("deployment", "CH4 stabilizes","CO2 stabilizes", "retrieval"), name="",
+                       labels = c("deployment", expression("stabilized CH"[4]), expression("stabilized CO"[2]),"retrieval")) +
   xlab("time (hh:mm)") +
   ylab(expression(paste("H "[2]*"O (ppt)")))
 H2O
