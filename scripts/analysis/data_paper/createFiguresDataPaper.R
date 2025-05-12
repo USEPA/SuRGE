@@ -1,10 +1,6 @@
 ## Script for Data Paper Figures
 ## February 26 2025
 
-# load("C:/Users/rpp/Environmental Protection Agency (EPA)/SuRGE Survey of Reservoir Greenhouse gas Emissions - Documents/data/all_obs_2025-01-23.RData")
-# dat = all_obs
-
-
 
 #create an object for overlaid methane density plots
 di<-data.frame(dat$ch4_diffusion_best,"diffusion")
@@ -93,11 +89,13 @@ breaks <-c(-10^(nbreaks:1),0, 10^(nbreaks:1))
 
 ## rmp additions
 
-dat_all = dieb %>%
-  mutate(gas_name = "CH[4]") %>%
-  full_join(diebc %>%
-              mutate(gas_name = "CO[2]")) %>%
-  mutate(rate_daily = rate * 24)
+dat_all = read.csv("communications/manuscript/data_paper/6_emission_rate_points.csv") %>%
+  select(ch4_diffusion, ch4_ebullition, ch4_total, co2_diffusion, co2_ebullition, co2_total) %>%
+  pivot_longer(values_to = "rate_hourly", names_to = "name", cols = ch4_diffusion:co2_total) %>%
+  separate(name, into = c("gas_name", "type"), sep = "_") %>%
+  mutate(gas_name = case_when(gas_name == "co2" ~ "CO[2]",
+                              gas_name == "ch4" ~ "CH[4]"),
+         rate_daily = rate_hourly * 24)
 
 
 ggplot() +
@@ -177,7 +175,7 @@ CH4<-unstable_plot_data %>%
         axis.text.x = element_blank(),
         axis.labels.x = element_blank(),
         axis.ticks.x = element_blank(),
-        legend.position="none")+
+        legend.position="top")+
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:16:22", tz = "UTC")),
                  color = "deployment"), key_glyph = "path") +
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:17:08", tz = "UTC")),
@@ -186,7 +184,8 @@ CH4<-unstable_plot_data %>%
                  color = "CO2 stabilizes"), key_glyph = "path") + #CO2
   geom_vline(aes(xintercept = as.numeric(as.POSIXct("2021-06-28 17:21:22", tz = "UTC")),
                  color = "retrieval"), key_glyph = "path") +
-  scale_color_discrete(breaks = c("deployment", "CH4 stabilizes","CO2 stabilizes", "retrieval"), name="") +
+  scale_color_discrete(breaks = c("deployment", "CH4 stabilizes","CO2 stabilizes", "retrieval"), name="",
+                       labels = c("deployment", bquote("CH[4]~stabilizes"),"CO2 stabilizes", "retrieval")) +
   xlab("") +
   ylab(expression(paste("CH "[4]*" (ppm)")))
 CH4
@@ -218,118 +217,218 @@ H2O
 unstab<-cowplot::plot_grid(CO2,CH4,H2O,ncol=1,align="v",labels=c("A","B","C"),rel_heights = c(1.1,1,1))
 unstab
 
-## Plot of Variables that Survey was Designed on
-
-# source("scripts/masterLibrary.R")
-# load("SuRGE-masterScript-objects_2025Mar25.RData")
 
 
-lake.list.plot.methane<-left_join(
-  emissions_agg %>%
-    select(lake_id, visit,ch4_ebullition_lake, ch4_diffusion_lake)%>%
-    mutate(type="methane"),
-  
-  lake.list.all %>%
-  mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
-                            lake_id %in% c( "69_lacustrine") ~ "69",
-                             lake_id %in% c( "70_lacustrine") ~ "70",
-                             TRUE ~ lake_id))%>%
-  mutate(lake_id=as.numeric(lake_id))%>%
-    select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
-  #rename(emission = "ch4_total_lake") %>%
-  pivot_longer(values_to = "emission", names_to = "pathway",
-               cols = c(ch4_ebullition_lake, ch4_diffusion_lake))
 
-lake.list.plot.cd<-left_join(
-  emissions_agg %>%
-    select(lake_id, visit,co2_total_lake)%>%
-    mutate(type="carbon dioxide",
-           pathway = "total"),
-  
-  lake.list.all %>%
-    mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
-                               lake_id %in% c( "69_lacustrine") ~ "69",
-                               lake_id %in% c( "70_lacustrine") ~ "70",
-                               TRUE ~ lake_id))%>%
-    mutate(lake_id=as.numeric(lake_id))%>%
-    select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
-  rename(emission = "co2_total_lake")
+## UPDATED:  Plot of Variables that Survey was Designed on
 
-lake.list.plot<-bind_rows(lake.list.plot.methane,lake.list.plot.cd)%>%
-  filter(!is.na(ag_eco9_nm))%>%
-  filter(!is.na(emission))%>%
-  mutate(emi_mg=emission*24)%>%
-  filter(!is.na(depth_cat))%>%
-  filter(!is.na(chla_cat))
+lake.list.plot = read.csv("communications/manuscript/data_paper/3_lake_scale.csv") %>%
+  filter(name %in% c("ag_eco9_nm",
+                     "depth_cat",
+                     "chla_cat",
+                     "study")) %>%
+  pivot_wider(values_from = value, names_from = name) %>%
+  filter(study == "SuRGE") %>%
+  mutate(depth_cat = case_when(depth_cat == "GT_6m" ~ "deep",
+                               depth_cat == "LE_6m" ~ "shallow"),
+         chla_cat = case_when(chla_cat == "GT_7" ~ "productive",
+                              chla_cat == "LE_7" ~ "unproductive")) %>%
+  select(-units, -study) %>%
+  pivot_longer(values_to = "value", names_to = "name",
+               cols = c(ag_eco9_nm, depth_cat, chla_cat)) %>%
+  left_join(read.csv("communications/manuscript/data_paper/7_emissions_lake.csv") %>%
+              select(lake_id, ch4_diffusion_lake, ch4_ebullition_lake, co2_total_lake) %>%
+              pivot_longer(values_to = "rate_hourly", names_to = "pathway",
+                           cols = c(ch4_diffusion_lake, ch4_ebullition_lake, co2_total_lake))) %>%
+  separate(pathway, into = c("gas_name", "type", "lake"), sep = "_") %>%
+  select(-lake) %>%
+  mutate(gas_name = case_when(gas_name == "co2" ~ "CO[2]",
+                              gas_name == "ch4" ~ "CH[4]"),
+         rate_daily = rate_hourly * 24)
 
-ecoregion<-lake.list.plot  %>%
-  ggplot(aes(x=ag_eco9_nm, y=emi_mg))+
-  theme_bw()+
+
+ecoregion = ggplot() +
+  geom_boxplot(data = lake.list.plot %>% filter(name == "ag_eco9_nm"), 
+               aes(x = value, y = rate_daily, fill = type)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  facet_wrap(~ gas_name, scales = "free", labeller = label_parsed, ncol = 2) +
+  scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
+  labs(x = NULL, y = expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")), title = "C") +
+  scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
+                                 expression(CH[4]~ebullition), 
+                                 expression(total~CO[2]~emissions))) +
+  theme_bw() +
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
         axis.line=element_line(colour="black"),legend.title=element_blank(),
         axis.text.x = element_text(size = 14, angle = 45, hjust=1),
         axis.text.y = element_text(size = 14),
+        plot.title = element_text(size = 16, face = "bold"),
         axis.title = element_text(size = 16),
         strip.text = element_text(size = 16),
         legend.text = element_text(size = 14),
-        legend.position="top"
-        )+
-  geom_boxplot(aes(fill=pathway))+
+        legend.position="top")
+
+
+
+
+depth = ggplot() +
+  geom_boxplot(data = lake.list.plot %>% filter(name == "depth_cat"), 
+               aes(x = value, y = rate_daily, fill = type)) +
   geom_hline(yintercept = 0, linetype = 2) +
-  facet_wrap(~type, scales = "free") +
+  facet_wrap(~ gas_name, scales = "free", labeller = label_parsed, ncol = 2) +
   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
-  ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
-  xlab("") +
+  labs(x = NULL, y = expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")), title = "A") +
   scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
                                  expression(CH[4]~ebullition), 
-                                 expression(total~CO[2]~emissions)))
-ecoregion
-
-depth<-lake.list.plot %>%
-  mutate(depth_cat=ifelse(depth_cat=="GT_6m","deep","shallow")) %>%
-  ggplot(aes(x=depth_cat, y=emi_mg))+
-  theme_bw()+
+                                 expression(total~CO[2]~emissions))) +
+  theme_bw() +
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
         axis.line=element_line(colour="black"),legend.title=element_blank(),
         axis.text = element_text(size = 14),
         axis.title = element_text(size = 16),
+        plot.title = element_text(size = 16, face = "bold"),
         strip.text = element_text(size = 16),
-        legend.position="none"
-        )+
-  geom_boxplot(aes(fill=pathway))+
+        legend.text = element_text(size = 14),
+        legend.position="none")
+
+
+
+
+productivity = ggplot() +
+  geom_boxplot(data = lake.list.plot %>% filter(name == "chla_cat"), 
+               aes(x = value, y = rate_daily, fill = type)) +
   geom_hline(yintercept = 0, linetype = 2) +
-  facet_wrap(~type, scales = "free") +
+  facet_wrap(~ gas_name, scales = "free", labeller = label_parsed, ncol = 2) +
   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
-  ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
-  xlab("")+
+  labs(x = NULL, y = expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")), title = "B") +
   scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
                                  expression(CH[4]~ebullition), 
-                                 expression(total~CO[2]~emissions)))
-depth
-
-productivity<-lake.list.plot %>%
-  mutate(chla_cat=ifelse(chla_cat=="GT_7","productive","unproductive")) %>%
-  ggplot(aes(x=chla_cat, y=emi_mg))+
-  theme_bw()+
+                                 expression(total~CO[2]~emissions))) +
+  theme_bw() +
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
         axis.line=element_line(colour="black"),legend.title=element_blank(),
         axis.text = element_text(size = 14),
         axis.title = element_text(size = 16),
+        plot.title = element_text(size = 16, face = "bold"),
         strip.text = element_text(size = 16),
-        legend.position="none"
-        )+
-  geom_boxplot(aes(fill=pathway))+
-  geom_hline(yintercept = 0, linetype = 2) +
-  facet_wrap(~type, scales = "free") +
-  scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
-  ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
-  xlab("")+
-  scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
-                                 expression(CH[4]~ebullition), 
-                                 expression(total~CO[2]~emissions)))
-productivity
+        legend.text = element_text(size = 14),
+        legend.position="none")
 
-top_row <- plot_grid(depth,productivity)
+
+top_row <- plot_grid(depth, productivity)
 
 strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,1.75))
 strata_fig
+
+
+
+
+# lake.list.plot.methane<-left_join(
+#   emissions_agg %>%
+#     select(lake_id, visit,ch4_ebullition_lake, ch4_diffusion_lake)%>%
+#     mutate(type="methane"),
+#   
+#   lake.list.all %>%
+#   mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
+#                             lake_id %in% c( "69_lacustrine") ~ "69",
+#                              lake_id %in% c( "70_lacustrine") ~ "70",
+#                              TRUE ~ lake_id))%>%
+#   mutate(lake_id=as.numeric(lake_id))%>%
+#     select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
+#   #rename(emission = "ch4_total_lake") %>%
+#   pivot_longer(values_to = "emission", names_to = "pathway",
+#                cols = c(ch4_ebullition_lake, ch4_diffusion_lake))
+# 
+# lake.list.plot.cd<-left_join(
+#   emissions_agg %>%
+#     select(lake_id, visit,co2_total_lake)%>%
+#     mutate(type="carbon dioxide",
+#            pathway = "total"),
+#   
+#   lake.list.all %>%
+#     mutate(lake_id = case_when(lake_id %in% c( "69_riverine", "69_transitional","70_riverine", "70_transitional") ~ NA,
+#                                lake_id %in% c( "69_lacustrine") ~ "69",
+#                                lake_id %in% c( "70_lacustrine") ~ "70",
+#                                TRUE ~ lake_id))%>%
+#     mutate(lake_id=as.numeric(lake_id))%>%
+#     select(lake_id,ag_eco9_nm,depth_cat,chla_cat))%>%
+#   rename(emission = "co2_total_lake")
+# 
+# lake.list.plot<-bind_rows(lake.list.plot.methane,lake.list.plot.cd)%>%
+#   filter(!is.na(ag_eco9_nm))%>%
+#   filter(!is.na(emission))%>%
+#   mutate(emi_mg=emission*24)%>%
+#   filter(!is.na(depth_cat))%>%
+#   filter(!is.na(chla_cat))
+# 
+# ecoregion<-lake.list.plot  %>%
+#   ggplot(aes(x=ag_eco9_nm, y=emi_mg))+
+#   theme_bw()+
+#   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+#         axis.line=element_line(colour="black"),legend.title=element_blank(),
+#         axis.text.x = element_text(size = 14, angle = 45, hjust=1),
+#         axis.text.y = element_text(size = 14),
+#         axis.title = element_text(size = 16),
+#         strip.text = element_text(size = 16),
+#         legend.text = element_text(size = 14),
+#         legend.position="top"
+#         )+
+#   geom_boxplot(aes(fill=pathway))+
+#   geom_hline(yintercept = 0, linetype = 2) +
+#   facet_wrap(~type, scales = "free") +
+#   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
+#   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
+#   xlab("") +
+#   scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
+#                                  expression(CH[4]~ebullition), 
+#                                  expression(total~CO[2]~emissions)))
+# ecoregion
+# 
+# depth<-lake.list.plot %>%
+#   mutate(depth_cat=ifelse(depth_cat=="GT_6m","deep","shallow")) %>%
+#   ggplot(aes(x=depth_cat, y=emi_mg))+
+#   theme_bw()+
+#   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+#         axis.line=element_line(colour="black"),legend.title=element_blank(),
+#         axis.text = element_text(size = 14),
+#         axis.title = element_text(size = 16),
+#         strip.text = element_text(size = 16),
+#         legend.position="none"
+#         )+
+#   geom_boxplot(aes(fill=pathway))+
+#   geom_hline(yintercept = 0, linetype = 2) +
+#   facet_wrap(~type, scales = "free") +
+#   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
+#   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
+#   xlab("")+
+#   scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
+#                                  expression(CH[4]~ebullition), 
+#                                  expression(total~CO[2]~emissions)))
+# depth
+# 
+# productivity<-lake.list.plot %>%
+#   mutate(chla_cat=ifelse(chla_cat=="GT_7","productive","unproductive")) %>%
+#   ggplot(aes(x=chla_cat, y=emi_mg))+
+#   theme_bw()+
+#   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+#         axis.line=element_line(colour="black"),legend.title=element_blank(),
+#         axis.text = element_text(size = 14),
+#         axis.title = element_text(size = 16),
+#         strip.text = element_text(size = 16),
+#         legend.position="none"
+#         )+
+#   geom_boxplot(aes(fill=pathway))+
+#   geom_hline(yintercept = 0, linetype = 2) +
+#   facet_wrap(~type, scales = "free") +
+#   scale_y_continuous(trans = "pseudo_log", breaks = c(-10000, -1000, -100, -10, 0, 10, 100, 1000, 10000))+
+#   ylab(expression(paste("Flux (mg m"^"-2"~"d"^"-1"*")")))+
+#   xlab("")+
+#   scale_fill_discrete(labels = c(expression(CH[4]~diffusion), 
+#                                  expression(CH[4]~ebullition), 
+#                                  expression(total~CO[2]~emissions)))
+# productivity
+# 
+# top_row <- plot_grid(depth,productivity)
+# 
+# strata_fig<-plot_grid(top_row, ecoregion, ncol=1, rel_heights = c(1,1.75))
+# strata_fig

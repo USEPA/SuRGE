@@ -120,11 +120,13 @@ master_dictionary <- tribble(~variable, ~definition,
                              "year_completed", "Year dam was completed",
                              
                              # water isotope
-                             "e_i", "Proportion of water entering a lake that leaves through evaporation",
+                             "e_i", "Proportion of water entering a lake that leaves through evaporation, estimated from water isotope data",
+                             "e_i_units", "units for e_i",
                              "sd_e_i", "Standard deviation of repeated estimates of the proportion of water entering a lake that leaves through evaporation",
-                             "retention_time", "Lake water residence time",
-                             "sd_retention_time", "Standard deviation of repeated estimates of lake water residence time",
-                             "retention_time_ei_repeat_visits", "Number of time retention time and e_i was estimated",
+                             "residence_time", "Lake water residence time estimated from water isotope data",
+                             "residence_time_units","units for residence_time",
+                             "sd_residence_time", "Standard deviation of repeated estimates of lake water residence time",
+                             "residence_time_ei_repeat_visits", "Number of time retention time and e_i was estimated",
                              "e_i_type", "Hydrologic regime based on e_i. e_i < 0.2 is run-of-river. e_i > 0.2 is storage reservoir",
                              
                              # survey design variables
@@ -417,10 +419,9 @@ lake_scale_data <- list(
            # decimals inherited from Renee's data release (10.23719/1531017)
            e_i = format(round(e_i, 3), nsmall = 3),
            sd_e_i = format(round(sd_e_i, 3), nsmall = 3),
-           retention_time = format(round(retention_time, 3), nsmall = 3),
-           sd_retention_time = case_when(is.na(sd_retention_time) ~ NA_character_,
-                                         TRUE ~ format(round(sd_retention_time, 3), nsmall = 3)),
-           
+           residence_time = format(round(residence_time, 3), nsmall = 3),
+           sd_residence_time = case_when(is.na(sd_residence_time) ~ NA_character_,
+                                         TRUE ~ format(round(sd_residence_time, 3), nsmall = 3)),
            across(-lake_id, as.character)) %>% # allow character and numeric in same column
     # all variables presenting a value must end with "_value". All variables
     # presenting units already end with "_units"
