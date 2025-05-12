@@ -128,7 +128,7 @@ k600_lit <- read_xlsx(paste0("scripts/analysis/data_paper/",
   st_set_crs(4326)
 
 # how many lakes id dataset
-k600_lit %>% distinct(lake_name) %>% summarize(n=n()) # 48
+k600_lit %>% distinct(lake_name) %>% summarize(n=n()) # 48  
 # where are they located? Europe, Asia, N and S America
 tmap::tm_shape(World) +
   tm_polygons() +
