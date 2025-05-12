@@ -171,17 +171,17 @@ master_dictionary <- tribble(~variable, ~definition,
 
                              #emissions(lake)
                              "ch4_ebullition_lake","lakewide areal methane ebullition flux estimated using survey site weights",
-                             "ch4_ebullition_units_lake","units for ch4_ebullition_lake_units",
+                             "ch4_ebullition_lake_units","units for ch4_ebullition_lake_units",
                              "ch4_diffusion_lake", "lakewide areal methane diffusion flux estimated using survey site weights",
-                             "ch4_diffusion_units_lake", "units for ch4_diffusion_lake",
+                             "ch4_diffusion_lake_units", "units for ch4_diffusion_lake",
                              "ch4_total_lake", "lakewide total methane flux estimated using survey site weights",
-                             "ch4_total_units_lake","units for ch4_total_lake",
+                             "ch4_total_lake_units","units for ch4_total_lake",
                              "co2_ebullition_lake", "lakewide areal carbon dioxide ebullition flux estimated using survey site weights",
-                             "co2_ebullition_units_lake", "units for co2_ebullition_lake",
+                             "co2_ebullition_lake_units", "units for co2_ebullition_lake",
                              "co2_diffusion_lake", "lakewide areal carbon dioxide diffuion flux estimated using survey site weights",
-                             "co2_diffusion_units_lake", "units for co2_diffusion_lake",
+                             "co2_diffusion_lake_units", "units for co2_diffusion_lake",
                              "co2_total_lake", "lakewide areal total carbon dioxide flux estimated using survey site weights",
-                             "co2_total_units_lake","units for co2_total_lake_units",
+                             "co2_total_lake_units","units for co2_total_lake_units",
                              "ch4_ebullition_std_error_lake","standard error of ch4_ebullition_lake",
                              "ch4_diffusion_std_error_lake", "standard error of ch4_diffusion_lake",
                              "ch4_total_std_error_lake", "standard error of ch4_total_lake",
@@ -764,7 +764,19 @@ emission_rate_points_data_paper <- left_join(
   dat %>%
     # add units for trap deployment and retrieval
     mutate(trap_deply_date_time_units="UTC",
-           trap_rtrvl_date_time_units="UTC") %>%
+           trap_rtrvl_date_time_units="UTC",
+           ch4_diffusion_best= ch4_diffusion_best*24,
+           ch4_diffusion_units = "mg CH4 m-2 d-1",
+           ch4_ebullition= ch4_ebullition*24,
+           ch4_ebullition_units= "mg CH4 m-2 d-1",
+           ch4_total= ch4_total*24,
+           ch4_total_units= "mg CH4 m-2 d-1",
+           co2_diffusion_best= co2_diffusion_best*24,
+           co2_diffusion_units= "mg CO2 m-2 d-1",
+           co2_ebullition= co2_ebullition*24,
+           co2_ebullition_units= "mg CO2 m-2 d-1",
+           co2_total= co2_total*24,
+           co2_total_units= "mg CO2 m-2 d-1")%>%
     select(
       lake_id,
       site_id,
@@ -791,10 +803,9 @@ emission_rate_points_data_paper <- left_join(
       trap_deply_date_time,
       trap_deply_date_time_units),
   # bind with chamber deployment dates (not distinguished by gas)
-  chm_dep
-) %>%
-  # remove "best" from diffusion variable
-  rename_with(.cols = contains("best"), ~sub(pattern = "_best", replacement = "", x = .)) %>%
+  chm_dep) %>%
+    # remove "best" from diffusion variable
+    rename_with(.cols = contains("best"), ~sub(pattern = "_best", replacement = "", x = .)) %>%
   # enforce decimal points
   mutate(
     # smallest non-zero ch4 diffusive emission rate is 0.0277
@@ -838,7 +849,19 @@ write.csv(
 
 # 7. EMISSION RATES LAKE------
 
-emissions_lake_data_paper <- emissions_agg
+emissions_lake_data_paper <- emissions_agg %>%
+  mutate(ch4_diffusion_lake= ch4_diffusion_lake*24,
+         ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
+         ch4_ebullition_lake= ch4_ebullition_lake*24,
+         ch4_ebullition_lake_units= "mg CH4 m-2 d-1",
+         ch4_total_lake= ch4_total_lake*24,
+         ch4_total_lake_units= "mg CH4 m-2 d-1",
+         co2_diffusion_lake= co2_diffusion_lake*24,
+         co2_diffusion_lake_units= "mg CO2 m-2 d-1",
+         co2_ebullition_lake= co2_ebullition_lake*24,
+         co2_ebullition_lake_units= "mg CO2 m-2 d-1",
+         co2_total_lake= co2_total_lake*24,
+         co2_total_lake_units= "mg CO2 m-2 d-1")
 
 
 # Data dictionary
