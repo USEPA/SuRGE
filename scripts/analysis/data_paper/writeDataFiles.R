@@ -336,539 +336,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "density_units", "Units used for density of organisms enumerated from sample"
                              )
 
-
-# 3. LAKE SCALE VALUES-----------
-lake_scale_data <- list(
-  
-  # e.	Links to existing data
-  # this needs to be long due to numerous nhdplus_comid, lagos, etc values per lake
-  read.csv(paste0(userPath, "data\\siteDescriptors\\surge_master_crosswalk_long_hollister.csv"), header = T) %>% 
-    select(-lake_name) %>% 
-    # A few variables are duplicated in this dataset: nl07_site_id == lmorpho_nla07, lmorpho_comid == hylak_comid == nhdplus_comid
-    # omit the ones we don't want (e.g. getting NLA07 from nl07_site_id variable; comid from nhdplus_comid variable)
-    filter(!(join_id_name %in% c("lmorpho_comid", "lmorpho_nla07", "hylak_comid"))) %>% 
-    mutate(join_id_name = replace(join_id_name, join_id_name == "nl07_site_id", "nla07_site_id")) %>%
-    rename(name = join_id_name,
-           value = join_id) %>%
-    mutate(units = NA),
-
-    # b.	Morphometry indices
-  morpho %>% 
-    select(-lake_name) %>%
-    mutate(
-      # variables with no decimals
-      across(c(surface_area, shoreline_length, max_width, mean_width, max_length, volume), 
-           ~format(round(., 0), nsmall = 0)),
-      # variables with 1 decimal
-      across(c(mean_depth, max_depth), ~ format(round(., 1), nsmall = 1)),
-      # variables with two decimals
-      across(c(shoreline_development, littoral_fraction), ~ format(round(., 2), nsmall = 2)),
-      # variables with three decimals, not including circularity in data paper
-      #circularity = format(round(circularity, 3), nsmall = 3)
-      ) %>%
-    mutate(across(!lake_id, as.character)) %>% # needed to collapse into one column
-    pivot_longer(!lake_id) %>%
-    mutate(units = case_when(name == "surface_area" ~ "m2",
-                             name == "shoreline_development" ~ "dimensionless",
-                             #name == "circularity" ~ "dimensionless",
-                             name == "volume" ~ "m3",
-                             #name == "axis_ratio" ~ "dimensionless",
-                             #name == "dynamic_ratio" ~ "dimensionless",
-                             TRUE ~ "m")) %>% # all others meters
-    mutate(across(!lake_id, as.character)), # needed to collapse into one column
-  
-  # c.  NWI
-  
-  nwi_link %>%
-    pivot_longer(!lake_id)%>%
-    mutate(value = format(round ((value * 100),2), nsmall=2)) %>%
-    mutate (units = "percent"),
-  
-  # X.	Sedimentation rates
-  # sedimentation_link %>%
-  #   select(- c(sediment_predictor_type, sedimentation, sedimentation_units)) %>% # not sure about this variable or sedimentation numbers
-  #   mutate(
-  #     # Fix decimal places, otherwise many are shown when converted to character
-  #     basin_kfact = format(round(basin_kfact, 3), nsmall = 3),
-  #     across(c(basin_forest, basin_crop, basin_wetland, sediment_oc, basin_slope),
-  #            ~ format(round(., 2), nsmall = 2)),
-  #     across(c(clow_surface_area, basin_soc0_5), ~ format(round(., 0), nsmall = 0))
-  #     ) %>%
-  #   # subset for development
-  #   #filter(lake_id == 100) %>%
-  #   #select(lake_id, contains("sedimentation"), contains("sediment")) %>%
-  #   # all variables presenting a value must end with "_value". All variables
-  #   # presenting units already end with "_units"
-  #   rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
-  #   pivot_longer(-lake_id, 
-  #                # anything to left of pattern is "name"
-  #                # every matching group to right creates new value column
-  #                names_to = c("name", ".value"), 
-  #                # breaking pattern in final _
-  #                names_pattern = "(.+)_(.+)"),
-  
-  # d.	Year of construction
-  nid_link %>%
-    select(lake_id, year_completed) %>%
-    pivot_longer(!lake_id) %>%
-    mutate(units = "Gregorian calendar year"),
-  
-  # f.	E:I and Residence Time estimates
-  water_isotope_agg %>%
-    mutate(lake_id = as.numeric(lake_id),
-           # decimals inherited from Renee's data release (10.23719/1531017)
-           e_i = format(round(e_i, 3), nsmall = 3),
-           sd_e_i = format(round(sd_e_i, 3), nsmall = 3),
-           residence_time = format(round(residence_time, 3), nsmall = 3),
-           sd_residence_time = case_when(is.na(sd_residence_time) ~ NA_character_,
-                                         TRUE ~ format(round(sd_residence_time, 3), nsmall = 3)),
-           across(-lake_id, as.character)) %>% # allow character and numeric in same column
-    # all variables presenting a value must end with "_value". All variables
-    # presenting units already end with "_units"
-    rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
-    pivot_longer(!lake_id,
-                 # anything to left of pattern is "name"
-                 # every matching group to right creates new value column
-                 names_to = c("name", ".value"), 
-                 # breaking pattern in final _
-                 names_pattern = "(.+)_(.+)"),
-  
-  # survey design parameters and study 
-  bind_rows(lake.list, lake.list.2016) %>%
-    filter(eval_status_code == "S",
-           visit == 1) %>% 
-    select(lake_id, wgt, ag_eco9, ag_eco9_nm, depth_cat, chla_cat) %>%
-    mutate(wgt_units = "dimensionless",
-           study = case_when(lake_id %in% 1:998 ~ "SuRGE",
-                             lake_id %in% 1001:1032 ~ "2016 Regional Survey",
-                             lake_id %in% 999:1000 ~ "Hand picked",
-                             TRUE ~ "Fly you fools!"), # error code
-           across(!lake_id, as.character)) %>% # needed to pivot all values to one column
-    # all variables presenting a value must end with "_value". All variables
-    # presenting units already end with "_units"
-    rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
-    pivot_longer(!lake_id,
-                 # anything to left of pattern is "name"
-                 # every matching group to right creates new value column
-                 names_to = c("name", ".value"), 
-                 # breaking pattern in final _
-                 names_pattern = "(.+)_(.+)"),
-  
-  # LAGOS trophic status data
-  lagos_ts_agg_link %>%
-    select(lake_id, visit,
-           chl_predicted_sample_month, doc_predicted_sample_month,
-           chl_predicted_sample_season, doc_predicted_sample_season)%>%
-    mutate(chl_predicted_sample_month_units = "ug_l",
-           doc_predicted_sample_month_units = "mg_l",
-           chl_predicted_sample_season_units = "ug_l",
-           doc_predicted_sample_season_units = "mg_l") %>%
-    # all variables presenting a value must end with "_value". All variables
-    # presenting units already end with "_units"
-    rename_with(~ifelse(!grepl(c("units|lake_id|visit"), .x), paste0(.x, "_value"), .x)) %>%
-    pivot_longer(!c(lake_id, visit),
-                 # anything to left of pattern is "name"
-                 # every matching group to right creates new value column
-                 names_to = c("name", ".value"), 
-                 # breaking pattern in final _
-                 names_pattern = "(.+)_(.+)") %>%
-    # move visit from "visit" column to variable name. This is because this
-    # data object doesn't have a visit column
-    mutate(name = paste0(name, "_visit", visit)) %>%
-    select(-visit) %>%
-    # enforce digits, otherwise many digits are shown when converted to character below
-    mutate(value = format(round(value, 2), nsmall = 2))
-
-  ) %>%
-    map(., ~.x %>% mutate(value = as.character(value))) %>% # character to enable all to collapse into one column
-    map_dfr(., bind_rows) %>%
-  filter(lake_id != 1033) # omit Falls Lake)
-  
-
-# Data dictionary
-# write.table(unique(lake_scale_data_paper$name), file = "clipboard", row.names = FALSE)
-lake_scale_dictionary <- master_dictionary %>%
-  filter(variable %in% unique(lake_scale_data$name))
-
-# Are all values in data dictionary?
-ifelse (unique(lake_scale_data$name) %in% lake_scale_dictionary$variable %>% 
-          {!.} %>%
-          sum(.) == 0,
-        "Site data dictionary is complete", 
-        "Site data dictionary is incomplete")
-
-# write data
-write.csv(x = lake_scale_data, 
-          file = "communications/manuscript/data_paper/3_lake_scale.csv",
-          row.names = FALSE)
-
-# write dictionary
-write.csv(x = lake_scale_dictionary, 
-          file = "communications/manuscript/data_paper/3_lake_scale_dictionary.csv",
-          row.names = FALSE)
-
-
-# 4. DEPTH PROFILES----
-# WIDE FORMAT
-# see readDepthProfiles.R for primary data source
-# depth_profile_all includes riverine, transitional, and lacustine. Although all
-# other lakes only have a single depth profile, lets report all zones in the paper.
-
-depth_profiles_data <- depth_profiles_all %>%
-  mutate(
-    # riverine and transitional zones. Move habitat from lake to site_id
-    site_id = case_when(grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
-                        grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
-                        grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
-                        TRUE ~ as.character(site_id)),
-    # remove transitional, riverine, lacustrine from lake_id
-    # retain character class initially, then convert to numeric.
-    lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
-                        lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
-                        TRUE ~ lake_id))
-
-# Data dictionary
-depth_profiles_dictionary <- master_dictionary %>%
-  filter(variable %in% colnames(depth_profiles_data))
-
-# Are all values in data dictionary?
-ifelse (colnames(depth_profiles_data) %in% depth_profiles_dictionary$variable %>% 
-          {!.} %>%
-          sum(.) == 0,
-        "Site data dictionary is complete", 
-        "Site data dictionary is incomplete")
-
-# write data
-write.csv(x = depth_profiles_data, 
-          file = "communications/manuscript/data_paper/4_depth_profiles.csv",
-          row.names = FALSE)
-
-# write dictionary
-write.csv(x = depth_profiles_dictionary, 
-          file = "communications/manuscript/data_paper/4_depth_profiles_dictionary.csv",
-          row.names = FALSE)
-
-
-
-# 5. SITE DATA------------
-
-# a.	Unit columns for all measurement
-# b.	Flat file
-# c.	lake_id
-# d.	site_id
-# e.	visit
-# f. chemistry
-# h.	Dissolved gas not ready
-
-site_data <- 
-  bind_rows(
-    # SONDE DATA FIRST
-    dat %>%
-      select(lake_id, site_id, visit,
-             # Sonde (deep and shallow)
-             contains("sonde"), # chlorophyll and phycocyanin
-             contains("do_mg"), 
-             contains("_ph") & !contains("nla") & !contains("phycocyanin"), # exclude NLA pH and lab phycocyanin 
-             contains("sp_cond"),
-             matches(c("shallow_temp|deep_temp")),
-             contains("turb") & !contains("nla")) %>% # exclude NLA turbidity
-      # exclude do units from column name
-      rename_with(~ifelse(grepl("do_mg", .x), gsub("_mg", "", .x), .x)) %>%
-      # every column name must end with _flags, _comment, _units, or _value. This will
-      # be used to pivot_longer
-      rename_with(~ifelse(
-        !grepl(c("lake_id|site_id|visit|flag|comment|units"), .x), # columns that aren't ID, flag, comment, or units
-        paste0(.x, "_value"), # append _value suffix
-        .x)) %>% # else return original name
-      pivot_longer(-c(lake_id, site_id, visit),
-                   # anything to left of pattern is "name"
-                   # every matching group to right creates new value column
-                   names_to = c("name", ".value"),
-                   # breaking pattern is final _
-                   names_pattern = "(.+)_(.+)") %>%
-      mutate(sample_depth = sub("\\_.*", "", name), # move depth to new column
-             name = gsub(c("deep_|shallow_"), "", name)) %>% # remove depth from name column
-      # fix turbidity name
-      mutate(name = case_when(name == "turb" ~ "turbidity",
-                              TRUE ~ name)) %>%
-      # create units columns
-      mutate(units = case_when(name == "chla_sonde" ~ "ug_l",
-                               name == "phycocyanin_sonde" ~ "ug_l",
-                               name == "do" ~ "mg_l",
-                               name == "ph" ~ "ph",
-                               name == "sp_cond" ~ "us_cm",
-                               name == "turbidity" ~ "ntu",
-                               name == "temp" ~ "c",
-                               TRUE ~ "FLY YOU FOOLS!"),
-             value = as.numeric(value)) %>% # something in here is causing a character value?
-      # NLA conventions
-      mutate(value = case_when(name == "ph" ~ round(value, 2),
-                               name == "temp" ~ round(value, 1),
-                               name == "do" ~ round(value, 1),
-                               name == "sp_cond" ~ round(value, 0),
-                               name == "turbidity" ~ round(value, 1),
-                               name == "chla_sonde" ~ round(value, 1),
-                               TRUE ~ value)) %>%
-      drop_na(value), # omit record if no value reported
-    
-    
-    # SuRGE CHEMISTRY DATA
-    chemistry_all %>%
-      filter(sample_type != "blank") %>% # omit blanks
-      select(-sample_type,
-             -contains("phycocyanin_lab")) %>%
-      # move transitional, lacustrine, riverine from lake_id to site_id
-      mutate( 
-        site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
-                            grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
-                            grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
-                            TRUE ~ as.character(site_id)),
-        # remove transitional, lacustrine, riverine from lake_id
-        # retain character class initially, then convert to numeric.
-        lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
-                            lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
-                            TRUE ~ lake_id),
-        lake_id = as.numeric(lake_id)) %>%
-      # some units are missing, even when an analyte value is presented.
-      # lake_id == 17, analyte == cl for example
-      # fill all units
-      fill(contains("units"), .direction = "updown") %>%
-      group_by(lake_id, site_id, visit, sample_depth) %>%
-      summarize(across(!matches(c("flags|units")), mean),
-                # This takes nearly 20 seconds to run!
-                # Check if any flags are present across grouped analytes;
-                # If every analyte has a flag, keep it. Otherwise, NA.
-                across(contains("flag"),
-                       ~ case_when(
-                         # Check for all combinations of flags
-                         all(str_detect(., "ND H S")) ~ "ND H S",
-                         all(str_detect(., "L H S")) ~ "L H S",
-                         all(str_detect(., "ND.*H")) ~ "ND H",
-                         all(str_detect(., "L.*H|H.*L")) ~ "L H",
-                         all(str_detect(., "ND.*S")) ~ "ND S",
-                         all(str_detect(., "L.*S")) ~ "L S",
-                         all(str_detect(., "H.*S")) ~ "H S",
-                         all(str_detect(., "ND")) ~ "ND",
-                         all(str_detect(., "L")) ~ "L",
-                         all(str_detect(., "H")) ~ "H",
-                         all(str_detect(., "S")) ~ "S",
-                         # All other combinations should result in NA
-                         TRUE ~ NA_character_)), 
-                # Retain units columns; look for any non-NA value
-                across(contains("unit"), 
-                       ~ min(., na.rm = TRUE))) %>%
-      # every column name must end with _flags, _units, or _value. This will
-      # be used to pivot_longer
-      rename_with(~ifelse(
-        !grepl(c("lake_id|site_id|sample_depth|visit|flag|units"), .x), # columns that aren't ID, flag, or units
-        paste0(.x, "_value"), # append _value suffix
-        .x)) %>% # else return original name
-      pivot_longer(-c(lake_id, site_id, visit, sample_depth),
-                   # anything to left of pattern is "name"
-                   # every matching group to right creates new value column
-                   names_to = c("name", ".value"),
-                   # breaking pattern is final _
-                   names_pattern = "(.+)_(.+)") %>%
-      ungroup %>%
-      drop_na(value), # omit record if no value reported
-    
-    
-    # 2016 CHEMISTRY DATA   
-    dat_2016 %>%
-      select(lake_id, site_id, visit,
-             matches(c("_chla_lab|_tn|_nh4|_no2|_no2_3|_toc|_tp|_op")),
-             contains("units") & !matches(c("ebullition|diffusion|total"))) %>%
-      mutate(site_id = as.character(site_id)) %>% # needed to bind with above that have 8_lacustrine....
-      # all 2016 chemistry observations are shallow. Remove from variable
-      # name to simplify things. Add in as new variable below
-      rename_with(.cols = contains("shallow"), # columns that aren't ID or units
-                  ~ gsub("shallow_", "", .x)) %>%
-      # every column name must end with _units, or _value. This will
-      # be used to pivot_longer
-      rename_with(.cols = !matches(c("lake_id|site_id|visit|units")), # columns that aren't ID or units
-                  ~paste0(.x, "_value")) %>% # append _value suffix
-      pivot_longer(-c(lake_id, site_id, visit),
-                   # anything to left of pattern is "name"
-                   # every matching group to right creates new value column
-                   names_to = c("name", ".value"),
-                   # breaking pattern is final _
-                   names_pattern = "(.+)_(.+)") %>%
-      mutate(sample_depth = "shallow") %>%
-      drop_na(value) # omit record if no value reported
-  ) %>%
-  # enforce decimal points
-  filter(!(name == "po4")) %>% # omit IC based po4 from TTEB
-  mutate(value = case_when(
-    # nitrogen analytes reported in ug_n_l
-    name %in% c("nh4", "no2", "no2_3", "no3", "tn") ~ round(value, 1),
-    # TP and colorimetric base p in ug_p_l
-    name %in% c("op", "tp") ~ round(value, 1),
-    # 5 decimals reported for tteb data
-    name %in% metals ~ round(value, 5), # metals is from chemSampleList.R
-    # anions in mg_l. decimals based on MDL. See Wiki, 
-    # Anions: analytical methods, detection limits, and holding times/CIN-TTEB Table
-    name %in% c("br", "f") ~ round(value, 3), 
-    name %in% c("cl", "so4") ~ round(value, 2), 
-    # based on NLA convention
-    name %in% c("doc", "toc") ~ round(value, 2),
-    # based on NLA convention
-    name == "chla_lab" ~ round(value, 2),
-    # error flag
-    TRUE ~ value))
-
-#write.table(unique(site_data$name), file = "clipboard", row.names = FALSE)
-
-# Data dictionary
-site_data_dictionary <- master_dictionary %>%
-  filter(variable %in% colnames(site_data) |
-         variable %in% unique(site_data$name))
-
-# Are all values in data dictionary?
-ifelse (c(colnames(site_data) %in% site_data_dictionary$variable,
-          unique(site_data$name) %in% site_data_dictionary$variable) %>% 
-          {!.} %>%
-          sum(.) == 0,
-"Site data dictionary is complete", 
-"Site data dictionary is incomplete")
-
-# write data
-write.csv(x = site_data, 
-          # writing data to repo rather than SharePoint
-          file = "communications/manuscript/data_paper/5_site_data.csv",
-          row.names = FALSE)
-
-# write dictionary
-write.csv(x = site_data_dictionary, 
-          file = "communications/manuscript/data_paper/5_site_data_dictionary.csv",
-          row.names = FALSE)
-
-
-# 6. EMISSION RATES (POINT)----
-
-# First need to compile correct chamber deployment times into an object
-# pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
-# and from the dat_2016 object for the 2016 sites
-chm_dep <- bind_rows (
-  chm_deply %>%
-    select(lake_id, site_id, visit, chamb_deply_date_time)%>%
-    mutate(chamb_deply_date_time_units="UTC"),
-  
-  dat_2016 %>%
-    select(lake_id, site_id, visit, chamb_deply_date_time) %>%
-    mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id),
-           chamb_deply_date_time_units="UTC")
-)
-
-emission_rate_points_data_paper <- left_join(
-  # primary data first
-  dat %>%
-    # add units for trap deployment and retrieval
-    mutate(trap_deply_date_time_units="UTC",
-           trap_rtrvl_date_time_units="UTC") %>%
-    select(
-      lake_id,
-      site_id,
-      visit,
-      air_temp,
-      air_temp_units,
-      ch4_diffusion_best,
-      ch4_diffusion_units,
-      ch4_ebullition,
-      ch4_ebullition_units,
-      ch4_total,
-      ch4_total_units,
-      ch4_deployment_length,
-      ch4_deployment_length_units,
-      co2_diffusion_best,
-      co2_diffusion_units,
-      co2flag,
-      co2_ebullition,
-      co2_ebullition_units,
-      co2_total,
-      co2_total_units,
-      co2_deployment_length,
-      co2_deployment_length_units,
-      trap_deply_date_time,
-      trap_deply_date_time_units),
-  # bind with chamber deployment dates (not distinguished by gas)
-  chm_dep
-) %>%
-  # remove "best" from diffusion variable
-  rename_with(.cols = contains("best"), ~sub(pattern = "_best", replacement = "", x = .)) %>%
-  # enforce decimal points
-  mutate(
-    # smallest non-zero ch4 diffusive emission rate is 0.0277
-    ch4_diffusion = round(ch4_diffusion, 2),
-    # smallest non-zero ch4 ebullition emission rate is 4.906696e-06
-    ch4_ebullition = round(ch4_ebullition, 6),
-    # smallest non-zero ch4 total emission rate is 1.394003e-05
-    ch4_total = round(ch4_total, 5),
-    # smallest non-zero abs(co2 diffusive emission rate) is 2.519658
-    co2_diffusion = round(co2_diffusion, 2),   
-    # smallest non-zero co2 ebullition is 0.0001472518
-    co2_ebullition = round(co2_ebullition, 4),
-    # smallest non-zero abs(co2 total) is 0.0001876054
-    co2_total = round(co2_total, 4))
-
-# Data dictionary
-emission_rate_points_data_paper_dictionary <- master_dictionary %>%
-  filter(variable %in% colnames(emission_rate_points_data_paper))
-
-# Are all values in data dictionary?
-ifelse (c(colnames(emission_rate_points_data_paper) %in% emission_rate_points_data_paper_dictionary$variable) %>% 
-          {!.} %>%
-          sum(.) == 0,
-        "Site data dictionary is complete", 
-        "Site data dictionary is incomplete")
-
-# write data
-write.csv(
-  x = emission_rate_points_data_paper,
-  file = "communications/manuscript/data_paper/6_emission_rate_points.csv",
-  row.names = FALSE
-)
-
-# write dictionary
-write.csv(
-  x = emission_rate_points_data_paper_dictionary,
-  file = "communications/manuscript/data_paper/6_emission_rate_points_dictionary.csv",
-  row.names = FALSE
-)
-
-
-# 7. EMISSION RATES LAKE------
-
-emissions_lake_data_paper <- emissions_agg
-
-
-# Data dictionary
-emissions_lake_data_paper_dictionary <- master_dictionary %>%
-  filter(variable %in% colnames(emissions_lake_data_paper))
-
-# Reorder variables so they match the data dictionary
-emissions_lake_data_paper <- emissions_lake_data_paper %>%
-  relocate(emissions_lake_data_paper_dictionary$variable)
-
-# Are all values in data dictionary?
-ifelse (c(colnames(emissions_lake_data_paper) %in% emissions_lake_data_paper_dictionary$variable) %>% 
-          {!.} %>%
-          sum(.) == 0,
-        "Site data dictionary is complete", 
-        "Site data dictionary is incomplete")
-
-# write data
-write.csv(
-  x = emissions_lake_data_paper,
-  file = "communications/manuscript/data_paper/7_emissions_lake.csv",
-  row.names = FALSE)
-
-# write dictionary
-write.csv(
-  x = emissions_lake_data_paper_dictionary,
-  file = "communications/manuscript/data_paper/7_emissions_lake_dictionary.csv",
-  row.names = FALSE)
-
-# 8. SITE DESCRIPTORS--------------
+# 3. SITE DESCRIPTORS--------------
 # -.	Site Descriptors
 # -.	Lake_id
 # -.	Site_id
@@ -1028,8 +496,8 @@ if (site_descriptors_data %>%
     summarize(date_check = sum(date_check)) %>% pull() > 1) {
   "All dates are good"
 } else {
-    "problem with dates"
-  }
+  "problem with dates"
+}
 
 
 # Data dictionary
@@ -1040,53 +508,594 @@ site_descriptors_dictionary <- master_dictionary %>%
 ifelse (
   #TRUE if variable is in dictionary, FALSE if not
   colnames(site_descriptors_data) %in% site_descriptors_dictionary$variable %>% # TRUE if variable is present 
-          {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
-          sum(.) == 0, # all TRUE add up
-        "Site data dictionary is complete", # if 0 (all variables are present) 
-        "Site data dictionary is incomplete") # if not 0 (>=1 variable missing)
-
-# write data
-write.csv(x = site_descriptors_data, 
-          file = "communications/manuscript/data_paper/8_site_descriptors_data.csv",
-          row.names = FALSE)
-
-# write dictionary
-write.csv(x = site_descriptors_dictionary, 
-          file = "communications/manuscript/data_paper/8_site_descriptors_dictionary.csv",
-          row.names = FALSE)
-
-# 9. METEOROLOGY-----------
-# 4/18/2025 only have wind speed, air temp, and precipitation
-met_data <- met_chamber %>%
-  select(-temp_lake_mix_layer_c) %>%
-  relocate(lake_id, site_id, visit, date_time, precipitation, wind_speed, temp_air_2m)
-
-# Data dictionary
-met_dictionary <- master_dictionary %>%
-  filter(variable %in% colnames(met_data))
-
-# Are all values in data dictionary?
-ifelse (
-  #TRUE if variable is in dictionary, FALSE if not
-  colnames(met_data) %in% met_dictionary$variable %>% # TRUE if variable is present 
     {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
     sum(.) == 0, # all TRUE add up
   "Site data dictionary is complete", # if 0 (all variables are present) 
   "Site data dictionary is incomplete") # if not 0 (>=1 variable missing)
 
 # write data
-write.csv(x = met_data, 
-          file = "communications/manuscript/data_paper/9_met_data.csv",
+write.csv(x = site_descriptors_data, 
+          file = "communications/manuscript/data_paper/3_site_descriptors_data.csv",
           row.names = FALSE)
 
 # write dictionary
-write.csv(x = met_dictionary, 
-          file = "communications/manuscript/data_paper/9_met_dictionary.csv",
+write.csv(x = site_descriptors_dictionary, 
+          file = "communications/manuscript/data_paper/3_site_descriptors_dictionary.csv",
           row.names = FALSE)
 
 
 
-# 10. PHYTOPLANKTON-------------------
+# 4. EMISSION RATES (POINT)----
+
+# First need to compile correct chamber deployment times into an object
+# pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
+# and from the dat_2016 object for the 2016 sites
+chm_dep <- bind_rows (
+  chm_deply %>%
+    select(lake_id, site_id, visit, chamb_deply_date_time)%>%
+    mutate(chamb_deply_date_time_units="UTC"),
+  
+  dat_2016 %>%
+    select(lake_id, site_id, visit, chamb_deply_date_time) %>%
+    mutate(lake_id = as.numeric(lake_id), site_id = as.character(site_id),
+           chamb_deply_date_time_units="UTC")
+)
+
+emission_rate_points_data_paper <- left_join(
+  # primary data first
+  dat %>%
+    # add units for trap deployment and retrieval
+    mutate(trap_deply_date_time_units="UTC",
+           trap_rtrvl_date_time_units="UTC") %>%
+    select(
+      lake_id,
+      site_id,
+      visit,
+      air_temp,
+      air_temp_units,
+      ch4_diffusion_best,
+      ch4_diffusion_units,
+      ch4_ebullition,
+      ch4_ebullition_units,
+      ch4_total,
+      ch4_total_units,
+      ch4_deployment_length,
+      ch4_deployment_length_units,
+      co2_diffusion_best,
+      co2_diffusion_units,
+      co2flag,
+      co2_ebullition,
+      co2_ebullition_units,
+      co2_total,
+      co2_total_units,
+      co2_deployment_length,
+      co2_deployment_length_units,
+      trap_deply_date_time,
+      trap_deply_date_time_units),
+  # bind with chamber deployment dates (not distinguished by gas)
+  chm_dep
+) %>%
+  # join precip and wind speed during hour of chamber deployment
+  left_join(# 4/18/2025 only have wind speed, air temp, and precipitation
+    met_chamber %>%
+      select(lake_id, site_id, visit, contains("precipitation"), contains("wind_speed"))) %>%
+  # remove "best" from diffusion variable
+  rename_with(.cols = contains("best"), ~sub(pattern = "_best", replacement = "", x = .)) %>%
+  # enforce decimal points
+  mutate(
+    # smallest non-zero ch4 diffusive emission rate is 0.0277
+    ch4_diffusion = round(ch4_diffusion, 2),
+    # smallest non-zero ch4 ebullition emission rate is 4.906696e-06
+    ch4_ebullition = round(ch4_ebullition, 6),
+    # smallest non-zero ch4 total emission rate is 1.394003e-05
+    ch4_total = round(ch4_total, 5),
+    # smallest non-zero abs(co2 diffusive emission rate) is 2.519658
+    co2_diffusion = round(co2_diffusion, 2),   
+    # smallest non-zero co2 ebullition is 0.0001472518
+    co2_ebullition = round(co2_ebullition, 4),
+    # smallest non-zero abs(co2 total) is 0.0001876054
+    co2_total = round(co2_total, 4),
+    wind_speed = round(wind_speed, 2))
+
+# Data dictionary
+emission_rate_points_data_paper_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(emission_rate_points_data_paper))
+
+# Are all values in data dictionary?
+ifelse (c(colnames(emission_rate_points_data_paper) %in% emission_rate_points_data_paper_dictionary$variable) %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
+
+# write data
+write.csv(
+  x = emission_rate_points_data_paper,
+  file = "communications/manuscript/data_paper/4_emission_rate_points.csv",
+  row.names = FALSE
+)
+
+# write dictionary
+write.csv(
+  x = emission_rate_points_data_paper_dictionary,
+  file = "communications/manuscript/data_paper/4_emission_rate_points_dictionary.csv",
+  row.names = FALSE
+)
+
+
+
+# 5. EMISSION RATES LAKE------
+
+emissions_lake_data_paper <- emissions_agg
+
+
+# Data dictionary
+emissions_lake_data_paper_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(emissions_lake_data_paper))
+
+# Reorder variables so they match the data dictionary
+emissions_lake_data_paper <- emissions_lake_data_paper %>%
+  relocate(emissions_lake_data_paper_dictionary$variable)
+
+# Are all values in data dictionary?
+ifelse (c(colnames(emissions_lake_data_paper) %in% emissions_lake_data_paper_dictionary$variable) %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
+
+# write data
+write.csv(
+  x = emissions_lake_data_paper,
+  file = "communications/manuscript/data_paper/5_emissions_lake.csv",
+  row.names = FALSE)
+
+# write dictionary
+write.csv(
+  x = emissions_lake_data_paper_dictionary,
+  file = "communications/manuscript/data_paper/5_emissions_lake_dictionary.csv",
+  row.names = FALSE)
+
+
+
+# 6. DEPTH PROFILES----
+# WIDE FORMAT
+# see readDepthProfiles.R for primary data source
+# depth_profile_all includes riverine, transitional, and lacustine. Although all
+# other lakes only have a single depth profile, lets report all zones in the paper.
+
+depth_profiles_data <- depth_profiles_all %>%
+  mutate(
+    # riverine and transitional zones. Move habitat from lake to site_id
+    site_id = case_when(grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                        grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                        grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                        TRUE ~ as.character(site_id)),
+    # remove transitional, riverine, lacustrine from lake_id
+    # retain character class initially, then convert to numeric.
+    lake_id = case_when(lake_id %in% c("69_riverine", "69_transitional", "69_lacustrine") ~ "69",
+                        lake_id %in% c("70_riverine", "70_transitional", "70_lacustrine") ~ "70",
+                        TRUE ~ lake_id))
+
+# Data dictionary
+depth_profiles_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(depth_profiles_data))
+
+# Are all values in data dictionary?
+ifelse (colnames(depth_profiles_data) %in% depth_profiles_dictionary$variable %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
+
+# write data
+write.csv(x = depth_profiles_data, 
+          file = "communications/manuscript/data_paper/6_depth_profiles.csv",
+          row.names = FALSE)
+
+# write dictionary
+write.csv(x = depth_profiles_dictionary, 
+          file = "communications/manuscript/data_paper/6_depth_profiles_dictionary.csv",
+          row.names = FALSE)
+
+
+# 7. SITE DATA------------
+
+# a.	Unit columns for all measurement
+# b.	Flat file
+# c.	lake_id
+# d.	site_id
+# e.	visit
+# f. chemistry
+# h.	Dissolved gas not ready
+
+site_data <- 
+  bind_rows(
+    # SONDE DATA FIRST
+    dat %>%
+      select(lake_id, site_id, visit,
+             # Sonde (deep and shallow)
+             contains("sonde"), # chlorophyll and phycocyanin
+             contains("do_mg"), 
+             contains("_ph") & !contains("nla") & !contains("phycocyanin"), # exclude NLA pH and lab phycocyanin 
+             contains("sp_cond"),
+             matches(c("shallow_temp|deep_temp")),
+             contains("turb") & !contains("nla")) %>% # exclude NLA turbidity
+      # exclude do units from column name
+      rename_with(~ifelse(grepl("do_mg", .x), gsub("_mg", "", .x), .x)) %>%
+      # every column name must end with _flags, _comment, _units, or _value. This will
+      # be used to pivot_longer
+      rename_with(~ifelse(
+        !grepl(c("lake_id|site_id|visit|flag|comment|units"), .x), # columns that aren't ID, flag, comment, or units
+        paste0(.x, "_value"), # append _value suffix
+        .x)) %>% # else return original name
+      pivot_longer(-c(lake_id, site_id, visit),
+                   # anything to left of pattern is "name"
+                   # every matching group to right creates new value column
+                   names_to = c("name", ".value"),
+                   # breaking pattern is final _
+                   names_pattern = "(.+)_(.+)") %>%
+      mutate(sample_depth = sub("\\_.*", "", name), # move depth to new column
+             name = gsub(c("deep_|shallow_"), "", name)) %>% # remove depth from name column
+      # fix turbidity name
+      mutate(name = case_when(name == "turb" ~ "turbidity",
+                              TRUE ~ name)) %>%
+      # create units columns
+      mutate(units = case_when(name == "chla_sonde" ~ "ug_l",
+                               name == "phycocyanin_sonde" ~ "ug_l",
+                               name == "do" ~ "mg_l",
+                               name == "ph" ~ "ph",
+                               name == "sp_cond" ~ "us_cm",
+                               name == "turbidity" ~ "ntu",
+                               name == "temp" ~ "c",
+                               TRUE ~ "FLY YOU FOOLS!"),
+             value = as.numeric(value)) %>% # something in here is causing a character value?
+      # NLA conventions
+      mutate(value = case_when(name == "ph" ~ round(value, 2),
+                               name == "temp" ~ round(value, 1),
+                               name == "do" ~ round(value, 1),
+                               name == "sp_cond" ~ round(value, 0),
+                               name == "turbidity" ~ round(value, 1),
+                               name == "chla_sonde" ~ round(value, 1),
+                               TRUE ~ value)) %>%
+      drop_na(value), # omit record if no value reported
+    
+    
+    # SuRGE CHEMISTRY DATA
+    chemistry_all %>%
+      filter(sample_type != "blank") %>% # omit blanks
+      select(-sample_type,
+             -contains("phycocyanin_lab")) %>%
+      # move transitional, lacustrine, riverine from lake_id to site_id
+      mutate( 
+        site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                            grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                            grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                            TRUE ~ as.character(site_id)),
+        # remove transitional, lacustrine, riverine from lake_id
+        # retain character class initially, then convert to numeric.
+        lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                            lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                            TRUE ~ lake_id),
+        lake_id = as.numeric(lake_id)) %>%
+      # some units are missing, even when an analyte value is presented.
+      # lake_id == 17, analyte == cl for example
+      # fill all units
+      fill(contains("units"), .direction = "updown") %>%
+      group_by(lake_id, site_id, visit, sample_depth) %>%
+      summarize(across(!matches(c("flags|units")), mean),
+                # This takes nearly 20 seconds to run!
+                # Check if any flags are present across grouped analytes;
+                # If every analyte has a flag, keep it. Otherwise, NA.
+                across(contains("flag"),
+                       ~ case_when(
+                         # Check for all combinations of flags
+                         all(str_detect(., "ND H S")) ~ "ND H S",
+                         all(str_detect(., "L H S")) ~ "L H S",
+                         all(str_detect(., "ND.*H")) ~ "ND H",
+                         all(str_detect(., "L.*H|H.*L")) ~ "L H",
+                         all(str_detect(., "ND.*S")) ~ "ND S",
+                         all(str_detect(., "L.*S")) ~ "L S",
+                         all(str_detect(., "H.*S")) ~ "H S",
+                         all(str_detect(., "ND")) ~ "ND",
+                         all(str_detect(., "L")) ~ "L",
+                         all(str_detect(., "H")) ~ "H",
+                         all(str_detect(., "S")) ~ "S",
+                         # All other combinations should result in NA
+                         TRUE ~ NA_character_)), 
+                # Retain units columns; look for any non-NA value
+                across(contains("unit"), 
+                       ~ min(., na.rm = TRUE))) %>%
+      # every column name must end with _flags, _units, or _value. This will
+      # be used to pivot_longer
+      rename_with(~ifelse(
+        !grepl(c("lake_id|site_id|sample_depth|visit|flag|units"), .x), # columns that aren't ID, flag, or units
+        paste0(.x, "_value"), # append _value suffix
+        .x)) %>% # else return original name
+      pivot_longer(-c(lake_id, site_id, visit, sample_depth),
+                   # anything to left of pattern is "name"
+                   # every matching group to right creates new value column
+                   names_to = c("name", ".value"),
+                   # breaking pattern is final _
+                   names_pattern = "(.+)_(.+)") %>%
+      ungroup %>%
+      drop_na(value), # omit record if no value reported
+    
+    
+    # 2016 CHEMISTRY DATA   
+    dat_2016 %>%
+      select(lake_id, site_id, visit,
+             matches(c("_chla_lab|_tn|_nh4|_no2|_no2_3|_toc|_tp|_op")),
+             contains("units") & !matches(c("ebullition|diffusion|total"))) %>%
+      mutate(site_id = as.character(site_id)) %>% # needed to bind with above that have 8_lacustrine....
+      # all 2016 chemistry observations are shallow. Remove from variable
+      # name to simplify things. Add in as new variable below
+      rename_with(.cols = contains("shallow"), # columns that aren't ID or units
+                  ~ gsub("shallow_", "", .x)) %>%
+      # every column name must end with _units, or _value. This will
+      # be used to pivot_longer
+      rename_with(.cols = !matches(c("lake_id|site_id|visit|units")), # columns that aren't ID or units
+                  ~paste0(.x, "_value")) %>% # append _value suffix
+      pivot_longer(-c(lake_id, site_id, visit),
+                   # anything to left of pattern is "name"
+                   # every matching group to right creates new value column
+                   names_to = c("name", ".value"),
+                   # breaking pattern is final _
+                   names_pattern = "(.+)_(.+)") %>%
+      mutate(sample_depth = "shallow") %>%
+      drop_na(value) # omit record if no value reported
+  ) 
+
+########################################### MDL FILE MISSING
+# •	Nutrients: 2022 – 2023, ADA and CIN
+# •	Anions: 2022 – 2023, ADA and CIN
+# •	Organic carbon: 2022 – 2023, ADA
+# asked Joe to fix 8am 5/13/2023
+site_data %>%
+  # ADD DETECTION LIMITS
+  # 1. add lab and year, needed for join with DL data
+  left_join(rbind(lake.list, lake.list.2016) %>%
+              select(lake_id, visit, lab, 
+                     year = sample_year)) %>% # joins by lake_id and visit
+  
+  # 2. detection limits differ between CIN and ADA. Current "lab" field is for
+  #    field crew (eg. R10, RTP, etc) not which lab ran chemistry. Create 
+  #    a "lab_mdl" field with either ADA and CIN as only legitimate values. 
+  mutate(lab_mdl = case_when(year == 2020 & name %in% nutrients ~ "ADA", # all 2020 nutrients sent to ADA
+                             lab == "ADA" & name %in% c(nutrients, "br", "cl", "so4", "f", "toc", "doc") ~ "ADA", # ADA ran their own nutrients, anions, OC
+                             TRUE ~ "CIN")) %>% # all others ran in CIN
+  
+  # 3. join with detection limit data
+  left_join(read_csv(paste0(userPath,"data/chemistry/dataPaperDetectionLimits.csv")) %>%
+              select(name, mdl, year,
+                     mdl_units = units,
+                     lab_mdl = lab)) %>% # join on name, lab_mdl, year
+  
+  
+  # enforce decimal points
+  filter(!(name == "po4")) %>% # omit IC based po4 from TTEB
+  mutate(value = case_when(
+    # nitrogen analytes reported in ug_n_l
+    name %in% c("nh4", "no2", "no2_3", "no3", "tn") ~ round(value, 1),
+    # TP and colorimetric base p in ug_p_l
+    name %in% c("op", "tp") ~ round(value, 1),
+    # 5 decimals reported for tteb data
+    name %in% metals ~ round(value, 5), # metals is from chemSampleList.R
+    # anions in mg_l. decimals based on MDL. See Wiki, 
+    # Anions: analytical methods, detection limits, and holding times/CIN-TTEB Table
+    name %in% c("br", "f") ~ round(value, 3), 
+    name %in% c("cl", "so4") ~ round(value, 2), 
+    # based on NLA convention
+    name %in% c("doc", "toc") ~ round(value, 2),
+    # based on NLA convention
+    name == "chla_lab" ~ round(value, 2),
+    # error flag
+    TRUE ~ value))
+
+#write.table(unique(site_data$name), file = "clipboard", row.names = FALSE)
+
+# Data dictionary
+site_data_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(site_data) |
+           variable %in% unique(site_data$name))
+
+# Are all values in data dictionary?
+ifelse (c(colnames(site_data) %in% site_data_dictionary$variable,
+          unique(site_data$name) %in% site_data_dictionary$variable) %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
+
+# write data
+write.csv(x = site_data, 
+          # writing data to repo rather than SharePoint
+          file = "communications/manuscript/data_paper/7_site_data.csv",
+          row.names = FALSE)
+
+# write dictionary
+write.csv(x = site_data_dictionary, 
+          file = "communications/manuscript/data_paper/7_site_data_dictionary.csv",
+          row.names = FALSE)
+
+
+
+
+
+
+# 8. LAKE SCALE VALUES-----------
+lake_scale_data <- list(
+  
+  # e.	Links to existing data
+  # this needs to be long due to numerous nhdplus_comid, lagos, etc values per lake
+  read.csv(paste0(userPath, "data\\siteDescriptors\\surge_master_crosswalk_long_hollister.csv"), header = T) %>% 
+    select(-lake_name) %>% 
+    # A few variables are duplicated in this dataset: nl07_site_id == lmorpho_nla07, lmorpho_comid == hylak_comid == nhdplus_comid
+    # omit the ones we don't want (e.g. getting NLA07 from nl07_site_id variable; comid from nhdplus_comid variable)
+    filter(!(join_id_name %in% c("lmorpho_comid", "lmorpho_nla07", "hylak_comid"))) %>% 
+    mutate(join_id_name = replace(join_id_name, join_id_name == "nl07_site_id", "nla07_site_id")) %>%
+    rename(name = join_id_name,
+           value = join_id) %>%
+    mutate(units = NA),
+  
+  # b.	Morphometry indices
+  morpho %>% 
+    select(-lake_name) %>%
+    mutate(
+      # variables with no decimals
+      across(c(surface_area, shoreline_length, max_width, mean_width, max_length, volume), 
+             ~format(round(., 0), nsmall = 0)),
+      # variables with 1 decimal
+      across(c(mean_depth, max_depth), ~ format(round(., 1), nsmall = 1)),
+      # variables with two decimals
+      across(c(shoreline_development, littoral_fraction), ~ format(round(., 2), nsmall = 2)),
+      # variables with three decimals, not including circularity in data paper
+      #circularity = format(round(circularity, 3), nsmall = 3)
+    ) %>%
+    mutate(across(!lake_id, as.character)) %>% # needed to collapse into one column
+    pivot_longer(!lake_id) %>%
+    mutate(units = case_when(name == "surface_area" ~ "m2",
+                             name == "shoreline_development" ~ "dimensionless",
+                             #name == "circularity" ~ "dimensionless",
+                             name == "volume" ~ "m3",
+                             #name == "axis_ratio" ~ "dimensionless",
+                             #name == "dynamic_ratio" ~ "dimensionless",
+                             TRUE ~ "m")) %>% # all others meters
+    mutate(across(!lake_id, as.character)), # needed to collapse into one column
+  
+  # c.  NWI
+  
+  nwi_link %>%
+    pivot_longer(!lake_id)%>%
+    mutate(value = format(round ((value * 100),2), nsmall=2)) %>%
+    mutate (units = "percent"),
+  
+  # X.	Sedimentation rates
+  # sedimentation_link %>%
+  #   select(- c(sediment_predictor_type, sedimentation, sedimentation_units)) %>% # not sure about this variable or sedimentation numbers
+  #   mutate(
+  #     # Fix decimal places, otherwise many are shown when converted to character
+  #     basin_kfact = format(round(basin_kfact, 3), nsmall = 3),
+  #     across(c(basin_forest, basin_crop, basin_wetland, sediment_oc, basin_slope),
+  #            ~ format(round(., 2), nsmall = 2)),
+  #     across(c(clow_surface_area, basin_soc0_5), ~ format(round(., 0), nsmall = 0))
+  #     ) %>%
+  #   # subset for development
+  #   #filter(lake_id == 100) %>%
+  #   #select(lake_id, contains("sedimentation"), contains("sediment")) %>%
+  #   # all variables presenting a value must end with "_value". All variables
+  #   # presenting units already end with "_units"
+  #   rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
+  #   pivot_longer(-lake_id, 
+  #                # anything to left of pattern is "name"
+  #                # every matching group to right creates new value column
+  #                names_to = c("name", ".value"), 
+  #                # breaking pattern in final _
+  #                names_pattern = "(.+)_(.+)"),
+  
+  # d.	Year of construction
+  nid_link %>%
+    select(lake_id, year_completed) %>%
+    pivot_longer(!lake_id) %>%
+    mutate(units = "Gregorian calendar year"),
+  
+  # f.	E:I and Residence Time estimates
+  water_isotope_agg %>%
+    mutate(lake_id = as.numeric(lake_id),
+           # decimals inherited from Renee's data release (10.23719/1531017)
+           e_i = format(round(e_i, 3), nsmall = 3),
+           sd_e_i = format(round(sd_e_i, 3), nsmall = 3),
+           residence_time = format(round(residence_time, 3), nsmall = 3),
+           sd_residence_time = case_when(is.na(sd_residence_time) ~ NA_character_,
+                                         TRUE ~ format(round(sd_residence_time, 3), nsmall = 3)),
+           across(-lake_id, as.character)) %>% # allow character and numeric in same column
+    # all variables presenting a value must end with "_value". All variables
+    # presenting units already end with "_units"
+    rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
+    pivot_longer(!lake_id,
+                 # anything to left of pattern is "name"
+                 # every matching group to right creates new value column
+                 names_to = c("name", ".value"), 
+                 # breaking pattern in final _
+                 names_pattern = "(.+)_(.+)"),
+  
+  # survey design parameters and study 
+  bind_rows(lake.list, lake.list.2016) %>%
+    filter(eval_status_code == "S",
+           visit == 1) %>% 
+    select(lake_id, wgt, ag_eco9, ag_eco9_nm, depth_cat, chla_cat) %>%
+    mutate(wgt_units = "dimensionless",
+           study = case_when(lake_id %in% 1:998 ~ "SuRGE",
+                             lake_id %in% 1001:1032 ~ "2016 Regional Survey",
+                             lake_id %in% 999:1000 ~ "Hand picked",
+                             TRUE ~ "Fly you fools!"), # error code
+           across(!lake_id, as.character)) %>% # needed to pivot all values to one column
+    # all variables presenting a value must end with "_value". All variables
+    # presenting units already end with "_units"
+    rename_with(~ifelse(!grepl(c("units|lake_id"), .x), paste0(.x, "_value"), .x)) %>%
+    pivot_longer(!lake_id,
+                 # anything to left of pattern is "name"
+                 # every matching group to right creates new value column
+                 names_to = c("name", ".value"), 
+                 # breaking pattern in final _
+                 names_pattern = "(.+)_(.+)"),
+  
+  # LAGOS trophic status data
+  lagos_ts_agg_link %>%
+    select(lake_id, visit,
+           chl_predicted_sample_month, doc_predicted_sample_month,
+           chl_predicted_sample_season, doc_predicted_sample_season)%>%
+    mutate(chl_predicted_sample_month_units = "ug_l",
+           doc_predicted_sample_month_units = "mg_l",
+           chl_predicted_sample_season_units = "ug_l",
+           doc_predicted_sample_season_units = "mg_l") %>%
+    # all variables presenting a value must end with "_value". All variables
+    # presenting units already end with "_units"
+    rename_with(~ifelse(!grepl(c("units|lake_id|visit"), .x), paste0(.x, "_value"), .x)) %>%
+    pivot_longer(!c(lake_id, visit),
+                 # anything to left of pattern is "name"
+                 # every matching group to right creates new value column
+                 names_to = c("name", ".value"), 
+                 # breaking pattern in final _
+                 names_pattern = "(.+)_(.+)") %>%
+    # move visit from "visit" column to variable name. This is because this
+    # data object doesn't have a visit column
+    mutate(name = paste0(name, "_visit", visit)) %>%
+    select(-visit) %>%
+    # enforce digits, otherwise many digits are shown when converted to character below
+    mutate(value = format(round(value, 2), nsmall = 2))
+  
+) %>%
+  map(., ~.x %>% mutate(value = as.character(value))) %>% # character to enable all to collapse into one column
+  map_dfr(., bind_rows) %>%
+  filter(lake_id != 1033) # omit Falls Lake)
+
+
+# Data dictionary
+# write.table(unique(lake_scale_data_paper$name), file = "clipboard", row.names = FALSE)
+lake_scale_dictionary <- master_dictionary %>%
+  filter(variable %in% unique(lake_scale_data$name))
+
+# Are all values in data dictionary?
+ifelse (unique(lake_scale_data$name) %in% lake_scale_dictionary$variable %>% 
+          {!.} %>%
+          sum(.) == 0,
+        "Site data dictionary is complete", 
+        "Site data dictionary is incomplete")
+
+# write data
+write.csv(x = lake_scale_data, 
+          file = "communications/manuscript/data_paper/8_lake_scale.csv",
+          row.names = FALSE)
+
+# write dictionary
+write.csv(x = lake_scale_dictionary, 
+          file = "communications/manuscript/data_paper/8_lake_scale_dictionary.csv",
+          row.names = FALSE)
+
+
+
+# 9. PHYTOPLANKTON-------------------
 phyto_data <-  read_excel(paste0(userPath,
                                  "data/algalIndicators/SuRGE Taxonomy 2021-23 v4.xlsx"), 
                           sheet = "SuRGE Taxonomy- 2021-23") %>%
@@ -1133,3 +1142,34 @@ write.csv(x = phyto_dictionary,
           file = "communications/manuscript/data_paper/10_phyto_dictionary.csv",
           row.names = FALSE)
 
+
+
+#  METEOROLOGY-----------
+# # These data have been merged with emission rate point
+# # 4/18/2025 only have wind speed, air temp, and precipitation
+# met_data <- met_chamber %>%
+#   select(-temp_lake_mix_layer_c) %>%
+#   relocate(lake_id, site_id, visit, date_time, precipitation, wind_speed, temp_air_2m)
+# 
+# # Data dictionary
+# met_dictionary <- master_dictionary %>%
+#   filter(variable %in% colnames(met_data))
+# 
+# # Are all values in data dictionary?
+# ifelse (
+#   #TRUE if variable is in dictionary, FALSE if not
+#   colnames(met_data) %in% met_dictionary$variable %>% # TRUE if variable is present 
+#     {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
+#     sum(.) == 0, # all TRUE add up
+#   "Site data dictionary is complete", # if 0 (all variables are present) 
+#   "Site data dictionary is incomplete") # if not 0 (>=1 variable missing)
+# 
+# # write data
+# write.csv(x = met_data, 
+#           file = "communications/manuscript/data_paper/9_met_data.csv",
+#           row.names = FALSE)
+# 
+# # write dictionary
+# write.csv(x = met_dictionary, 
+#           file = "communications/manuscript/data_paper/9_met_dictionary.csv",
+#           row.names = FALSE)
