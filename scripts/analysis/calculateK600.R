@@ -31,8 +31,10 @@ dissolved_gas_k <-
       ch4_diffusion_best != 0 ~ (ch4_diffusion_best / ch4_star) * 24), # m/d
     k_co2_units = "m d-1",
     k_ch4_units = "m d-1",
-    sc_co2 = 1911.1 - 118.11*water_temperature + 3.4527*water_temperature^2 - 0.04132*water_temperature^3, # schmidt number (Wanninkhof et al 1992)
-    sc_ch4 = 1897.8 - 114.28*water_temperature + 3.2902*water_temperature^2 - 0.039061*water_temperature^3, # schmidt number (Wanninkhof et al 1992)
+    sc_co2 = 1923.6 - 125.06*water_temperature + 4.3773*water_temperature^2 - 0.085681*water_temperature^3 + 0.00070284*water_temperature^4, #schmidt number (Wanninkhof 2014)
+    sc_ch4 = 1909.4 - 120.78*water_temperature + 4.1555*water_temperature^2 - 0.080578*water_temperature^3 + 0.00065777*water_temperature^4, #schmidt number (Wanninkhof 2014)   
+    # sc_co2 = 1911.1 - 118.11*water_temperature + 3.4527*water_temperature^2 - 0.04132*water_temperature^3, # schmidt number (Wanninkhof et al 1992)
+    # sc_ch4 = 1897.8 - 114.28*water_temperature + 3.2902*water_temperature^2 - 0.039061*water_temperature^3, # schmidt number (Wanninkhof et al 1992)
     k_co2_600 = k_co2 * (1 / (sc_co2 / 600)^-(2/3)), # m/d
     k_ch4_600 = k_ch4 * (1 / (sc_ch4 / 600)^-(2/3)), # m/d
     k_co2_600_units = "m d-1",
@@ -57,4 +59,4 @@ gc_lakeid %>% filter(lake_id == "188", site_id == 9)
 
 # check what the k would be for the high diffusion site at Comins
 k_ch4_comins=48.04/916.4949
-k_ch4_600= k_ch4_comins * (1/(562.8052/600)^-2/3)
+k_ch4_600= k_ch4_comins * (1/(562.2937/600)^-2/3)
