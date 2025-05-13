@@ -259,11 +259,14 @@ lake_list_for_lagos_merge_ts_lagoslakeid <- left_join(lake_list_for_lagos_merge_
   mutate(lagoslakeid = case_when(lake_id == 10 ~ 201797,
                                  lake_id == 1009 ~ 260194,
                                  lake_id == 1010 ~ 260193,
+                                 lake_id == 49 ~ 1420,
+                                 lake_id == 57 ~ 7460,
+                                 lake_id == 231 ~ 353133, 
                                  TRUE ~ lagoslakeid)) %>%
   select(-nhdplusv2_comid) # remove merging variable, no longer needed
 dim(lake_list_for_lagos_merge_ts_lagoslakeid) # 150. only 146 lakes (falls lake excluded), but revisits for 4 
 
-#File for Jeff
+#File for Jeff to check against his lake link
 #write.csv(lake_list_for_lagos_merge_ts_lagoslakeid,file="~/National_Reservoir_GHG_Survey/lagos_ids.csv")
 
 # any missing lagos_id
