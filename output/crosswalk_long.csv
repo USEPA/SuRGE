@@ -1,0 +1,1482 @@
+lake_name,lake_id,join_id_name,join_id
+Lake O' the Pines,3,nla17_site_id,NLA17_TX-10007
+Lake O' the Pines,3,nla12_site_id,NLA12_TX-113
+Lake O' the Pines,3,nla07_site_id,NLA06608-1560
+Lake O' the Pines,3,lmorpho_comid,1010832
+Lake O' the Pines,3,lmorpho_nla07,NLA06608-1560
+Lake O' the Pines,3,nhdplus_comid,1010832
+Lake O' the Pines,3,gnis_id,1375468
+Lake O' the Pines,3,comid_match_lagoslakeid,405739
+Lake O' the Pines,3,poly_intersect_lagoslakeid,405739
+Lake O' the Pines,3,hylak_comid,1010832
+Lake O' the Pines,3,hylak_id,9462
+Lake O' the Pines,3,grand_id,1186
+Lake O' the Pines,3,nhdplus_comid,1010928
+Lake O' the Pines,3,lmorpho_comid,1010928
+Cotile Lake,4,nla17_site_id,NLA17_LA-10002
+Cotile Lake,4,nla12_site_id,NLA12_LA-105
+Cotile Lake,4,nla07_site_id,NLA06608-2823
+Cotile Lake,4,lmorpho_comid,19918180
+Cotile Lake,4,lmorpho_nla07,NLA06608-2823
+Cotile Lake,4,nhdplus_comid,19918180
+Cotile Lake,4,gnis_id,554093
+Cotile Lake,4,comid_match_lagoslakeid,405745
+Cotile Lake,4,poly_intersect_lagoslakeid,405745
+Cotile Lake,4,hylak_comid,19918180
+Cotile Lake,4,hylak_id,113773
+Cotile Lake,4,grand_id,1265
+Cotile Lake,4,nid_id,LA00031
+Lake Jacksonville,11,nla17_site_id,NLA17_TX-10010
+Lake Jacksonville,11,nla12_site_id,NLA12_TX-137
+Lake Jacksonville,11,nla07_site_id,NLA06608-TX:19
+Lake Jacksonville,11,lmorpho_comid,4452402
+Lake Jacksonville,11,lmorpho_nla07,NLA06608-TX:19
+Lake Jacksonville,11,nhdplus_comid,4452402
+Lake Jacksonville,11,gnis_id,1855387
+Lake Jacksonville,11,comid_match_lagoslakeid,415369
+Lake Jacksonville,11,poly_intersect_lagoslakeid,415369
+Lake Jacksonville,11,hylak_comid,4452402
+Lake Jacksonville,11,hylak_id,113707
+Lake Jacksonville,11,grand_id,1241
+Lake Jacksonville,11,nid_id,TX00583
+Crooked Creek Reservoir,18,nla17_site_id,NLA17_LA-10006
+Crooked Creek Reservoir,18,nla12_site_id,NLA12_LA-152
+Crooked Creek Reservoir,18,lmorpho_comid,15138463
+Crooked Creek Reservoir,18,nhdplus_comid,15138463
+Crooked Creek Reservoir,18,gnis_id,556751
+Crooked Creek Reservoir,18,comid_match_lagoslakeid,303903
+Crooked Creek Reservoir,18,poly_intersect_lagoslakeid,303903
+Crooked Creek Reservoir,18,hylak_comid,15138463
+Crooked Creek Reservoir,18,hylak_id,113825
+Crooked Creek Reservoir,18,nid_id,LA00046
+Lake Hamilton,99,nla17_site_id,NLA17_AR-10002
+Lake Hamilton,99,nla22_site_id,NES22-10107
+Lake Hamilton,99,nla12_site_id,NLA12_AR-103
+Lake Hamilton,99,nla07_site_id,NLA06608-1204
+Lake Hamilton,99,lmorpho_comid,15232080
+Lake Hamilton,99,lmorpho_nla07,NLA06608-1204
+Lake Hamilton,99,nhdplus_comid,167794922
+Lake Hamilton,99,comid_match_lagoslakeid,292666
+Lake Hamilton,99,hylak_comid,167794922
+Lake Hamilton,99,hylak_id,9387
+Lake Hamilton,99,grand_id,1116
+Lake Hamilton,99,nid_id,AR00534
+Lake Hanna,100,nla17_site_id,NLA17_MO-10005
+Lake Hanna,100,nla12_site_id,NLA12_MO-104
+Lake Hanna,100,lmorpho_comid,729879
+Lake Hanna,100,lmorpho_nla07,NLA06608-0224
+Lake Hanna,100,nhdplus_comid,729879
+Lake Hanna,100,comid_match_lagoslakeid,28694
+Lake Hanna,100,poly_intersect_lagoslakeid,28694
+Lake Hanna,100,hylak_comid,729879
+Lake Hanna,100,hylak_id,1058745
+Lake Hanna,100,nid_id,MO30314
+Arrow Head Lake,136,nla17_site_id,NLA17_MO-10006
+Arrow Head Lake,136,nla12_site_id,NLA12_MO-108
+Arrow Head Lake,136,lmorpho_comid,7557711
+Arrow Head Lake,136,nhdplus_comid,7557711
+Arrow Head Lake,136,gnis_id,763685
+Arrow Head Lake,136,comid_match_lagoslakeid,54020
+Arrow Head Lake,136,poly_intersect_lagoslakeid,54020
+Arrow Head Lake,136,hylak_comid,7557711
+Arrow Head Lake,136,hylak_id,1059628
+Canton Lake,146,nla17_site_id,NLA17_OK-10007
+Canton Lake,146,nla12_site_id,NLA12_OK-106
+Canton Lake,146,nla07_site_id,NLA06608-4056
+Canton Lake,146,lmorpho_comid,389774
+Canton Lake,146,lmorpho_nla07,NLA06608-4056
+Canton Lake,146,nhdplus_comid,389774
+Canton Lake,146,gnis_id,1751417
+Canton Lake,146,comid_match_lagoslakeid,390029
+Canton Lake,146,poly_intersect_lagoslakeid,390029
+Canton Lake,146,hylak_comid,389774
+Canton Lake,146,hylak_id,9331
+Canton Lake,146,grand_id,1050
+Canton Lake,146,nid_id,OK10316
+Lake Jean Neustadt,147,nla17_site_id,NLA17_OK-10009
+Lake Jean Neustadt,147,nla22_site_id,NLA22_OK-10120
+Lake Jean Neustadt,147,nla12_site_id,NLA12_OK-119
+Lake Jean Neustadt,147,nla07_site_id,NLA06608-0856
+Lake Jean Neustadt,147,lmorpho_comid,19959244
+Lake Jean Neustadt,147,lmorpho_nla07,NLA06608-0856
+Lake Jean Neustadt,147,nhdplus_comid,19959244
+Lake Jean Neustadt,147,comid_match_lagoslakeid,396235
+Lake Jean Neustadt,147,poly_intersect_lagoslakeid,396235
+Lake Jean Neustadt,147,hylak_comid,19959244
+Lake Jean Neustadt,147,hylak_id,113170
+Keystone,148,nla17_site_id,NLA17_OK-10002
+Keystone,148,nla12_site_id,NLA12_OK-103
+Keystone,148,lmorpho_comid,368417
+Keystone,148,lmorpho_nla07,NLA06608-0120
+Keystone,148,nhdplus_comid,493024
+Keystone,148,gnis_id,1095117
+Keystone,148,comid_match_lagoslakeid,378906
+Keystone,148,hylak_comid,20971700
+Keystone,148,hylak_id,9328
+Keystone,148,grand_id,1048
+Keystone,148,nid_id,OK10309
+Keystone,148,nhdplus_comid,20971700
+Cloud Southern Plains,166,nla17_site_id,NLA17_KS-10001
+Cloud Southern Plains,166,nla12_site_id,NLA12_KS-101
+Cloud Southern Plains,166,lmorpho_comid,5925122
+Cloud Southern Plains,166,lmorpho_nla07,NLA06608-0588
+Cloud Southern Plains,166,nhdplus_comid,5925122
+Cloud Southern Plains,166,comid_match_lagoslakeid,367833
+Cloud Southern Plains,166,poly_intersect_lagoslakeid,367833
+Cloud Southern Plains,166,hylak_comid,5925122
+Lake Overholser,167,nla17_site_id,NLA17_OK-10003
+Lake Overholser,167,nla12_site_id,NLA12_OK-105
+Lake Overholser,167,nla07_site_id,NLA06608-4472
+Lake Overholser,167,lmorpho_comid,167300171
+Lake Overholser,167,lmorpho_nla07,NLA06608-4472
+Lake Overholser,167,nhdplus_comid,167300171
+Lake Overholser,167,gnis_id,1096356
+Lake Overholser,167,comid_match_lagoslakeid,389511
+Lake Overholser,167,poly_intersect_lagoslakeid,389511
+Lake Overholser,167,hylak_comid,167300171
+Lake Overholser,167,hylak_id,112917
+Lake Overholser,167,grand_id,1068
+Lake Overholser,167,nid_id,OK02537
+Rush Cr. Site 17 Reservoir,184,nla17_site_id,NLA17_OK-10005
+Rush Cr. Site 17 Reservoir,184,nla12_site_id,NLA12_OK-132
+Rush Cr. Site 17 Reservoir,184,nla07_site_id,NLA06608-4382
+Rush Cr. Site 17 Reservoir,184,lmorpho_comid,19956504
+Rush Cr. Site 17 Reservoir,184,lmorpho_nla07,NLA06608-4382
+Rush Cr. Site 17 Reservoir,184,nhdplus_comid,19956504
+Rush Cr. Site 17 Reservoir,184,comid_match_lagoslakeid,399996
+Rush Cr. Site 17 Reservoir,184,poly_intersect_lagoslakeid,399996
+Rush Cr. Site 17 Reservoir,184,hylak_comid,19956504
+Rush Cr. Site 17 Reservoir,184,nid_id,OK00157
+Boulder Reservoir,186,nla17_site_id,NLA17_CO-10002
+Boulder Reservoir,186,nla12_site_id,NLA12_CO-111
+Boulder Reservoir,186,nla07_site_id,NLA06608-1851
+Boulder Reservoir,186,lmorpho_comid,2888348
+Boulder Reservoir,186,lmorpho_nla07,NLA06608-1851
+Boulder Reservoir,186,nhdplus_comid,2888348
+Boulder Reservoir,186,gnis_id,178708
+Boulder Reservoir,186,comid_match_lagoslakeid,361292
+Boulder Reservoir,186,poly_intersect_lagoslakeid,361292
+Boulder Reservoir,186,hylak_comid,2888348
+Boulder Reservoir,186,hylak_id,112156
+Boulder Reservoir,186,grand_id,495
+Boulder Reservoir,186,nid_id,CO00215
+Bluestem Lake,190,nla17_site_id,NLA17_OK-10004
+Bluestem Lake,190,nla12_site_id,NLA12_OK-109
+Bluestem Lake,190,nla07_site_id,NLA06608-0824
+Bluestem Lake,190,lmorpho_comid,846154
+Bluestem Lake,190,lmorpho_nla07,NLA06608-0824
+Bluestem Lake,190,nhdplus_comid,846154
+Bluestem Lake,190,gnis_id,1090304
+Bluestem Lake,190,comid_match_lagoslakeid,386238
+Bluestem Lake,190,poly_intersect_lagoslakeid,386238
+Bluestem Lake,190,hylak_comid,846154
+Bluestem Lake,190,hylak_id,112769
+Bluestem Lake,190,grand_id,1024
+Bluestem Lake,190,nid_id,OK02570
+Wyandotte County Lake,206,nla17_site_id,NLA17_KS-10007
+Wyandotte County Lake,206,nla12_site_id,NLA12_KS-125
+Wyandotte County Lake,206,lmorpho_comid,2254441
+Wyandotte County Lake,206,nhdplus_comid,2254441
+Wyandotte County Lake,206,gnis_id,478584
+Wyandotte County Lake,206,comid_match_lagoslakeid,125419
+Wyandotte County Lake,206,poly_intersect_lagoslakeid,125419
+Wyandotte County Lake,206,hylak_comid,2254441
+Wyandotte County Lake,206,hylak_id,112363
+Wyandotte County Lake,206,grand_id,966
+Wyandotte County Lake,206,nid_id,KS02555
+Concord Pond,13,nla17_site_id,NLA17_DE-10002
+Concord Pond,13,nla12_site_id,NLA12_DE-103
+Concord Pond,13,nla07_site_id,NLA06608-2333
+Concord Pond,13,lmorpho_comid,8390734
+Concord Pond,13,lmorpho_nla07,NLA06608-2333
+Concord Pond,13,nhdplus_comid,8390734
+Concord Pond,13,gnis_id,213824
+Concord Pond,13,comid_match_lagoslakeid,147878
+Concord Pond,13,poly_intersect_lagoslakeid,147878
+Concord Pond,13,hylak_comid,8390734
+Concord Pond,13,hylak_id,1057586
+Concord Pond,13,nid_id,DE00044
+Concord Pond,13,nhdplus_comid,9437967
+Blue Lake,17,nla17_site_id,NLA17_FL-10042
+Blue Lake,17,lmorpho_comid,71542
+Blue Lake,17,nhdplus_comid,71542
+Blue Lake,17,comid_match_lagoslakeid,200658
+Blue Lake,17,hylak_comid,71542
+Maple Lake,46,nla17_site_id,NLA17_NJ-10004
+Maple Lake,46,nla12_site_id,NLA12_NJ-131
+Maple Lake,46,lmorpho_comid,9435755
+Maple Lake,46,nhdplus_comid,9435755
+Maple Lake,46,gnis_id,883938
+Maple Lake,46,comid_match_lagoslakeid,123565
+Maple Lake,46,poly_intersect_lagoslakeid,123565
+Maple Lake,46,hylak_comid,9435755
+Maple Lake,46,hylak_id,1056710
+Maple Lake,46,nid_id,NJ00687
+Mirror Lake,47,nla17_site_id,NLA17_NJ-10003
+Mirror Lake,47,nla12_site_id,NLA12_NJ-104
+Mirror Lake,47,nla07_site_id,NLA06608-0013
+Mirror Lake,47,lmorpho_comid,4489294
+Mirror Lake,47,lmorpho_nla07,NLA06608-0013
+Mirror Lake,47,nhdplus_comid,4489312
+Mirror Lake,47,comid_match_lagoslakeid,30086
+Mirror Lake,47,poly_intersect_lagoslakeid,30086
+Mirror Lake,47,hylak_comid,4489294
+Mirror Lake,47,hylak_id,1056048
+Mirror Lake,47,nid_id,NJ00458
+Mirror Lake,47,nhdplus_comid,4489294
+Mirror Lake,47,gnis_id,878414
+Mirror Lake,47,nhdplus_comid,4489298
+Mirror Lake,47,lmorpho_comid,4489298
+Mirror Lake,47,lmorpho_comid,4489312
+Lake Stockwell,49,nla17_site_id,NLA17_NJ-10005
+Lake Stockwell,49,nla12_site_id,NLA12_NJ-108
+Lake Stockwell,49,lmorpho_comid,4489532
+Lake Stockwell,49,nhdplus_comid,4489532
+Lake Stockwell,49,comid_match_lagoslakeid,1420
+Lake Stockwell,49,poly_intersect_lagoslakeid,1420
+Lake Stockwell,49,hylak_comid,4489532
+Lake Stockwell,49,nid_id,NJ00422
+Spencer Lake,54,nla17_site_id,NLA17_OH-10024
+Spencer Lake,54,nla12_site_id,NLA12_OH-136
+Spencer Lake,54,lmorpho_comid,15595957
+Spencer Lake,54,nhdplus_comid,15595957
+Spencer Lake,54,gnis_id,1070946
+Spencer Lake,54,comid_match_lagoslakeid,2414
+Spencer Lake,54,poly_intersect_lagoslakeid,2414
+Spencer Lake,54,hylak_comid,15595957
+Spencer Lake,54,hylak_id,1054666
+Spencer Lake,54,nid_id,OH00619
+Zepernick Lake,55,nla17_site_id,NLA17_OH-10027
+Zepernick Lake,55,nla22_site_id,NLA22_OH-10018
+Zepernick Lake,55,lmorpho_comid,19386918
+Zepernick Lake,55,nhdplus_comid,19386918
+Zepernick Lake,55,gnis_id,1078733
+Zepernick Lake,55,comid_match_lagoslakeid,2039
+Zepernick Lake,55,hylak_comid,19386918
+Zepernick Lake,55,nid_id,OH00637
+Fort Peck Trout pond,67,nla17_site_id,NLA17_MT-10036
+Fort Peck Trout pond,67,nla12_site_id,NLA12_MT-161
+Fort Peck Trout pond,67,lmorpho_comid,12461540
+Fort Peck Trout pond,67,nhdplus_comid,12461540
+Fort Peck Trout pond,67,gnis_id,771517
+Fort Peck Trout pond,67,comid_match_lagoslakeid,323994
+Fort Peck Trout pond,67,poly_intersect_lagoslakeid,323994
+Fort Peck Trout pond,67,hylak_comid,12461540
+Fort Peck Trout pond,67,hylak_id,104407
+Tschida Lake,68,nla17_site_id,NLA17_ND-10021
+Tschida Lake,68,nla12_site_id,NLA12_ND-131
+Tschida Lake,68,lmorpho_comid,16237597
+Tschida Lake,68,nhdplus_comid,16237597
+Tschida Lake,68,gnis_id,1032544
+Tschida Lake,68,comid_match_lagoslakeid,341692
+Tschida Lake,68,poly_intersect_lagoslakeid,341692
+Tschida Lake,68,hylak_comid,16237597
+Tschida Lake,68,hylak_id,8643
+Tschida Lake,68,grand_id,798
+Tschida Lake,68,nid_id,ND00149
+willow creek,71,nla17_site_id,NLA17_MT-10001
+willow creek,71,nla12_site_id,NLA12_MT-104
+willow creek,71,nla07_site_id,NLA06608-0378
+willow creek,71,lmorpho_comid,12394688
+willow creek,71,lmorpho_nla07,NLA06608-0378
+willow creek,71,nhdplus_comid,12394688
+willow creek,71,gnis_id,801708
+willow creek,71,comid_match_lagoslakeid,319208
+willow creek,71,poly_intersect_lagoslakeid,319208
+willow creek,71,hylak_comid,12394688
+willow creek,71,hylak_id,105301
+willow creek,71,grand_id,320
+willow creek,71,nid_id,MT00577
+Nelson,72,nla17_site_id,NLA17_MT-10003
+Nelson,72,nla12_site_id,NLA12_MT-109
+Nelson,72,nla07_site_id,NLA06608-0240
+Nelson,72,lmorpho_comid,167204935
+Nelson,72,lmorpho_nla07,NLA06608-0240
+Nelson,72,nhdplus_comid,167204935
+Nelson,72,gnis_id,774584
+Nelson,72,comid_match_lagoslakeid,323197
+Nelson,72,poly_intersect_lagoslakeid,323197
+Nelson,72,hylak_comid,167204935
+Nelson,72,hylak_id,8297
+Nelson,72,grand_id,295
+Nelson,72,nid_id,MT00574
+freeman lake,75,nla17_site_id,NLA17_SD-10052
+freeman lake,75,nla12_site_id,NLA12_SD-143
+freeman lake,75,lmorpho_comid,16131367
+freeman lake,75,nhdplus_comid,16131367
+freeman lake,75,comid_match_lagoslakeid,346238
+freeman lake,75,poly_intersect_lagoslakeid,346238
+freeman lake,75,hylak_comid,16131367
+freeman lake,75,nid_id,SD01173
+Eureka Reservoir,76,nla12_site_id,NLA12_MT-113
+Eureka Reservoir,76,lmorpho_comid,12744019
+Eureka Reservoir,76,lmorpho_nla07,NLA06608-1008
+Eureka Reservoir,76,nhdplus_comid,12744019
+Eureka Reservoir,76,gnis_id,771249
+Eureka Reservoir,76,comid_match_lagoslakeid,318415
+Eureka Reservoir,76,poly_intersect_lagoslakeid,318415
+Eureka Reservoir,76,hylak_comid,12744019
+Eureka Reservoir,76,hylak_id,104709
+Eureka Reservoir,76,nid_id,MT01354
+Cottonwood Reservoir,77,nla12_site_id,NLA12_MT-160
+Cottonwood Reservoir,77,lmorpho_comid,4061192
+Cottonwood Reservoir,77,nhdplus_comid,4061192
+Cottonwood Reservoir,77,gnis_id,770196
+Cottonwood Reservoir,77,comid_match_lagoslakeid,325238
+Cottonwood Reservoir,77,poly_intersect_lagoslakeid,325238
+Cottonwood Reservoir,77,hylak_comid,4061192
+Cottonwood Reservoir,77,hylak_id,1031968
+Cottonwood Reservoir,77,nid_id,MT00021
+owens lake,78,nla17_site_id,NLA17_SD-10016
+owens lake,78,nla12_site_id,NLA12_SD-168
+owens lake,78,lmorpho_comid,11251122
+owens lake,78,nhdplus_comid,11251122
+owens lake,78,gnis_id,1266445
+owens lake,78,comid_match_lagoslakeid,343711
+owens lake,78,poly_intersect_lagoslakeid,343711
+owens lake,78,hylak_comid,11251122
+owens lake,78,hylak_id,1037404
+Roosevelt Lake,79,nla17_site_id,NLA17_SD-10015
+Roosevelt Lake,79,nla12_site_id,NLA12_SD-147
+Roosevelt Lake,79,lmorpho_comid,11666754
+Roosevelt Lake,79,nhdplus_comid,11666754
+Roosevelt Lake,79,gnis_id,1257454
+Roosevelt Lake,79,comid_match_lagoslakeid,349348
+Roosevelt Lake,79,poly_intersect_lagoslakeid,349348
+Roosevelt Lake,79,hylak_comid,11666754
+Roosevelt Lake,79,hylak_id,1048970
+Roosevelt Lake,79,nid_id,SD00043
+Monroe,83,nla17_site_id,NLA17_IN-10009
+Monroe,83,nla22_site_id,NES22-10087
+Monroe,83,nla12_site_id,NLA12_IN-115
+Monroe,83,nla07_site_id,NLA06608-0212
+Monroe,83,lmorpho_comid,166899251
+Monroe,83,lmorpho_nla07,NLA06608-0212
+Monroe,83,nhdplus_comid,18443736
+Monroe,83,comid_match_lagoslakeid,3651
+Monroe,83,poly_intersect_lagoslakeid,3651
+Monroe,83,hylak_comid,166899251
+Monroe,83,hylak_id,9229
+Monroe,83,grand_id,1684
+Monroe,83,nid_id,IN03001
+Monroe,83,nhdplus_comid,166899251
+Monroe,83,gnis_id,451234
+Monroe,83,lmorpho_comid,18443736
+Hammertown Lake,101,nla17_site_id,NLA17_OH-10003
+Hammertown Lake,101,nla12_site_id,NLA12_OH-127
+Hammertown Lake,101,lmorpho_comid,3484673
+Hammertown Lake,101,nhdplus_comid,3484673
+Hammertown Lake,101,gnis_id,1078504
+Hammertown Lake,101,comid_match_lagoslakeid,3253
+Hammertown Lake,101,poly_intersect_lagoslakeid,3253
+Hammertown Lake,101,hylak_comid,3484673
+Hammertown Lake,101,hylak_id,1057141
+Hammertown Lake,101,nid_id,OH00507
+Piney Run Lake,103,nla17_site_id,NLA17_MD-10026
+Piney Run Lake,103,nla22_site_id,NLA22_MD-10022
+Piney Run Lake,103,nla07_site_id,NLA06608-R31
+Piney Run Lake,103,lmorpho_comid,125914857
+Piney Run Lake,103,lmorpho_nla07,NLA06608-R31
+Piney Run Lake,103,nhdplus_comid,125914857
+Piney Run Lake,103,comid_match_lagoslakeid,142983
+Piney Run Lake,103,poly_intersect_lagoslakeid,142983
+Piney Run Lake,103,hylak_comid,125914857
+Piney Run Lake,103,hylak_id,1056731
+Piney Run Lake,103,nid_id,MD00139
+Krodel Park,116,nla17_site_id,NLA17_WV-10004
+Krodel Park,116,nla12_site_id,NLA12_WV-112
+Krodel Park,116,lmorpho_comid,19314376
+Krodel Park,116,nhdplus_comid,19314376
+Krodel Park,116,comid_match_lagoslakeid,259224
+Krodel Park,116,poly_intersect_lagoslakeid,259224
+Krodel Park,116,hylak_comid,19314376
+Sherman Reservoir,149,nla17_site_id,NLA17_NE-10029
+Sherman Reservoir,149,nla22_site_id,NES22-10144
+Sherman Reservoir,149,nla12_site_id,NLA12_NE-114
+Sherman Reservoir,149,nla07_site_id,NLA06608-2740
+Sherman Reservoir,149,lmorpho_comid,17373390
+Sherman Reservoir,149,lmorpho_nla07,NLA06608-2740
+Sherman Reservoir,149,nhdplus_comid,17373390
+Sherman Reservoir,149,gnis_id,834983
+Sherman Reservoir,149,comid_match_lagoslakeid,364887
+Sherman Reservoir,149,poly_intersect_lagoslakeid,364887
+Sherman Reservoir,149,hylak_comid,17373390
+Sherman Reservoir,149,hylak_id,111804
+Sherman Reservoir,149,grand_id,912
+Sherman Reservoir,149,nid_id,NE01077
+Sherman Reservoir,149,nhdplus_comid,17373392
+Sherman Reservoir,149,lmorpho_comid,17373392
+Lake Minatare,155,nla17_site_id,NLA17_NE-10007
+Lake Minatare,155,nla12_site_id,NLA12_NE-160
+Lake Minatare,155,lmorpho_comid,17508468
+Lake Minatare,155,nhdplus_comid,17508468
+Lake Minatare,155,gnis_id,831339
+Lake Minatare,155,comid_match_lagoslakeid,358471
+Lake Minatare,155,poly_intersect_lagoslakeid,358471
+Lake Minatare,155,hylak_comid,17508468
+Lake Minatare,155,hylak_id,111553
+Lake Minatare,155,grand_id,904
+Lake Minatare,155,nid_id,NE01075
+Storrie Lake,157,nla17_site_id,NLA17_NM-10003
+Storrie Lake,157,nla12_site_id,NLA12_NM-160
+Storrie Lake,157,lmorpho_comid,20814160
+Storrie Lake,157,nhdplus_comid,20814160
+Storrie Lake,157,comid_match_lagoslakeid,448036
+Storrie Lake,157,poly_intersect_lagoslakeid,448036
+Storrie Lake,157,hylak_comid,20814160
+Storrie Lake,157,hylak_id,112888
+Storrie Lake,157,grand_id,611
+Storrie Lake,157,nid_id,NM00245
+Eaglewatch Lake,159,nla17_site_id,NLA17_CO-10050
+Eaglewatch Lake,159,nla22_site_id,NLA22_CO-10036
+Eaglewatch Lake,159,lmorpho_comid,188011
+Eaglewatch Lake,159,nhdplus_comid,188011
+Eaglewatch Lake,159,comid_match_lagoslakeid,359874
+Eaglewatch Lake,159,hylak_comid,188011
+Eaglewatch Lake,159,hylak_id,1056529
+Beaver pond,165,nla17_site_id,NLA17_CO-10057
+Beaver pond,165,nla22_site_id,NLA22_CO-10043
+Beaver pond,165,lmorpho_comid,167246042
+Beaver pond,165,nhdplus_comid,167246042
+Beaver pond,165,comid_match_lagoslakeid,361422
+Beaver pond,165,hylak_comid,167246042
+Beaver pond,165,hylak_id,1055507
+Stubblefield,188,nla17_site_id,NLA17_NM-10022
+Stubblefield,188,nla22_site_id,NLA22_NM-10013
+Stubblefield,188,nla07_site_id,NLA06608-1380
+Stubblefield,188,lmorpho_comid,20064419
+Stubblefield,188,lmorpho_nla07,NLA06608-1380
+Stubblefield,188,nhdplus_comid,20064419
+Stubblefield,188,gnis_id,923893
+Stubblefield,188,comid_match_lagoslakeid,386846
+Stubblefield,188,poly_intersect_lagoslakeid,386846
+Stubblefield,188,hylak_comid,20064419
+Stubblefield,188,hylak_id,112776
+Stubblefield,188,nid_id,NM00124
+Lake Fisher,191,nla17_site_id,NLA17_IA-10007
+Lake Fisher,191,nla12_site_id,NLA12_IA-127
+Lake Fisher,191,lmorpho_comid,5798096
+Lake Fisher,191,nhdplus_comid,5798096
+Lake Fisher,191,gnis_id,461470
+Lake Fisher,191,comid_match_lagoslakeid,19195
+Lake Fisher,191,poly_intersect_lagoslakeid,19195
+Lake Fisher,191,hylak_comid,5798096
+Lake Fisher,191,hylak_id,1055205
+Lake Fisher,191,nid_id,IA01339
+Monee Reservoir,195,nla17_site_id,NLA17_IL-10011
+Monee Reservoir,195,nla22_site_id,NLA22_IL-10005
+Monee Reservoir,195,lmorpho_comid,13435489
+Monee Reservoir,195,nhdplus_comid,13435489
+Monee Reservoir,195,gnis_id,413721
+Monee Reservoir,195,comid_match_lagoslakeid,6765
+Monee Reservoir,195,poly_intersect_lagoslakeid,6765
+Monee Reservoir,195,hylak_comid,13435489
+Monee Reservoir,195,nid_id,IL00566
+Beaver Creek Upground,204,nla17_site_id,NLA17_OH-10007
+Beaver Creek Upground,204,nla12_site_id,NLA12_OH-112
+Beaver Creek Upground,204,lmorpho_comid,15610820
+Beaver Creek Upground,204,nhdplus_comid,15610820
+Beaver Creek Upground,204,gnis_id,1078434
+Beaver Creek Upground,204,comid_match_lagoslakeid,3695
+Beaver Creek Upground,204,poly_intersect_lagoslakeid,3695
+Beaver Creek Upground,204,hylak_comid,15610820
+Beaver Creek Upground,204,hylak_id,1054453
+Beaver Creek Upground,204,nid_id,OH00469
+Lake Station,205,nla17_site_id,NLA17_IN-10141
+Lake Station,205,lmorpho_comid,3397968
+Lake Station,205,nhdplus_comid,3397968
+Lake Station,205,comid_match_lagoslakeid,50112
+Lake Station,205,hylak_comid,3397968
+Lake Station,205,hylak_id,1053681
+Old Mans Lake,207,nla17_site_id,NLA17_IL-10004
+Old Mans Lake,207,nla12_site_id,NLA12_IL-114
+Old Mans Lake,207,lmorpho_comid,13583718
+Old Mans Lake,207,nhdplus_comid,13583718
+Old Mans Lake,207,comid_match_lagoslakeid,6445
+Old Mans Lake,207,poly_intersect_lagoslakeid,6445
+Old Mans Lake,207,hylak_comid,13583718
+Old Mans Lake,207,hylak_id,1055540
+Lake Lancelot,208,nla17_site_id,NLA17_IL-10009
+Lake Lancelot,208,nla07_site_id,NLA06608-1724
+Lake Lancelot,208,lmorpho_comid,13604166
+Lake Lancelot,208,lmorpho_nla07,NLA06608-1724
+Lake Lancelot,208,nhdplus_comid,13604166
+Lake Lancelot,208,gnis_id,1692499
+Lake Lancelot,208,comid_match_lagoslakeid,6573
+Lake Lancelot,208,poly_intersect_lagoslakeid,6573
+Lake Lancelot,208,hylak_comid,13604166
+Lake Lancelot,208,nid_id,IL01147
+Otter Lake,209,nla22_site_id,NLA22_KY-10018
+Otter Lake,209,lmorpho_comid,11895232
+Otter Lake,209,nhdplus_comid,11895232
+Otter Lake,209,comid_match_lagoslakeid,262225
+Otter Lake,209,hylak_comid,11895232
+Otter Lake,209,hylak_id,1058994
+Otter Lake,209,nid_id,KY00858
+Lake Dalercarlia,210,nla17_site_id,NLA17_IN-10171
+Lake Dalercarlia,210,lmorpho_comid,13435569
+Lake Dalercarlia,210,nhdplus_comid,13435569
+Lake Dalercarlia,210,comid_match_lagoslakeid,135533
+Lake Dalercarlia,210,hylak_comid,13435551
+Lake Dalercarlia,210,hylak_id,1054250
+Lake Dalercarlia,210,nid_id,IN00791
+Madison Lake,211,nla17_site_id,NLA17_OH-10013
+Madison Lake,211,nla22_site_id,NLA22_OH-10005
+Madison Lake,211,lmorpho_comid,3483393
+Madison Lake,211,nhdplus_comid,3483393
+Madison Lake,211,gnis_id,1042876
+Madison Lake,211,comid_match_lagoslakeid,2097
+Madison Lake,211,poly_intersect_lagoslakeid,2097
+Madison Lake,211,hylak_comid,3483393
+Madison Lake,211,hylak_id,1056158
+Madison Lake,211,nid_id,OH00439
+Lake of the Woods,214,nla17_site_id,NLA17_IL-10013
+Lake of the Woods,214,nla22_site_id,NLA22_IL-10007
+Lake of the Woods,214,lmorpho_comid,13570445
+Lake of the Woods,214,nhdplus_comid,13570445
+Lake of the Woods,214,gnis_id,421484
+Lake of the Woods,214,comid_match_lagoslakeid,6522
+Lake of the Woods,214,poly_intersect_lagoslakeid,6522
+Lake of the Woods,214,hylak_comid,13570445
+Lake of the Woods,214,nid_id,IL00511
+Yellow Banks Lake,230,nla17_site_id,NLA17_IN-10002
+Yellow Banks Lake,230,nla12_site_id,NLA12_IN-104
+Yellow Banks Lake,230,nla07_site_id,NLA06608-2916
+Yellow Banks Lake,230,lmorpho_comid,10107773
+Yellow Banks Lake,230,lmorpho_nla07,NLA06608-2916
+Yellow Banks Lake,230,nhdplus_comid,10107773
+Yellow Banks Lake,230,comid_match_lagoslakeid,88820
+Yellow Banks Lake,230,poly_intersect_lagoslakeid,88820
+Yellow Banks Lake,230,hylak_comid,10107773
+Yellow Banks Lake,230,hylak_id,1058041
+Yellow Banks Lake,230,nid_id,IN00189
+mina lake,231,nla17_site_id,NLA17_SD-10112
+mina lake,231,nla22_site_id,NLA22_SD-10088
+mina lake,231,lmorpho_comid,12554996
+mina lake,231,nhdplus_comid,12555002
+mina lake,231,comid_match_lagoslakeid,353133
+mina lake,231,poly_intersect_lagoslakeid,353133
+mina lake,231,hylak_comid,12555002
+mina lake,231,hylak_id,108901
+mina lake,231,grand_id,848
+mina lake,231,nid_id,SD00016
+mina lake,231,comid_match_lagoslakeid,351297
+mina lake,231,nhdplus_comid,12555004
+mina lake,231,gnis_id,1256961
+mina lake,231,nhdplus_comid,12554996
+mina lake,231,lmorpho_comid,12555002
+mina lake,231,lmorpho_comid,12555004
+harvey dam,232,nla17_site_id,NLA17_ND-10126
+harvey dam,232,nla22_site_id,NLA22_ND-10101
+harvey dam,232,lmorpho_comid,14278116
+harvey dam,232,nhdplus_comid,14278116
+harvey dam,232,comid_match_lagoslakeid,315741
+harvey dam,232,poly_intersect_lagoslakeid,315741
+harvey dam,232,hylak_comid,14278116
+harvey dam,232,hylak_id,104950
+harvey dam,232,nid_id,ND00189
+harvey dam,232,nhdplus_comid,14278128
+harvey dam,232,nhdplus_comid,14278148
+harvey dam,232,lmorpho_comid,14278128
+harvey dam,232,lmorpho_comid,14278148
+Redstone Lake,233,nla17_site_id,NLA17_WI-10010
+Redstone Lake,233,nla12_site_id,NLA12_WI-173
+Redstone Lake,233,lmorpho_comid,13652598
+Redstone Lake,233,nhdplus_comid,13652598
+Redstone Lake,233,gnis_id,1792896
+Redstone Lake,233,comid_match_lagoslakeid,4900
+Redstone Lake,233,poly_intersect_lagoslakeid,4900
+Redstone Lake,233,hylak_comid,13652598
+Redstone Lake,233,hylak_id,110902
+Redstone Lake,233,grand_id,892
+Redstone Lake,233,nid_id,WI00707
+Palmer Lake,234,nla17_site_id,NLA17_MI-10007
+Palmer Lake,234,nla12_site_id,NLA12_MI-112
+Palmer Lake,234,nla07_site_id,NLA06608-0363
+Palmer Lake,234,lmorpho_comid,15677567
+Palmer Lake,234,lmorpho_nla07,NLA06608-0363
+Palmer Lake,234,nhdplus_comid,15677567
+Palmer Lake,234,comid_match_lagoslakeid,3582
+Palmer Lake,234,poly_intersect_lagoslakeid,3582
+Palmer Lake,234,hylak_comid,15677567
+Palmer Lake,234,hylak_id,111537
+Sylvan Lake,235,nla17_site_id,NLA17_IN-10010
+Sylvan Lake,235,nla12_site_id,NLA12_IN-149
+Sylvan Lake,235,lmorpho_comid,167552428
+Sylvan Lake,235,nhdplus_comid,167552428
+Sylvan Lake,235,gnis_id,444518
+Sylvan Lake,235,comid_match_lagoslakeid,2898
+Sylvan Lake,235,poly_intersect_lagoslakeid,2898
+Sylvan Lake,235,hylak_comid,167552428
+Sylvan Lake,235,hylak_id,111733
+Sylvan Lake,235,nid_id,IN00383
+Meyer Lake,236,nla17_site_id,NLA17_IA-10034
+Meyer Lake,236,lmorpho_comid,13308673
+Meyer Lake,236,nhdplus_comid,13308673
+Meyer Lake,236,gnis_id,459018
+Meyer Lake,236,comid_match_lagoslakeid,5414
+Meyer Lake,236,poly_intersect_lagoslakeid,5414
+Meyer Lake,236,hylak_comid,13308673
+Meyer Lake,236,hylak_id,1049046
+Meyer Lake,236,nid_id,IA01077
+Sidie Hollow Lake,237,nla17_site_id,NLA17_WI-10013
+Sidie Hollow Lake,237,nla12_site_id,NLA12_WI-157
+Sidie Hollow Lake,237,lmorpho_comid,13205684
+Sidie Hollow Lake,237,nhdplus_comid,13205684
+Sidie Hollow Lake,237,gnis_id,1834495
+Sidie Hollow Lake,237,comid_match_lagoslakeid,5006
+Sidie Hollow Lake,237,poly_intersect_lagoslakeid,5006
+Sidie Hollow Lake,237,hylak_comid,13205684
+Sidie Hollow Lake,237,hylak_id,1048247
+stockade lake,240,nla17_site_id,NLA17_SD-10009
+stockade lake,240,nla12_site_id,NLA12_SD-107
+stockade lake,240,nla07_site_id,NLA06608-0979
+stockade lake,240,lmorpho_comid,14395602
+stockade lake,240,lmorpho_nla07,NLA06608-0979
+stockade lake,240,nhdplus_comid,14395602
+stockade lake,240,gnis_id,1267048
+stockade lake,240,comid_match_lagoslakeid,337055
+stockade lake,240,poly_intersect_lagoslakeid,337055
+stockade lake,240,hylak_comid,14395602
+stockade lake,240,hylak_id,1047730
+stockade lake,240,nid_id,SD02152
+Heron Reservoir,247,lmorpho_comid,17843236
+Heron Reservoir,247,lmorpho_nla07,NLA06608-0260
+Heron Reservoir,247,nhdplus_comid,17843236
+Heron Reservoir,247,gnis_id,923891
+Heron Reservoir,247,comid_match_lagoslakeid,447742
+Heron Reservoir,247,hylak_comid,17843236
+Heron Reservoir,247,hylak_id,9301
+Heron Reservoir,247,grand_id,603
+Heron Reservoir,247,nid_id,NM00122
+East Fork Reservoir,250,nla17_site_id,NLA17_MT-10014
+East Fork Reservoir,250,nla12_site_id,NLA12_MT-124
+East Fork Reservoir,250,lmorpho_comid,24315765
+East Fork Reservoir,250,nhdplus_comid,24315765
+East Fork Reservoir,250,gnis_id,782895
+East Fork Reservoir,250,comid_match_lagoslakeid,457983
+East Fork Reservoir,250,poly_intersect_lagoslakeid,457983
+East Fork Reservoir,250,hylak_comid,24315765
+East Fork Reservoir,250,hylak_id,107881
+East Fork Reservoir,250,grand_id,344
+Troutvale Reservoir #1,264,nla17_site_id,NLA17_CO-10037
+Troutvale Reservoir #1,264,nla22_site_id,NLA22_CO-10023
+Troutvale Reservoir #1,264,lmorpho_comid,17905661
+Troutvale Reservoir #1,264,nhdplus_comid,17905661
+Troutvale Reservoir #1,264,gnis_id,199649
+Troutvale Reservoir #1,264,comid_match_lagoslakeid,446976
+Troutvale Reservoir #1,264,hylak_comid,17905661
+Troutvale Reservoir #1,264,hylak_id,1058547
+Troutvale Reservoir #1,264,nid_id,CO00812
+gooseberry reservoir,276,nla17_site_id,NLA17_UT-10009
+gooseberry reservoir,276,nla22_site_id,NLA22_UT-10125
+gooseberry reservoir,276,nla12_site_id,NLA12_UT-196
+gooseberry reservoir,276,lmorpho_comid,3906261
+gooseberry reservoir,276,nhdplus_comid,3906261
+gooseberry reservoir,276,gnis_id,1447806
+gooseberry reservoir,276,comid_match_lagoslakeid,452903
+gooseberry reservoir,276,poly_intersect_lagoslakeid,452903
+gooseberry reservoir,276,hylak_comid,3906261
+gooseberry reservoir,276,hylak_id,1056355
+gooseberry reservoir,276,nid_id,UT10142
+Upper Twin Lake,281,nla17_site_id,NLA17_MT-10101
+Upper Twin Lake,281,nla22_site_id,NLA22_MT-10091
+Upper Twin Lake,281,lmorpho_comid,24331578
+Upper Twin Lake,281,nhdplus_comid,24331578
+Upper Twin Lake,281,gnis_id,796284
+Upper Twin Lake,281,comid_match_lagoslakeid,459210
+Upper Twin Lake,281,poly_intersect_lagoslakeid,459210
+Upper Twin Lake,281,hylak_comid,24331578
+Upper Twin Lake,281,hylak_id,1030644
+Upper Twin Lake,281,nid_id,MT01166
+Kemmerer Reservoir,328,nla17_site_id,NLA17_WY-10005
+Kemmerer Reservoir,328,nla12_site_id,NLA12_WY-131
+Kemmerer Reservoir,328,lmorpho_comid,3192814
+Kemmerer Reservoir,328,nhdplus_comid,3192814
+Kemmerer Reservoir,328,gnis_id,1590318
+Kemmerer Reservoir,328,comid_match_lagoslakeid,450981
+Kemmerer Reservoir,328,poly_intersect_lagoslakeid,450981
+Kemmerer Reservoir,328,hylak_comid,3192814
+Kemmerer Reservoir,328,hylak_id,1052513
+Kemmerer Reservoir,328,nid_id,WY01282
+French Creek,1,lmorpho_comid,18208112
+French Creek,1,lmorpho_nla07,NLA06608-0283
+French Creek,1,nhdplus_comid,21677972
+French Creek,1,comid_match_lagoslakeid,244053
+French Creek,1,hylak_comid,21677972
+French Creek,1,hylak_id,113618
+Arkabutla,2,nla17_site_id,NLA17_MS-10002
+Arkabutla,2,nla12_site_id,NLA12_MS-107
+Arkabutla,2,nla07_site_id,NLA06608-0432
+Arkabutla,2,lmorpho_comid,15252778
+Arkabutla,2,lmorpho_nla07,NLA06608-0432
+Arkabutla,2,nhdplus_comid,15252778
+Arkabutla,2,gnis_id,690215
+Arkabutla,2,comid_match_lagoslakeid,287042
+Arkabutla,2,poly_intersect_lagoslakeid,287042
+Arkabutla,2,hylak_comid,15252778
+Arkabutla,2,hylak_id,9378
+Arkabutla,2,grand_id,1101
+Arkabutla,2,nid_id,MS01496
+Johnson Family Boating Lake,14,nla17_site_id,NLA17_MS-10015
+Johnson Family Boating Lake,14,nla12_site_id,NLA12_MS-102
+Johnson Family Boating Lake,14,nla07_site_id,NLA06608-0812
+Johnson Family Boating Lake,14,lmorpho_comid,19139667
+Johnson Family Boating Lake,14,lmorpho_nla07,NLA06608-0812
+Johnson Family Boating Lake,14,nhdplus_comid,19139667
+Johnson Family Boating Lake,14,hylak_comid,19139667
+Johnson Family Boating Lake,14,hylak_id,1064609
+Marrowbone Lake,84,nla17_site_id,NLA17_TN-10004
+Marrowbone Lake,84,nla12_site_id,NLA12_TN-119
+Marrowbone Lake,84,lmorpho_comid,18407394
+Marrowbone Lake,84,nhdplus_comid,18407394
+Marrowbone Lake,84,gnis_id,1292729
+Marrowbone Lake,84,comid_match_lagoslakeid,270107
+Marrowbone Lake,84,poly_intersect_lagoslakeid,270107
+Marrowbone Lake,84,hylak_comid,18407394
+Marrowbone Lake,84,nid_id,TN03707
+acworth lake,117,nla17_site_id,NLA17_GA-10023
+acworth lake,117,nla22_site_id,NLA22_GA-10012
+acworth lake,117,lmorpho_comid,6495242
+acworth lake,117,nhdplus_comid,6495242
+acworth lake,117,gnis_id,310382
+acworth lake,117,comid_match_lagoslakeid,243038
+acworth lake,117,hylak_comid,6495242
+acworth lake,117,hylak_id,9403
+acworth lake,117,grand_id,1862
+acworth lake,117,nid_id,GA06143
+Tully Lake,51,nla17_site_id,NLA17_MA-10004
+Tully Lake,51,nla12_site_id,NLA12_MA-105
+Tully Lake,51,lmorpho_comid,9343025
+Tully Lake,51,nhdplus_comid,9343025
+Tully Lake,51,gnis_id,617920
+Tully Lake,51,comid_match_lagoslakeid,127944
+Tully Lake,51,poly_intersect_lagoslakeid,127944
+Tully Lake,51,hylak_comid,9343025
+Tully Lake,51,hylak_id,1050358
+Tully Lake,51,nid_id,MA00970
+Lake Zoar,52,nla17_site_id,NLA17_CT-10010
+Lake Zoar,52,nla22_site_id,NLA22_CT-10009
+Lake Zoar,52,nla07_site_id,NLA06608-1010
+Lake Zoar,52,lmorpho_comid,120052268
+Lake Zoar,52,lmorpho_nla07,NLA06608-1010
+Lake Zoar,52,nhdplus_comid,120052268
+Lake Zoar,52,comid_match_lagoslakeid,7429
+Lake Zoar,52,poly_intersect_lagoslakeid,7429
+Lake Zoar,52,hylak_comid,120052268
+Morris Reservoir,53,nla17_site_id,NLA17_CT-10004
+Morris Reservoir,53,nla12_site_id,NLA12_CT-103
+Morris Reservoir,53,nla07_site_id,NLA06608-0006
+Morris Reservoir,53,lmorpho_comid,7711476
+Morris Reservoir,53,lmorpho_nla07,NLA06608-0006
+Morris Reservoir,53,nhdplus_comid,7711476
+Morris Reservoir,53,gnis_id,209057
+Morris Reservoir,53,comid_match_lagoslakeid,76789
+Morris Reservoir,53,poly_intersect_lagoslakeid,76789
+Morris Reservoir,53,hylak_comid,7711476
+Morris Reservoir,53,hylak_id,1053336
+Morris Reservoir,53,nid_id,CT00473
+Slatersville Reservoir,57,nla17_site_id,NLA17_RI-10002
+Slatersville Reservoir,57,nla22_site_id,NES22-10006
+Slatersville Reservoir,57,nla12_site_id,NLA12_RI-103
+Slatersville Reservoir,57,nla07_site_id,NLA06608-0690
+Slatersville Reservoir,57,lmorpho_comid,6117396
+Slatersville Reservoir,57,lmorpho_nla07,NLA06608-0690
+Slatersville Reservoir,57,nhdplus_comid,6117396
+Slatersville Reservoir,57,gnis_id,1218849
+Slatersville Reservoir,57,comid_match_lagoslakeid,7460
+Slatersville Reservoir,57,poly_intersect_lagoslakeid,7460
+Slatersville Reservoir,57,hylak_comid,6117396
+Slatersville Reservoir,57,hylak_id,1052360
+Slatersville Reservoir,57,nid_id,RI02501
+Slatersville Reservoir,57,nhdplus_comid,6117428
+Slatersville Reservoir,57,lmorpho_comid,6117428
+Halls pond,64,nla17_site_id,NLA17_CT-10005
+Halls pond,64,nla12_site_id,NLA12_CT-126
+Halls pond,64,lmorpho_comid,6161203
+Halls pond,64,nhdplus_comid,6161203
+Halls pond,64,gnis_id,1771346
+Halls pond,64,comid_match_lagoslakeid,6582
+Halls pond,64,poly_intersect_lagoslakeid,6582
+Halls pond,64,hylak_comid,6161203
+Halls pond,64,hylak_id,1052823
+Halls pond,64,nid_id,CT00598
+Weatherhead Hollow,65,nla17_site_id,NLA17_VT-10019
+Weatherhead Hollow,65,nla22_site_id,NLA22_VT-10013
+Weatherhead Hollow,65,lmorpho_comid,6777539
+Weatherhead Hollow,65,nhdplus_comid,6777539
+Weatherhead Hollow,65,comid_match_lagoslakeid,5519
+Weatherhead Hollow,65,poly_intersect_lagoslakeid,5519
+Weatherhead Hollow,65,hylak_comid,6777539
+Weatherhead Hollow,65,nid_id,VT00116
+Norton Reservoir,66,nla17_site_id,NLA17_MA-10002
+Norton Reservoir,66,nla12_site_id,NLA12_MA-102
+Norton Reservoir,66,lmorpho_comid,6126713
+Norton Reservoir,66,lmorpho_nla07,NLA06608-0454
+Norton Reservoir,66,nhdplus_comid,6126713
+Norton Reservoir,66,gnis_id,612499
+Norton Reservoir,66,comid_match_lagoslakeid,73599
+Norton Reservoir,66,poly_intersect_lagoslakeid,73599
+Norton Reservoir,66,hylak_comid,6126713
+Norton Reservoir,66,nid_id,MA00815
+beulah,238,nla17_site_id,NLA17_OR-10003
+beulah,238,nla12_site_id,NLA12_OR-112
+beulah,238,nla07_site_id,NLA06608-0933
+beulah,238,lmorpho_comid,23422703
+beulah,238,lmorpho_nla07,NLA06608-0933
+beulah,238,nhdplus_comid,23422703
+beulah,238,gnis_id,1117569
+beulah,238,comid_match_lagoslakeid,464740
+beulah,238,poly_intersect_lagoslakeid,464740
+beulah,238,hylak_comid,23422703
+beulah,238,hylak_id,110691
+beulah,238,grand_id,383
+beulah,238,nid_id,OR00589
+Philips,239,nla12_site_id,NLA12_OR-105
+Philips,239,nla07_site_id,NLA06608-0881
+Philips,239,lmorpho_comid,24215523
+Philips,239,lmorpho_nla07,NLA06608-0881
+Philips,239,nhdplus_comid,24215523
+Philips,239,gnis_id,1132099
+Philips,239,comid_match_lagoslakeid,464221
+Philips,239,hylak_comid,24215523
+Philips,239,hylak_id,109970
+Philips,239,grand_id,367
+Philips,239,nid_id,OR00577
+Emigrant,249,nla17_site_id,NLA17_OR-10004
+Emigrant,249,nla12_site_id,NLA12_OR-113
+Emigrant,249,lmorpho_comid,23934034
+Emigrant,249,lmorpho_nla07,NLA06608-2082
+Emigrant,249,nhdplus_comid,23934034
+Emigrant,249,gnis_id,1120500
+Emigrant,249,comid_match_lagoslakeid,469968
+Emigrant,249,poly_intersect_lagoslakeid,469968
+Emigrant,249,hylak_comid,23934034
+Emigrant,249,hylak_id,111445
+Emigrant,249,grand_id,114
+Emigrant,249,nid_id,OR00581
+Lost_Valley,253,nla17_site_id,NLA17_ID-10001
+Lost_Valley,253,nla12_site_id,NLA12_ID-101
+Lost_Valley,253,nla07_site_id,NLA06608-3121
+Lost_Valley,253,lmorpho_comid,24189308
+Lost_Valley,253,lmorpho_nla07,NLA06608-3121
+Lost_Valley,253,nhdplus_comid,24189308
+Lost_Valley,253,gnis_id,397875
+Lost_Valley,253,comid_match_lagoslakeid,464872
+Lost_Valley,253,poly_intersect_lagoslakeid,464872
+Lost_Valley,253,hylak_comid,24189308
+Lost_Valley,253,hylak_id,109578
+Lost_Valley,253,nid_id,ID00255
+Swofford,263,nla17_site_id,NLA17_WA-10006
+Swofford,263,nla12_site_id,NLA12_WA-106
+Swofford,263,nla07_site_id,NLA06608-0721
+Swofford,263,lmorpho_comid,24252344
+Swofford,263,lmorpho_nla07,NLA06608-0721
+Swofford,263,nhdplus_comid,24252344
+Swofford,263,gnis_id,1529467
+Swofford,263,comid_match_lagoslakeid,467585
+Swofford,263,poly_intersect_lagoslakeid,467585
+Swofford,263,hylak_comid,24252344
+Swofford,263,hylak_id,1026592
+elk cr,265,nla17_site_id,NLA17_ID-10168
+elk cr,265,lmorpho_comid,23634788
+elk cr,265,nhdplus_comid,23634788
+elk cr,265,gnis_id,381368
+elk cr,265,comid_match_lagoslakeid,466359
+elk cr,265,hylak_comid,23634788
+elk cr,265,hylak_id,1023145
+elk cr,265,nid_id,ID00146
+owyhee,287,nla17_site_id,NLA17_OR-10060
+owyhee,287,nla22_site_id,NLA22_OR-10042
+owyhee,287,lmorpho_comid,120052938
+owyhee,287,nhdplus_comid,120052938
+owyhee,287,gnis_id,1125099
+owyhee,287,comid_match_lagoslakeid,464222
+owyhee,287,hylak_comid,120052938
+owyhee,287,hylak_id,9050
+owyhee,287,grand_id,386
+owyhee,287,nid_id,OR00582
+Lower Goose,302,nla17_site_id,NLA17_ID-10032
+Lower Goose,302,nla12_site_id,NLA12_ID-214
+Lower Goose,302,lmorpho_comid,23192245
+Lower Goose,302,nhdplus_comid,23192245
+Lower Goose,302,comid_match_lagoslakeid,463792
+Lower Goose,302,poly_intersect_lagoslakeid,463792
+Lower Goose,302,hylak_comid,23192245
+Lower Goose,302,hylak_id,111430
+Lower Goose,302,nid_id,ID00233
+Wapato Lake,308,nla17_site_id,NLA17_WA-10002
+Wapato Lake,308,nla12_site_id,NLA12_WA-111
+Wapato Lake,308,nla07_site_id,NLA06608-2833
+Wapato Lake,308,lmorpho_comid,23078085
+Wapato Lake,308,lmorpho_nla07,NLA06608-2833
+Wapato Lake,308,nhdplus_comid,23078085
+Wapato Lake,308,gnis_id,1527791
+Wapato Lake,308,comid_match_lagoslakeid,461289
+Wapato Lake,308,poly_intersect_lagoslakeid,461289
+Wapato Lake,308,hylak_comid,23078085
+Wapato Lake,308,hylak_id,1003151
+Wapato Lake,308,nid_id,WA00321
+Mormon Lake,323,lmorpho_comid,23265324
+Mormon Lake,323,nhdplus_comid,23265324
+Mormon Lake,323,gnis_id,397930
+Mormon Lake,323,comid_match_lagoslakeid,463336
+Mormon Lake,323,hylak_comid,23265324
+Mormon Lake,323,hylak_id,111024
+Mormon Lake,323,nid_id,ID00024
+Springfield,331,nla17_site_id,NLA17_ID-10007
+Springfield,331,nla12_site_id,NLA12_ID-166
+Springfield,331,lmorpho_comid,24566893
+Springfield,331,nhdplus_comid,24566893
+Springfield,331,comid_match_lagoslakeid,463086
+Springfield,331,poly_intersect_lagoslakeid,463086
+Springfield,331,hylak_comid,24566893
+Springfield,331,hylak_id,1049284
+Baker Lake,999,nla17_site_id,NLA17_WA-10038
+Baker Lake,999,nla12_site_id,NLA12_WA-151
+Baker Lake,999,lmorpho_comid,24260671
+Baker Lake,999,nhdplus_comid,24260671
+Baker Lake,999,gnis_id,1516055
+Baker Lake,999,comid_match_lagoslakeid,471746
+Baker Lake,999,poly_intersect_lagoslakeid,471746
+Baker Lake,999,hylak_comid,24260671
+Baker Lake,999,hylak_id,8279
+Baker Lake,999,grand_id,43
+Baker Lake,999,nid_id,WA00173
+okeheelee,10,nla17_site_id,NLA17_FL-10030
+okeheelee,10,nla22_site_id,NLA22_FL-10019
+okeheelee,10,lmorpho_comid,56038
+okeheelee,10,nhdplus_comid,56038
+okeheelee,10,comid_match_lagoslakeid,201797
+okeheelee,10,hylak_comid,56068
+okeheelee,10,nhdplus_comid,56050
+okeheelee,10,nhdplus_comid,56068
+okeheelee,10,nhdplus_comid,56090
+okeheelee,10,lmorpho_comid,56050
+okeheelee,10,lmorpho_comid,56068
+okeheelee,10,lmorpho_comid,56090
+jolly pond,16,nla17_site_id,NLA17_VA-10002
+jolly pond,16,nla12_site_id,NLA12_VA-106
+jolly pond,16,nla07_site_id,NLA06608-0221
+jolly pond,16,lmorpho_comid,10062717
+jolly pond,16,lmorpho_nla07,NLA06608-0221
+jolly pond,16,nhdplus_comid,10062717
+jolly pond,16,gnis_id,1502049
+jolly pond,16,comid_match_lagoslakeid,145909
+jolly pond,16,poly_intersect_lagoslakeid,145909
+jolly pond,16,hylak_comid,10062717
+jolly pond,16,nid_id,VA095009
+lake juniper,44,nla17_site_id,NLA17_SC-10027
+lake juniper,44,lmorpho_comid,9164888
+lake juniper,44,nhdplus_comid,9164888
+lake juniper,44,gnis_id,1222305
+lake juniper,44,comid_match_lagoslakeid,157615
+lake juniper,44,hylak_comid,9164888
+lake juniper,44,hylak_id,1061366
+lake juniper,44,nid_id,SC00028
+Four Prong Lake,45,nla17_site_id,NLA17_FL-10029
+Four Prong Lake,45,nla22_site_id,NLA22_FL-10018
+Four Prong Lake,45,lmorpho_comid,478125
+Four Prong Lake,45,nhdplus_comid,478125
+Four Prong Lake,45,gnis_id,282740
+Four Prong Lake,45,comid_match_lagoslakeid,233591
+Four Prong Lake,45,hylak_comid,478125
+lake montclair,82,nla17_site_id,NLA17_VA-10010
+lake montclair,82,nla12_site_id,NLA12_VA-110
+lake montclair,82,lmorpho_comid,4528811
+lake montclair,82,nhdplus_comid,4528811
+lake montclair,82,gnis_id,1502074
+lake montclair,82,comid_match_lagoslakeid,143451
+lake montclair,82,poly_intersect_lagoslakeid,143451
+lake montclair,82,hylak_comid,4528811
+lake montclair,82,hylak_id,1057607
+lake montclair,82,nid_id,VA153003
+Hickory Nut Upper Lake_Big Mirror Lake,98,nla17_site_id,NLA17_NC-10030
+Hickory Nut Upper Lake_Big Mirror Lake,98,lmorpho_comid,12036081
+Hickory Nut Upper Lake_Big Mirror Lake,98,nhdplus_comid,12036081
+Hickory Nut Upper Lake_Big Mirror Lake,98,comid_match_lagoslakeid,164519
+Hickory Nut Upper Lake_Big Mirror Lake,98,hylak_comid,12036081
+Hickory Nut Upper Lake_Big Mirror Lake,98,hylak_id,112928
+Hickory Nut Upper Lake_Big Mirror Lake,98,grand_id,1805
+Hickory Nut Upper Lake_Big Mirror Lake,98,nid_id,NC01390
+Atagahi,102,nla17_site_id,NLA17_NC-10004
+Atagahi,102,nla12_site_id,NLA12_NC-109
+Atagahi,102,lmorpho_comid,22163154
+Atagahi,102,nhdplus_comid,22163154
+Atagahi,102,gnis_id,1017051
+Atagahi,102,comid_match_lagoslakeid,272935
+Atagahi,102,poly_intersect_lagoslakeid,272935
+Atagahi,102,hylak_comid,22163154
+Atagahi,102,hylak_id,1060692
+Atagahi,102,nid_id,NC00197
+Beaver Pond,119,nla17_site_id,NLA17_VA-10001
+Beaver Pond,119,nla12_site_id,NLA12_VA-101
+Beaver Pond,119,nla07_site_id,NLA06608-0045
+Beaver Pond,119,lmorpho_comid,8606221
+Beaver Pond,119,lmorpho_nla07,NLA06608-0045
+Beaver Pond,119,nhdplus_comid,8606221
+Beaver Pond,119,gnis_id,1489117
+Beaver Pond,119,comid_match_lagoslakeid,146300
+Beaver Pond,119,hylak_comid,8606221
+Burnsville Lake,137,nla17_site_id,NLA17_WV-10002
+Burnsville Lake,137,nla12_site_id,NLA12_WV-102
+Burnsville Lake,137,nla07_site_id,NLA06608-0681
+Burnsville Lake,137,lmorpho_comid,76669453
+Burnsville Lake,137,lmorpho_nla07,NLA06608-0681
+Burnsville Lake,137,nhdplus_comid,76669453
+Burnsville Lake,137,comid_match_lagoslakeid,259075
+Burnsville Lake,137,poly_intersect_lagoslakeid,259075
+Burnsville Lake,137,hylak_comid,76669453
+Burnsville Lake,137,hylak_id,112416
+Burnsville Lake,137,grand_id,1691
+Burnsville Lake,137,nid_id,WV00707
+Suck cr,138,nla17_site_id,NLA17_NC-10023
+Suck cr,138,nla22_site_id,NLA22_NC-10016
+Suck cr,138,lmorpho_comid,8874182
+Suck cr,138,nhdplus_comid,8874182
+Suck cr,138,comid_match_lagoslakeid,156574
+Suck cr,138,hylak_comid,8874182
+Suck cr,138,hylak_id,1060479
+Willow Lake,275,nla17_site_id,NLA17_AZ-10004
+Willow Lake,275,nla12_site_id,NLA12_AZ-102
+Willow Lake,275,nla07_site_id,NLA06608-0569
+Willow Lake,275,lmorpho_comid,20451100
+Willow Lake,275,lmorpho_nla07,NLA06608-0569
+Willow Lake,275,nhdplus_comid,20451100
+Willow Lake,275,gnis_id,36238
+Willow Lake,275,comid_match_lagoslakeid,454810
+Willow Lake,275,poly_intersect_lagoslakeid,454810
+Willow Lake,275,hylak_comid,20451100
+Willow Lake,275,hylak_id,1061426
+Willow Lake,275,nid_id,AZ00019
+Saguaro,288,nla17_site_id,NLA17_AZ-10001
+Saguaro,288,nla12_site_id,NLA12_AZ-101
+Saguaro,288,nla07_site_id,NLA06608-0834
+Saguaro,288,lmorpho_comid,20476542
+Saguaro,288,lmorpho_nla07,NLA06608-0834
+Saguaro,288,nhdplus_comid,20476542
+Saguaro,288,gnis_id,33945
+Saguaro,288,comid_match_lagoslakeid,454700
+Saguaro,288,poly_intersect_lagoslakeid,454700
+Saguaro,288,hylak_comid,20476542
+Saguaro,288,hylak_id,113313
+Saguaro,288,grand_id,652
+Saguaro,288,nid_id,AZ10318
+Upper San Leandro Reservoir,291,nla17_site_id,NLA17_CA-10011
+Upper San Leandro Reservoir,291,nla12_site_id,NLA12_CA-188
+Upper San Leandro Reservoir,291,lmorpho_comid,2803209
+Upper San Leandro Reservoir,291,nhdplus_comid,2803209
+Upper San Leandro Reservoir,291,gnis_id,236920
+Upper San Leandro Reservoir,291,comid_match_lagoslakeid,480826
+Upper San Leandro Reservoir,291,hylak_comid,2803209
+Upper San Leandro Reservoir,291,hylak_id,112601
+Upper San Leandro Reservoir,291,grand_id,208
+Upper San Leandro Reservoir,291,nid_id,CA01082
+Shadow Cliffs Lake,296,nla17_site_id,NLA17_CA-10081
+Shadow Cliffs Lake,296,nla22_site_id,NLA22_CA-10067
+Shadow Cliffs Lake,296,lmorpho_comid,2806007
+Shadow Cliffs Lake,296,nhdplus_comid,2806007
+Shadow Cliffs Lake,296,comid_match_lagoslakeid,480705
+Shadow Cliffs Lake,296,poly_intersect_lagoslakeid,480705
+Shadow Cliffs Lake,296,hylak_comid,2806007
+Shadow Cliffs Lake,296,hylak_id,1058713
+New Melones,297,nla17_site_id,NLA17_CA-10009
+New Melones,297,nla12_site_id,NLA12_CA-119
+New Melones,297,lmorpho_comid,120051899
+New Melones,297,nhdplus_comid,342271
+New Melones,297,comid_match_lagoslakeid,479040
+New Melones,297,poly_intersect_lagoslakeid,479040
+New Melones,297,hylak_comid,120051899
+New Melones,297,hylak_id,9267
+New Melones,297,grand_id,198
+New Melones,297,nid_id,CA10246
+New Melones,297,nhdplus_comid,342321
+New Melones,297,nhdplus_comid,120051899
+New Melones,297,gnis_id,253643
+New Melones,297,lmorpho_comid,342271
+New Melones,297,lmorpho_comid,342321
+Wild Horse Reservoir,298,nla17_site_id,NLA17_NV-10090
+Wild Horse Reservoir,298,nla22_site_id,NLA22_NV-10079
+Wild Horse Reservoir,298,lmorpho_comid,23326906
+Wild Horse Reservoir,298,nhdplus_comid,23326906
+Wild Horse Reservoir,298,gnis_id,862000
+Wild Horse Reservoir,298,comid_match_lagoslakeid,464605
+Wild Horse Reservoir,298,poly_intersect_lagoslakeid,464605
+Wild Horse Reservoir,298,hylak_comid,23326906
+Wild Horse Reservoir,298,hylak_id,9147
+Wild Horse Reservoir,298,grand_id,430
+Wild Horse Reservoir,298,nid_id,NV10119
+Mitry,316,nla17_site_id,NLA17_AZ-10041
+Mitry,316,nla22_site_id,NLA22_AZ-10032
+Mitry,316,lmorpho_comid,21411459
+Mitry,316,nhdplus_comid,21411459
+Mitry,316,comid_match_lagoslakeid,454273
+Mitry,316,hylak_comid,21411459
+Mitry,316,hylak_id,1063576
+Mitry,316,nid_id,AZ10315
+Lake Greenhaven,317,nla17_site_id,NLA17_CA-10003
+Lake Greenhaven,317,nla12_site_id,NLA12_CA-105
+Lake Greenhaven,317,nla07_site_id,NLA06608-1269
+Lake Greenhaven,317,lmorpho_comid,15033533
+Lake Greenhaven,317,lmorpho_nla07,NLA06608-1269
+Lake Greenhaven,317,nhdplus_comid,15033533
+Lake Greenhaven,317,gnis_id,224584
+Lake Greenhaven,317,comid_match_lagoslakeid,475176
+Lake Greenhaven,317,poly_intersect_lagoslakeid,475176
+Lake Greenhaven,317,hylak_comid,15033533
+Comins Lake,326,nla17_site_id,NLA17_NV-10243
+Comins Lake,326,lmorpho_comid,11337343
+Comins Lake,326,nhdplus_comid,11337345
+Comins Lake,326,comid_match_lagoslakeid,457519
+Comins Lake,326,poly_intersect_lagoslakeid,457519
+Comins Lake,326,hylak_comid,11337343
+Comins Lake,326,hylak_id,1057010
+Comins Lake,326,nid_id,NV00174
+Comins Lake,326,nhdplus_comid,11337343
+Comins Lake,326,lmorpho_comid,11337345
+Dacey Reservoir,327,nla17_site_id,NLA17_NV-10002
+Dacey Reservoir,327,nla12_site_id,NLA12_NV-103
+Dacey Reservoir,327,lmorpho_comid,20637202
+Dacey Reservoir,327,lmorpho_nla07,NLA06608-0237
+Dacey Reservoir,327,nhdplus_comid,20637202
+Dacey Reservoir,327,gnis_id,857953
+Dacey Reservoir,327,comid_match_lagoslakeid,453698
+Dacey Reservoir,327,poly_intersect_lagoslakeid,453698
+Dacey Reservoir,327,hylak_comid,20637202
+Dacey Reservoir,327,hylak_id,1057841
+Dacey Reservoir,327,nid_id,NV00120
+Las Curias,1000,hylak_comid,800045123
+Las Curias,1000,hylak_id,1072637
+Las Curias,1000,nid_id,PR00022
+Lake Francis Case,70,nla17_site_id,NLA17_SD-10053
+Lake Francis Case,70,nla12_site_id,NLA12_SD-183
+Lake Francis Case,70,lmorpho_comid,11546104
+Lake Francis Case,70,nhdplus_comid,11546104
+Lake Francis Case,70,comid_match_lagoslakeid,345199
+Lake Francis Case,70,poly_intersect_lagoslakeid,345199
+Lake Francis Case,70,hylak_comid,120053557
+Lake Francis Case,70,nid_id,SD01093
+Lake Francis Case,70,nhdplus_comid,120053557
+Lake Francis Case,70,gnis_id,1255140
+Lake Francis Case,70,nhdplus_comid,167245953
+Lake Oahe,69,nla17_site_id,NLA17_SD-10001
+Lake Oahe,69,nla12_site_id,NLA12_SD-101
+Lake Oahe,69,nla07_site_id,NLA06608-0243
+Lake Oahe,69,lmorpho_comid,14489102
+Lake Oahe,69,lmorpho_nla07,NLA06608-0243
+Lake Oahe,69,nhdplus_comid,14496248
+Lake Oahe,69,comid_match_lagoslakeid,343492
+Lake Oahe,69,poly_intersect_lagoslakeid,337264
+Lake Oahe,69,hylak_comid,19251179
+Lake Oahe,69,hylak_id,65
+Lake Oahe,69,grand_id,870
+Lake Oahe,69,nid_id,SD01095
+Lake Oahe,69,poly_intersect_lagoslakeid,343492
+Lake Oahe,69,comid_match_lagoslakeid,337264
+Lake Oahe,69,nhdplus_comid,14496254
+Lake Oahe,69,nhdplus_comid,14489102
+Lake Oahe,69,nhdplus_comid,19242169
+Lake Oahe,69,nhdplus_comid,19247123
+Lake Oahe,69,gnis_id,1266878
+Lake Oahe,69,nhdplus_comid,19247131
+Lake Oahe,69,nhdplus_comid,21833617
+Lake Oahe,69,nhdplus_comid,21833599
+Lake Oahe,69,nhdplus_comid,19251179
+Acton Lake,1001,lmorpho_comid,3881594
+Acton Lake,1001,nhdplus_comid,3881594
+Acton Lake,1001,gnis_id,1070657
+Acton Lake,1001,comid_match_lagoslakeid,447
+Acton Lake,1001,poly_intersect_lagoslakeid,447
+Acton Lake,1001,hylak_comid,3881594
+Acton Lake,1001,hylak_id,112264
+Acton Lake,1001,nid_id,OH00575
+Alum Creek Lake,1002,lmorpho_comid,5212313
+Alum Creek Lake,1002,nhdplus_comid,5212313
+Alum Creek Lake,1002,gnis_id,1047931
+Alum Creek Lake,1002,comid_match_lagoslakeid,2226
+Alum Creek Lake,1002,poly_intersect_lagoslakeid,2226
+Alum Creek Lake,1002,hylak_comid,5212313
+Alum Creek Lake,1002,hylak_id,9190
+Alum Creek Lake,1002,grand_id,1621
+Alum Creek Lake,1002,nid_id,OH00931
+Apple Valley Lake,1003,lmorpho_comid,15400440
+Apple Valley Lake,1003,nhdplus_comid,15400440
+Apple Valley Lake,1003,gnis_id,1078224
+Apple Valley Lake,1003,comid_match_lagoslakeid,91800
+Apple Valley Lake,1003,hylak_comid,15400440
+Apple Valley Lake,1003,hylak_id,112083
+Apple Valley Lake,1003,grand_id,1614
+Apple Valley Lake,1003,nid_id,OH00345
+Atwood Lake,1004,nla22_site_id,NES22-10062
+Atwood Lake,1004,nla07_site_id,NLA06608-0863
+Atwood Lake,1004,lmorpho_comid,19387446
+Atwood Lake,1004,nhdplus_comid,19387446
+Atwood Lake,1004,comid_match_lagoslakeid,543
+Atwood Lake,1004,poly_intersect_lagoslakeid,543
+Atwood Lake,1004,hylak_comid,19387454
+Atwood Lake,1004,hylak_id,112055
+Atwood Lake,1004,grand_id,1606
+Atwood Lake,1004,nid_id,OH00006
+Atwood Lake,1004,nhdplus_comid,19387450
+Atwood Lake,1004,nhdplus_comid,19387452
+Atwood Lake,1004,nhdplus_comid,19387454
+Atwood Lake,1004,gnis_id,1070667
+Atwood Lake,1004,lmorpho_comid,19387450
+Atwood Lake,1004,lmorpho_comid,19387452
+Atwood Lake,1004,lmorpho_comid,19387454
+Atwood Lake,1004,lmorpho_nla07,NLA06608-0863
+Brookville Lake,1005,lmorpho_comid,166899200
+Brookville Lake,1005,nhdplus_comid,166899200
+Brookville Lake,1005,gnis_id,431588
+Brookville Lake,1005,comid_match_lagoslakeid,2907
+Brookville Lake,1005,hylak_comid,166899200
+Brookville Lake,1005,hylak_id,9216
+Brookville Lake,1005,grand_id,1656
+Brookville Lake,1005,nid_id,IN03017
+Buckhorn Lake,1006,lmorpho_comid,486928
+Buckhorn Lake,1006,nhdplus_comid,486928
+Buckhorn Lake,1006,gnis_id,511027
+Buckhorn Lake,1006,comid_match_lagoslakeid,260192
+Buckhorn Lake,1006,poly_intersect_lagoslakeid,260192
+Buckhorn Lake,1006,hylak_comid,486928
+Buckhorn Lake,1006,hylak_id,112676
+Buckhorn Lake,1006,grand_id,1739
+Buckhorn Lake,1006,nid_id,KY03027
+Burr Oak Reservoir,1007,lmorpho_comid,15417757
+Burr Oak Reservoir,1007,nhdplus_comid,15417757
+Burr Oak Reservoir,1007,comid_match_lagoslakeid,1590
+Burr Oak Reservoir,1007,poly_intersect_lagoslakeid,1590
+Burr Oak Reservoir,1007,hylak_comid,15417757
+Burr Oak Reservoir,1007,hylak_id,112267
+Burr Oak Reservoir,1007,grand_id,1650
+Burr Oak Reservoir,1007,nid_id,OH00018
+Caesar Creek Lake,1008,lmorpho_comid,166899204
+Caesar Creek Lake,1008,nhdplus_comid,166899204
+Caesar Creek Lake,1008,comid_match_lagoslakeid,2350
+Caesar Creek Lake,1008,poly_intersect_lagoslakeid,2350
+Caesar Creek Lake,1008,hylak_comid,166899204
+Caesar Creek Lake,1008,hylak_id,9211
+Caesar Creek Lake,1008,grand_id,1655
+Caesar Creek Lake,1008,nid_id,OH00927
+Carr Fork Lake,1009,comid_match_lagoslakeid,260194
+Carr Fork Lake,1009,hylak_comid,456124
+Carr Fork Lake,1009,hylak_id,112696
+Carr Fork Lake,1009,grand_id,1744
+Carr Fork Lake,1009,nid_id,KY03056
+Cave Run Lake,1010,lmorpho_comid,166830448
+Cave Run Lake,1010,nhdplus_comid,166830448
+Cave Run Lake,1010,gnis_id,516671
+Cave Run Lake,1010,comid_match_lagoslakeid,260193
+Cave Run Lake,1010,hylak_comid,166830448
+Cave Run Lake,1010,hylak_id,9260
+Cave Run Lake,1010,grand_id,1714
+Cave Run Lake,1010,nid_id,KY03055
+Charles Mill Lake,1011,lmorpho_comid,15408897
+Charles Mill Lake,1011,nhdplus_comid,15408897
+Charles Mill Lake,1011,comid_match_lagoslakeid,3895
+Charles Mill Lake,1011,poly_intersect_lagoslakeid,3895
+Charles Mill Lake,1011,hylak_comid,15408897
+Charles Mill Lake,1011,hylak_id,111992
+Charles Mill Lake,1011,nid_id,OH00020
+Cowan Lake,1012,lmorpho_comid,3932186
+Cowan Lake,1012,nhdplus_comid,3932186
+Cowan Lake,1012,gnis_id,1061001
+Cowan Lake,1012,comid_match_lagoslakeid,451
+Cowan Lake,1012,poly_intersect_lagoslakeid,451
+Cowan Lake,1012,hylak_comid,3932186
+Cowan Lake,1012,hylak_id,112310
+Cowan Lake,1012,grand_id,1663
+Cowan Lake,1012,nid_id,OH00500
+Delaware Reservoir,1013,nla17_site_id,NLA17_OH-10001
+Delaware Reservoir,1013,nla12_site_id,NLA12_OH-101
+Delaware Reservoir,1013,lmorpho_comid,5213645
+Delaware Reservoir,1013,nhdplus_comid,5213645
+Delaware Reservoir,1013,gnis_id,1039659
+Delaware Reservoir,1013,comid_match_lagoslakeid,3386
+Delaware Reservoir,1013,poly_intersect_lagoslakeid,3386
+Delaware Reservoir,1013,hylak_comid,5213645
+Delaware Reservoir,1013,hylak_id,112096
+Delaware Reservoir,1013,grand_id,1616
+Delaware Reservoir,1013,nid_id,OH00015
+Dillon Lake,1014,lmorpho_comid,166899180
+Dillon Lake,1014,nhdplus_comid,166899180
+Dillon Lake,1014,gnis_id,1037280
+Dillon Lake,1014,comid_match_lagoslakeid,4031
+Dillon Lake,1014,poly_intersect_lagoslakeid,4031
+Dillon Lake,1014,hylak_comid,166899180
+Dillon Lake,1014,hylak_id,112177
+Dillon Lake,1014,grand_id,1631
+Dillon Lake,1014,nid_id,OH00007
+Falls Lake,1033,nla07_site_id,NLA06608-0921
+Falls Lake,1033,lmorpho_comid,166737717
+Falls Lake,1033,lmorpho_nla07,NLA06608-0921
+Falls Lake,1033,nhdplus_comid,12050086
+Falls Lake,1033,hylak_comid,12050276
+Falls Lake,1033,hylak_id,9333
+Falls Lake,1033,grand_id,1782
+Falls Lake,1033,nid_id,NC01713
+Falls Lake,1033,nhdplus_comid,12050088
+Falls Lake,1033,nhdplus_comid,12050276
+Falls Lake,1033,nhdplus_comid,12050278
+Falls Lake,1033,nhdplus_comid,166737717
+William H Harsha Lake,1031,lmorpho_comid,166899203
+William H Harsha Lake,1031,nhdplus_comid,166899203
+William H Harsha Lake,1031,comid_match_lagoslakeid,1821
+William H Harsha Lake,1031,poly_intersect_lagoslakeid,1821
+William H Harsha Lake,1031,hylak_comid,166899203
+William H Harsha Lake,1031,hylak_id,112388
+William H Harsha Lake,1031,grand_id,1683
+William H Harsha Lake,1031,nid_id,OH00929
+Hocking County Lake,1015,lmorpho_comid,15417761
+Hocking County Lake,1015,nhdplus_comid,15417761
+Hocking County Lake,1015,comid_match_lagoslakeid,2821
+Hocking County Lake,1015,poly_intersect_lagoslakeid,2821
+Hocking County Lake,1015,hylak_comid,15417761
+Hocking County Lake,1015,hylak_id,112268
+Hocking County Lake,1015,nid_id,OH00260
+Kiser Lake,1016,nla07_site_id,NLA06608-1359
+Kiser Lake,1016,lmorpho_comid,3980812
+Kiser Lake,1016,lmorpho_nla07,NLA06608-1359
+Kiser Lake,1016,nhdplus_comid,3980812
+Kiser Lake,1016,gnis_id,1070804
+Kiser Lake,1016,comid_match_lagoslakeid,496
+Kiser Lake,1016,poly_intersect_lagoslakeid,496
+Kiser Lake,1016,hylak_comid,3980812
+Kiser Lake,1016,hylak_id,112129
+Kiser Lake,1016,nid_id,OH00435
+Knox Lake,1017,lmorpho_comid,167484602
+Knox Lake,1017,nhdplus_comid,167484602
+Knox Lake,1017,gnis_id,1042332
+Knox Lake,1017,comid_match_lagoslakeid,1500
+Knox Lake,1017,poly_intersect_lagoslakeid,1500
+Knox Lake,1017,hylak_comid,167484602
+Knox Lake,1017,hylak_id,112062
+Knox Lake,1017,nid_id,OH00638
+La Due Reservoir,1018,nla07_site_id,NLA06608-0367
+La Due Reservoir,1018,lmorpho_comid,15585938
+La Due Reservoir,1018,lmorpho_nla07,NLA06608-0367
+La Due Reservoir,1018,nhdplus_comid,15585996
+La Due Reservoir,1018,comid_match_lagoslakeid,3192
+La Due Reservoir,1018,poly_intersect_lagoslakeid,3192
+La Due Reservoir,1018,hylak_comid,15585938
+La Due Reservoir,1018,hylak_id,111756
+La Due Reservoir,1018,grand_id,1561
+La Due Reservoir,1018,nid_id,OH00756
+La Due Reservoir,1018,nhdplus_comid,15585938
+La Due Reservoir,1018,gnis_id,1084011
+La Due Reservoir,1018,lmorpho_comid,15585996
+Lake Loramie,1019,nla22_site_id,NES22-10058
+Lake Loramie,1019,nla12_site_id,NLA12_OH-102
+Lake Loramie,1019,nla07_site_id,NLA06608-0783
+Lake Loramie,1019,lmorpho_comid,3982320
+Lake Loramie,1019,lmorpho_nla07,NLA06608-0783
+Lake Loramie,1019,nhdplus_comid,3982320
+Lake Loramie,1019,gnis_id,1042782
+Lake Loramie,1019,comid_match_lagoslakeid,3002
+Lake Loramie,1019,poly_intersect_lagoslakeid,3002
+Lake Loramie,1019,hylak_comid,3982320
+Lake Loramie,1019,hylak_id,112094
+Lake Loramie,1019,nid_id,OH00442
+Lake Milton,1020,lmorpho_comid,13152651
+Lake Milton,1020,nhdplus_comid,13152651
+Lake Milton,1020,gnis_id,1043393
+Lake Milton,1020,comid_match_lagoslakeid,3855
+Lake Milton,1020,poly_intersect_lagoslakeid,3855
+Lake Milton,1020,hylak_comid,13152651
+Lake Milton,1020,hylak_id,111867
+Lake Milton,1020,grand_id,1574
+Lake Milton,1020,nid_id,OH00419
+Michael J Kirwan Reservoir,1024,nla07_site_id,NLA06608-0111
+Michael J Kirwan Reservoir,1024,lmorpho_comid,13155459
+Michael J Kirwan Reservoir,1024,lmorpho_nla07,NLA06608-0111
+Michael J Kirwan Reservoir,1024,nhdplus_comid,13155459
+Michael J Kirwan Reservoir,1024,comid_match_lagoslakeid,2553
+Michael J Kirwan Reservoir,1024,poly_intersect_lagoslakeid,2553
+Michael J Kirwan Reservoir,1024,hylak_comid,13155459
+Michael J Kirwan Reservoir,1024,hylak_id,111863
+Michael J Kirwan Reservoir,1024,grand_id,1572
+Michael J Kirwan Reservoir,1024,nid_id,OH00030
+Lake Mohawk,1021,lmorpho_comid,19387410
+Lake Mohawk,1021,nhdplus_comid,19387410
+Lake Mohawk,1021,gnis_id,1061156
+Lake Mohawk,1021,comid_match_lagoslakeid,25227
+Lake Mohawk,1021,hylak_comid,19387410
+Lake Mohawk,1021,hylak_id,112019
+Lake Mohawk,1021,grand_id,1595
+Lake Mohawk,1021,nid_id,OH00467
+Paint Creek Lake,1025,lmorpho_comid,5231436
+Paint Creek Lake,1025,nhdplus_comid,5231436
+Paint Creek Lake,1025,comid_match_lagoslakeid,2784
+Paint Creek Lake,1025,poly_intersect_lagoslakeid,2784
+Paint Creek Lake,1025,hylak_comid,5231436
+Paint Creek Lake,1025,hylak_id,112343
+Paint Creek Lake,1025,grand_id,1670
+Paint Creek Lake,1025,nid_id,OH00017
+Piedmont Lake,1026,lmorpho_comid,19390850
+Piedmont Lake,1026,nhdplus_comid,19390850
+Piedmont Lake,1026,gnis_id,1037285
+Piedmont Lake,1026,comid_match_lagoslakeid,2211
+Piedmont Lake,1026,poly_intersect_lagoslakeid,2211
+Piedmont Lake,1026,hylak_comid,19390850
+Piedmont Lake,1026,hylak_id,112131
+Piedmont Lake,1026,grand_id,1620
+Piedmont Lake,1026,nid_id,OH00011
+Pleasant Hill Lake,1027,lmorpho_comid,15408959
+Pleasant Hill Lake,1027,nhdplus_comid,15408959
+Pleasant Hill Lake,1027,gnis_id,1037286
+Pleasant Hill Lake,1027,comid_match_lagoslakeid,3866
+Pleasant Hill Lake,1027,poly_intersect_lagoslakeid,3866
+Pleasant Hill Lake,1027,hylak_comid,15408959
+Pleasant Hill Lake,1027,hylak_id,112033
+Pleasant Hill Lake,1027,grand_id,1600
+Pleasant Hill Lake,1027,nid_id,OH00001
+Lake Roaming Rock,1022,lmorpho_comid,9846027
+Lake Roaming Rock,1022,nhdplus_comid,9846027
+Lake Roaming Rock,1022,gnis_id,1084042
+Lake Roaming Rock,1022,comid_match_lagoslakeid,23033
+Lake Roaming Rock,1022,hylak_comid,9846027
+Lake Roaming Rock,1022,hylak_id,111665
+Lake Roaming Rock,1022,nid_id,OH00397
+Rocky Fork Lake,1028,lmorpho_comid,5231452
+Rocky Fork Lake,1028,nhdplus_comid,5231452
+Rocky Fork Lake,1028,comid_match_lagoslakeid,3423
+Rocky Fork Lake,1028,poly_intersect_lagoslakeid,3423
+Rocky Fork Lake,1028,hylak_comid,5231452
+Rocky Fork Lake,1028,hylak_id,112357
+Rocky Fork Lake,1028,grand_id,1675
+Rocky Fork Lake,1028,nid_id,OH00302
+Senecaville Lake,1029,lmorpho_comid,15372030
+Senecaville Lake,1029,nhdplus_comid,15372030
+Senecaville Lake,1029,gnis_id,1058011
+Senecaville Lake,1029,comid_match_lagoslakeid,2246
+Senecaville Lake,1029,poly_intersect_lagoslakeid,2246
+Senecaville Lake,1029,hylak_comid,15372030
+Senecaville Lake,1029,hylak_id,9199
+Senecaville Lake,1029,grand_id,1636
+Senecaville Lake,1029,nid_id,OH00013
+Tappan Lake,1030,lmorpho_comid,19390686
+Tappan Lake,1030,nhdplus_comid,19390686
+Tappan Lake,1030,gnis_id,1046947
+Tappan Lake,1030,comid_match_lagoslakeid,494
+Tappan Lake,1030,poly_intersect_lagoslakeid,494
+Tappan Lake,1030,hylak_comid,19390686
+Tappan Lake,1030,hylak_id,112099
+Tappan Lake,1030,grand_id,1617
+Tappan Lake,1030,nid_id,OH00010
+Lake Waynoka,1023,nla07_site_id,NLA06608-1007
+Lake Waynoka,1023,lmorpho_comid,1918274
+Lake Waynoka,1023,lmorpho_nla07,NLA06608-1007
+Lake Waynoka,1023,nhdplus_comid,1918274
+Lake Waynoka,1023,gnis_id,1077889
+Lake Waynoka,1023,comid_match_lagoslakeid,44125
+Lake Waynoka,1023,poly_intersect_lagoslakeid,44125
+Lake Waynoka,1023,hylak_comid,1918274
+Lake Waynoka,1023,hylak_id,1057294
+Lake Waynoka,1023,nid_id,OH00162
+Wingfoot Lake,1032,lmorpho_comid,15586832
+Wingfoot Lake,1032,nhdplus_comid,15586832
+Wingfoot Lake,1032,gnis_id,1070998
+Wingfoot Lake,1032,comid_match_lagoslakeid,91726
+Wingfoot Lake,1032,hylak_comid,15586832
+Wingfoot Lake,1032,hylak_id,111904
+Wingfoot Lake,1032,nid_id,OH00664
