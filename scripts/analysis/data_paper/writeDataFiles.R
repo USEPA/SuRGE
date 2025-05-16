@@ -171,17 +171,17 @@ master_dictionary <- tribble(~variable, ~definition,
 
                              #emissions(lake)
                              "ch4_ebullition_lake","lakewide areal methane ebullition flux estimated using survey site weights",
-                             "ch4_ebullition_lake_units","units for ch4_ebullition_lake_units",
+                             "ch4_ebullition_units_lake","units for ch4_ebullition_lake",
                              "ch4_diffusion_lake", "lakewide areal methane diffusion flux estimated using survey site weights",
-                             "ch4_diffusion_lake_units", "units for ch4_diffusion_lake",
+                             "ch4_diffusion_units_lake", "units for ch4_diffusion_lake",
                              "ch4_total_lake", "lakewide total methane flux estimated using survey site weights",
-                             "ch4_total_lake_units","units for ch4_total_lake",
+                             "ch4_total_units_lake","units for ch4_total_lake",
                              "co2_ebullition_lake", "lakewide areal carbon dioxide ebullition flux estimated using survey site weights",
-                             "co2_ebullition_lake_units", "units for co2_ebullition_lake",
+                             "co2_ebullition_units_lake", "units for co2_ebullition_lake",
                              "co2_diffusion_lake", "lakewide areal carbon dioxide diffuion flux estimated using survey site weights",
-                             "co2_diffusion_lake_units", "units for co2_diffusion_lake",
+                             "co2_diffusion_units_lake", "units for co2_diffusion_lake",
                              "co2_total_lake", "lakewide areal total carbon dioxide flux estimated using survey site weights",
-                             "co2_total_lake_units","units for co2_total_lake_units",
+                             "co2_total_units_lake","units for co2_total_lake_units",
                              "ch4_ebullition_std_error_lake","standard error of ch4_ebullition_lake",
                              "ch4_diffusion_std_error_lake", "standard error of ch4_diffusion_lake",
                              "ch4_total_std_error_lake", "standard error of ch4_total_lake",
@@ -219,6 +219,11 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_diffusion_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_diffusion_lake",
                              "co2_total_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_total_lake",
                              
+                             #stratification indices
+                             "buoyancy_frequency", "Brunt-Väisälä frequency (N2), or center buoyancy frequency, calculated in RLakeAnalyzer",
+                             "buoyancy_frequency_units", "units for buoyancy_frequency",
+                             "thermocline_depth", "depth where the maximum change in temperature-based density was observed, calculated in RLakeAnalyzer",
+                             "thermocline_depth_units", "units for thermocline_depth",
                              
                              #remote sensing (lake)
                              "chl_predicted_sample_month_visit1", paste("predicted chlorophyll a concentration from the same month",
@@ -640,20 +645,34 @@ write.csv(
 
 # 5. EMISSION RATES LAKE------
 
-emissions_lake_data_paper <- emissions_agg %>%
+emissions_lake_data_paper <- left_join(
+  emissions_agg %>%
   mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
-         ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
+         ch4_diffusion_units_lake = "mg CH4 m-2 d-1",
          ch4_ebullition_lake = ch4_ebullition_lake * 24,
-         ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
+         ch4_ebullition_units_lake = "mg CH4 m-2 d-1",
          ch4_total_lake = ch4_total_lake * 24,
-         ch4_total_lake_units = "mg CH4 m-2 d-1",
+         ch4_total_units_lake = "mg CH4 m-2 d-1",
          co2_diffusion_lake = co2_diffusion_lake * 24,
-         co2_diffusion_lake_units = "mg CO2 m-2 d-1",
+         co2_diffusion_units_lake = "mg CO2 m-2 d-1",
          co2_ebullition_lake = co2_ebullition_lake * 24,
-         co2_ebullition_lake_units = "mg CO2 m-2 d-1",
+         co2_ebullition_units_lake = "mg CO2 m-2 d-1",
          co2_total_lake = co2_total_lake * 24,
-         co2_total_lake_units = "mg CO2 m-2 d-1")
-
+         co2_total_units_lake = "mg CO2 m-2 d-1"),
+  strat_link %>%
+    mutate(lake_id = case_when(grepl("69", lake_id) ~ "69",
+                               grepl("70", lake_id) ~ "70",
+                               TRUE ~ lake_id))%>%
+    #this creates three estimates of buoyancy frequency & thermocline depth for lakes 69 and 70
+    #average them together?
+    group_by(lake_id,visit)%>%
+    summarise(buoyancy_frequency= mean(buoyf),
+              thermocline_depth= mean(thermdep2))%>%
+    mutate(buoyancy_frequency_units= "s-2",
+           thermocline_depth_units="m",
+           lake_id = as.numeric(lake_id))%>%
+    select(lake_id, visit, buoyancy_frequency, buoyancy_frequency_units, 
+           thermocline_depth, thermocline_depth_units))
 
 # Data dictionary
 emissions_lake_data_paper_dictionary <- master_dictionary %>%
@@ -1160,12 +1179,12 @@ ifelse (
 
 # write data
 write.csv(x = phyto_data, 
-          file = "communications/manuscript/data_paper/10_phyto_data.csv",
+          file = "communications/manuscript/data_paper/9_phyto_data.csv",
           row.names = FALSE)
 
 # write dictionary
 write.csv(x = phyto_dictionary, 
-          file = "communications/manuscript/data_paper/10_phyto_dictionary.csv",
+          file = "communications/manuscript/data_paper/9_phyto_dictionary.csv",
           row.names = FALSE)
 
 

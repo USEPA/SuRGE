@@ -84,12 +84,12 @@ source("scripts/analysis/calculateTotalEmissions.R")
 # calculate k600
 source("scripts/analysis/calculateK600.R")
 
-#Implement sonde criteria 
-source("scripts/analysis/sonde_criteria.R")
-
 # Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs
 source("scripts/analysis/mergePredictors.R") # dat
+
+#Implement sonde criteria 
+source("scripts/analysis/sonde_criteria.R") #edits dat object to remove unreasonable sonde values
 
 # Annualize emissions
 source("scripts/analysis/annualizeEmissions.R")
