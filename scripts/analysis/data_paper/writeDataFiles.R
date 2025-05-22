@@ -873,18 +873,11 @@ site_data <-
       mutate(sample_depth = "shallow") %>%
       drop_na(value) # omit record if no value reported
   ) %>%
-
-########################################### MDL FILE MISSING
-# •	Nutrients: 2022 – 2023, ADA and CIN
-# •	Anions: 2022 – 2023, ADA and CIN
-# •	Organic carbon: 2022 – 2023, ADA
-# asked Joe to fix 8am 5/13/2023
-#site_data %>%
   # ADD DETECTION LIMITS
   # 1. add lab and year, needed for join with DL data
-  left_join(rbind(lake.list, lake.list.2016) %>%
+  left_join(rbind(lake.list, lake.list.2016) %>% # joins by lake_id and visit
               select(lake_id, visit, lab, 
-                     year = sample_year)) %>% # joins by lake_id and visit
+                     year = sample_year)) %>% 
   
   # 2. detection limits differ between CIN and ADA. Current "lab" field is for
   #    field crew (eg. R10, RTP, etc) not which lab ran chemistry. Create 
@@ -896,7 +889,7 @@ site_data <-
   # 3. join with detection limit data
   left_join(read_csv(paste0(userPath,"data/chemistry/dataPaperDetectionLimits.csv")) %>%
               select(name, mdl, year,
-                     # mdl_units = units, # double check consistent units
+                     # mdl_units = units, # confirmed identical units
                      lab_mdl = lab)) %>% # join on name, lab_mdl, year
   
   # 4. Remove join fields no longer needed)
@@ -920,7 +913,24 @@ site_data <-
     # based on NLA convention
     name == "chla_lab" ~ round(value, 2),
     # error flag
-    TRUE ~ value))
+    TRUE ~ value),
+    mdl = case_when(
+      # nitrogen analytes reported in ug_n_l
+      name %in% c("nh4", "no2", "no2_3", "no3", "tn") ~ round(value, 1),
+      # TP and colorimetric base p in ug_p_l
+      name %in% c("op", "tp") ~ round(value, 1),
+      # 5 decimals reported for tteb data
+      name %in% metals ~ round(value, 5), # metals is from chemSampleList.R
+      # anions in mg_l. decimals based on MDL. See Wiki, 
+      # Anions: analytical methods, detection limits, and holding times/CIN-TTEB Table
+      name %in% c("br", "f") ~ round(value, 3), 
+      name %in% c("cl", "so4") ~ round(value, 2), 
+      # based on NLA convention
+      name %in% c("doc", "toc") ~ round(value, 2),
+      # based on NLA convention
+      name == "chla_lab" ~ round(value, 2),
+      # error flag
+      TRUE ~ mdl))
 
 #write.table(unique(site_data$name), file = "clipboard", row.names = FALSE)
 
