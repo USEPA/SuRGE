@@ -22,7 +22,7 @@ source("scripts/analysis/readNutrientsAwberc.R") # read AWBERC lab nutrient resu
 source("scripts/analysis/readNutrientsR10_2018.R") # read AWBERC nutrients for 2018 R10. [chem18]
 source("scripts/analysis/readOcAda.R") # read ADA TOC/DOC data.  [ada.oc]
 source("scripts/analysis/readOcMasi.R") # read 2020 TOC run at MASI lab. [toc.masi]
-source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC.  [tteb.all]
+source("scripts/analysis/readTteb.R") # TTEB metals, TOC, DOC, anions.  [tteb.all]
 source("scripts/analysis/readPigments.R") # NAR chl, phyco. [pigments]
 source("scripts/analysis/readMicrocystin.R") # [microcystin]
 source("scripts/analysis/readChlorophyllR10_2018.R") # 2018 R10 chlorophyll. [chl18]
@@ -84,15 +84,15 @@ source("scripts/analysis/calculateTotalEmissions.R")
 # calculate k600
 source("scripts/analysis/calculateK600.R")
 
-#Implement sonde criteria 
-source("scripts/analysis/sonde_criteria.R")
-
 # Merge emissions, chemistry, field sheets, and other predictors
 source("scripts/analysis/mergeChemEmissions.R") #all_obs
 source("scripts/analysis/mergePredictors.R") # dat
 
 # Annualize emissions
 source("scripts/analysis/annualizeEmissions.R")
+
+# Implement sonde criteria 
+source("scripts/analysis/sonde_criteria.R")
 
 # Random
 #source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 

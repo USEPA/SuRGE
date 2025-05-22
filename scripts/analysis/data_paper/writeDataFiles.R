@@ -137,7 +137,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "chla_cat", "Chlorophyll a category used for the SuRGE survery design",
                              "study", "Survey effort the reservoir was included in. See data paper Figure 1.",
                              
-                             #emissions (point)
+                             # emissions (point)
                              "air_temp", "temperature of the air at the time the floating chamber was deployed",
                              "air_temp_units", "units for air_temp",
                              "ch4_diffusion","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
@@ -169,7 +169,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "trap_rtrvl_date_time_units", "timezone for trap_rtrvl_date_time",
                              
 
-                             #emissions(lake)
+                             # emissions(lake)
                              "ch4_ebullition_lake","lakewide areal methane ebullition flux estimated using survey site weights",
                              "ch4_ebullition_lake_units","units for ch4_ebullition_lake_units",
                              "ch4_diffusion_lake", "lakewide areal methane diffusion flux estimated using survey site weights",
@@ -220,7 +220,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_total_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_total_lake",
                              
                              
-                             #remote sensing (lake)
+                             # remote sensing (lake)
                              "chl_predicted_sample_month_visit1", paste("predicted chlorophyll a concentration from the same month",
                                                                   "and year that emissions were collected during the first site visit if available, otherwise mean predicted",
                                                                   "chlorophyll from 2018-2020 during the same month emissions were collected, ",
@@ -256,6 +256,7 @@ master_dictionary <- tribble(~variable, ~definition,
 
                              # SITE DATA
                              # sonde (see above)
+                             "mdl", "minimum detection limit",
                              "al", "aluminum",
                              "as", "arsenic",
                              "ba", "barium",
@@ -641,6 +642,7 @@ write.csv(
 # 5. EMISSION RATES LAKE------
 
 emissions_lake_data_paper <- emissions_agg %>%
+  rename_with(.cols = contains("units_lake"), ~ gsub("units_lake", "lake_units", .x)) %>%
   mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
          ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
          ch4_ebullition_lake = ch4_ebullition_lake * 24,
@@ -652,7 +654,7 @@ emissions_lake_data_paper <- emissions_agg %>%
          co2_ebullition_lake = co2_ebullition_lake * 24,
          co2_ebullition_lake_units = "mg CO2 m-2 d-1",
          co2_total_lake = co2_total_lake * 24,
-         co2_total_lake_units = "mg CO2 m-2 d-1")
+         co2_total_lake_units = "mg CO2 m-2 d-1") 
 
 
 # Data dictionary
@@ -870,14 +872,14 @@ site_data <-
                    names_pattern = "(.+)_(.+)") %>%
       mutate(sample_depth = "shallow") %>%
       drop_na(value) # omit record if no value reported
-  ) 
+  ) %>%
 
 ########################################### MDL FILE MISSING
 # •	Nutrients: 2022 – 2023, ADA and CIN
 # •	Anions: 2022 – 2023, ADA and CIN
 # •	Organic carbon: 2022 – 2023, ADA
 # asked Joe to fix 8am 5/13/2023
-site_data %>%
+#site_data %>%
   # ADD DETECTION LIMITS
   # 1. add lab and year, needed for join with DL data
   left_join(rbind(lake.list, lake.list.2016) %>%
@@ -894,9 +896,11 @@ site_data %>%
   # 3. join with detection limit data
   left_join(read_csv(paste0(userPath,"data/chemistry/dataPaperDetectionLimits.csv")) %>%
               select(name, mdl, year,
-                     mdl_units = units,
+                     # mdl_units = units, # double check consistent units
                      lab_mdl = lab)) %>% # join on name, lab_mdl, year
   
+  # 4. Remove join fields no longer needed)
+  select(-lab_mdl, -lab, -year) %>%
   
   # enforce decimal points
   filter(!(name == "po4")) %>% # omit IC based po4 from TTEB
@@ -1091,7 +1095,7 @@ lake_scale_data <- list(
     # enforce digits, otherwise many digits are shown when converted to character below
     mutate(value = format(round(value, 2), nsmall = 2))
   
-) %>%
+) %>% # close list
   map(., ~.x %>% mutate(value = as.character(value))) %>% # character to enable all to collapse into one column
   map_dfr(., bind_rows) %>%
   filter(lake_id != 1033) # omit Falls Lake)

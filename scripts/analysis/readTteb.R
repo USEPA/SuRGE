@@ -101,17 +101,18 @@ tteb.prelim.toc <- read_excel(
 # Vectors of analyte names, grouped by reporting limit
 analytes_0.005 <- "no2" 
 analytes_0.006 <- "no3"
-analytes_0.007 <- "f"  
-analytes_0.008 <- "br" 
-analytes_0.011 <- "po4"
-analytes_0.03 <- "cl"  
-analytes_0.05 <- "so4" 
+analytes_0.007 <- "f"  # this is mdl
+analytes_0.008 <- "br" # this is mdl
+analytes_0.011 <- "po4" 
+analytes_0.03 <- "cl"  # this is mdl
+analytes_0.05 <- "so4" # this is mdl
+# lowest standard is 0.5 for these (e-mail from Eugenia Riddick on 9/30/2022)
 analytes_0.5 <- c("al", "as", "ba", "be", "ca", "cd", "cr", "cu", "fe", "k",  "li", 
                   "mg", "mn", "na", "ni", "pb", "sb", "sr", "v", "zn") 
-analytes_1 <-c("toc", "doc")
-analytes_2 <- "sn"
-analytes_4 <- "si"
-analytes_20 <- c("s", "p")
+analytes_1 <-c("toc", "doc") # lowest standard, this is RL
+analytes_2 <- "sn" # lowest standard, this is RL
+analytes_4 <- "si" # lowest standard, this is RL
+analytes_20 <- c("s", "p") # lowest standard, this is RL
 analyte_names <- c(analytes_0.005, analytes_0.006, analytes_0.007, 
                    analytes_0.008, analytes_0.011, analytes_0.03,
                    analytes_0.05, analytes_0.5, 
