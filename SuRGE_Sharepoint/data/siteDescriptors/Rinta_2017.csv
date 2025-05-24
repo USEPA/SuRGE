@@ -1,0 +1,48 @@
+﻿System,Latitude,Longitude,Amazon,Region,Country,Alpine (cutoff 1000m elevation),Installed Hydropower Capacity?,Primary Use of Reservoir,Trophic Status,mg CH4-C m-2 d-1 Diffusive + Ebullitive,mg CH4-C m-2 d-1 Diffusive Only,mg CH4-C m-2 d-1 Ebullitive Only,mg CH4-C m-2 d-1 All Estimates Combined,mg CO2-C m-2 d-1,mg N2O-N m-2 d-1,Age (yrs),Chlorophyll a (ug/L),Reported Mean Annual Precipitation (mm),| Latitude |,Mean Water Temperature (degrees C),Mean Depth (m),Surface Area (km2),Catchment Area (km2),Catchment Area : Surface Area,Volume (km3),Residence Time (days),DOC (mg/L),TP (ug/L),NO3-N (mg/L),Modeled DIP Yield (kg km-2 yr-1),Modeled DIP (ug/L),Modeled Mean Annual Precipitation (mm),Modeled Runoff (mm y-1),Modeled Mean Annual Air Temperature (degrees C),Citations for GHG Data,Supplementary Citations,Type,TN(mg/L), Max Depth (m)
+Lovojärvi,61.08,25.03,,B,Finland,,,,,13.44,3.72,9.72,,527.88,,,,,,17.9,,0.05,,,,,,27,,,,,,,Rinta et al. 2017,,lake,0.84,18
+Nimetön,61.23,25.19,,B,Finland,,,,,3.48,0.48,3,,216.96,,,,,,16.9,,0.004,,,,,,10,,,,,,,Rinta et al. 2017,,lake,0.48,13
+Valkea-Kotinen,61.24,25.06,,B,Finland,,,,,1.8,0.24,1.44,,,,,,,,17.6,,0.04,,,,,,11,,,,,,,Rinta et al. 2017,,lake,0.565,8
+Mekkojärvi,61.23,25.14,,B,Finland,,,,,7.44,4.92,2.52,,245.64,,,,,,16,,0.003,,,,,,11,,,,,,,Rinta et al. 2017,,lake,0.61,4
+Syrjänalunen,61.19,25.14,,B,Finland,,,,,8.04,6.48,1.56,,179.04,,,,,,15.2,,0.01,,,,,,3,,,,,,,Rinta et al. 2017,,lake,0.2,9
+Jyväsjärvi,62.24,25.77,,B,Finland,,,,,3.6,2.16,1.44,,153.6,,,,,,18.2,,3.03,,,,,,25,,,,,,,Rinta et al. 2017,,lake,0.62,25
+Erssjön,58.37,12.16,,B,Sweden,,,,,12,15.6,0,,127.68,,,,,,16.9,,0.06,,,,,,18,,,,,,,Rinta et al. 2017,,lake,0.663,5
+Skottenesjön,58.35,12.14,,B,Sweden,,,,,24.36,3.24,21.12,,,,,,,,17.2,,0.26,,,,,,38,,,,,,,Rinta et al. 2017,,lake,0.647,6
+Skärgölen,58.76,16.23,,B,Sweden,,,,,2.76,2.16,0.6,,21.12,,,,,,18.1,,0.16,,,,,,12,,,,,,,Rinta et al. 2017,,lake,0.348,13
+Lillsjön,58.66,16.14,,B,Sweden,,,,,0.96,0.72,0.24,,126.84,,,,,,16.8,,0.03,,,,,,18,,,,,,,Rinta et al. 2017,,lake,0.606,8
+Grissjön,58.77,15.14,,B,Sweden,,,,,1.08,0.96,0.12,,41.64,,,,,,16.5,,0.23,,,,,,11,,,,,,,Rinta et al. 2017,,lake,0.389,16
+Mårn,58.59,15.87,,B,Sweden,,,,,0.48,0.48,0,,76.44,,,,,,16.4,,0.62,,,,,,27,,,,,,,Rinta et al. 2017,,lake,1.05,15
+Kisasjön north,58.01,15.65,,B,Sweden,,,,,5.28,5.52,0.36,,,,,,,,16.9,,0.96,,,,,,18,,,,,,,Rinta et al. 2017,,lake,0.49,9
+Glimmingen,57.93,15.57,,B,Sweden,,,,,1.56,1.8,0,,83.16,,,,,,16.5,,1.67,,,,,,8,,,,,,,Rinta et al. 2017,,lake,0.328,32
+Hargsjön,58.27,15.24,,B,Sweden,,,,,22.44,1.92,20.52,,,,,,,,14.9,,0.99,,,,,,45,,,,,,,Rinta et al. 2017,,lake,1.172,6
+Illersjön,58.58,14.99,,B,Sweden,,,,,3,1.08,1.92,,-13.44,,,,,,14.1,,0.07,,,,,,25,,,,,,,Rinta et al. 2017,,lake,0.479,12
+Stora Vänstern,58.62,15.15,,B,Sweden,,,,,1.8,1.92,0,,404.16,,,,,,15.6,,1.13,,,,,,9,,,,,,,Rinta et al. 2017,,lake,0.462,21
+Holzsee,54.16,10.18,,CE,Germany,,,,,44.88,8.64,36.36,,,,,,,,21.4,,0.19,,,,,,36,,,,,,,Rinta et al. 2017,,lake,0.86,7
+Schöhsee,54.17,10.44,,CE,Germany,,,,,33,11.76,21.24,,-76.56,,,,,,20.3,,0.75,,,,,,17,,,,,,,Rinta et al. 2017,,lake,0.57,29
+Plusssee,54.18,10.44,,CE,Germany,,,,,60.96,6.6,54.36,,-117.12,,,,,,21.2,,0.14,,,,,,35,,,,,,,Rinta et al. 2017,,lake,0.99,29
+De Waay,51.93,5.15,,CE,Netherlands,,,,,16.56,8.04,8.64,,,,,,,,19.7,,0.04,,,,,,120,,,,,,,Rinta et al. 2017,,lake,2.3,15
+Hijkermeer,52.89,6.49,,CE,Netherlands,,,,,267.36,8.76,258.6,,,,,,,,20.8,,0.02,,,,,,150,,,,,,,Rinta et al. 2017,,lake,1.9,2
+Gerzensee,46.83,7.55,,CE,Switzerland,,,,,129.84,48.72,81.72,,,,,,,,23,,0.24,,,,,,16,,,,,,,Rinta et al. 2017,,lake,0.68,11
+Lauenensee,46.4,7.33,,CE,Switzerland,,,,,31.68,27.36,4.32,,146.76,,,,,,17.5,,0.09,,,,,,7,,,,,,,Rinta et al. 2017,,lake,0.53,4
+Schwarzsee,46.67,7.28,,CE,Switzerland,,,,,8.16,8.4,0,,-52.08,,,,,,17.2,,0.45,,,,,,15,,,,,,,Rinta et al. 2017,,lake,0.42,9
+Burgäschisee,47.17,7.67,,CE,Switzerland,,,,,44.4,13.68,31.44,,1.68,,,,,,21.4,,0.2,,,,,,14,,,,,,,Rinta et al. 2017,,lake,1.2,30
+Rotsee,47.07,8.31,,CE,Switzerland,,,,,69.96,4.8,65.16,,-117.48,,,,,,21.7,,0.44,,,,,,34,,,,,,,Rinta et al. 2017,,lake,0.81,16
+Hinterburgsee,46.72,8.07,,CE,Switzerland,,,,,51.36,33.84,18,,-67.68,,,,,,14.3,,0.05,,,,,,11,,,,,,,Rinta et al. 2017,,lake,0.8,11
+Seealpsee,47.27,9.4,,CE,Switzerland,,,,,3.24,3.24,0,,-40.44,,,,,,11.4,,0.13,,,,,,10,,,,,,,Rinta et al. 2017,,lake,0.55,15
+Hasensee east,47.61,8.83,,CE,Switzerland,,,,,212.64,102.24,110.4,,,,,,,,22.7,,0.07,,,,,,36,,,,,,,Rinta et al. 2017,,lake,1.2,6
+Hüttwilersee,47.61,8.84,,CE,Switzerland,,,,,15,7.2,7.8,,-17.04,,,,,,19.6,,0.34,,,,,,15,,,,,,,Rinta et al. 2017,,lake,1.1,16
+Nussbaumersee middle,47.62,8.82,,CE,Switzerland,,,,,145.8,2.64,143.04,,,,,,,,19.6,,0.25,,,,,,24,,,,,,,Rinta et al. 2017,,lake,1.2,8
+Inkwilersee,47.2,7.66,,CE,Switzerland,,,,,190.68,7.92,182.76,,,,,,,,22.5,,0.1,,,,,,260,,,,,,,Rinta et al. 2017,,lake,2.9,5
+Lac de Derborence,46.28,7.22,,CE,Switzerland,,,,,7.8,1.92,6,,,,,,,,11.4,,0.04,,,,,,10,,,,,,,Rinta et al. 2017,,lake,0.46,2
+Lac de Retaud,46.36,7.2,,CE,Switzerland,,,,,579.72,35.04,544.68,,,,,,,,20.1,,0.01,,,,,,13,,,,,,,Rinta et al. 2017,,lake,0.48,5
+Husemersee,47.62,8.7,,CE,Switzerland,,,,,63.72,34.92,28.92,,,,,,,,25.2,,0.07,,,,,,7,,,,,,,Rinta et al. 2017,,lake,2.4,14
+Türlersee,47.27,8.5,,CE,Switzerland,,,,,16.2,15.96,0.72,,,,,,,,24.5,,0.48,,,,,,9,,,,,,,Rinta et al. 2017,,lake,0.67,25
+Lac Noir,46.33,7.08,,CE,Switzerland,,,,,90.48,52.56,39,,,,,,,,18.9,,0.01,,,,,,7,,,,,,,Rinta et al. 2017,,lake,0.29,11
+Lac de Bretaye,46.33,7.07,,CE,Switzerland,,,,,30.48,19.92,10.56,,,,,,,,18.9,,0.04,,,,,,29,,,,,,,Rinta et al. 2017,,lake,0.54,9
+Lac des Chavonnes,46.33,7.09,,CE,Switzerland,,,,,1.2,0.72,0.48,,,,,,,,18.8,,0.05,,,,,,13,,,,,,,Rinta et al. 2017,,lake,0.34,28
+Egelsee,47.4,8.36,,CE,Switzerland,,,,,81.6,38.04,43.68,,,,,,,,24.3,,0.02,,,,,,12,,,,,,,Rinta et al. 2017,,lake,0.46,11
+Schwendisee,47.19,9.33,,CE,Switzerland,,,,,34.2,32.28,1.92,,,,,,,,23,,0.03,,,,,,16,,,,,,,Rinta et al. 2017,,lake,0.39,10
+Lac d'Aï,46.36,7.01,,CE,Switzerland,,,,,202.92,73.68,129.24,,,,,,,,16.6,,0.01,,,,,,65,,,,,,,Rinta et al. 2017,,lake,1.1,2
+Seelisbergsee,46.96,8.57,,CE,Switzerland,,,,,12.96,8.76,4.56,,,,,,,,22,,0.17,,,,,,9,,,,,,,Rinta et al. 2017,,lake,0.53,38
+Gantrischseeli,46.71,7.44,,CE,Switzerland,,,,,37.56,5.64,31.8,,,,,,,,16.1,,0.01,,,,,,39,,,,,,,Rinta et al. 2017,,lake,1.1,1
+Uebeschisee,46.73,7.57,,CE,Switzerland,,,,,94.2,57,37.92,,,,,,,,23.4,,0.14,,,,,,16,,,,,,,Rinta et al. 2017,,lake,1.3,15
+Seebergsee,46.58,7.44,,CE,Switzerland,,,,,70.68,77.52,0,,,,,,,,15.1,,0.06,,,,,,12,,,,,,,Rinta et al. 2017,,lake,0.4,15
