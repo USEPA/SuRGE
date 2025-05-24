@@ -137,7 +137,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "chla_cat", "Chlorophyll a category used for the SuRGE survery design",
                              "study", "Survey effort the reservoir was included in. See data paper Figure 1.",
                              
-                             #emissions (point)
+                             # emissions (point)
                              "air_temp", "temperature of the air at the time the floating chamber was deployed",
                              "air_temp_units", "units for air_temp",
                              "ch4_diffusion","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
@@ -169,19 +169,19 @@ master_dictionary <- tribble(~variable, ~definition,
                              "trap_rtrvl_date_time_units", "timezone for trap_rtrvl_date_time",
                              
 
-                             #emissions(lake)
+                             # emissions(lake)
                              "ch4_ebullition_lake","lakewide areal methane ebullition flux estimated using survey site weights",
-                             "ch4_ebullition_units_lake","units for ch4_ebullition_lake",
+                             "ch4_ebullition_lake_units","units for ch4_ebullition_lake_units",
                              "ch4_diffusion_lake", "lakewide areal methane diffusion flux estimated using survey site weights",
-                             "ch4_diffusion_units_lake", "units for ch4_diffusion_lake",
+                             "ch4_diffusion_lake_units", "units for ch4_diffusion_lake",
                              "ch4_total_lake", "lakewide total methane flux estimated using survey site weights",
-                             "ch4_total_units_lake","units for ch4_total_lake",
+                             "ch4_total_lake_units","units for ch4_total_lake",
                              "co2_ebullition_lake", "lakewide areal carbon dioxide ebullition flux estimated using survey site weights",
-                             "co2_ebullition_units_lake", "units for co2_ebullition_lake",
+                             "co2_ebullition_lake_units", "units for co2_ebullition_lake",
                              "co2_diffusion_lake", "lakewide areal carbon dioxide diffuion flux estimated using survey site weights",
-                             "co2_diffusion_units_lake", "units for co2_diffusion_lake",
+                             "co2_diffusion_lake_units", "units for co2_diffusion_lake",
                              "co2_total_lake", "lakewide areal total carbon dioxide flux estimated using survey site weights",
-                             "co2_total_units_lake","units for co2_total_lake_units",
+                             "co2_total_lake_units","units for co2_total_lake_units",
                              "ch4_ebullition_std_error_lake","standard error of ch4_ebullition_lake",
                              "ch4_diffusion_std_error_lake", "standard error of ch4_diffusion_lake",
                              "ch4_total_std_error_lake", "standard error of ch4_total_lake",
@@ -219,13 +219,8 @@ master_dictionary <- tribble(~variable, ~definition,
                              "co2_diffusion_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_diffusion_lake",
                              "co2_total_ucb95pct_lake", "upper bound 95 percent confidence interval for co2_total_lake",
                              
-                             #stratification indices
-                             "buoyancy_frequency", "Brunt-Väisälä frequency (N2), or center buoyancy frequency, calculated in RLakeAnalyzer",
-                             "buoyancy_frequency_units", "units for buoyancy_frequency",
-                             "thermocline_depth", "depth where the maximum change in temperature-based density was observed, calculated in RLakeAnalyzer",
-                             "thermocline_depth_units", "units for thermocline_depth",
                              
-                             #remote sensing (lake)
+                             # remote sensing (lake)
                              "chl_predicted_sample_month_visit1", paste("predicted chlorophyll a concentration from the same month",
                                                                   "and year that emissions were collected during the first site visit if available, otherwise mean predicted",
                                                                   "chlorophyll from 2018-2020 during the same month emissions were collected, ",
@@ -261,6 +256,7 @@ master_dictionary <- tribble(~variable, ~definition,
 
                              # SITE DATA
                              # sonde (see above)
+                             "mdl", "minimum detection limit",
                              "al", "aluminum",
                              "as", "arsenic",
                              "ba", "barium",
@@ -645,34 +641,21 @@ write.csv(
 
 # 5. EMISSION RATES LAKE------
 
-emissions_lake_data_paper <- left_join(
-  emissions_agg %>%
+emissions_lake_data_paper <- emissions_agg %>%
+  rename_with(.cols = contains("units_lake"), ~ gsub("units_lake", "lake_units", .x)) %>%
   mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
-         ch4_diffusion_units_lake = "mg CH4 m-2 d-1",
+         ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
          ch4_ebullition_lake = ch4_ebullition_lake * 24,
-         ch4_ebullition_units_lake = "mg CH4 m-2 d-1",
+         ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
          ch4_total_lake = ch4_total_lake * 24,
-         ch4_total_units_lake = "mg CH4 m-2 d-1",
+         ch4_total_lake_units = "mg CH4 m-2 d-1",
          co2_diffusion_lake = co2_diffusion_lake * 24,
-         co2_diffusion_units_lake = "mg CO2 m-2 d-1",
+         co2_diffusion_lake_units = "mg CO2 m-2 d-1",
          co2_ebullition_lake = co2_ebullition_lake * 24,
-         co2_ebullition_units_lake = "mg CO2 m-2 d-1",
+         co2_ebullition_lake_units = "mg CO2 m-2 d-1",
          co2_total_lake = co2_total_lake * 24,
-         co2_total_units_lake = "mg CO2 m-2 d-1"),
-  strat_link %>%
-    mutate(lake_id = case_when(grepl("69", lake_id) ~ "69",
-                               grepl("70", lake_id) ~ "70",
-                               TRUE ~ lake_id))%>%
-    #this creates three estimates of buoyancy frequency & thermocline depth for lakes 69 and 70
-    #average them together?
-    group_by(lake_id,visit)%>%
-    summarise(buoyancy_frequency= mean(buoyf),
-              thermocline_depth= mean(thermdep2))%>%
-    mutate(buoyancy_frequency_units= "s-2",
-           thermocline_depth_units="m",
-           lake_id = as.numeric(lake_id))%>%
-    select(lake_id, visit, buoyancy_frequency, buoyancy_frequency_units, 
-           thermocline_depth, thermocline_depth_units))
+         co2_total_lake_units = "mg CO2 m-2 d-1") 
+
 
 # Data dictionary
 emissions_lake_data_paper_dictionary <- master_dictionary %>%
@@ -889,19 +872,12 @@ site_data <-
                    names_pattern = "(.+)_(.+)") %>%
       mutate(sample_depth = "shallow") %>%
       drop_na(value) # omit record if no value reported
-  ) 
-
-########################################### MDL FILE MISSING
-# •	Nutrients: 2022 – 2023, ADA and CIN
-# •	Anions: 2022 – 2023, ADA and CIN
-# •	Organic carbon: 2022 – 2023, ADA
-# asked Joe to fix 8am 5/13/2023
-site_data %>%
+  ) %>%
   # ADD DETECTION LIMITS
   # 1. add lab and year, needed for join with DL data
-  left_join(rbind(lake.list, lake.list.2016) %>%
+  left_join(rbind(lake.list, lake.list.2016) %>% # joins by lake_id and visit
               select(lake_id, visit, lab, 
-                     year = sample_year)) %>% # joins by lake_id and visit
+                     year = sample_year)) %>% 
   
   # 2. detection limits differ between CIN and ADA. Current "lab" field is for
   #    field crew (eg. R10, RTP, etc) not which lab ran chemistry. Create 
@@ -913,9 +889,11 @@ site_data %>%
   # 3. join with detection limit data
   left_join(read_csv(paste0(userPath,"data/chemistry/dataPaperDetectionLimits.csv")) %>%
               select(name, mdl, year,
-                     mdl_units = units,
+                     # mdl_units = units, # confirmed identical units
                      lab_mdl = lab)) %>% # join on name, lab_mdl, year
   
+  # 4. Remove join fields no longer needed)
+  select(-lab_mdl, -lab, -year) %>%
   
   # enforce decimal points
   filter(!(name == "po4")) %>% # omit IC based po4 from TTEB
@@ -935,7 +913,24 @@ site_data %>%
     # based on NLA convention
     name == "chla_lab" ~ round(value, 2),
     # error flag
-    TRUE ~ value))
+    TRUE ~ value),
+    mdl = case_when(
+      # nitrogen analytes reported in ug_n_l
+      name %in% c("nh4", "no2", "no2_3", "no3", "tn") ~ round(value, 1),
+      # TP and colorimetric base p in ug_p_l
+      name %in% c("op", "tp") ~ round(value, 1),
+      # 5 decimals reported for tteb data
+      name %in% metals ~ round(value, 5), # metals is from chemSampleList.R
+      # anions in mg_l. decimals based on MDL. See Wiki, 
+      # Anions: analytical methods, detection limits, and holding times/CIN-TTEB Table
+      name %in% c("br", "f") ~ round(value, 3), 
+      name %in% c("cl", "so4") ~ round(value, 2), 
+      # based on NLA convention
+      name %in% c("doc", "toc") ~ round(value, 2),
+      # based on NLA convention
+      name == "chla_lab" ~ round(value, 2),
+      # error flag
+      TRUE ~ mdl))
 
 #write.table(unique(site_data$name), file = "clipboard", row.names = FALSE)
 
@@ -1110,7 +1105,7 @@ lake_scale_data <- list(
     # enforce digits, otherwise many digits are shown when converted to character below
     mutate(value = format(round(value, 2), nsmall = 2))
   
-) %>%
+) %>% # close list
   map(., ~.x %>% mutate(value = as.character(value))) %>% # character to enable all to collapse into one column
   map_dfr(., bind_rows) %>%
   filter(lake_id != 1033) # omit Falls Lake)
@@ -1179,12 +1174,12 @@ ifelse (
 
 # write data
 write.csv(x = phyto_data, 
-          file = "communications/manuscript/data_paper/9_phyto_data.csv",
+          file = "communications/manuscript/data_paper/10_phyto_data.csv",
           row.names = FALSE)
 
 # write dictionary
 write.csv(x = phyto_dictionary, 
-          file = "communications/manuscript/data_paper/9_phyto_dictionary.csv",
+          file = "communications/manuscript/data_paper/10_phyto_dictionary.csv",
           row.names = FALSE)
 
 
