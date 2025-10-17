@@ -404,7 +404,7 @@ bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   st_make_valid() %>%
   st_write(., file.path( 
     "communications/manuscript/data_paper/", 
-    "lake_polygons.gpkg"), # write to .gpkg
+    "2_lake_polygons.gpkg"), # write to .gpkg
     layer = "lake_polygons",
     append = FALSE)
 
@@ -426,7 +426,7 @@ bind_rows(list(dat_2016_sf, dat_surge_sf, dat_falls_lake_sf)) %>% # merge points
   left_join(dat %>% select(lake_id, site_id, visit)) %>%  
   st_write(., file.path(
     "communications/manuscript/data_paper/", 
-    "sample_points.gpkg"), # write to .gpkg
+    "1_sample_points.gpkg"), # write to .gpkg
     layer = "sample_points",
     append = FALSE)
 
