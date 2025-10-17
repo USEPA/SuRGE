@@ -1,0 +1,8 @@
+"variable","definition"
+"site_id","Unique identifier for sample site within a waterbody"
+"lake_id","Unique identifier for each waterbody"
+"visit","First (1) or second (2) site visit"
+"date_time","Date and time (hour) of meteoroligcal observation"
+"date_time_units","Time zone of date_time values"
+"barometric_pressure","Barometric pressure at lake surface"
+"barometric_pressure_units","Units of barometric pressure values"
