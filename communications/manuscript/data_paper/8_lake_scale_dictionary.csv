@@ -7,6 +7,7 @@
 "gnis_id","A permanent, unique number assigned by the Geographic Names Information System (GNIS) to a geographic feature name for the sole purpose of uniquely identifying that name application as a record in any information system database, dataset, file, or document"
 "lagoslakeid","Unique ID assigned to lakes included in the LAGOS dataset (https://lagoslakes.org/)."
 "grand_id","Unique ID assigned to lakes included in the Global Reservoir and Dam Database v1.3."
+"nid_id","Unique ID assigned to dams in the USACE National Inventory of Dams dataset."
 "nla17_site_id","Unique ID assigned to lakes included in EPA's 2017 National Lakes Assessment."
 "surface_area","Waterbody surface area"
 "shoreline_length","Length of waterbody shoreline"
