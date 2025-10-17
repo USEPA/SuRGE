@@ -138,12 +138,19 @@ master_dictionary <- tribble(~variable, ~definition,
                              "depth_cat", "Depth category used for the SuRGE survey design",
                              "chla_cat", "Chlorophyll a category used for the SuRGE survery design",
                              "study", "Survey effort the reservoir was included in. See data paper Figure 1.",
+                             "lab", "the lab that conducted the reservoir survey as a three to four letter code",
+                             
+                             #elevation
+                             "lake_elevation", "elevation of the lake surface used for correcting ERA-5 barometric pressure data",
+                             "lake_elevation_units", "units for lake_elevation",
                              
                              # emissions (point)
                              "air_temp", "temperature of the air at the time the floating chamber was deployed",
                              "air_temp_units", "units for air_temp",
                              "ch4_diffusion","areal ch4 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
                              "ch4_diffusion_units","ch4_diffusion units",
+                             "ch4_r2" , "r2 of the model used to estimate methane diffusion",
+                             "ch4flag","value of B if a bubble caused the data to be un-usable",
                              "ch4_ebullition","areal ch4 ebullition flux from bubble traps",
                              "ch4_ebullition_units","ch4_ebullition units",
                              "ch4_total","the sum of ch4 diffusion and ch4 ebullition when both were measured",
@@ -152,6 +159,7 @@ master_dictionary <- tribble(~variable, ~definition,
                              "ch4_deployment_length_units","ch4_deployment_length units in seconds",
                              "co2_diffusion","areal co2 diffusion flux from floating chamber calculated using most preferred model (could be linear or exponential)",
                              "co2_diffusion_units","co2_diffusion units",
+                             "co2_r2", "r2 of the model used to estimate carbon dioxide diffusion",
                              "co2flag","Value of U if the floating chamber experienced an unstable start",
                              "co2_ebullition","areal co2 ebullition flux from bubble traps",
                              "co2_ebullition_units","co2_ebullition units",
@@ -328,14 +336,18 @@ master_dictionary <- tribble(~variable, ~definition,
                              "chla_collection_date", "Date that sample was collected for laboratory-based chlorophyll a measurement (date based on local time zone)",
                              
                              # 9. meteorology
-                             "date_time", "Date and time (hour) of floating chamber deployment and associated meteoroligcal observations",
+                             "date_time", "Date and time (hour) of meteoroligcal observation",
                              "date_time_units", "Time zone of date_time values",
-                             "precipitation", "Total precipitation during hour of chamber deployment",
+                             "precipitation_chamber", "Total precipitation during hour of chamber deployment",
+                             "precipitation_trap", "Total precipitation during trap deployment",
                              "precipitation_units", "Units of precipitation values",
-                             "wind_speed", "Mean wind speed during hour of floating chamber deployment",
+                             "wind_speed_chamber", "Mean wind speed during hour of floating chamber deployment",
+                             "wind_speed_trap", "Mean wind speed during trap deployment",
                              "wind_speed_units", "Units of wind speed",
                              "temp_air_2m", "Air temperature 2m above the water surface during hour of floating chamber deployment",
                              "temp_air_2m_units", "2m air temperature units",
+                             "barometric_pressure", "Barometric pressure at lake surface",
+                             "barometric_pressure_units", "Units of barometric pressure values",
                              
                              # 10. phytoplankton
                              "algal_group", "Broad algal group classification",
@@ -604,6 +616,8 @@ emission_rate_points_data_paper <- left_join(
       air_temp_units,
       ch4_diffusion_best,
       ch4_diffusion_units,
+      ch4flag,
+      ch4_r2,
       ch4_ebullition,
       ch4_ebullition_units,
       ch4_total,
@@ -613,6 +627,7 @@ emission_rate_points_data_paper <- left_join(
       co2_diffusion_best,
       co2_diffusion_units,
       co2flag,
+      co2_r2,
       co2_ebullition,
       co2_ebullition_units,
       co2_total,
@@ -627,8 +642,19 @@ emission_rate_points_data_paper <- left_join(
   # join precip and wind speed during hour of chamber deployment
   left_join( # 4/18/2025 only have wind speed, air temp, and precipitation
     met_chamber %>%
-      select(lake_id, site_id, visit, contains("precipitation"), contains("wind_speed"))
+      select(lake_id, site_id, visit, contains("precipitation"), contains("wind_speed")) %>%
+      rename(precipitation_chamber = precipitation,
+             wind_speed_chamber = wind_speed)
     ) %>% # close left join
+  # join precipitation and wind_speed during trap deployment
+  left_join(
+    read_csv(paste0(userPath, 
+                    "data\\siteDescriptors\\RTP_gridded_data\\",
+                    "Sites\\Trap\\Trap_Precip_Wind.csv")) %>%
+      clean_names %>%
+      rename(precipitation_trap = precipitation_sum_m,
+             wind_speed_trap = wind_speed_mean_ms)
+  ) %>% # close left_join
   # join k600
   left_join(
     dissolved_gas_k %>%
@@ -662,12 +688,23 @@ emission_rate_points_data_paper <- left_join(
     co2_ebullition = round(co2_ebullition, 4),
     # smallest non-zero abs(co2 total) is 0.0001876054
     co2_total = round(co2_total, 4),
-    wind_speed = round(wind_speed, 2),
+    wind_speed_chamber = round(wind_speed_chamber, 2),
+    wind_speed_trap = round(wind_speed_trap, 2),
     k_ch4_600 = round(k_ch4_600, 3),
-    k_co2_600 = round(k_co2_600, 3))
-
-#Ensure that times are formatted correctly for writing midnight data
-
+    k_co2_600 = round(k_co2_600, 3)
+    ) %>%
+  # make sure units are presented when a measurement is presented
+mutate(
+  wind_speed_units = case_when(
+  (!is.na(wind_speed_chamber) | !is.na(wind_speed_trap)) ~ "m s-1",
+  TRUE ~ wind_speed_units
+  ),
+  precipitation_units = case_when(
+    (!is.na(precipitation_chamber) | !is.na(precipitation_trap)) ~ "m",
+    TRUE ~ precipitation_units
+  )
+  )
+# Ensure that times are formatted correctly for writing midnight data
 emission_rate_points_data_paper$trap_deply_date_time<- format(emission_rate_points_data_paper$trap_deply_date_time,"%Y-%m-%d %H:%M:%S" ) 
 
 # Data dictionary
@@ -1111,7 +1148,7 @@ lake_scale_data <- list(
   bind_rows(lake.list, lake.list.2016) %>%
     filter(eval_status_code == "S",
            visit == 1) %>% 
-    select(lake_id, wgt, ag_eco9, ag_eco9_nm, depth_cat, chla_cat) %>%
+    select(lake_id, wgt, ag_eco9, ag_eco9_nm, depth_cat, chla_cat, lab) %>%
     mutate(wgt_units = "dimensionless",
            study = case_when(lake_id %in% 1:998 ~ "SuRGE",
                              lake_id %in% 1001:1032 ~ "2016 Regional Survey",
@@ -1151,7 +1188,14 @@ lake_scale_data <- list(
     mutate(name = paste0(name, "_visit", visit)) %>%
     select(-visit) %>%
     # enforce digits, otherwise many digits are shown when converted to character below
-    mutate(value = format(round(value, 2), nsmall = 2))
+    mutate(value = format(round(value, 2), nsmall = 2)),
+  
+  
+  #Elevation 
+  elevation %>%
+    mutate(lake_elevation=format(round(lake_elevation, 1), nsmall = 1))%>%
+    pivot_longer(!lake_id)%>%
+    mutate (units = "meters above sea level")
   
 ) %>% # close list
   map(., ~.x %>% mutate(value = as.character(value))) %>% # character to enable all to collapse into one column
@@ -1240,32 +1284,59 @@ write.csv(x = phyto_dictionary,
 
 
 
-#  METEOROLOGY-----------
-# # These data have been merged with emission rate point
-# # 4/18/2025 only have wind speed, air temp, and precipitation
-# met_data <- met_chamber %>%
-#   select(-temp_lake_mix_layer_c) %>%
-#   relocate(lake_id, site_id, visit, date_time, precipitation, wind_speed, temp_air_2m)
-# 
-# # Data dictionary
-# met_dictionary <- master_dictionary %>%
-#   filter(variable %in% colnames(met_data))
-# 
-# # Are all values in data dictionary?
-# ifelse (
-#   #TRUE if variable is in dictionary, FALSE if not
-#   colnames(met_data) %in% met_dictionary$variable %>% # TRUE if variable is present 
-#     {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
-#     sum(.) == 0, # all TRUE add up
-#   "Site data dictionary is complete", # if 0 (all variables are present) 
-#   "Site data dictionary is incomplete") # if not 0 (>=1 variable missing)
-# 
-# # write data
-# write.csv(x = met_data, 
-#           file = "communications/manuscript/data_paper/9_met_data.csv",
-#           row.names = FALSE)
-# 
-# # write dictionary
-# write.csv(x = met_dictionary, 
-#           file = "communications/manuscript/data_paper/9_met_dictionary.csv",
-#           row.names = FALSE)
+# 10. BAROMETRIC PRESSURE-----------
+# BP time series
+bp_data <- bind_rows(
+  read_csv(paste0(userPath, 
+                  "data\\siteDescriptors\\RTP_gridded_data\\",
+                  "Sites\\Trap\\Trap_Pressure.csv")) %>%
+    clean_names %>%
+    select(lake_id, site_id, visit, 
+           date_time = std_time, 
+           barometric_pressure = pressure_lake_pa) %>%
+    mutate(barometric_pressure_units = "pascal"),
+  
+  read_csv(paste0(userPath, 
+                  "data\\siteDescriptors\\RTP_gridded_data\\",
+                  "Sites\\Chamber\\Chamber_Pressure.csv"))
+  ) %>% # close bind_rows
+    clean_names %>%
+    select(lake_id, site_id, visit,  
+           date_time = std_time,
+           barometric_pressure = pressure_lake_pa) %>%
+    mutate(barometric_pressure_units = "pascal",
+           date_time_units = "UTC",
+           date_time = as.POSIXct(date_time, format = "%m/%d/%Y %H:%M:%S")) %>% 
+  distinct %>%
+  arrange(lake_id, site_id, visit, date_time) %>%
+  filter(!is.na(barometric_pressure)) # at least one NA snuck through
+
+#Ensure that times are formatted correctly for writing midnight data
+bp_data$date_time <- format(bp_data$date_time,"%Y-%m-%d %H:%M:%S") 
+
+# Data dictionary
+bp_dictionary <- master_dictionary %>%
+  filter(variable %in% colnames(bp_data))
+
+# Are all values in data dictionary?
+ifelse (
+  #TRUE if variable is in dictionary, FALSE if not
+  colnames(bp_data) %in% bp_dictionary$variable %>% # TRUE if variable is present 
+    {!.} %>% # convert TRUE to FALSE, and FALSE to TRUE
+    sum(.) == 0, # all TRUE add up
+  "BP data dictionary is complete", # if 0 (all variables are present) 
+  "BP data dictionary is incomplete") # if not 0 (>=1 variable missing)
+
+
+# write data
+write.csv(x = bp_data, 
+          file = "communications/manuscript/data_paper/10_bp_data.csv",
+          row.names = FALSE)
+
+# write dictionary
+write.csv(x = bp_dictionary, 
+          file = "communications/manuscript/data_paper/10_bp_dictionary.csv",
+          row.names = FALSE)
+
+
+
