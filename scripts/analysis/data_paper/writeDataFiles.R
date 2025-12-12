@@ -736,27 +736,42 @@ write.csv(
 
 # 5. EMISSION RATES LAKE------
 
-emissions_lake_data_paper <- left_join(emissions_agg %>%
-  rename_with(.cols = contains("units_lake"), ~ gsub("units_lake", "lake_units", .x)) %>%
-  mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
-         ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
-         ch4_ebullition_lake = ch4_ebullition_lake * 24,
-         ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
-         ch4_total_lake = ch4_total_lake * 24,
-         ch4_total_lake_units = "mg CH4 m-2 d-1",
-         co2_diffusion_lake = co2_diffusion_lake * 24,
-         co2_diffusion_lake_units = "mg CO2 m-2 d-1",
-         co2_ebullition_lake = co2_ebullition_lake * 24,
-         co2_ebullition_lake_units = "mg CO2 m-2 d-1",
-         co2_total_lake = co2_total_lake * 24,
-         co2_total_lake_units = "mg CO2 m-2 d-1"),
-  strat_link%>%
-    mutate(lake_id = case_when(grepl("69", lake_id) ~ "69",
-                               grepl("70", lake_id) ~ "70",
-                               TRUE ~ lake_id),
-           lake_id = gsub(".*?([0-9]+).*", "\\1", lake_id) %>% as.numeric,
-           buoyf_units="s-2",
-           thermdep2_units="meters"))
+emissions_lake_data_paper <- left_join(
+  # lake scale emissions
+  emissions_agg %>%
+    rename_with(.cols = contains("units_lake"), ~ gsub("units_lake", "lake_units", .x)) %>%
+    mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
+           ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
+           ch4_ebullition_lake = ch4_ebullition_lake * 24,
+           ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
+           ch4_total_lake = ch4_total_lake * 24,
+           ch4_total_lake_units = "mg CH4 m-2 d-1",
+           co2_diffusion_lake = co2_diffusion_lake * 24,
+           co2_diffusion_lake_units = "mg CO2 m-2 d-1",
+           co2_ebullition_lake = co2_ebullition_lake * 24,
+           co2_ebullition_lake_units = "mg CO2 m-2 d-1",
+           co2_total_lake = co2_total_lake * 24,
+           co2_total_lake_units = "mg CO2 m-2 d-1"),
+  
+  # bind with stratification indices
+  strat_link %>%
+    mutate(
+      # strip lac, trans, river from 69 and 70
+      lake_id = case_when(grepl("69", lake_id) ~ "69",
+                          grepl("70", lake_id) ~ "70",
+                          TRUE ~ lake_id),
+      lake_id = gsub(".*?([0-9]+).*", "\\1", lake_id) %>% as.numeric
+    ) %>%
+    group_by(lake_id, visit) %>%
+    summarize(
+      buoyf = mean(buoyf, na.rm = TRUE),
+      thermdep2 = mean(thermdep2, na.rm = TRUE)
+    ) %>%
+    mutate(
+      buoyf_units="s-2",
+      thermdep2_units="meters"
+    )
+)
 
 
 # Data dictionary

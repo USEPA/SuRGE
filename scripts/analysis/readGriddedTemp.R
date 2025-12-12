@@ -78,13 +78,13 @@ met_temp %>%
 
 
 
-# CHAMBER DATA PREVIEW
+# # CHAMBER DATA PREVIEW
 ### NEW DATA FILES DON'T HAVE ERA5 TEMP [10/15/2025]
-era5_bias_dat <- inner_join(met_chamber, 
+era5_bias_dat <- inner_join(met_chamber,
                             fld_sheet %>%
                               select(lake_id, site_id, visit, temp_s) %>%
                               mutate(
-                                # move habitat from lake_id to site_id 
+                                # move habitat from lake_id to site_id
                                 site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
                                                     grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
                                                     grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
@@ -97,30 +97,30 @@ era5_bias_dat <- inner_join(met_chamber,
                                 lake_id = as.numeric(lake_id))
 )
 
-# plot
-  ggplot(era5_bias_dat, aes(temp_s, temp_lake_mix_layer_c)) +
-  geom_point() +
-  geom_abline(slope = 1, intercept = 0) +
-  geom_smooth(method = "lm")
-           
-# equation
-era5_mod <- lm(temp_lake_mix_layer_c ~ temp_s, data = era5_bias_dat)  
-
-# compare predicted and observed
-# simulated era5 data
-sim_temp <- seq(from = min(era5_bias_dat$temp_s, na.rm = TRUE), 
-                to = max(era5_bias_dat$temp_s, na.rm = TRUE), 
-                by = 1)
-
-# 3.2 degree cold bias
-tibble(true_temp = sim_temp,
-       predicted_temp = predict(object = era5_mod, 
-                                newdata = data.frame(
-                                  temp_s = sim_temp))) %>%
-  dplyr::rowwise() %>%
-  mutate(temp_bias = true_temp - predicted_temp) %>%
-  ungroup %>%
-  summarise(temp_bias = mean(temp_bias))
+# # plot
+#   ggplot(era5_bias_dat, aes(temp_s, temp_lake_mix_layer_c)) +
+#   geom_point() +
+#   geom_abline(slope = 1, intercept = 0) +
+#   geom_smooth(method = "lm")
+# 
+# # equation
+# era5_mod <- lm(temp_lake_mix_layer_c ~ temp_s, data = era5_bias_dat)
+# 
+# # compare predicted and observed
+# # simulated era5 data
+# sim_temp <- seq(from = min(era5_bias_dat$temp_s, na.rm = TRUE),
+#                 to = max(era5_bias_dat$temp_s, na.rm = TRUE),
+#                 by = 1)
+# 
+# # 3.2 degree cold bias
+# tibble(true_temp = sim_temp,
+#        predicted_temp = predict(object = era5_mod,
+#                                 newdata = data.frame(
+#                                   temp_s = sim_temp))) %>%
+#   dplyr::rowwise() %>%
+#   mutate(temp_bias = true_temp - predicted_temp) %>%
+#   ungroup %>%
+#   summarise(temp_bias = mean(temp_bias))
 
 
 
