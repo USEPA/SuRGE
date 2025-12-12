@@ -78,25 +78,25 @@ met_temp %>%
 
 
 
-# CHAMBER DATA PREVIEW
+# # CHAMBER DATA PREVIEW
 ### NEW DATA FILES DON'T HAVE ERA5 TEMP [10/15/2025]
-# era5_bias_dat <- inner_join(met_chamber,
-#                             fld_sheet %>%
-#                               select(lake_id, site_id, visit, temp_s) %>%
-#                               mutate(
-#                                 # move habitat from lake_id to site_id
-#                                 site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
-#                                                     grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
-#                                                     grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
-#                                                     TRUE ~ as.character(site_id)),
-#                                 # remove transitional, lacustrine, riverine from lake_id
-#                                 # retain character class initially, then convert to numeric.
-#                                 lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
-#                                                     lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
-#                                                     TRUE ~ lake_id),
-#                                 lake_id = as.numeric(lake_id))
-# )
-# 
+era5_bias_dat <- inner_join(met_chamber,
+                            fld_sheet %>%
+                              select(lake_id, site_id, visit, temp_s) %>%
+                              mutate(
+                                # move habitat from lake_id to site_id
+                                site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                                                    grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                                                    grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                                                    TRUE ~ as.character(site_id)),
+                                # remove transitional, lacustrine, riverine from lake_id
+                                # retain character class initially, then convert to numeric.
+                                lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                                                    lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                                                    TRUE ~ lake_id),
+                                lake_id = as.numeric(lake_id))
+)
+
 # # plot
 #   ggplot(era5_bias_dat, aes(temp_s, temp_lake_mix_layer_c)) +
 #   geom_point() +
@@ -121,7 +121,7 @@ met_temp %>%
 #   mutate(temp_bias = true_temp - predicted_temp) %>%
 #   ungroup %>%
 #   summarise(temp_bias = mean(temp_bias))
-# 
+
 
 
 # PREP DATA FOR MERGE WITH OTHER VARIABLES---------------- 
@@ -170,5 +170,5 @@ elevation<-lake.list.all %>%
   filter(lake_id != 1033) # omit Falls Lake
 
 #Write csv for jeremy
-#write.csv(elevation,file="output/SuRGE_elevations.csv")
+write.csv(elevation,file="output/SuRGE_elevations.csv")
   

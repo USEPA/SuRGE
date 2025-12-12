@@ -736,27 +736,42 @@ write.csv(
 
 # 5. EMISSION RATES LAKE------
 
-emissions_lake_data_paper <- left_join(emissions_agg %>%
-  rename_with(.cols = contains("units_lake"), ~ gsub("units_lake", "lake_units", .x)) %>%
-  mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
-         ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
-         ch4_ebullition_lake = ch4_ebullition_lake * 24,
-         ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
-         ch4_total_lake = ch4_total_lake * 24,
-         ch4_total_lake_units = "mg CH4 m-2 d-1",
-         co2_diffusion_lake = co2_diffusion_lake * 24,
-         co2_diffusion_lake_units = "mg CO2 m-2 d-1",
-         co2_ebullition_lake = co2_ebullition_lake * 24,
-         co2_ebullition_lake_units = "mg CO2 m-2 d-1",
-         co2_total_lake = co2_total_lake * 24,
-         co2_total_lake_units = "mg CO2 m-2 d-1"),
-  strat_link%>%
-    mutate(lake_id = case_when(grepl("69", lake_id) ~ "69",
-                               grepl("70", lake_id) ~ "70",
-                               TRUE ~ lake_id),
-           lake_id = gsub(".*?([0-9]+).*", "\\1", lake_id) %>% as.numeric,
-           buoyf_units="s-2",
-           thermdep2_units="meters"))
+emissions_lake_data_paper <- left_join(
+  # lake scale emissions
+  emissions_agg %>%
+    rename_with(.cols = contains("units_lake"), ~ gsub("units_lake", "lake_units", .x)) %>%
+    mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
+           ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
+           ch4_ebullition_lake = ch4_ebullition_lake * 24,
+           ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
+           ch4_total_lake = ch4_total_lake * 24,
+           ch4_total_lake_units = "mg CH4 m-2 d-1",
+           co2_diffusion_lake = co2_diffusion_lake * 24,
+           co2_diffusion_lake_units = "mg CO2 m-2 d-1",
+           co2_ebullition_lake = co2_ebullition_lake * 24,
+           co2_ebullition_lake_units = "mg CO2 m-2 d-1",
+           co2_total_lake = co2_total_lake * 24,
+           co2_total_lake_units = "mg CO2 m-2 d-1"),
+  
+  # bind with stratification indices
+  strat_link %>%
+    mutate(
+      # strip lac, trans, river from 69 and 70
+      lake_id = case_when(grepl("69", lake_id) ~ "69",
+                          grepl("70", lake_id) ~ "70",
+                          TRUE ~ lake_id),
+      lake_id = gsub(".*?([0-9]+).*", "\\1", lake_id) %>% as.numeric
+    ) %>%
+    group_by(lake_id, visit) %>%
+    summarize(
+      buoyf = mean(buoyf, na.rm = TRUE),
+      thermdep2 = mean(thermdep2, na.rm = TRUE)
+    ) %>%
+    mutate(
+      buoyf_units="s-2",
+      thermdep2_units="meters"
+    )
+)
 
 
 # Data dictionary
@@ -1044,21 +1059,8 @@ lake_scale_data <- list(
   
   # e.	Links to existing data
   # this needs to be long due to numerous nhdplus_comid, lagos, etc values per lake
-  bind_rows(
-    # the 10/16/2025 commit of this file (d8b0673ccb86763692e2909e16ab88684d9a2705)
-    # has nid_id as an extra column rather than embeded in the existing columns
-    # pull out nid_id, reformat, and bind back in
-    read.csv(paste0(userPath, "data\\siteDescriptors\\crosswalk_long.csv"), header = T) %>% 
-      as_tibble %>% 
-      select(lake_id, nid_id) %>% 
-      mutate(join_id_name = "nid_id") %>% 
-      rename(join_id = nid_id) %>% 
-      filter(!is.na(join_id)) %>%
-      distinct(),
-    
-    # bind with
   read.csv(paste0(userPath, "data\\siteDescriptors\\crosswalk_long.csv"), header = T) %>% 
-    select(-lake_name, -nid_id) %>% 
+    select(-lake_name) %>% 
     # A few variables are duplicated in this dataset: nl07_site_id == lmorpho_nla07, lmorpho_comid == hylak_comid == nhdplus_comid
     # omit the ones we don't want (e.g. getting NLA07 from nl07_site_id variable; comid from nhdplus_comid variable)
     filter(!(join_id_name %in% c("lmorpho_comid", "lmorpho_nla07", "hylak_comid"))) %>% 
@@ -1071,12 +1073,9 @@ lake_scale_data <- list(
     # eliminate duplicate lagoslakeid values created when collapsing lagoslakeid
     # values determined using polygon intersection or comid matching. In many cases,
     # both methods returned the same match.
-    distinct() 
-  ) %>% # close bind_rows
-    arrange(lake_id, join_id_name) %>%
+    distinct() %>%
     rename(name = join_id_name,
            value = join_id) %>%
-    select(lake_id, name, value) %>% # rearrange columns
     mutate(units = NA),
   
   # b.	Morphometry indices

@@ -214,12 +214,14 @@
 76,"lagoslakeid","318415",NA
 76,"hylak_id","104709",NA
 76,"nid_id","MT01354",NA
+76,"nla17_site_id","NLA17_MT-10007",NA
 77,"nla12_site_id","NLA12_MT-160",NA
 77,"nhdplus_comid","4061192",NA
 77,"gnis_id","770196",NA
 77,"lagoslakeid","325238",NA
 77,"hylak_id","1031968",NA
 77,"nid_id","MT00021",NA
+77,"nla17_site_id","NLA17_MT-10013",NA
 78,"nla17_site_id","NLA17_SD-10016",NA
 78,"nla12_site_id","NLA12_SD-168",NA
 78,"nhdplus_comid","11251122",NA
@@ -346,6 +348,7 @@
 209,"lagoslakeid","262225",NA
 209,"hylak_id","1058994",NA
 209,"nid_id","KY00858",NA
+209,"nla17_site_id","NLA17_KY-10023",NA
 210,"nla17_site_id","NLA17_IN-10171",NA
 210,"nhdplus_comid","13435569",NA
 210,"lagoslakeid","135533",NA
@@ -437,6 +440,7 @@
 247,"hylak_id","9301",NA
 247,"grand_id","603",NA
 247,"nid_id","NM00122",NA
+247,"nla17_site_id","NLA17_NM-10049",NA
 250,"nla17_site_id","NLA17_MT-10014",NA
 250,"nla12_site_id","NLA12_MT-124",NA
 250,"nhdplus_comid","24315765",NA
@@ -476,6 +480,7 @@
 1,"nhdplus_comid","21677972",NA
 1,"lagoslakeid","244053",NA
 1,"hylak_id","113618",NA
+1,"nla17_site_id","NLA17_AL-10003",NA
 2,"nla17_site_id","NLA17_MS-10002",NA
 2,"nla12_site_id","NLA12_MS-107",NA
 2,"nla07_site_id","NLA06608-0432",NA
@@ -569,6 +574,7 @@
 239,"hylak_id","109970",NA
 239,"grand_id","367",NA
 239,"nid_id","OR00577",NA
+239,"nla17_site_id","NLA17_OR-10006",NA
 249,"nla17_site_id","NLA17_OR-10004",NA
 249,"nla12_site_id","NLA12_OR-113",NA
 249,"nhdplus_comid","23934034",NA
@@ -625,6 +631,7 @@
 323,"lagoslakeid","463336",NA
 323,"hylak_id","111024",NA
 323,"nid_id","ID00024",NA
+323,"nla17_site_id","NLA17_ID-10175",NA
 331,"nla17_site_id","NLA17_ID-10007",NA
 331,"nla12_site_id","NLA12_ID-166",NA
 331,"nhdplus_comid","24566893",NA
