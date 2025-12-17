@@ -810,6 +810,7 @@ write.csv(
 # other lakes only have a single depth profile, lets report all zones in the paper.
 
 depth_profiles_data <- depth_profiles_all %>%
+  filter(lake_id != 1030) %>% # exclude Falls Lake
   mutate(
     # riverine and transitional zones. Move habitat from lake to site_id
     site_id = case_when(grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
