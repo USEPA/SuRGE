@@ -9,12 +9,51 @@
 #   filter(sample_year == 2016) %>%
 #   select (lake_id, site_id, visit)
 
-lake_id<-c(1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,
-             1015,1016,1017,1018,1019,1020,1021,1022,1023,1025,1026,1027,1028,1029,
-             1030,1031,1032)
-site_id<-c(4,4,6,3,7,3,5,12,4,7,16,4,8,2,15,2,1,2,4,1,3,9,1,4,10,7,7,4,7,3,16)
-ind2016<-data.frame(lake_id,site_id)
-ind2016$uid<-paste(ind2016$lake_id,ind2016$site_id)
+# lake_id<-c(1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,
+#              1015,1016,1017,1018,1019,1020,1021,1022,1023,1025,1026,1027,1028,1029,
+#              1030,1031,1032)
+# site_id<-c(4,4,6,3,7,3,5,12,4,7,16,4,8,2,15,2,1,2,4,1,3,9,1,4,10,7,7,4,7,3,16)
+# ind2016<-data.frame(lake_id,site_id)
+# ind2016$uid<-paste(ind2016$lake_id,ind2016$site_id)
+# recreate ind2016 object using dplry::tribble and adding 1024, site 7
+ind2016 <- tribble(
+  ~lake_id, ~site_id,
+  1001, 4,
+  1002, 4,
+  1003, 6,
+  1004, 3,
+  1005, 7,
+  1006, 3,
+  1007, 5,
+  1008, 12,
+  1009, 4,
+  1010, 7,
+  1011, 16,
+  1012, 4,
+  1013, 8,
+  1014, 2,
+  1015, 15,
+  1016, 2,
+  1017, 1,
+  1018, 2,
+  1019, 4,
+  1020, 1,
+  1021, 3,
+  1022, 9,
+  1023, 1,
+  1024, 7,
+  1025, 4,
+  1026, 10,
+  1027, 7,
+  1028, 7,
+  1029, 4,
+  1030, 7,
+  1031, 3,
+  1032, 16
+) %>%
+  mutate(uid = paste(lake_id, site_id))
+  
+
 
 #This is the dataframe to check interpolation method against
 dat2016sondeni<-dat_2016 %>%
@@ -71,7 +110,7 @@ dat_2016 <- dat_2016 %>%
 
 #Now use the index site profiles to interpolate deep sonde data for sites >1m deep
 
-for (i in 1:31){
+for (i in 1:nrow(ind2016)){
   
   pro<-filter(depth_profile_2016,lake_id == ind2016$lake_id[i])
   
