@@ -1190,6 +1190,8 @@ lake_scale_data <- list(
            doc_predicted_sample_month_units = "mg_l",
            chl_predicted_sample_season_units = "ug_l",
            doc_predicted_sample_season_units = "mg_l") %>%
+    # convert NaN to Na
+    mutate(across(everything(), ~ifelse(is.nan(.), NA, .))) %>%
     # all variables presenting a value must end with "_value". All variables
     # presenting units already end with "_units"
     rename_with(~ifelse(!grepl(c("units|lake_id|visit"), .x), paste0(.x, "_value"), .x)) %>%
