@@ -348,6 +348,8 @@ master_dictionary <- tribble(~variable, ~definition,
                              "temp_air_2m_units", "2m air temperature units",
                              "barometric_pressure", "Barometric pressure at lake surface",
                              "barometric_pressure_units", "Units of barometric pressure values",
+                             "era5_land_reference_geopotential_height", "Geopotential height of the ERA5 grid cell containing the sampling site",
+                             "era5_land_reference_geopotential_height_units", "Units of the era5_land_reference_geopotential_height",
                              
                              # 10. phytoplankton
                              "algal_group", "Broad algal group classification",
@@ -1307,12 +1309,7 @@ write.csv(x = phyto_dictionary,
 bp_data <- bind_rows(
   read_csv(paste0(userPath, 
                   "data\\siteDescriptors\\RTP_gridded_data\\",
-                  "Sites\\Trap\\Trap_Pressure.csv")) %>%
-    clean_names %>%
-    select(lake_id, site_id, visit, 
-           date_time = std_time, 
-           barometric_pressure = pressure_lake_pa) %>%
-    mutate(barometric_pressure_units = "pascal"),
+                  "Sites\\Trap\\Trap_Pressure.csv")),
   
   read_csv(paste0(userPath, 
                   "data\\siteDescriptors\\RTP_gridded_data\\",
@@ -1321,8 +1318,10 @@ bp_data <- bind_rows(
     clean_names %>%
     select(lake_id, site_id, visit,  
            date_time = std_time,
-           barometric_pressure = pressure_lake_pa) %>%
+           barometric_pressure = pressure_lake_pa,
+           era5_land_reference_geopotential_height = geopotential_height_era5_m) %>%
     mutate(barometric_pressure_units = "pascal",
+           era5_land_reference_geopotential_height_units = "m",
            date_time_units = "UTC",
            date_time = as.POSIXct(date_time, format = "%m/%d/%Y %H:%M:%S")) %>% 
   distinct %>%

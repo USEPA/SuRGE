@@ -6,3 +6,5 @@
 "date_time_units","Time zone of date_time values"
 "barometric_pressure","Barometric pressure at lake surface"
 "barometric_pressure_units","Units of barometric pressure values"
+"era5_land_reference_geopotential_height","Geopotential height of the ERA5 grid cell containing the sampling site"
+"era5_land_reference_geopotential_height_units","Units of the era5_land_reference_geopotential_height"
