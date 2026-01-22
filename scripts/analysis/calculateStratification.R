@@ -11,7 +11,8 @@ for (i in 1:nrow(sites)) {
   prol <- filter(depth_profiles_all, lake_id == sites$lake_id[i], visit == sites$visit[i])
   wtr <- as.vector(prol$temp)
   depths <- as.vector(prol$sample_depth)
-  buoyf[i] <- buoyancy.freq(wtr, depths)
+  buoyf[i] <- max(buoyancy.freq(wtr, depths))
+
 }
 
 thermdep <- NULL

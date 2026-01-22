@@ -196,6 +196,56 @@ for (i in 1:2) {
   fld_sheet$do_mg_d_flags[match(missing_70$uniqueid[i], fld_sheet$uniqueid)] <- "I"
 }
 
+#The index profile is also missing from Lake 71
+#Try filling the profile out with deep and shallow measurements from other sites
+
+willcrk<-fld_sheet %>%
+  filter(lake_id=="71") %>%
+  select(lake_id,site_id,site_depth,temp_s,temp_s_flags, do_mg_s,do_mg_s_flags,
+         sp_cond_s,sp_cond_s_flags,ph_s,ph_s_flags,chla_sonde_s,chla_sonde_s_flags,
+         turb_s,turb_s_flags, temp_d,temp_d_flags, do_mg_d,do_mg_d_flags,
+         sp_cond_d,sp_cond_d_flags,ph_d,ph_d_flags, chla_sonde_d,chla_sonde_d,turb_d,turb_d_flags)%>%
+  mutate(visit=1)
+
+#Create a dataframe to merge with the other depth profile data in the readDepthProfile script
+#Site 11 is the index site
+surgeDepthProfile71<-willcrk%>%
+  select(lake_id,site_id,visit,site_depth,temp_d, do_mg_d,
+         sp_cond_d,ph_d, chla_sonde_d,turb_d)%>%
+  mutate(sample_depth_m= ifelse(site_depth>4,site_depth-1,site_depth-0.5))%>%
+           select(-site_depth)
+colnames(surgeDepthProfile71)<-c("lake_id","site_id","visit","temp","do","sp_cond","ph",
+                                 "chla_sonde","turbidity","sample_depth")
+  
+surgeDepthProfile71s<-willcrk%>%
+  filter(site_id==11)%>%
+  select(lake_id,site_id,visit,temp_s,do_mg_s,
+         sp_cond_s,ph_s,chla_sonde_s,turb_s,site_depth)%>%
+  mutate(sample_depth=0.1)%>%
+  select(-site_depth)
+colnames(surgeDepthProfile71s)<-c("lake_id","site_id","visit","temp","do","sp_cond","ph",
+                                  "chla_sonde","turbidity","sample_depth")
+
+surgeDepthProfile71<-rbind(surgeDepthProfile71,surgeDepthProfile71s)%>%
+  mutate(do_flag="I",sp_cond_flag="I",ph_flag="I",chla_sonde_flag="I",
+         turbidity_flag="I")%>%
+  # create units column for each analyte
+  mutate(across(c("sample_depth", "temp", "do", "sp_cond", "turbidity","chla_sonde"), 
+                ~ case_when(
+                  str_detect(paste(cur_column()), "depth") ~ "m",
+                  str_detect(paste(cur_column()), "temp") ~ "c",
+                  str_detect(paste(cur_column()), "do") ~ "mg_l",
+                  str_detect(paste(cur_column()), "sp_cond") ~ "us_cm",
+                  str_detect(paste(cur_column()), "turb") ~ "ntu",
+                  str_detect(paste(cur_column()), "chl") ~ "ug_l",
+                  TRUE ~ "FLY UOU FOOLS"), # 
+                .names = "{col}_units"))%>%
+  #filter out repeat depths to avoid error in the thermo.depth calculation
+  filter(site_id !="10")%>%
+  filter(site_id != "5")%>%
+  mutate(sp_cond_comment="")
+surgeDepthProfile71$sp_cond_comment[1]="Modified datasheet from 0.493 to 493"
+
 #Replace deep sonde NA values with shallow measurements for sites less than 1 meter deep & flag those values
 
 #Dissolved Oxygen
