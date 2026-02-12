@@ -21,6 +21,8 @@ surgeOverview.html
 /scripts/analysis/*.pdf
 Peer Nomination Award SuRGE.pdf
 Peer Nomination Award SuRGE signed.pdf
+# ignore recreated water levels .csv
+/data/siteDescriptors/water_level/water_levels_combined.csv
 
 # some output files
 ## dat_2025_01-16.RData, dat_2025_02-25.RData,....
