@@ -169,7 +169,7 @@ depth_profile_2016 <- read_csv(paste0(userPath, "data/CIN/2016_survey/depthProfi
 
   
  # 4. MERGE DEPTH PROFILES----
-depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_profile_69_70),
+depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_profile_69_70, surgeDepthProfile71),
                           ~.x %>% mutate(lake_id = as.character(lake_id))) %>% # 69_lacustrine, etc
   map_dfr(., bind_rows) %>% # rbinds into one df
   relocate(lake_id, site_id, visit, sample_depth, sample_date)
