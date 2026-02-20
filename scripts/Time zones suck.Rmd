@@ -1,0 +1,262 @@
+---
+title: "Time zones suck"
+author: "J. Beaulieu"
+date: "2026-02-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "..")
+
+library(tidyverse)
+library(janitor)
+library(sf)
+library(kableExtra)
+```
+
+## Time zone issues and SuRGE data
+
+Deployment and retrieval date/time were recorded for all chamber and trap deployments. These data were transcribed to Excel and read with `readxl::read_excel` which guesses column classes. This function initially assigns a `character` class to the dates and a `dttm` class to the time stamps. `dttm` class requires both a date and a time, but we don't provide a date for the time-only data in Excel. Since Excel stores time-only values as a fractional number of days from its default origin date 1899-12-31, R assigns that date to the deployment/retrieval times in the dataframe.
+
+
+```{r}
+dat <- readxl::read_excel(
+  path = "SuRGE_Sharepoint/data/CIN/CH4_191_fisher/dataSheets/surgeData191.xlsx", 
+  skip = 1, sheet = "data", na = c("NA", "", "N/A", "n/a")
+  ) %>%
+  janitor::clean_names(.) %>%
+  select(
+    lake_id, site_id, lat, long, contains("date"), contains("time")
+    ) %>%
+  slice(1) # grab first row
+
+dat %>% select(contains("trap_deply"))
+  
+```
+Since the 1899-12-31 date is erroneous, we eliminate it by converting the `dttm` class to character while only retaining the time. While we are at it, we convert dates from character to `date` class.
+
+```{r}
+dat <- dat %>%
+  mutate(
+    across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+    across(contains("time"), ~ format(.x, format = "%H:%M:%S"))
+  )
+
+dat %>% select(contains("trap_deply"))
+```
+
+Now we need to combine the date and time to create a proper `dttm` class column. This is done using `as.POSIXct` and it is best to specify the time zone in the function. Since SuRGE data were collected from all over the country, the dataset contains numerous time zones. We use the handy `tz_lookup_coords` function from the `lutz` package to determine the time zone based on the lat/lon of the sampling site:
+
+```{r}
+dat <- dat %>%
+  mutate(
+     tz = lutz::tz_lookup_coords(lat, long, warn = FALSE)
+  )
+
+dat %>% select(contains("trap_deply"), tz)
+
+```
+
+OK, now lets create `dttm` class columns using the date, time, and time zone data. Note that the time zone of the `dttm` column isn't displayed by when viewing the tibble, but be viewed as an attribute of the column.
+```{r}
+dat <- dat %>%
+  mutate(
+    trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                      format = "%Y-%m-%d%H:%M:%S",
+                                      tz = tz)
+  )
+
+dat %>% select(contains("trap_deply"), tz)
+attr(dat$trap_deply_date_time, "tzone")
+
+
+```
+When the `dttm` class column is pulled from the tibble and displayed as a vector, the time zone AND daylight saving time specification is shown. In this case it returns "CDT", which is the "America/Chicago" timezone in daylight savings time. Note that `as.POSIXct` automatically handles the transition between Central Standard Time (CST) and Central Daylight Time (CDT) based on the date provided.
+
+```{r}
+dat$trap_deply_date_time
+```
+
+
+Rather than having a bunch of different time zones in the data, we decided to display everything in Coordinated Universal Time (UTC). Central Daylight Time (CDT) is 5 hours behind UTC, meaning you add 5 hours to CDT to get UTC. "2020-09-09 10:33:00 CDT" should be equivalent to "2020-09-09 15:33:00 UTC". We achieve this conversion using the `with_tz` function from `lutz`. Note that the `dttm` class column is displayed in UTC and the time zone attribute is changed to UTC.
+
+
+```{r}
+dat <- dat %>%
+  mutate(
+    trap_deply_date_time = with_tz(trap_deply_date_time, tz = "UTC")
+  )
+
+dat %>% select(contains("trap_deply"))
+dat$trap_deply_date_time
+attr(dat$trap_deply_date_time, "tzone")
+
+
+```
+
+
+That all worked great with a simple example but things get more complicated when working with data from multiple time zones because each `dttm` class column in a data frame can only have a single time zone. The workaround we adopted for SuRGE is to 1) place the data from each lake into separate list elements, 2) enforce the local time zone for each lake, 3) convert the local time zone to UTC, 4) bind the list elements into a single dataframe. In step 2, I added a binary (TRUE/FALSE) daylight savings time indicator (dst). The finalized data are shown below, along with their local time zone (lutz_tz), daylight savings time status (dst), and the current time zone (new_tz).
+
+Note that the `dttm` class times of the final data object (trap_deply_date_time) are offset relative to those recorded in the field (trap_deply_date and trap_deply_time). Lake 191 was recorded in the America/Chicago timezone (in daylight savings time) and was offset by 5 hours when converted to UTC. Lake 288 was recorded in the America/Phoenix timezone (no daylight savings time) and was offset by 7 hours when converted to UTC. These offsets are correct per a google search (the internet can't be wrong!). 
+
+This approach was generalized across all 146 lakes in the SuRGE dataset. The only additional complication I ran into was Lake Oahe (lacustrine zone) where the time zone boundary ran down the center of the river! We never knew what time zone our cell phones were displaying (I nearly missed my remote ASLO presentation because of this!). `lutz::tz_lookup_coords` assigned time zone X to some of the sample points and time zone Y to others. Since we don't know what time zone the field data were recorded in, I assigned one time zone to all point in the lake.
+
+
+```{r}
+test_dat <- lst(
+  dat_191 = readxl::read_excel(
+    path = "SuRGE_Sharepoint/data/CIN/CH4_191_fisher/dataSheets/surgeData191.xlsx", 
+    skip = 1, sheet = "data", na = c("NA", "", "N/A", "n/a")
+  ) %>%
+    janitor::clean_names(.) %>%
+    select(
+      lake_id, site_id, lat, long, contains("date"), contains("time")
+    ) %>%
+    slice(1:5), # subset
+  
+  dat_288 =  readxl::read_excel(
+    path = "SuRGE_Sharepoint/data/USGS/CH4_288_Saguaro Lake/dataSheets/surgeData288.xlsx", 
+    skip = 1, sheet = "data", na = c("NA", "", "N/A", "n/a")
+  ) %>%
+    janitor::clean_names(.) %>%
+    select(
+      lake_id, site_id, lat, long, contains("date"), contains("time")
+    ) %>%
+    slice(1:5) # subset
+) %>%
+  map_dfr(., 
+          function(x){
+            x %>%
+              mutate(
+                # fix longitude
+                long = case_when(long > 0 ~ long * -1, # longitude should be negative
+                                 TRUE ~ long),
+                across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+                across(contains("time"), ~ format(.x, format = "%H:%M:%S")),
+                tz = lutz::tz_lookup_coords(lat = lat, lon = long, warn = FALSE) # this gets tz based on location
+              ) %>% 
+              # replace NA with a value, else with_tz throws warning
+              # `fill` will replace NA with non-NA value in column. Code assumes only one tz per lake
+              # check that assumption for Missouri River impoundments
+              fill(tz, .direction = "updown") %>% 
+              # referencing tz via the tz argument in as.POSIXct throws an error. I don't really
+              # understand why. Here we create date_time object without time zone, then enforce
+              # local time zone with `force_tz`, finally display in UTC via `with_tz`
+              rowwise() %>%
+              mutate(
+                trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                                  format = "%Y-%m-%d%H:%M:%S", tz = tz),
+                trap_rtrvl_date_time = as.POSIXct(x = paste0(trap_rtrvl_date, trap_rtrvl_time),
+                                                  format = "%Y-%m-%d%H:%M:%S", tz = tz)
+              ) %>%
+              ungroup %>% # so rowwise doesn't create unexpected behavior
+              mutate(
+                dst = lubridate::dst(trap_deply_date_time),
+                across(c(trap_deply_date_time, trap_rtrvl_date_time), ~  with_tz(., tzone = "UTC"))
+              )
+          }
+  )
+
+bind_cols(
+  test_dat %>% select(lake_id, contains("trap_deply"), lutz_tz = tz, dst),
+  tibble(new_tz = rep(attr(test_dat$trap_deply_date_time, "tz"), nrow(test_dat)))
+) %>%
+  kableExtra::kbl() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"))
+
+
+```
+
+
+## Traps to avoid
+### Binding different time zones
+R can do things invisibly that may cause confusion if not careful. What happens if we bind data frames with `dttm` data in different time zones. First lets read data from two sites with different time zones, format the `dttm` class data with local time zone. 
+
+```{r}
+
+test_dat <- lst(
+  dat_191 = readxl::read_excel(
+    path = "SuRGE_Sharepoint/data/CIN/CH4_191_fisher/dataSheets/surgeData191.xlsx", 
+    skip = 1, sheet = "data", na = c("NA", "", "N/A", "n/a")
+  ) %>%
+    janitor::clean_names(.) %>%
+    select(
+      lake_id, site_id, lat, long, contains("date"), contains("time")
+    ) %>%
+    slice(1), # subset
+  
+  dat_288 =  readxl::read_excel(
+    path = "SuRGE_Sharepoint/data/USGS/CH4_288_Saguaro Lake/dataSheets/surgeData288.xlsx", 
+    skip = 1, sheet = "data", na = c("NA", "", "N/A", "n/a")
+  ) %>%
+    janitor::clean_names(.) %>%
+    select(
+      lake_id, site_id, lat, long, contains("date"), contains("time")
+    ) %>%
+    slice(1) # subset
+) %>%
+  map(., 
+          function(x){
+            x %>%
+              mutate(
+                # fix longitude
+                long = case_when(long > 0 ~ long * -1, # longitude should be negative
+                                 TRUE ~ long),
+                across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+                across(contains("time"), ~ format(.x, format = "%H:%M:%S")),
+                tz = lutz::tz_lookup_coords(lat = lat, lon = long, warn = FALSE) # this gets tz based on location
+              ) %>% 
+              # replace NA with a value, else with_tz throws warning
+              # `fill` will replace NA with non-NA value in column. Code assumes only one tz per lake
+              # check that assumption for Missouri River impoundments
+              fill(tz, .direction = "updown") %>% 
+              # referencing tz via the tz argument in as.POSIXct throws an error. I don't really
+              # understand why. Here we create date_time object without time zone, then enforce
+              # local time zone with `force_tz`, finally display in UTC via `with_tz`
+              rowwise() %>%
+              mutate(
+                trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                                  format = "%Y-%m-%d%H:%M:%S", tz = tz),
+                trap_rtrvl_date_time = as.POSIXct(x = paste0(trap_rtrvl_date, trap_rtrvl_time),
+                                                  format = "%Y-%m-%d%H:%M:%S", tz = tz)
+              ) %>%
+              ungroup %>% # so rowwise doesn't create unexpected behavior
+              mutate(
+                dst = lubridate::dst(trap_deply_date_time),
+              )
+          }
+  )
+
+map(test_dat, \(x) x$trap_deply_date_time)
+```
+
+Now lets bind the data and see what happens. R enforced a single time zone by applying the correct offset. How smart!
+
+```{r}
+map_dfr(test_dat, bind_rows) %>%
+  pull(trap_deply_date_time)
+
+```
+
+### Not specifying a time zone
+If a time zone isn't specified when creating `dttm` class data, R assigns the local time zone in the computer. Your local time zone can viewed by running `Sys.timezone`. My computer returns `r Sys.timezone()` but users in other time zones (Bridget!) will likely get a different value. Note that the `dttm` object reports "EST" time zone, which is simply "America/New_York" in standard time (as opposed to daylight savings time (EDT)).
+
+Failure to specify a time zone in the SuRGE workflow caused Bridget's machine (Pacific time) to produce numbers that differed from Rachel and Jake's machines (easter time zone). 
+
+
+```{r}
+Sys.timezone()
+
+as.POSIXct("2026-02-2013:38:42", format = "%Y-%m-%d%H:%M:%S")
+
+```
+
+
+
+
+
+
+
+
+
