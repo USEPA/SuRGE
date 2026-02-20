@@ -28,7 +28,7 @@ chem_fld_wide <- chem_fld %>%
                    "site_depth",  "units", "flag", "date_time"), collapse = "|")),
                 as.numeric), # chemistry values back to numeric
          across(contains("trap_"),
-                as.POSIXct)) # deployment and retrieval times back to posixct
+                as.POSIXct, tz = "UTC")) # deployment and retrieval times back to posixct
 
 
 
@@ -45,9 +45,9 @@ all_obs <- full_join(chem_fld_wide, # keep all observations
          matches("diffusion|ebullition|total|volumetric"), # then these
          everything()) # then everything else, unchanged
 
-dim(chem_fld_wide) # 1869, 283
-dim(emissions) # 1867, 56
-dim(all_obs) # 1869, 304
+dim(chem_fld_wide) # 1869, 280
+dim(emissions) # 1868, 59
+dim(all_obs) # 1869, 306
 
 # all observations from emissions are in chem
 emissions[!(with(emissions, paste(lake_id, site_id, visit)) %in% 

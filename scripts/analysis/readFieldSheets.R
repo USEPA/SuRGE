@@ -16,7 +16,7 @@ get_data_sheet <- function(paths){
     .[!grepl(c(".pdf|.docx"), .)] %>% # remove pdf and .docx review files
     .[!grepl(c("Falls"), .)] %>% # omit Falls Lake while data entry underway (add visit number to file name)
     .[!grepl(c("surgeData207_nlafill.xlsx"), .)] %>% # temp file Bridget is using to extrapolate sonde data
-    #.[grepl("191", .)] %>%
+    #.[grepl(c("069_oahe_lacustrine"), .)] %>% # exclude missouri river for testing
     # map will read each file in fs_path list generated above
     # imap passes the element name (here, the filename) to the function
     purrr::imap(~read_excel(.x, skip = 1, sheet = "data", 
@@ -54,30 +54,46 @@ get_data_sheet <- function(paths){
         # remove unused sites
         filter(eval_status == "TS") %>% # keep "Target/Sampled". Exclude all others
         # Format date and time objects
-        mutate(across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
+        mutate(
+          across(contains("date"), ~ as.Date(.x, format = "%m.%d.%Y")), # convert date to as.Date
                across(contains("time"), ~ format(.x, format = "%H:%M:%S")), # convert time to character
-               tz = lutz::tz_lookup_coords(lat, long, warn = FALSE)) %>% # this gets tz based on location
-        # need to replace NA with a value, else force_tz throws error
+          # 69_lacustrine crosses two time zones, not at all clear if the correct time zones were 
+          # referenced when recording times in the boat. Since multiple time zones in the
+          # same column aren't tolerated, assuming all were recorded in "America/Chicago".
+               trap_tz = case_when(
+                 lake_id == "69_lacustrine" ~ "America/Chicago",
+                 TRUE ~ lutz::tz_lookup_coords(lat = lat, lon = long, warn = FALSE) # tz based on location
+               ),
+               # chamber time read from LGR which is set to eastern in lab except for R10 which is pacific
+               chamber_tz = case_when(
+                 lake_id %in% c(238, 239, 249, 253, 263, 265, 287, 302, # if a R10 site
+                                308, 323, 331, 999) ~ "America/Los_Angeles",
+                 TRUE ~ "America/New_York"
+               )
+               ) %>% 
+        # replace NA with a value, else with_tz throws warning
         # `fill` will replace NA with non-NA value in column. Code assumes only one tz per lake
         # check that assumption for Missouri River impoundments
-        fill(tz, .direction = "updown") %>% 
-        # referencing tz via the tz argument in as.POSIXct throws an error. I don't really
-        # understand why. Here we create date_time object without time zone, then enforce
-        # local time zone with `force_tz`, finally display in UTC via `with_tz`
-        mutate(trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
-                                                 format = "%Y-%m-%d%H:%M:%S"),
+        fill(chamber_tz, trap_tz, .direction = "updown") %>% 
+        # as.POSIXct requires a single timzone value. When referring to values stored
+        # in a column, as.POSIXct errors. Here we limt the scope of as.POSIXcr
+        # to one row at a time, that way it only sees a single tz value 
+        rowwise %>% # limit as.POSIXct scope to value in one row 
+        mutate(
+          trap_deply_date_time = as.POSIXct(x = paste0(trap_deply_date, trap_deply_time),
+                                                 format = "%Y-%m-%d%H:%M:%S", tz = trap_tz),
                trap_rtrvl_date_time = as.POSIXct(x = paste0(trap_rtrvl_date, trap_rtrvl_time),
-                                                 format = "%Y-%m-%d%H:%M:%S"),
+                                                 format = "%Y-%m-%d%H:%M:%S", tz = trap_tz),
                chamb_deply_date_time = as.POSIXct(x = paste0(chamb_deply_date, chamb_deply_time),
-                                                  format = "%Y-%m-%d%H:%M:%S"),
-               across(c(trap_deply_date_time, trap_rtrvl_date_time), ~  force_tz(.x, tzone = tz) %>%
-                        with_tz(., tzone = "UTC")),
-               # chamber time read from LGR which is set to eastern in lab except for R10 which is pacific
-               # define local time zone then cast to UTC
-               chamb_deply_date_time = case_when(lake_id %in% c(238, 239, 249, 253, 263, 265, 287, 302, # if a R10 site
-                                                                308, 323, 331, 999) ~ force_tz(chamb_deply_date_time, "America/Los_Angeles") %>% with_tz(., tzone = "UTC"),
-                                                 TRUE ~ force_tz(chamb_deply_date_time, "America/New_York") %>% with_tz(., tzone = "UTC"))) %>%
-        select(-tz) %>% # remove unneeded tz variable
+                                                  format = "%Y-%m-%d%H:%M:%S", tz = chamber_tz)
+          ) %>%
+        ungroup %>% # remove rowwise to avoid unexpected behavior
+        mutate(
+               across(
+                 c(trap_deply_date_time, trap_rtrvl_date_time, chamb_deply_date_time), ~ with_tz(., tzone = "UTC")
+                 ),
+           ) %>%
+        select(-trap_tz, -chamber_tz) %>% # remove unneeded tz variable
         # chemistry data uses "flags" rather than "flag".  be consistent
         rename_with(~sub("flag", "flags", .),
                     .cols = contains("flag"))
