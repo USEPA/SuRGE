@@ -3,14 +3,18 @@
 
 # first pivot to long, then back to wide, then join with emissions
 chem_fld_wide <- chem_fld %>%
-  mutate(across(!c(lake_id, site_id, visit, eval_status, lat, long, sample_date, 
-                   site_depth, sample_depth), 
-                   # trap_deply_date_time, trap_rtrvl_date_time, # don't distinguish between deep and shallow
-                   # phycocyanin_lab, phycocyanin_lab_units, phycocyanin_lab_flags, # only shallow samples
-                   # chla_lab, chla_lab_units, chla_lab_flags), # only shallow samples
-                as.character)) %>% # enforce consistent type
-  pivot_longer(!c(lake_id, site_id, eval_status, lat, long, sample_date, 
-                  site_depth, sample_depth, visit)) %>% #
+  mutate(
+    across(!c(lake_id, site_id, visit, eval_status, lat, long, sample_date, 
+              site_depth, sample_depth, 
+              trap_deply_date_time, trap_rtrvl_date_time), # don't distinguish between deep and shallow
+           # phycocyanin_lab, phycocyanin_lab_units, phycocyanin_lab_flags, # only shallow samples
+           # chla_lab, chla_lab_units, chla_lab_flags), # only shallow samples
+           as.character), # enforce consistent type
+    # convert dttm to character, format needed to retain midnight 00:00:00 time stamp (lake 287, site =2)
+    across(c(trap_deply_date_time, trap_rtrvl_date_time), \(x) format(x, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"))
+  ) %>%
+pivot_longer(!c(lake_id, site_id, eval_status, lat, long, sample_date, 
+                site_depth, sample_depth, visit)) %>% #
   pivot_wider(names_from = c(sample_depth, name), values_from = value) %>% # cast to wide
   # units are repeated for deep and shallow, not necessary.  Remove one of them
   # and strip depth reference from the other
@@ -25,10 +29,10 @@ chem_fld_wide <- chem_fld %>%
               .cols = (contains("deep_trap"))) %>%
   # convert values back to appropriate class
   mutate(across(!matches(paste(c("lake_id", "site_id", "visit", "eval_status", "lat", "long", "sample_date", 
-                   "site_depth",  "units", "flag", "date_time"), collapse = "|")),
+                                 "site_depth",  "units", "flag", "date_time"), collapse = "|")),
                 as.numeric), # chemistry values back to numeric
          across(contains("trap_"),
-                as.POSIXct, tz = "UTC")) # deployment and retrieval times back to posixct
+                as.POSIXct, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")) # deployment and retrieval times back to posixct
 
 
 

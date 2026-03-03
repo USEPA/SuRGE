@@ -10,7 +10,7 @@ source("scripts/analysis/chemSampleList.R") # creates chem.samples.foo, an inven
 
 # Read field sheets and merge sample dates
 source("scripts/analysis/readFieldSheets.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
-source("scripts/analysis/missingSonde.R") # interpolate missing Sonde data
+source("scripts/analysis/missingSonde.R") #interpolate missing Sonde data
 source("scripts/analysis/chamberVolume.R") # read surgeData...xlsx.  fld_sheet, dg_sheet
 source("scripts/analysis/sampleDates.R") # df of lake_id, visit, and sample_date 
 
@@ -32,6 +32,7 @@ source("scripts/analysis/readGc.R") # gc_lakeid_agg
 source("scripts/analysis/read2016data.R")
 source("scripts/analysis/estimateDepth2016.R")
 
+
 # Read other lake characteristics
 source("scripts/analysis/readMorpho.R") # morpho
 source("scripts/analysis/readNla17.R") # nla17_chem
@@ -42,6 +43,7 @@ source("scripts/analysis/readWaterIsotope.R") # Renee Brooks Isotope/Residence T
 source("scripts/analysis/readNWI.R") # NWI attributes from Mark Mitchell
 source("scripts/analysis/readIpccClimateZones.R") # surge_climate
 source("scripts/analysis/readLakeCat.R")# read in LakeCat 
+#source("scripts/analysis/readSedimentation.R") # read in reservoir sedimentation data (requires lagosLakesID.R)
 source("scripts/analysis/readDepthProfile.R") # read SuRGE, 2016, and Falls Lake depth profile
 source("scripts/analysis/getIndexSite.R") # extract index site location from depth_profiles_all
 source("scripts/analysis/readPhytos.R") # read in data from Avery Tatters
@@ -58,9 +60,15 @@ source("scripts/analysis/calculateDissolvedGas.R") # dissolved_gas
 source("scripts/analysis/mergeChemistry.R") # merge all chem objects. chemistry_all
 source("scripts/analysis/cincinnatiShippingNotes.R") # adding S flag
 source("scripts/analysis/aggregateFieldDupsStripFieldBlanks.R") # strip out blanks and aggregate field duplicates.  chemistry
+#source("scripts/analysis/surgeFieldDuplicatesAndFieldBlanks.Rmd") # document blanks and percent agreement among dups
+#source("scripts/analysis/mergeGc.R") # not written yet.  Need to add dissolved gas to gc_lakeid_agg
 
 # Merge chemistry and field sheets
 source("scripts/analysis/mergeChemistryFieldSheets.R") # produces chem_fld.
+
+# Prep 2020 and 2021 data sets for RAPID reporting
+#source("scripts/analysis/rapidReport.R")
+
 
 # Diffusive emission rates
 source("scripts/analysis/readLgr.R") # read raw LGR data
@@ -78,14 +86,30 @@ source("scripts/analysis/calculateTotalEmissions.R")
 source("scripts/analysis/calculateK600.R")
 
 # Merge emissions, chemistry, field sheets, and other predictors
-source("scripts/analysis/mergeChemEmissions.R") # all_obs
+source("scripts/analysis/mergeChemEmissions.R") #all_obs
 source("scripts/analysis/mergePredictors.R") # dat
 
-# Implement sonde criteria 
-source("scripts/analysis/sonde_criteria.R") # edits dat object to remove unreasonable sonde values
+#Implement sonde criteria 
+source("scripts/analysis/sonde_criteria.R") #edits dat object to remove unreasonable sonde values
+
+# Annualize emissions
+source("scripts/analysis/annualizeEmissions.R")
+
+
+# Random
+#source("scripts/analysis/readGps.R") # inform how much of LGR time series to use per site? 
+#source("scripts/analysis/chemSampleList2022.R") # estimate 2022 sample load
+#source("scripts/analysis/aggregateNutrientLabDupExample.R") # example code for aggregating lab dups.  Can delete.
 
 # Project shapefiles
 source("scripts/analysis/writeSuRGElakesToGpkg.R")
+#source("scripts/analysis/writeSuRGElakesForGres.R")
+#source("scripts/analysis/spatialDataForJeremy.R")
+
+
+# Analysis
+#source("scripts/analysis/inspectMeasurementValues.R")
+#source("scripts/analysis/reviewMetTemp.R") # ERA5 bias corrections
 
 # Manuscripts
 source("scripts/analysis/data_paper/writeDataFiles.R")
