@@ -579,11 +579,51 @@ write.csv(x = site_descriptors_dictionary,
 # 4. EMISSION RATES (POINT)----
 
 # First need to compile correct chamber deployment times into an object
-# pull chamber deployments from the chm_deply object created in writeSuRGElakesToGpkg for SuRGE
-# and from the dat_2016 object for the 2016 sites
+# pull chamber deployments from gga3 for SuRGE sites and dat_2016 object
+# for the 2016 sites
 chm_dep <- bind_rows (
-  chm_deply %>%
-    select(lake_id, site_id, visit, chamb_deply_date_time)%>%
+  # SuRGE chamber deployment times
+  # Pull from gga_3 which contains corrections for deployments where internal
+  # GGA clock was wrong
+  gga_3 %>%
+    # deal with lacustrine etc from Missouri river
+    mutate( # move transitional, lacustrine, riverine from lake_id to site_id
+      site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                          grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                          grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                          TRUE ~ as.character(site_id)),
+      # remove transitional, lacustrine, riverine from lake_id
+      # retain character class initially, then convert to numeric.
+      lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                          lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                          TRUE ~ lake_id),
+      lake_id = as.numeric(lake_id)) %>%
+    select(lake_id, site_id, visit, ch4DeplyDtTm) %>%
+    rename(chamb_deply_date_time = ch4DeplyDtTm) %>% # we are focusing on CH4
+    # time zones arbitrarily defined as UTC in readLgr.R, but are eastern for all 
+    # lakes except Region 10 where LGR clock was set to Pacific. Here we 1) split
+    # the R10 data into one list element and all other data into another, 2) redefine
+    # time zone as Pacific or Eastern, 3) recast as UTC, 4) recombine data.
+    mutate(tz = case_when(lake_id %in% c(238, 239, 249, 253, 263, 265, 287, 302,
+                                         308, 323, 331, 999) ~ "America/Los_Angeles", # all R10 are Pacific
+                          TRUE ~ "America/New_York")) %>% # all others eastern
+    group_split(tz) %>% # split by time zone
+    # R can't support different time zones in one column. split eastern and pacific
+    # into separate list elements, define local time zone, cast to UTC, then join
+    # back to df
+    map_dfr(~.x %>% mutate(
+      # enforce time zone used in LGR, then cast to UTC
+      chamb_deply_date_time = case_when(tz == "America/Los_Angeles" ~ 
+                                          force_tz(chamb_deply_date_time, "America/Los_Angeles") %>%
+                                          with_tz(., tzone = "UTC"),
+                                        tz == "America/New_York" ~ 
+                                          force_tz(chamb_deply_date_time, "America/New_York") %>%
+                                          with_tz(., tzone = "UTC"),
+                                        TRUE ~ as.POSIXct("1900-01-01 01:30:00", "%Y-%m-%d %H:%M:%S", tz = "UTC")))
+    ) %>%
+    select(-tz) %>% # no longer need tz field
+    # time series repeated for each deployment. Filter down to unique values for each site.
+    distinct %>%
     mutate(chamb_deply_date_time_units="UTC"),
   
   dat_2016 %>%
@@ -637,7 +677,9 @@ emission_rate_points_data_paper <- left_join(
       co2_deployment_length,
       co2_deployment_length_units,
       trap_deply_date_time,
-      trap_deply_date_time_units),
+      trap_deply_date_time_units,
+      trap_rtrvl_date_time,
+      trap_rtrvl_date_time_units),
   # bind with chamber deployment dates (not distinguished by gas)
   chm_dep
 ) %>% # close left join
@@ -705,9 +747,20 @@ mutate(
     (!is.na(precipitation_chamber) | !is.na(precipitation_trap)) ~ "m",
     TRUE ~ precipitation_units
   )
+  ) %>%
+  # format time stamps so that tenths of a second are not reported in .csv
+  # Bridget noted that is also needed "for writing midnight data"
+  mutate(
+    across(contains("date_time") & !contains("units"), \(x) format(x,"%Y-%m-%d %H:%M:%S") 
+)
   )
-# Ensure that times are formatted correctly for writing midnight data
-emission_rate_points_data_paper$trap_deply_date_time<- format(emission_rate_points_data_paper$trap_deply_date_time,"%Y-%m-%d %H:%M:%S" ) 
+
+# check for error flag
+emission_rate_points_data_paper %>% 
+  filter(
+    chamb_deply_date_time == as.POSIXct("1900-01-01 01:30:00", "%Y-%m-%d %H:%M:%S", tz = "UTC")
+    )
+
 
 # Data dictionary
 emission_rate_points_data_paper_dictionary <- master_dictionary %>%

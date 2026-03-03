@@ -32,6 +32,8 @@
 "co2_deployment_length_units","Units used to express duration of CO2 time series used to calculate diffusive CO2 emissions"
 "trap_deply_date_time","date and time of bubble trap deployment in UTC"
 "trap_deply_date_time_units","timezone for trap_deply_date_time"
+"trap_rtrvl_date_time","date and time of bubble trap retrieval in UTC"
+"trap_rtrvl_date_time_units","timezone for trap_rtrvl_date_time"
 "k_co2_600","CO2 air-water gas exchange rate normalized to a Schmidt number of 600"
 "k_co2_600_units","Units of k_co2_600"
 "k_ch4_600","CH4 air-water gas exchange rate normalized to a Schmidt number of 600"
