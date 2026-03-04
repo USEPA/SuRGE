@@ -121,14 +121,14 @@ surge_lakes <- get_surge(paths)
 # In st_cast.sf(., "POLYGON") :
 #   repeating attributes for all sub-geometries for which they may not be constant
 
-## 2016 AND FALLS LAKE POLYGONS------------------------
+## 2016 LAKE POLYGONS------------------------
 
 # 1. file paths where the 2016 lake polygons are stored.  
 paths <- paste0(userPath,  "lakeDsn/", "2016_survey")
 
 get_2016 <- function(paths){
   
-  # 1. READ IN FILE NAMES FOR 2016 RESERVOIR SURVEY AND FALLS LAKE POLYGONS
+  # 1. READ IN FILE NAMES FOR 2016 RESERVOIR SURVEY
   #d <- 
   fs::dir_ls(path = paths, 
              regexp = '..shp', # file names containing this pattern
@@ -137,7 +137,7 @@ get_2016 <- function(paths){
     .[!(grepl("xml|lock|basin", .))] %>% # omit .shp, .xml, .lock, and basin shapefiles
     # I couldn't dissolve intra-reservoir boundaries for these lakes in R. dissolved in Pro. Ignore original .shp
     # and read in dissolved polygons. Specified lake name below.
-    .[!(grepl("fallsLakeSitesEqArea|fallsLakeEqArea.shp|miltonEqArea.shp|senecavilleEqArea.shp|caesarCreekEqArea.shp", .))] %>%
+    .[!(grepl("fallsLakeSitesEqArea|fallsLakeEqArea.shp|fallsLakeEqAreaDissolve.shp|miltonEqArea.shp|senecavilleEqArea.shp|caesarCreekEqArea.shp", .))] %>%
     .[!grepl("brookville_bb.shp", .)] %>% # omit brookeville bounding box used for data paper figure
     #.[15] %>% # subset for code development
     #imap: .x is object piped into imap, .y is object index (name of list element)
@@ -210,11 +210,6 @@ dat_surge_sf <- fld_sheet %>%
   select(lake_id, site_id, visit)
 
 
-
-dim(dat_surge_sf) #1869
-
-
-
 ## 2016 data----------
 # dat_2016 loaded via read2016data.R --> estimateDepth2016.R
 dat_2016
@@ -226,70 +221,18 @@ dat_2016_sf <- dat_2016 %>%
   st_as_sf(., coords = c("long","lat"), crs = "EPSG:4326") %>% # lat/long
   st_transform(., 3857) %>% # web meractor, consistent with surge_lakes
   st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
-  # exclude sites with no trap or chamber deployment
-  filter(
-    !is.na(trap_deply_date_time)|!is.na(trap_rtrvl_date_time)|!is.na(chamb_deply_date_time)
-    ) %>% 
+  filter(!is.na(trap_deply_date_time)|!is.na(trap_rtrvl_date_time)|!is.na(chamb_deply_date_time)) %>% # exclude sites with no trap or chamber deployment
   select(lake_id, site_id, visit) %>%
- relocate(lake_id, site_id) %>%
   mutate(site_id = as.character(site_id))
 
 dim(dat_2016_sf) #498
 
 
-## Falls lake-----------
-# data maintained at: "C:\Users\JBEAULIE\OneDrive - Environmental Protection Agency (EPA)\gitRepository\fallsLakeCH4"
-# 1. create sf object for sites 991 and 992 that were sampled one. These sites
-#    are not included in official survey design.
-# 2. merge above with official survey design sf object
-# 3. merge sf object above with deployment and retrieval times
-
-# sf object of sites
-dat_falls_lake_sf <- rbind(
-  # sf object for sites 991 and 992. these were sampled once but not in survey design file (?)
-  tribble(
-    ~lat, ~lon, ~site_id,
-    36.07039, -78.79043, 991,
-    36.07016, -78.78858, 992) %>%
-    st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
-    st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
-    st_transform(3857), # web meractor, consistent with surge_lakes
-  
-  # read in and merge .shp containing survey design
-  st_read(paste0(userPath,  "lakeDsn/2016_survey/fallsLake/FallsLakeSitesEqArea.shp")) %>%
-    st_transform(., 3857) %>% # web mercator, consistent with surge_lakes
-    st_set_geometry("geom") %>%  # ensure consistent geometry column names across all sf objects
-    select(siteID) %>%
-    rename(site_id = siteID) %>%
-    mutate(site_id = substr(site_id, 4,5) %>% as.numeric)
-) %>%
-  # join with visit number from fallsLakeCH4 RStudio project (readFieldSheets.R)
-  #  RStudio project (readFieldSheets.R)
-  right_join(
-    readRDS(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/falls_lake_fld_sheet.rds")) %>%
-      select(lake_id, site_id, visit) 
-  ) %>%
-  st_make_valid() %>%
-  mutate(site_id = as.character(site_id),
-         lake_id = as.numeric(lake_id))
-
 
 # WRITE POLYGONS AND POINTS TO DISK-----------
 ## POLYGONS----
-# general geopackage for collaborators, including Falls Lakes for Jeremy
-bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
-  st_make_valid() %>%
-  st_write(., file.path(userPath, "/lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
-           layer = "all_lakes",
-           append = FALSE)
-
 # geopackage for data paper
-bind_rows( # merge polygons
-  list(
-    surge_lakes, 
-    lakes_2016 %>% filter(lake_id != 1033) # exclude Falls Lake 
-    ) # close list
-  ) %>% # close bind_rows
+bind_rows(list(surge_lakes, lakes_2016)) %>% # merge polygons
   select(-lake_name) %>%
   st_make_valid() %>%
   st_write(., file.path( 
@@ -299,27 +242,13 @@ bind_rows( # merge polygons
     append = FALSE)
 
 dim(surge_lakes) #114
-dim(lakes_2016 %>% filter(lake_id != 1033)) #32
+dim(lakes_2016) #32
 32+114 #146
 
 ## POINTS----
-# merge 2016, SuRGE, and Falls Lake data
-# general geopackage for collaborators, add to all_lakes.gpkg
-# see scripts/analysis/spatialDataForJeremy.R for addition of deply/retr
-# date_times
-bind_rows(
-  list(
-    dat_2016_sf, # 2016 points
-    dat_surge_sf, # surge points
-    dat_falls_lake_sf # Falls Lake points
-    )
-  ) %>% # merge points
-  st_write(., file.path(userPath, "/lakeDsn", paste0("all_lakes_", Sys.Date(), ".gpkg")), # write to .gpkg
-           layer = "points",
-           append = FALSE)
-
 # geopackage for data paper
 bind_rows(list(dat_2016_sf, dat_surge_sf)) %>% # merge points
+  left_join(dat %>% select(lake_id, site_id, visit)) %>%  
   st_write(., file.path(
     "communications/manuscript/data_paper/", 
     "1_sample_points.gpkg"), # write to .gpkg
