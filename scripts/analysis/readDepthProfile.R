@@ -160,21 +160,16 @@ depth_profile_2016 <- read_csv(paste0(userPath, "data/CIN/2016_survey/depthProfi
            TRUE ~ "FLY UOU FOOLS"), # 
          .names = "{col}_units"),
          visit = 1,
-         site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id))) %>%
+         site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
+         sample_date = as.Date(sample_date, format = "%m/%d/%Y")) %>%
   # bring in SuRGE lake_id
   left_join(lake.list.2016 %>% select(lake_id, eval_status_code_comment), 
             by = c("lake_name" = "eval_status_code_comment")) %>%
   select(-lake_name, -sample_depth_ft, -orp_m_v)
 
   
- 
-# 4. FALLS LAKE DEPTH PROFILES----
-depth_profile_falls <- read_csv(paste0(userPath, "data/RTP/CH4_1033_Falls_Lake/falls_lake_depth_profiles.csv"))
-
-
-
-# 5. MERGE DEPTH PROFILES----
-depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_profile_falls, depth_profile_69_70,surgeDepthProfile71),
+ # 4. MERGE DEPTH PROFILES----
+depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_profile_69_70, surgeDepthProfile71),
                           ~.x %>% mutate(lake_id = as.character(lake_id))) %>% # 69_lacustrine, etc
   map_dfr(., bind_rows) %>% # rbinds into one df
   relocate(lake_id, site_id, visit, sample_depth, sample_date)
@@ -183,7 +178,8 @@ depth_profiles_all <- map(list(depth_profile_surge, depth_profile_2016, depth_pr
 # 6. GET SAMPLE DATES-----
 depth_profile_dates <- read_csv("SuRGE_Sharepoint/data/depth_profile_dates.csv") %>%
   mutate(sample_date = as.Date(observation_date, format = "%m/%d/%Y")) %>%
-  select(-observation_date)
+  select(-observation_date) %>%
+  filter(lake_id != "1033") # Falls Lake not included in data paper
 
  
 # 7. MERGE SAMPLE DATES WITH DEPTH PROFILES
