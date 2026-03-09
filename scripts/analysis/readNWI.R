@@ -44,9 +44,9 @@ nwi<-rbind(nwi_SuRGE,nwi_2016)%>%
          unknown_perennialper=ifelse(is.na(unknown_perennial),0,unknown_perennial/totper),
          upper_perennialper=ifelse(is.na(upper_perennial),0,upper_perennial/totper),
          aquatic_b=rowSums(across(c(aquatic_bed_x,aquatic_bed_y)),na.rm=TRUE),
-         aquatic_bed=ifelse(is.na(aquatic_b),0,100*(aquatic_b/totper)),
+         aquatic_bed=ifelse(is.na(aquatic_b),0,(aquatic_b/totper)),
          emer=rowSums(across(c(emergent_x,emergent_y)),na.rm=TRUE),
-         emergent=ifelse(is.na(emer),0,100*(emer/totper)),
+         emergent=ifelse(is.na(emer),0,(emer/totper)),
          #forested=
          #scrub_shrub=
          #unconsolidated_bottom=
