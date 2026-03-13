@@ -1,11 +1,11 @@
 ## Read in NWI attributes for SuRGE Lakes
-## Script last updated on 7/25/2024
+## Script last updated on 3/13/2026
 
 
 #Read in NWI data that Mark Mitchell sent at lake scale
 #going down to class after checking that class is consistently reported across lakes
-nwi_SuRGE<- read_xlsx(paste0(userPath, "data/siteDescriptors/nwi/SURGE_AllAttributes_NWI_20240124.xlsx"),
-                      sheet = "AllAttribute",na="NA")%>%
+nwi_SuRGE<- read_xlsx(paste0(userPath, "data/siteDescriptors/nwi/AllAttribute2025.xlsx"),
+                      sheet = "AllAttribute2025",na="NA")%>%
   janitor::clean_names() %>%
   dplyr::rename(lake_id = site_id) %>%
   filter(!(lake_id %in% c("eqAreaharsha", "eqAreaxxx"))) %>% # demo data not needed
