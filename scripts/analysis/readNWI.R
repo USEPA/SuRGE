@@ -1,11 +1,11 @@
 ## Read in NWI attributes for SuRGE Lakes
-## Script last updated on 7/25/2024
+## Script last updated on 3/13/2026
 
 
 #Read in NWI data that Mark Mitchell sent at lake scale
 #going down to class after checking that class is consistently reported across lakes
-nwi_SuRGE<- read_xlsx(paste0(userPath, "data/siteDescriptors/nwi/SURGE_AllAttributes_NWI_20240124.xlsx"),
-                      sheet = "AllAttribute",na="NA")%>%
+nwi_SuRGE<- read_xlsx(paste0(userPath, "data/siteDescriptors/nwi/AllAttribute2025.xlsx"),
+                      sheet = "AllAttribute2025",na="NA")%>%
   janitor::clean_names() %>%
   dplyr::rename(lake_id = site_id) %>%
   filter(!(lake_id %in% c("eqAreaharsha", "eqAreaxxx"))) %>% # demo data not needed
@@ -17,22 +17,22 @@ nwi_SuRGE<- read_xlsx(paste0(userPath, "data/siteDescriptors/nwi/SURGE_AllAttrib
          unconsolidated_bottom_x, unconsolidated_shore_x,aquatic_bed_y,emergent_y,
          forested_y,scrub_shrub_y,unconsolidated_bottom_y,unconsolidated_shore_y,broad_leaved_deciduous_y) 
 
-nwi_2016<- read_xlsx(paste0(userPath, "data/siteDescriptors/nwi/2016_survey_AllAttributes_NWI_20240124.xlsx"),
-                     sheet = "2016Sites_AllAttribute",na="NA")%>%
-  janitor::clean_names() %>%
-  #Need to manually assign lake ids
-  mutate(lake_id = c(1001:1014,1033,1015:1032))%>%
-  mutate(unconsolidated_bottom_x=unconsolidated_bottom,unconsolidated_bottom_y=NA,
-         rocky_shore=NA,aquatic_bed_x=aquatic_bed,aquatic_bed_y=NA,unconsolidated_shore_x=unconsolidated_shore,
-         unconsolidated_shore_y=NA)%>%
-  select(lake_id,lacustrine,palustrine,riverine,intermittent,limnetic,littoral,lower_perennial,unknown_perennial,
-         upper_perennial,aquatic_bed_x,emergent_x,forested_x,rocky_shore,streambed,scrub_shrub_x,streambed,
-         unconsolidated_bottom_x, unconsolidated_shore_x,aquatic_bed_y,emergent_y,
-         forested_y,scrub_shrub_y,unconsolidated_bottom_y,unconsolidated_shore_y,broad_leaved_deciduous_y)
+# nwi_2016<- read_xlsx(paste0(userPath, "data/siteDescriptors/nwi/2016_survey_AllAttributes_NWI_20240124.xlsx"),
+#                      sheet = "2016Sites_AllAttribute",na="NA")%>%
+#   janitor::clean_names() %>%
+#   #Need to manually assign lake ids
+#   mutate(lake_id = c(1001:1014,1033,1015:1032))%>%
+#   mutate(unconsolidated_bottom_x=unconsolidated_bottom,unconsolidated_bottom_y=NA,
+#          rocky_shore=NA,aquatic_bed_x=aquatic_bed,aquatic_bed_y=NA,unconsolidated_shore_x=unconsolidated_shore,
+#          unconsolidated_shore_y=NA)%>%
+#   select(lake_id,lacustrine,palustrine,riverine,intermittent,limnetic,littoral,lower_perennial,unknown_perennial,
+#          upper_perennial,aquatic_bed_x,emergent_x,forested_x,rocky_shore,streambed,scrub_shrub_x,streambed,
+#          unconsolidated_bottom_x, unconsolidated_shore_x,aquatic_bed_y,emergent_y,
+#          forested_y,scrub_shrub_y,unconsolidated_bottom_y,unconsolidated_shore_y,broad_leaved_deciduous_y)
   
 #Bind the two datasets together
 #Recalculate percentages as fractions of total
-nwi<-rbind(nwi_SuRGE,nwi_2016)%>%
+nwi<-nwi_SuRGE %>%
   mutate(totper=rowSums(across(c(lacustrine,palustrine,riverine)),na.rm=TRUE),
          lacustrineper=ifelse(is.na(lacustrine),0,lacustrine/totper),
          palustrineper=ifelse(is.na(palustrine),0,palustrine/totper),
