@@ -799,13 +799,13 @@ emissions_lake_data_paper <- left_join(
            ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
            ch4_ebullition_lake = ch4_ebullition_lake * 24,
            ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
-           ch4_total_lake = ch4_total_lake * 24,
+           ch4_total_lake = ch4_diffusion_lake + ch4_ebullition_lake,
            ch4_total_lake_units = "mg CH4 m-2 d-1",
            co2_diffusion_lake = co2_diffusion_lake * 24,
            co2_diffusion_lake_units = "mg CO2 m-2 d-1",
            co2_ebullition_lake = co2_ebullition_lake * 24,
            co2_ebullition_lake_units = "mg CO2 m-2 d-1",
-           co2_total_lake = co2_total_lake * 24,
+           co2_total_lake = co2_diffusion_lake +  co2_ebullition_lake,
            co2_total_lake_units = "mg CO2 m-2 d-1"),
   
   # bind with stratification indices
