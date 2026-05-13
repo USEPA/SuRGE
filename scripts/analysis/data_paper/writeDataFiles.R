@@ -795,18 +795,42 @@ emissions_lake_data_paper <- left_join(
   # lake scale emissions
   emissions_agg %>%
     rename_with(.cols = contains("units_lake"), ~ gsub("units_lake", "lake_units", .x)) %>%
-    mutate(ch4_diffusion_lake = ch4_diffusion_lake * 24,
-           ch4_diffusion_lake_units = "mg CH4 m-2 d-1",
-           ch4_ebullition_lake = ch4_ebullition_lake * 24,
-           ch4_ebullition_lake_units = "mg CH4 m-2 d-1",
-           ch4_total_lake = ch4_diffusion_lake + ch4_ebullition_lake,
-           ch4_total_lake_units = "mg CH4 m-2 d-1",
-           co2_diffusion_lake = co2_diffusion_lake * 24,
-           co2_diffusion_lake_units = "mg CO2 m-2 d-1",
-           co2_ebullition_lake = co2_ebullition_lake * 24,
-           co2_ebullition_lake_units = "mg CO2 m-2 d-1",
-           co2_total_lake = co2_diffusion_lake + co2_ebullition_lake,
-           co2_total_lake_units = "mg CO2 m-2 d-1"),
+    mutate(
+      # calculate total rates as sum of diffusion and ebullition
+      # adjust variance estimates
+      ch4_total_lake = ch4_ebullition_lake + ch4_diffusion_lake,
+      ch4_total_std_error_lake = sqrt(ch4_ebullition_std_error_lake^2 + 
+                                        ch4_diffusion_std_error_lake^2),
+      ch4_total_margin_of_error_lake = sqrt(ch4_ebullition_margin_of_error_lake^2 +
+                                              ch4_diffusion_margin_of_error_lake^2),
+      ch4_total_lcb95pct_lake = ch4_total_lake - 
+        (ch4_total_std_error_lake * 1.96),
+      ch4_total_ucb95pct_lake = ch4_total_lake + 
+        (ch4_total_std_error_lake * 1.96),
+      co2_total_lake = co2_ebullition_lake + co2_diffusion_lake,
+      co2_total_std_error_lake = sqrt(co2_ebullition_std_error_lake^2 + 
+                                        co2_diffusion_std_error_lake^2),
+      co2_total_margin_of_error_lake = sqrt(co2_ebullition_margin_of_error_lake^2 +
+                                              co2_diffusion_margin_of_error_lake^2),
+      co2_total_lcb95pct_lake = co2_total_lake - 
+        (co2_total_std_error_lake * 1.96),
+      co2_total_ucb95pct_lake = co2_total_lake + 
+        (co2_total_std_error_lake * 1.96),
+      # convert rates and variance estimates to per day
+      across(
+        # use matches to exclude all columns except emission rates
+        !matches(c("units|thermdep2|buoyf|lake_id|visit")), 
+        ~ .x * 24 # multiply per hour rates by 24
+      ), # close across
+      # fix CH4 units
+      across(c(ch4_ebullition_lake_units, ch4_diffusion_lake_units,
+               ch4_total_lake_units),
+             ~ "mg CH4 m-2 d-1"),
+      # fix CO2 units
+      across(c(co2_ebullition_lake_units, co2_diffusion_lake_units, 
+               co2_total_lake_units),
+             ~ "mg CO2 m-2 d-1")
+    ),
   
   # bind with stratification indices
   strat_link %>%
