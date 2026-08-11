@@ -110,6 +110,7 @@ source("scripts/analysis/writeSuRGElakesToGpkg.R")
 # Analysis
 #source("scripts/analysis/inspectMeasurementValues.R")
 #source("scripts/analysis/reviewMetTemp.R") # ERA5 bias corrections
+source("scripts/analysis/gather_n2o_ebulltion_data.R")
 
 # Manuscripts
 source("scripts/analysis/data_paper/writeDataFiles.R")
