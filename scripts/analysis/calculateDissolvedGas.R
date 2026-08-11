@@ -41,7 +41,8 @@ dissolved_gas_input <- left_join(
     # minor discrepancies in depths recorded on "data" and "dissolved_gas"
     # worksheets cause join to fail. 
     mutate(sample_depth = case_when(sample_depth == 0.1 ~ "shallow",
-                                    TRUE ~ "deep"))
+                                    TRUE ~ "deep"),
+           atm_pressure = atm_pressure * (101.325 / 760)) # mm Hg to KPa
 ) %>% # end first left_join
   left_join(.,
             # Now get water temperature for fld_sheet
@@ -83,7 +84,7 @@ dissolved_gas_input %>%
 dissolved_gas <- with(dissolved_gas_input, 
                       def.calc.sdg(inputFile = dissolved_gas_input, 
                                             volGas = air_vol, volH2O = water_vol, 
-                                            baro = atm_pressure, # units? 
+                                            baro = atm_pressure, # kPa
                                             waterTemp = water_temperature, # lake temp     
                                             headspaceTemp = dg_extn_temp, # 
                                             eqCO2 = dg_co2_ppm, # co2 in equilibrated headspace
