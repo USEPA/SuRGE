@@ -38259,372 +38259,372 @@
 1001,"4",1,"co2_sat_ratio",0.931834065896141,NA,NA,"shallow","dimensionless",NA
 1001,"4",1,"ch4_sat_ratio",401.851504717301,NA,NA,"shallow","dimensionless",NA
 1001,"4",1,"n2o_sat_ratio",5.05991684593131,NA,NA,"shallow","dimensionless",NA
-1001,"4",1,"dissolved_co2",9.01e-05,NA,NA,"shallow","mol co2 L-1",NA
-1001,"4",1,"dissolved_ch4",7.57e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1001,"4",1,"dissolved_n2o",2.89e-07,NA,NA,"shallow","mol n2o L-1",NA
+1001,"4",1,"dissolved_co2",1.2e-05,NA,NA,"shallow","mol co2 L-1",NA
+1001,"4",1,"dissolved_ch4",1.01e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1001,"4",1,"dissolved_n2o",3.86e-08,NA,NA,"shallow","mol n2o L-1",NA
 1001,"17",1,"co2_sat_ratio",0.793310750521984,NA,NA,"shallow","dimensionless",NA
 1001,"17",1,"ch4_sat_ratio",396.488612402193,NA,NA,"shallow","dimensionless",NA
 1001,"17",1,"n2o_sat_ratio",5.03845051937584,NA,NA,"shallow","dimensionless",NA
-1001,"17",1,"dissolved_co2",7.39e-05,NA,NA,"shallow","mol co2 L-1",NA
-1001,"17",1,"dissolved_ch4",7.25e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1001,"17",1,"dissolved_n2o",2.76e-07,NA,NA,"shallow","mol n2o L-1",NA
+1001,"17",1,"dissolved_co2",9.85e-06,NA,NA,"shallow","mol co2 L-1",NA
+1001,"17",1,"dissolved_ch4",9.67e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1001,"17",1,"dissolved_n2o",3.69e-08,NA,NA,"shallow","mol n2o L-1",NA
 1002,"4",1,"co2_sat_ratio",1.80611549231866,NA,NA,"shallow","dimensionless",NA
 1002,"4",1,"ch4_sat_ratio",52.4203901818245,NA,NA,"shallow","dimensionless",NA
 1002,"4",1,"n2o_sat_ratio",1.24976602299122,NA,NA,"shallow","dimensionless",NA
-1002,"4",1,"dissolved_co2",0.000187,NA,NA,"shallow","mol co2 L-1",NA
-1002,"4",1,"dissolved_ch4",1.04e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1002,"4",1,"dissolved_n2o",7.72e-08,NA,NA,"shallow","mol n2o L-1",NA
+1002,"4",1,"dissolved_co2",2.49e-05,NA,NA,"shallow","mol co2 L-1",NA
+1002,"4",1,"dissolved_ch4",1.39e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1002,"4",1,"dissolved_n2o",1.03e-08,NA,NA,"shallow","mol n2o L-1",NA
 1002,"30",1,"co2_sat_ratio",3.89899705840089,NA,NA,"shallow","dimensionless",NA
 1002,"30",1,"ch4_sat_ratio",301.177354846689,NA,NA,"shallow","dimensionless",NA
 1002,"30",1,"n2o_sat_ratio",3.67506540262361,NA,NA,"shallow","dimensionless",NA
-1002,"30",1,"dissolved_co2",0.000383,NA,NA,"shallow","mol co2 L-1",NA
-1002,"30",1,"dissolved_ch4",5.73e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1002,"30",1,"dissolved_n2o",2.14e-07,NA,NA,"shallow","mol n2o L-1",NA
+1002,"30",1,"dissolved_co2",5.1e-05,NA,NA,"shallow","mol co2 L-1",NA
+1002,"30",1,"dissolved_ch4",7.64e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1002,"30",1,"dissolved_n2o",2.85e-08,NA,NA,"shallow","mol n2o L-1",NA
 1003,"6",1,"co2_sat_ratio",0.690586668990445,NA,NA,"shallow","dimensionless",NA
 1003,"6",1,"ch4_sat_ratio",199.193358363514,NA,NA,"shallow","dimensionless",NA
 1003,"6",1,"n2o_sat_ratio",1.29488291719569,NA,NA,"shallow","dimensionless",NA
-1003,"6",1,"dissolved_co2",6.11e-05,NA,NA,"shallow","mol co2 L-1",NA
-1003,"6",1,"dissolved_ch4",3.5e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1003,"6",1,"dissolved_n2o",6.69e-08,NA,NA,"shallow","mol n2o L-1",NA
+1003,"6",1,"dissolved_co2",8.14e-06,NA,NA,"shallow","mol co2 L-1",NA
+1003,"6",1,"dissolved_ch4",4.67e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1003,"6",1,"dissolved_n2o",8.92e-09,NA,NA,"shallow","mol n2o L-1",NA
 1003,"31",1,"co2_sat_ratio",0.320508112868834,NA,NA,"shallow","dimensionless",NA
 1003,"31",1,"ch4_sat_ratio",1315.51074916886,NA,NA,"shallow","dimensionless",NA
 1003,"31",1,"n2o_sat_ratio",1.64721591482291,NA,NA,"shallow","dimensionless",NA
-1003,"31",1,"dissolved_co2",2.88e-05,NA,NA,"shallow","mol co2 L-1",NA
-1003,"31",1,"dissolved_ch4",2.34e-05,NA,NA,"shallow","mol ch4 L-1",NA
-1003,"31",1,"dissolved_n2o",8.66e-08,NA,NA,"shallow","mol n2o L-1",NA
+1003,"31",1,"dissolved_co2",3.83e-06,NA,NA,"shallow","mol co2 L-1",NA
+1003,"31",1,"dissolved_ch4",3.13e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1003,"31",1,"dissolved_n2o",1.15e-08,NA,NA,"shallow","mol n2o L-1",NA
 1004,"3",1,"co2_sat_ratio",0.0965985736946748,NA,NA,"shallow","dimensionless",NA
 1004,"3",1,"ch4_sat_ratio",70.6185179933977,NA,NA,"shallow","dimensionless",NA
 1004,"3",1,"n2o_sat_ratio",0.924562170926103,NA,NA,"shallow","dimensionless",NA
-1004,"3",1,"dissolved_co2",8.99e-06,NA,NA,"shallow","mol co2 L-1",NA
-1004,"3",1,"dissolved_ch4",1.29e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1004,"3",1,"dissolved_n2o",5.06e-08,NA,NA,"shallow","mol n2o L-1",NA
+1004,"3",1,"dissolved_co2",1.2e-06,NA,NA,"shallow","mol co2 L-1",NA
+1004,"3",1,"dissolved_ch4",1.72e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1004,"3",1,"dissolved_n2o",6.74e-09,NA,NA,"shallow","mol n2o L-1",NA
 1004,"33",1,"co2_sat_ratio",0.747210260290721,NA,NA,"shallow","dimensionless",NA
 1004,"33",1,"ch4_sat_ratio",369.407649156705,NA,NA,"shallow","dimensionless",NA
 1004,"33",1,"n2o_sat_ratio",1.27855358593315,NA,NA,"shallow","dimensionless",NA
-1004,"33",1,"dissolved_co2",6.93e-05,NA,NA,"shallow","mol co2 L-1",NA
-1004,"33",1,"dissolved_ch4",6.73e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1004,"33",1,"dissolved_n2o",6.97e-08,NA,NA,"shallow","mol n2o L-1",NA
+1004,"33",1,"dissolved_co2",9.24e-06,NA,NA,"shallow","mol co2 L-1",NA
+1004,"33",1,"dissolved_ch4",8.97e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1004,"33",1,"dissolved_n2o",9.3e-09,NA,NA,"shallow","mol n2o L-1",NA
 1005,"7",1,"co2_sat_ratio",1.53572552394587,NA,NA,"shallow","dimensionless",NA
 1005,"7",1,"ch4_sat_ratio",91.0960024027262,NA,NA,"shallow","dimensionless",NA
 1005,"7",1,"n2o_sat_ratio",0.829589962649819,NA,NA,"shallow","dimensionless",NA
-1005,"7",1,"dissolved_co2",0.000142,NA,NA,"shallow","mol co2 L-1",NA
-1005,"7",1,"dissolved_ch4",1.66e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1005,"7",1,"dissolved_n2o",4.5e-08,NA,NA,"shallow","mol n2o L-1",NA
+1005,"7",1,"dissolved_co2",1.9e-05,NA,NA,"shallow","mol co2 L-1",NA
+1005,"7",1,"dissolved_ch4",2.22e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1005,"7",1,"dissolved_n2o",6e-09,NA,NA,"shallow","mol n2o L-1",NA
 1006,"3",1,"co2_sat_ratio",1.08239608624405,NA,NA,"shallow","dimensionless",NA
 1006,"3",1,"ch4_sat_ratio",214.161353764988,NA,NA,"shallow","dimensionless",NA
 1006,"3",1,"n2o_sat_ratio",0.959797020471319,NA,NA,"shallow","dimensionless",NA
-1006,"3",1,"dissolved_co2",9.64e-05,NA,NA,"shallow","mol co2 L-1",NA
-1006,"3",1,"dissolved_ch4",3.79e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1006,"3",1,"dissolved_n2o",4.99e-08,NA,NA,"shallow","mol n2o L-1",NA
+1006,"3",1,"dissolved_co2",1.29e-05,NA,NA,"shallow","mol co2 L-1",NA
+1006,"3",1,"dissolved_ch4",5.06e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1006,"3",1,"dissolved_n2o",6.65e-09,NA,NA,"shallow","mol n2o L-1",NA
 1007,"5",1,"co2_sat_ratio",0.606470249197481,NA,NA,"shallow","dimensionless",NA
 1007,"5",1,"ch4_sat_ratio",255.145806728888,NA,NA,"shallow","dimensionless",NA
 1007,"5",1,"n2o_sat_ratio",0.933607223586124,NA,NA,"shallow","dimensionless",NA
-1007,"5",1,"dissolved_co2",5.44e-05,NA,NA,"shallow","mol co2 L-1",NA
-1007,"5",1,"dissolved_ch4",4.53e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1007,"5",1,"dissolved_n2o",4.9e-08,NA,NA,"shallow","mol n2o L-1",NA
+1007,"5",1,"dissolved_co2",7.25e-06,NA,NA,"shallow","mol co2 L-1",NA
+1007,"5",1,"dissolved_ch4",6.05e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1007,"5",1,"dissolved_n2o",6.53e-09,NA,NA,"shallow","mol n2o L-1",NA
 1007,"21",1,"co2_sat_ratio",2.72027782975838,NA,NA,"shallow","dimensionless",NA
 1007,"21",1,"ch4_sat_ratio",660.630198569631,NA,NA,"shallow","dimensionless",NA
 1007,"21",1,"n2o_sat_ratio",0.677989766272642,NA,NA,"shallow","dimensionless",NA
-1007,"21",1,"dissolved_co2",0.000238,NA,NA,"shallow","mol co2 L-1",NA
-1007,"21",1,"dissolved_ch4",1.15e-05,NA,NA,"shallow","mol ch4 L-1",NA
-1007,"21",1,"dissolved_n2o",3.46e-08,NA,NA,"shallow","mol n2o L-1",NA
+1007,"21",1,"dissolved_co2",3.17e-05,NA,NA,"shallow","mol co2 L-1",NA
+1007,"21",1,"dissolved_ch4",1.53e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1007,"21",1,"dissolved_n2o",4.62e-09,NA,NA,"shallow","mol n2o L-1",NA
 1008,"12",1,"co2_sat_ratio",1.9748159053475,NA,NA,"shallow","dimensionless",NA
 1008,"12",1,"ch4_sat_ratio",114.694701317628,NA,NA,"shallow","dimensionless",NA
 1008,"12",1,"n2o_sat_ratio",1.6404046276562,NA,NA,"shallow","dimensionless",NA
-1008,"12",1,"dissolved_co2",0.000189,NA,NA,"shallow","mol co2 L-1",NA
-1008,"12",1,"dissolved_ch4",2.14e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1008,"12",1,"dissolved_n2o",9.27e-08,NA,NA,"shallow","mol n2o L-1",NA
+1008,"12",1,"dissolved_co2",2.52e-05,NA,NA,"shallow","mol co2 L-1",NA
+1008,"12",1,"dissolved_ch4",2.86e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1008,"12",1,"dissolved_n2o",1.24e-08,NA,NA,"shallow","mol n2o L-1",NA
 1008,"32",1,"co2_sat_ratio",2.79246616133883,NA,NA,"shallow","dimensionless",NA
 1008,"32",1,"ch4_sat_ratio",690.176793253296,NA,NA,"shallow","dimensionless",NA
 1008,"32",1,"n2o_sat_ratio",4.49003614909982,NA,NA,"shallow","dimensionless",NA
-1008,"32",1,"dissolved_co2",0.00026,NA,NA,"shallow","mol co2 L-1",NA
-1008,"32",1,"dissolved_ch4",1.26e-05,NA,NA,"shallow","mol ch4 L-1",NA
-1008,"32",1,"dissolved_n2o",2.46e-07,NA,NA,"shallow","mol n2o L-1",NA
+1008,"32",1,"dissolved_co2",3.47e-05,NA,NA,"shallow","mol co2 L-1",NA
+1008,"32",1,"dissolved_ch4",1.68e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1008,"32",1,"dissolved_n2o",3.29e-08,NA,NA,"shallow","mol n2o L-1",NA
 1009,"4",1,"co2_sat_ratio",2.30476794557723,NA,NA,"shallow","dimensionless",NA
 1009,"4",1,"ch4_sat_ratio",229.352658002197,NA,NA,"shallow","dimensionless",NA
 1009,"4",1,"n2o_sat_ratio",0.952585514201597,NA,NA,"shallow","dimensionless",NA
-1009,"4",1,"dissolved_co2",0.000206,NA,NA,"shallow","mol co2 L-1",NA
-1009,"4",1,"dissolved_ch4",4.06e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1009,"4",1,"dissolved_n2o",4.98e-08,NA,NA,"shallow","mol n2o L-1",NA
+1009,"4",1,"dissolved_co2",2.74e-05,NA,NA,"shallow","mol co2 L-1",NA
+1009,"4",1,"dissolved_ch4",5.41e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1009,"4",1,"dissolved_n2o",6.65e-09,NA,NA,"shallow","mol n2o L-1",NA
 1009,"29",1,"co2_sat_ratio",2.56546753319424,NA,NA,"shallow","dimensionless",NA
 1009,"29",1,"ch4_sat_ratio",332.511871936218,NA,NA,"shallow","dimensionless",NA
 1009,"29",1,"n2o_sat_ratio",0.873538218218265,NA,NA,"shallow","dimensionless",NA
-1009,"29",1,"dissolved_co2",0.000229,NA,NA,"shallow","mol co2 L-1",NA
-1009,"29",1,"dissolved_ch4",5.88e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1009,"29",1,"dissolved_n2o",4.56e-08,NA,NA,"shallow","mol n2o L-1",NA
+1009,"29",1,"dissolved_co2",3.06e-05,NA,NA,"shallow","mol co2 L-1",NA
+1009,"29",1,"dissolved_ch4",7.84e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1009,"29",1,"dissolved_n2o",6.08e-09,NA,NA,"shallow","mol n2o L-1",NA
 1010,"11",1,"co2_sat_ratio",0.915490220539852,NA,NA,"shallow","dimensionless",NA
 1010,"11",1,"ch4_sat_ratio",106.40670017394,NA,NA,"shallow","dimensionless",NA
 1010,"11",1,"n2o_sat_ratio",0.987208669583964,NA,NA,"shallow","dimensionless",NA
-1010,"11",1,"dissolved_co2",8.1e-05,NA,NA,"shallow","mol co2 L-1",NA
-1010,"11",1,"dissolved_ch4",1.87e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1010,"11",1,"dissolved_n2o",5.1e-08,NA,NA,"shallow","mol n2o L-1",NA
+1010,"11",1,"dissolved_co2",1.08e-05,NA,NA,"shallow","mol co2 L-1",NA
+1010,"11",1,"dissolved_ch4",2.49e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1010,"11",1,"dissolved_n2o",6.8e-09,NA,NA,"shallow","mol n2o L-1",NA
 1010,"50",1,"co2_sat_ratio",7.29825335684534,NA,NA,"shallow","dimensionless",NA
 1010,"50",1,"ch4_sat_ratio",306.461658964879,NA,NA,"shallow","dimensionless",NA
 1010,"50",1,"n2o_sat_ratio",1.656672593355,NA,NA,"shallow","dimensionless",NA
-1010,"50",1,"dissolved_co2",0.00073,NA,NA,"shallow","mol co2 L-1",NA
-1010,"50",1,"dissolved_ch4",5.94e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1010,"50",1,"dissolved_n2o",9.82e-08,NA,NA,"shallow","mol n2o L-1",NA
+1010,"50",1,"dissolved_co2",9.74e-05,NA,NA,"shallow","mol co2 L-1",NA
+1010,"50",1,"dissolved_ch4",7.92e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1010,"50",1,"dissolved_n2o",1.31e-08,NA,NA,"shallow","mol n2o L-1",NA
 1011,"1",1,"co2_sat_ratio",1.73947441843052,NA,NA,"shallow","dimensionless",NA
 1011,"1",1,"ch4_sat_ratio",169.255628832906,NA,NA,"shallow","dimensionless",NA
 1011,"1",1,"n2o_sat_ratio",0.928885427932085,NA,NA,"shallow","dimensionless",NA
-1011,"1",1,"dissolved_co2",0.000159,NA,NA,"shallow","mol co2 L-1",NA
-1011,"1",1,"dissolved_ch4",3.05e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1011,"1",1,"dissolved_n2o",4.98e-08,NA,NA,"shallow","mol n2o L-1",NA
+1011,"1",1,"dissolved_co2",2.12e-05,NA,NA,"shallow","mol co2 L-1",NA
+1011,"1",1,"dissolved_ch4",4.06e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1011,"1",1,"dissolved_n2o",6.64e-09,NA,NA,"shallow","mol n2o L-1",NA
 1011,"16",1,"co2_sat_ratio",2.04533693043797,NA,NA,"shallow","dimensionless",NA
 1011,"16",1,"ch4_sat_ratio",201.109993516107,NA,NA,"shallow","dimensionless",NA
 1011,"16",1,"n2o_sat_ratio",0.632079253798846,NA,NA,"shallow","dimensionless",NA
-1011,"16",1,"dissolved_co2",0.000188,NA,NA,"shallow","mol co2 L-1",NA
-1011,"16",1,"dissolved_ch4",3.64e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1011,"16",1,"dissolved_n2o",3.41e-08,NA,NA,"shallow","mol n2o L-1",NA
+1011,"16",1,"dissolved_co2",2.5e-05,NA,NA,"shallow","mol co2 L-1",NA
+1011,"16",1,"dissolved_ch4",4.86e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1011,"16",1,"dissolved_n2o",4.54e-09,NA,NA,"shallow","mol n2o L-1",NA
 1012,"4",1,"co2_sat_ratio",0.723711998866792,NA,NA,"shallow","dimensionless",NA
 1012,"4",1,"ch4_sat_ratio",176.202315718781,NA,NA,"shallow","dimensionless",NA
 1012,"4",1,"n2o_sat_ratio",2.21576500712151,NA,NA,"shallow","dimensionless",NA
-1012,"4",1,"dissolved_co2",6.82e-05,NA,NA,"shallow","mol co2 L-1",NA
-1012,"4",1,"dissolved_ch4",3.25e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1012,"4",1,"dissolved_n2o",1.23e-07,NA,NA,"shallow","mol n2o L-1",NA
+1012,"4",1,"dissolved_co2",9.09e-06,NA,NA,"shallow","mol co2 L-1",NA
+1012,"4",1,"dissolved_ch4",4.34e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1012,"4",1,"dissolved_n2o",1.64e-08,NA,NA,"shallow","mol n2o L-1",NA
 1012,"41",1,"co2_sat_ratio",1.12608800728681,NA,NA,"shallow","dimensionless",NA
 1012,"41",1,"ch4_sat_ratio",571.003445548245,NA,NA,"shallow","dimensionless",NA
 1012,"41",1,"n2o_sat_ratio",2.81970944269664,NA,NA,"shallow","dimensionless",NA
-1012,"41",1,"dissolved_co2",0.000107,NA,NA,"shallow","mol co2 L-1",NA
-1012,"41",1,"dissolved_ch4",1.06e-05,NA,NA,"shallow","mol ch4 L-1",NA
-1012,"41",1,"dissolved_n2o",1.58e-07,NA,NA,"shallow","mol n2o L-1",NA
+1012,"41",1,"dissolved_co2",1.43e-05,NA,NA,"shallow","mol co2 L-1",NA
+1012,"41",1,"dissolved_ch4",1.42e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1012,"41",1,"dissolved_n2o",2.1e-08,NA,NA,"shallow","mol n2o L-1",NA
 1013,"8",1,"co2_sat_ratio",1.49396611481151,NA,NA,"shallow","dimensionless",NA
 1013,"8",1,"ch4_sat_ratio",70.4474895311882,NA,NA,"shallow","dimensionless",NA
 1013,"8",1,"n2o_sat_ratio",7.26945029386411,NA,NA,"shallow","dimensionless",NA
-1013,"8",1,"dissolved_co2",0.000152,NA,NA,"shallow","mol co2 L-1",NA
-1013,"8",1,"dissolved_ch4",1.38e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1013,"8",1,"dissolved_n2o",4.4e-07,NA,NA,"shallow","mol n2o L-1",NA
+1013,"8",1,"dissolved_co2",2.03e-05,NA,NA,"shallow","mol co2 L-1",NA
+1013,"8",1,"dissolved_ch4",1.84e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1013,"8",1,"dissolved_n2o",5.86e-08,NA,NA,"shallow","mol n2o L-1",NA
 1013,"30",1,"co2_sat_ratio",0.840140634500574,NA,NA,"shallow","dimensionless",NA
 1013,"30",1,"ch4_sat_ratio",238.811160622993,NA,NA,"shallow","dimensionless",NA
 1013,"30",1,"n2o_sat_ratio",4.37920436372409,NA,NA,"shallow","dimensionless",NA
-1013,"30",1,"dissolved_co2",8.46e-05,NA,NA,"shallow","mol co2 L-1",NA
-1013,"30",1,"dissolved_ch4",4.64e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1013,"30",1,"dissolved_n2o",2.62e-07,NA,NA,"shallow","mol n2o L-1",NA
+1013,"30",1,"dissolved_co2",1.13e-05,NA,NA,"shallow","mol co2 L-1",NA
+1013,"30",1,"dissolved_ch4",6.18e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1013,"30",1,"dissolved_n2o",3.5e-08,NA,NA,"shallow","mol n2o L-1",NA
 1014,"2",1,"co2_sat_ratio",0.748759155733962,NA,NA,"shallow","dimensionless",NA
 1014,"2",1,"ch4_sat_ratio",12.8024222016245,NA,NA,"shallow","dimensionless",NA
 1014,"2",1,"n2o_sat_ratio",2.70634174694252,NA,NA,"shallow","dimensionless",NA
-1014,"2",1,"dissolved_co2",7.14e-05,NA,NA,"shallow","mol co2 L-1",NA
-1014,"2",1,"dissolved_ch4",2.39e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1014,"2",1,"dissolved_n2o",1.52e-07,NA,NA,"shallow","mol n2o L-1",NA
+1014,"2",1,"dissolved_co2",9.52e-06,NA,NA,"shallow","mol co2 L-1",NA
+1014,"2",1,"dissolved_ch4",3.19e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1014,"2",1,"dissolved_n2o",2.03e-08,NA,NA,"shallow","mol n2o L-1",NA
 1014,"22",1,"co2_sat_ratio",3.5079394320712,NA,NA,"shallow","dimensionless",NA
 1014,"22",1,"ch4_sat_ratio",66.1401302829349,NA,NA,"shallow","dimensionless",NA
 1014,"22",1,"n2o_sat_ratio",2.91245446915878,NA,NA,"shallow","dimensionless",NA
-1014,"22",1,"dissolved_co2",0.000357,NA,NA,"shallow","mol co2 L-1",NA
-1014,"22",1,"dissolved_ch4",1.3e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1014,"22",1,"dissolved_n2o",1.76e-07,NA,NA,"shallow","mol n2o L-1",NA
+1014,"22",1,"dissolved_co2",4.76e-05,NA,NA,"shallow","mol co2 L-1",NA
+1014,"22",1,"dissolved_ch4",1.74e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1014,"22",1,"dissolved_n2o",2.35e-08,NA,NA,"shallow","mol n2o L-1",NA
 1015,"7",1,"co2_sat_ratio",0.304521611590962,NA,NA,"shallow","dimensionless",NA
 1015,"7",1,"ch4_sat_ratio",466.759695354125,NA,NA,"shallow","dimensionless",NA
 1015,"7",1,"n2o_sat_ratio",1.19714873497441,NA,NA,"shallow","dimensionless",NA
-1015,"7",1,"dissolved_co2",2.69e-05,NA,NA,"shallow","mol co2 L-1",NA
-1015,"7",1,"dissolved_ch4",8.2e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1015,"7",1,"dissolved_n2o",6.17e-08,NA,NA,"shallow","mol n2o L-1",NA
+1015,"7",1,"dissolved_co2",3.59e-06,NA,NA,"shallow","mol co2 L-1",NA
+1015,"7",1,"dissolved_ch4",1.09e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1015,"7",1,"dissolved_n2o",8.23e-09,NA,NA,"shallow","mol n2o L-1",NA
 1015,"15",1,"co2_sat_ratio",0.577462694488715,NA,NA,"shallow","dimensionless",NA
 1015,"15",1,"ch4_sat_ratio",309.153745543741,NA,NA,"shallow","dimensionless",NA
 1015,"15",1,"n2o_sat_ratio",0.847776204743962,NA,NA,"shallow","dimensionless",NA
-1015,"15",1,"dissolved_co2",5.35e-05,NA,NA,"shallow","mol co2 L-1",NA
-1015,"15",1,"dissolved_ch4",5.64e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1015,"15",1,"dissolved_n2o",4.61e-08,NA,NA,"shallow","mol n2o L-1",NA
+1015,"15",1,"dissolved_co2",7.13e-06,NA,NA,"shallow","mol co2 L-1",NA
+1015,"15",1,"dissolved_ch4",7.52e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1015,"15",1,"dissolved_n2o",6.15e-09,NA,NA,"shallow","mol n2o L-1",NA
 1016,"2",1,"co2_sat_ratio",2.32362281363254,NA,NA,"shallow","dimensionless",NA
 1016,"2",1,"ch4_sat_ratio",1072.01410347877,NA,NA,"shallow","dimensionless",NA
 1016,"2",1,"n2o_sat_ratio",1.20722119709758,NA,NA,"shallow","dimensionless",NA
-1016,"2",1,"dissolved_co2",0.000225,NA,NA,"shallow","mol co2 L-1",NA
-1016,"2",1,"dissolved_ch4",2.02e-05,NA,NA,"shallow","mol ch4 L-1",NA
-1016,"2",1,"dissolved_n2o",6.91e-08,NA,NA,"shallow","mol n2o L-1",NA
+1016,"2",1,"dissolved_co2",3e-05,NA,NA,"shallow","mol co2 L-1",NA
+1016,"2",1,"dissolved_ch4",2.69e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1016,"2",1,"dissolved_n2o",9.22e-09,NA,NA,"shallow","mol n2o L-1",NA
 1016,"12",1,"co2_sat_ratio",2.39426906393131,NA,NA,"shallow","dimensionless",NA
 1016,"12",1,"ch4_sat_ratio",899.644037347687,NA,NA,"shallow","dimensionless",NA
 1016,"12",1,"n2o_sat_ratio",1.4032092724532,NA,NA,"shallow","dimensionless",NA
-1016,"12",1,"dissolved_co2",0.000231,NA,NA,"shallow","mol co2 L-1",NA
-1016,"12",1,"dissolved_ch4",1.69e-05,NA,NA,"shallow","mol ch4 L-1",NA
-1016,"12",1,"dissolved_n2o",8e-08,NA,NA,"shallow","mol n2o L-1",NA
+1016,"12",1,"dissolved_co2",3.08e-05,NA,NA,"shallow","mol co2 L-1",NA
+1016,"12",1,"dissolved_ch4",2.25e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1016,"12",1,"dissolved_n2o",1.07e-08,NA,NA,"shallow","mol n2o L-1",NA
 1017,"1",1,"co2_sat_ratio",0.795374595198643,NA,NA,"shallow","dimensionless",NA
 1017,"1",1,"ch4_sat_ratio",178.241652612673,NA,NA,"shallow","dimensionless",NA
 1017,"1",1,"n2o_sat_ratio",1.1912356923599,NA,NA,"shallow","dimensionless",NA
-1017,"1",1,"dissolved_co2",8.18e-05,NA,NA,"shallow","mol co2 L-1",NA
-1017,"1",1,"dissolved_ch4",3.52e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1017,"1",1,"dissolved_n2o",7.3e-08,NA,NA,"shallow","mol n2o L-1",NA
+1017,"1",1,"dissolved_co2",1.09e-05,NA,NA,"shallow","mol co2 L-1",NA
+1017,"1",1,"dissolved_ch4",4.7e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1017,"1",1,"dissolved_n2o",9.73e-09,NA,NA,"shallow","mol n2o L-1",NA
 1017,"33",1,"co2_sat_ratio",0.524601943144108,NA,NA,"shallow","dimensionless",NA
 1017,"33",1,"ch4_sat_ratio",249.605839698942,NA,NA,"shallow","dimensionless",NA
 1017,"33",1,"n2o_sat_ratio",0.9988705388302,NA,NA,"shallow","dimensionless",NA
-1017,"33",1,"dissolved_co2",5.41e-05,NA,NA,"shallow","mol co2 L-1",NA
-1017,"33",1,"dissolved_ch4",4.94e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1017,"33",1,"dissolved_n2o",6.14e-08,NA,NA,"shallow","mol n2o L-1",NA
+1017,"33",1,"dissolved_co2",7.22e-06,NA,NA,"shallow","mol co2 L-1",NA
+1017,"33",1,"dissolved_ch4",6.59e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1017,"33",1,"dissolved_n2o",8.18e-09,NA,NA,"shallow","mol n2o L-1",NA
 1018,"2",1,"co2_sat_ratio",0.322286269600839,NA,NA,"shallow","dimensionless",NA
 1018,"2",1,"ch4_sat_ratio",14.2554994737708,NA,NA,"shallow","dimensionless",NA
 1018,"2",1,"n2o_sat_ratio",0.786346263378706,NA,NA,"shallow","dimensionless",NA
-1018,"2",1,"dissolved_co2",2.97e-05,NA,NA,"shallow","mol co2 L-1",NA
-1018,"2",1,"dissolved_ch4",2.58e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1018,"2",1,"dissolved_n2o",4.26e-08,NA,NA,"shallow","mol n2o L-1",NA
+1018,"2",1,"dissolved_co2",3.96e-06,NA,NA,"shallow","mol co2 L-1",NA
+1018,"2",1,"dissolved_ch4",3.45e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1018,"2",1,"dissolved_n2o",5.68e-09,NA,NA,"shallow","mol n2o L-1",NA
 1018,"40",1,"co2_sat_ratio",0.507657122256572,NA,NA,"shallow","dimensionless",NA
 1018,"40",1,"ch4_sat_ratio",59.9584430603972,NA,NA,"shallow","dimensionless",NA
 1018,"40",1,"n2o_sat_ratio",1.01978586855942,NA,NA,"shallow","dimensionless",NA
-1018,"40",1,"dissolved_co2",4.38e-05,NA,NA,"shallow","mol co2 L-1",NA
-1018,"40",1,"dissolved_ch4",1.03e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1018,"40",1,"dissolved_n2o",5.13e-08,NA,NA,"shallow","mol n2o L-1",NA
+1018,"40",1,"dissolved_co2",5.84e-06,NA,NA,"shallow","mol co2 L-1",NA
+1018,"40",1,"dissolved_ch4",1.37e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1018,"40",1,"dissolved_n2o",6.84e-09,NA,NA,"shallow","mol n2o L-1",NA
 1019,"4",1,"co2_sat_ratio",1.45961117211086,NA,NA,"shallow","dimensionless",NA
 1019,"4",1,"ch4_sat_ratio",37.9972079558868,NA,NA,"shallow","dimensionless",NA
 1019,"4",1,"n2o_sat_ratio",0.475749007657502,NA,NA,"shallow","dimensionless",NA
-1019,"4",1,"dissolved_co2",0.000132,NA,NA,"shallow","mol co2 L-1",NA
-1019,"4",1,"dissolved_ch4",6.79e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1019,"4",1,"dissolved_n2o",2.52e-08,NA,NA,"shallow","mol n2o L-1",NA
+1019,"4",1,"dissolved_co2",1.75e-05,NA,NA,"shallow","mol co2 L-1",NA
+1019,"4",1,"dissolved_ch4",9.05e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1019,"4",1,"dissolved_n2o",3.36e-09,NA,NA,"shallow","mol n2o L-1",NA
 1019,"34",1,"co2_sat_ratio",1.01626111649248,NA,NA,"shallow","dimensionless",NA
 1019,"34",1,"ch4_sat_ratio",69.4854112412543,NA,NA,"shallow","dimensionless",NA
 1019,"34",1,"n2o_sat_ratio",0.50136816431578,NA,NA,"shallow","dimensionless",NA
-1019,"34",1,"dissolved_co2",8.71e-05,NA,NA,"shallow","mol co2 L-1",NA
-1019,"34",1,"dissolved_ch4",1.19e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1019,"34",1,"dissolved_n2o",2.5e-08,NA,NA,"shallow","mol n2o L-1",NA
+1019,"34",1,"dissolved_co2",1.16e-05,NA,NA,"shallow","mol co2 L-1",NA
+1019,"34",1,"dissolved_ch4",1.59e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1019,"34",1,"dissolved_n2o",3.34e-09,NA,NA,"shallow","mol n2o L-1",NA
 1020,"1",1,"co2_sat_ratio",0.564179886609068,NA,NA,"shallow","dimensionless",NA
 1020,"1",1,"ch4_sat_ratio",27.9082604729127,NA,NA,"shallow","dimensionless",NA
 1020,"1",1,"n2o_sat_ratio",0.915570339109695,NA,NA,"shallow","dimensionless",NA
-1020,"1",1,"dissolved_co2",4.99e-05,NA,NA,"shallow","mol co2 L-1",NA
-1020,"1",1,"dissolved_ch4",4.9e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1020,"1",1,"dissolved_n2o",4.73e-08,NA,NA,"shallow","mol n2o L-1",NA
+1020,"1",1,"dissolved_co2",6.65e-06,NA,NA,"shallow","mol co2 L-1",NA
+1020,"1",1,"dissolved_ch4",6.53e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1020,"1",1,"dissolved_n2o",6.31e-09,NA,NA,"shallow","mol n2o L-1",NA
 1020,"34",1,"co2_sat_ratio",1.19578382281209,NA,NA,"shallow","dimensionless",NA
 1020,"34",1,"ch4_sat_ratio",22.9681760579654,NA,NA,"shallow","dimensionless",NA
 1020,"34",1,"n2o_sat_ratio",1.10564500205739,NA,NA,"shallow","dimensionless",NA
-1020,"34",1,"dissolved_co2",0.00011,NA,NA,"shallow","mol co2 L-1",NA
-1020,"34",1,"dissolved_ch4",4.16e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1020,"34",1,"dissolved_n2o",5.97e-08,NA,NA,"shallow","mol n2o L-1",NA
+1020,"34",1,"dissolved_co2",1.47e-05,NA,NA,"shallow","mol co2 L-1",NA
+1020,"34",1,"dissolved_ch4",5.54e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1020,"34",1,"dissolved_n2o",7.95e-09,NA,NA,"shallow","mol n2o L-1",NA
 1021,"3",1,"co2_sat_ratio",0.66839688258577,NA,NA,"shallow","dimensionless",NA
 1021,"3",1,"ch4_sat_ratio",51.1676328258602,NA,NA,"shallow","dimensionless",NA
 1021,"3",1,"n2o_sat_ratio",1.05071898118679,NA,NA,"shallow","dimensionless",NA
-1021,"3",1,"dissolved_co2",6.04e-05,NA,NA,"shallow","mol co2 L-1",NA
-1021,"3",1,"dissolved_ch4",9.14e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1021,"3",1,"dissolved_n2o",5.56e-08,NA,NA,"shallow","mol n2o L-1",NA
+1021,"3",1,"dissolved_co2",8.05e-06,NA,NA,"shallow","mol co2 L-1",NA
+1021,"3",1,"dissolved_ch4",1.22e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1021,"3",1,"dissolved_n2o",7.41e-09,NA,NA,"shallow","mol n2o L-1",NA
 1021,"28",1,"co2_sat_ratio",1.48749210496804,NA,NA,"shallow","dimensionless",NA
 1021,"28",1,"ch4_sat_ratio",37.1126833069306,NA,NA,"shallow","dimensionless",NA
 1021,"28",1,"n2o_sat_ratio",1.18384668809979,NA,NA,"shallow","dimensionless",NA
-1021,"28",1,"dissolved_co2",0.000137,NA,NA,"shallow","mol co2 L-1",NA
-1021,"28",1,"dissolved_ch4",6.73e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1021,"28",1,"dissolved_n2o",6.4e-08,NA,NA,"shallow","mol n2o L-1",NA
+1021,"28",1,"dissolved_co2",1.83e-05,NA,NA,"shallow","mol co2 L-1",NA
+1021,"28",1,"dissolved_ch4",8.97e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1021,"28",1,"dissolved_n2o",8.53e-09,NA,NA,"shallow","mol n2o L-1",NA
 1022,"9",1,"co2_sat_ratio",0.613790859716448,NA,NA,"shallow","dimensionless",NA
 1022,"9",1,"ch4_sat_ratio",76.6552842302897,NA,NA,"shallow","dimensionless",NA
 1022,"9",1,"n2o_sat_ratio",0.947116265187634,NA,NA,"shallow","dimensionless",NA
-1022,"9",1,"dissolved_co2",5.61e-05,NA,NA,"shallow","mol co2 L-1",NA
-1022,"9",1,"dissolved_ch4",1.38e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1022,"9",1,"dissolved_n2o",5.08e-08,NA,NA,"shallow","mol n2o L-1",NA
+1022,"9",1,"dissolved_co2",7.48e-06,NA,NA,"shallow","mol co2 L-1",NA
+1022,"9",1,"dissolved_ch4",1.84e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1022,"9",1,"dissolved_n2o",6.78e-09,NA,NA,"shallow","mol n2o L-1",NA
 1022,"32",1,"co2_sat_ratio",1.07406632571776,NA,NA,"shallow","dimensionless",NA
 1022,"32",1,"ch4_sat_ratio",123.28592692677,NA,NA,"shallow","dimensionless",NA
 1022,"32",1,"n2o_sat_ratio",1.09787236841175,NA,NA,"shallow","dimensionless",NA
-1022,"32",1,"dissolved_co2",0.000101,NA,NA,"shallow","mol co2 L-1",NA
-1022,"32",1,"dissolved_ch4",2.27e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1022,"32",1,"dissolved_n2o",6.08e-08,NA,NA,"shallow","mol n2o L-1",NA
+1022,"32",1,"dissolved_co2",1.34e-05,NA,NA,"shallow","mol co2 L-1",NA
+1022,"32",1,"dissolved_ch4",3.02e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1022,"32",1,"dissolved_n2o",8.11e-09,NA,NA,"shallow","mol n2o L-1",NA
 1023,"1",1,"co2_sat_ratio",2.74525364251496,NA,NA,"shallow","dimensionless",NA
 1023,"1",1,"ch4_sat_ratio",260.026764677637,NA,NA,"shallow","dimensionless",NA
 1023,"1",1,"n2o_sat_ratio",0.978164847785999,NA,NA,"shallow","dimensionless",NA
-1023,"1",1,"dissolved_co2",0.00024,NA,NA,"shallow","mol co2 L-1",NA
-1023,"1",1,"dissolved_ch4",4.52e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1023,"1",1,"dissolved_n2o",4.99e-08,NA,NA,"shallow","mol n2o L-1",NA
+1023,"1",1,"dissolved_co2",3.2e-05,NA,NA,"shallow","mol co2 L-1",NA
+1023,"1",1,"dissolved_ch4",6.03e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1023,"1",1,"dissolved_n2o",6.65e-09,NA,NA,"shallow","mol n2o L-1",NA
 1024,"4",1,"co2_sat_ratio",1.59365823167309,NA,NA,"shallow","dimensionless",NA
 1024,"4",1,"ch4_sat_ratio",41.226656075941,NA,NA,"shallow","dimensionless",NA
 1024,"4",1,"n2o_sat_ratio",0.958134538520532,NA,NA,"shallow","dimensionless",NA
-1024,"4",1,"dissolved_co2",0.000152,NA,NA,"shallow","mol co2 L-1",NA
-1024,"4",1,"dissolved_ch4",7.68e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1024,"4",1,"dissolved_n2o",5.39e-08,NA,NA,"shallow","mol n2o L-1",NA
+1024,"4",1,"dissolved_co2",2.02e-05,NA,NA,"shallow","mol co2 L-1",NA
+1024,"4",1,"dissolved_ch4",1.02e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1024,"4",1,"dissolved_n2o",7.19e-09,NA,NA,"shallow","mol n2o L-1",NA
 1024,"23",1,"co2_sat_ratio",0.985410208531043,NA,NA,"shallow","dimensionless",NA
 1024,"23",1,"ch4_sat_ratio",61.0950733686347,NA,NA,"shallow","dimensionless",NA
 1024,"23",1,"n2o_sat_ratio",0.883854042146855,NA,NA,"shallow","dimensionless",NA
-1024,"23",1,"dissolved_co2",9.21e-05,NA,NA,"shallow","mol co2 L-1",NA
-1024,"23",1,"dissolved_ch4",1.12e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1024,"23",1,"dissolved_n2o",4.86e-08,NA,NA,"shallow","mol n2o L-1",NA
+1024,"23",1,"dissolved_co2",1.23e-05,NA,NA,"shallow","mol co2 L-1",NA
+1024,"23",1,"dissolved_ch4",1.49e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1024,"23",1,"dissolved_n2o",6.48e-09,NA,NA,"shallow","mol n2o L-1",NA
 1025,"4",1,"co2_sat_ratio",1.12964512425312,NA,NA,"shallow","dimensionless",NA
 1025,"4",1,"ch4_sat_ratio",220.012674801724,NA,NA,"shallow","dimensionless",NA
 1025,"4",1,"n2o_sat_ratio",7.5442122977608,NA,NA,"shallow","dimensionless",NA
-1025,"4",1,"dissolved_co2",0.000105,NA,NA,"shallow","mol co2 L-1",NA
-1025,"4",1,"dissolved_ch4",4.02e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1025,"4",1,"dissolved_n2o",4.12e-07,NA,NA,"shallow","mol n2o L-1",NA
+1025,"4",1,"dissolved_co2",1.4e-05,NA,NA,"shallow","mol co2 L-1",NA
+1025,"4",1,"dissolved_ch4",5.36e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1025,"4",1,"dissolved_n2o",5.49e-08,NA,NA,"shallow","mol n2o L-1",NA
 1025,"31",1,"co2_sat_ratio",1.61634334859641,NA,NA,"shallow","dimensionless",NA
 1025,"31",1,"ch4_sat_ratio",242.076117346036,NA,NA,"shallow","dimensionless",NA
 1025,"31",1,"n2o_sat_ratio",2.39980474301712,NA,NA,"shallow","dimensionless",NA
-1025,"31",1,"dissolved_co2",0.000142,NA,NA,"shallow","mol co2 L-1",NA
-1025,"31",1,"dissolved_ch4",4.23e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1025,"31",1,"dissolved_n2o",1.23e-07,NA,NA,"shallow","mol n2o L-1",NA
+1025,"31",1,"dissolved_co2",1.89e-05,NA,NA,"shallow","mol co2 L-1",NA
+1025,"31",1,"dissolved_ch4",5.64e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1025,"31",1,"dissolved_n2o",1.64e-08,NA,NA,"shallow","mol n2o L-1",NA
 1026,"10",1,"co2_sat_ratio",2.5820375160723,NA,NA,"shallow","dimensionless",NA
 1026,"10",1,"ch4_sat_ratio",21.6083396880556,NA,NA,"shallow","dimensionless",NA
 1026,"10",1,"n2o_sat_ratio",1.01801713217573,NA,NA,"shallow","dimensionless",NA
-1026,"10",1,"dissolved_co2",0.000226,NA,NA,"shallow","mol co2 L-1",NA
-1026,"10",1,"dissolved_ch4",3.76e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1026,"10",1,"dissolved_n2o",5.2e-08,NA,NA,"shallow","mol n2o L-1",NA
+1026,"10",1,"dissolved_co2",3.02e-05,NA,NA,"shallow","mol co2 L-1",NA
+1026,"10",1,"dissolved_ch4",5.01e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1026,"10",1,"dissolved_n2o",6.93e-09,NA,NA,"shallow","mol n2o L-1",NA
 1026,"33",1,"co2_sat_ratio",3.39596421911778,NA,NA,"shallow","dimensionless",NA
 1026,"33",1,"ch4_sat_ratio",95.3334485295976,NA,NA,"shallow","dimensionless",NA
 1026,"33",1,"n2o_sat_ratio",0.853879365303435,NA,NA,"shallow","dimensionless",NA
-1026,"33",1,"dissolved_co2",0.000302,NA,NA,"shallow","mol co2 L-1",NA
-1026,"33",1,"dissolved_ch4",1.68e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1026,"33",1,"dissolved_n2o",4.44e-08,NA,NA,"shallow","mol n2o L-1",NA
+1026,"33",1,"dissolved_co2",4.03e-05,NA,NA,"shallow","mol co2 L-1",NA
+1026,"33",1,"dissolved_ch4",2.24e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1026,"33",1,"dissolved_n2o",5.92e-09,NA,NA,"shallow","mol n2o L-1",NA
 1027,"7",1,"co2_sat_ratio",1.14996608831681,NA,NA,"shallow","dimensionless",NA
 1027,"7",1,"ch4_sat_ratio",209.788812314318,NA,NA,"shallow","dimensionless",NA
 1027,"7",1,"n2o_sat_ratio",1.05736615417928,NA,NA,"shallow","dimensionless",NA
-1027,"7",1,"dissolved_co2",0.000104,NA,NA,"shallow","mol co2 L-1",NA
-1027,"7",1,"dissolved_ch4",3.75e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1027,"7",1,"dissolved_n2o",5.6e-08,NA,NA,"shallow","mol n2o L-1",NA
+1027,"7",1,"dissolved_co2",1.39e-05,NA,NA,"shallow","mol co2 L-1",NA
+1027,"7",1,"dissolved_ch4",5e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1027,"7",1,"dissolved_n2o",7.47e-09,NA,NA,"shallow","mol n2o L-1",NA
 1027,"34",1,"co2_sat_ratio",0.862358292155678,NA,NA,"shallow","dimensionless",NA
 1027,"34",1,"ch4_sat_ratio",283.075925719301,NA,NA,"shallow","dimensionless",NA
 1027,"34",1,"n2o_sat_ratio",1.12030302510443,NA,NA,"shallow","dimensionless",NA
-1027,"34",1,"dissolved_co2",7.76e-05,NA,NA,"shallow","mol co2 L-1",NA
-1027,"34",1,"dissolved_ch4",5.04e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1027,"34",1,"dissolved_n2o",5.9e-08,NA,NA,"shallow","mol n2o L-1",NA
+1027,"34",1,"dissolved_co2",1.03e-05,NA,NA,"shallow","mol co2 L-1",NA
+1027,"34",1,"dissolved_ch4",6.72e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1027,"34",1,"dissolved_n2o",7.87e-09,NA,NA,"shallow","mol n2o L-1",NA
 1028,"7",1,"co2_sat_ratio",1.15115572772156,NA,NA,"shallow","dimensionless",NA
 1028,"7",1,"ch4_sat_ratio",241.820463088143,NA,NA,"shallow","dimensionless",NA
 1028,"7",1,"n2o_sat_ratio",0.892365767234888,NA,NA,"shallow","dimensionless",NA
-1028,"7",1,"dissolved_co2",0.000104,NA,NA,"shallow","mol co2 L-1",NA
-1028,"7",1,"dissolved_ch4",4.32e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1028,"7",1,"dissolved_n2o",4.72e-08,NA,NA,"shallow","mol n2o L-1",NA
+1028,"7",1,"dissolved_co2",1.39e-05,NA,NA,"shallow","mol co2 L-1",NA
+1028,"7",1,"dissolved_ch4",5.75e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1028,"7",1,"dissolved_n2o",6.29e-09,NA,NA,"shallow","mol n2o L-1",NA
 1028,"31",1,"co2_sat_ratio",3.12775798702226,NA,NA,"shallow","dimensionless",NA
 1028,"31",1,"ch4_sat_ratio",299.412478977289,NA,NA,"shallow","dimensionless",NA
 1028,"31",1,"n2o_sat_ratio",1.06593516641074,NA,NA,"shallow","dimensionless",NA
-1028,"31",1,"dissolved_co2",0.000288,NA,NA,"shallow","mol co2 L-1",NA
-1028,"31",1,"dissolved_ch4",5.43e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1028,"31",1,"dissolved_n2o",5.76e-08,NA,NA,"shallow","mol n2o L-1",NA
+1028,"31",1,"dissolved_co2",3.83e-05,NA,NA,"shallow","mol co2 L-1",NA
+1028,"31",1,"dissolved_ch4",7.24e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1028,"31",1,"dissolved_n2o",7.68e-09,NA,NA,"shallow","mol n2o L-1",NA
 1029,"4",1,"co2_sat_ratio",1.04911656164048,NA,NA,"shallow","dimensionless",NA
 1029,"4",1,"ch4_sat_ratio",37.4939944424711,NA,NA,"shallow","dimensionless",NA
 1029,"4",1,"n2o_sat_ratio",0.724547692938442,NA,NA,"shallow","dimensionless",NA
-1029,"4",1,"dissolved_co2",1e-04,NA,NA,"shallow","mol co2 L-1",NA
-1029,"4",1,"dissolved_ch4",6.99e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1029,"4",1,"dissolved_n2o",4.07e-08,NA,NA,"shallow","mol n2o L-1",NA
+1029,"4",1,"dissolved_co2",1.33e-05,NA,NA,"shallow","mol co2 L-1",NA
+1029,"4",1,"dissolved_ch4",9.32e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1029,"4",1,"dissolved_n2o",5.43e-09,NA,NA,"shallow","mol n2o L-1",NA
 1029,"8",1,"co2_sat_ratio",1.21164684706846,NA,NA,"shallow","dimensionless",NA
 1029,"8",1,"ch4_sat_ratio",11.4100755615775,NA,NA,"shallow","dimensionless",NA
 1029,"8",1,"n2o_sat_ratio",0.783489104835635,NA,NA,"shallow","dimensionless",NA
-1029,"8",1,"dissolved_co2",0.000115,NA,NA,"shallow","mol co2 L-1",NA
-1029,"8",1,"dissolved_ch4",2.12e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1029,"8",1,"dissolved_n2o",4.38e-08,NA,NA,"shallow","mol n2o L-1",NA
+1029,"8",1,"dissolved_co2",1.53e-05,NA,NA,"shallow","mol co2 L-1",NA
+1029,"8",1,"dissolved_ch4",2.82e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1029,"8",1,"dissolved_n2o",5.85e-09,NA,NA,"shallow","mol n2o L-1",NA
 1029,"21",1,"co2_sat_ratio",0.700807811255376,NA,NA,"shallow","dimensionless",NA
 1029,"21",1,"ch4_sat_ratio",44.7399406206978,NA,NA,"shallow","dimensionless",NA
 1029,"21",1,"n2o_sat_ratio",0.84101900639967,NA,NA,"shallow","dimensionless",NA
-1029,"21",1,"dissolved_co2",6.75e-05,NA,NA,"shallow","mol co2 L-1",NA
-1029,"21",1,"dissolved_ch4",8.41e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1029,"21",1,"dissolved_n2o",4.78e-08,NA,NA,"shallow","mol n2o L-1",NA
+1029,"21",1,"dissolved_co2",9e-06,NA,NA,"shallow","mol co2 L-1",NA
+1029,"21",1,"dissolved_ch4",1.12e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1029,"21",1,"dissolved_n2o",6.37e-09,NA,NA,"shallow","mol n2o L-1",NA
 1030,"7",1,"co2_sat_ratio",0.812353849828055,NA,NA,"shallow","dimensionless",NA
 1030,"7",1,"ch4_sat_ratio",23.8942202092153,NA,NA,"shallow","dimensionless",NA
 1030,"7",1,"n2o_sat_ratio",0.904753942212425,NA,NA,"shallow","dimensionless",NA
-1030,"7",1,"dissolved_co2",7.53e-05,NA,NA,"shallow","mol co2 L-1",NA
-1030,"7",1,"dissolved_ch4",4.35e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1030,"7",1,"dissolved_n2o",4.93e-08,NA,NA,"shallow","mol n2o L-1",NA
+1030,"7",1,"dissolved_co2",1e-05,NA,NA,"shallow","mol co2 L-1",NA
+1030,"7",1,"dissolved_ch4",5.8e-08,NA,NA,"shallow","mol ch4 L-1",NA
+1030,"7",1,"dissolved_n2o",6.58e-09,NA,NA,"shallow","mol n2o L-1",NA
 1030,"28",1,"co2_sat_ratio",4.18174162079784,NA,NA,"shallow","dimensionless",NA
 1030,"28",1,"ch4_sat_ratio",299.913435576603,NA,NA,"shallow","dimensionless",NA
 1030,"28",1,"n2o_sat_ratio",1.26861983224226,NA,NA,"shallow","dimensionless",NA
-1030,"28",1,"dissolved_co2",0.000376,NA,NA,"shallow","mol co2 L-1",NA
-1030,"28",1,"dissolved_ch4",5.33e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1030,"28",1,"dissolved_n2o",6.68e-08,NA,NA,"shallow","mol n2o L-1",NA
+1030,"28",1,"dissolved_co2",5.02e-05,NA,NA,"shallow","mol co2 L-1",NA
+1030,"28",1,"dissolved_ch4",7.11e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1030,"28",1,"dissolved_n2o",8.9e-09,NA,NA,"shallow","mol n2o L-1",NA
 1031,"3",1,"co2_sat_ratio",0.799662699361424,NA,NA,"shallow","dimensionless",NA
 1031,"3",1,"ch4_sat_ratio",83.0891883494466,NA,NA,"shallow","dimensionless",NA
 1031,"3",1,"n2o_sat_ratio",0.911648500602,NA,NA,"shallow","dimensionless",NA
-1031,"3",1,"dissolved_co2",7.01e-05,NA,NA,"shallow","mol co2 L-1",NA
-1031,"3",1,"dissolved_ch4",1.45e-06,NA,NA,"shallow","mol ch4 L-1",NA
-1031,"3",1,"dissolved_n2o",4.66e-08,NA,NA,"shallow","mol n2o L-1",NA
+1031,"3",1,"dissolved_co2",9.35e-06,NA,NA,"shallow","mol co2 L-1",NA
+1031,"3",1,"dissolved_ch4",1.93e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1031,"3",1,"dissolved_n2o",6.21e-09,NA,NA,"shallow","mol n2o L-1",NA
 1031,"31",1,"co2_sat_ratio",0.636119404325451,NA,NA,"shallow","dimensionless",NA
 1031,"31",1,"ch4_sat_ratio",1162.89562960236,NA,NA,"shallow","dimensionless",NA
 1031,"31",1,"n2o_sat_ratio",1.48051941965739,NA,NA,"shallow","dimensionless",NA
-1031,"31",1,"dissolved_co2",5.44e-05,NA,NA,"shallow","mol co2 L-1",NA
-1031,"31",1,"dissolved_ch4",1.99e-05,NA,NA,"shallow","mol ch4 L-1",NA
-1031,"31",1,"dissolved_n2o",7.36e-08,NA,NA,"shallow","mol n2o L-1",NA
+1031,"31",1,"dissolved_co2",7.25e-06,NA,NA,"shallow","mol co2 L-1",NA
+1031,"31",1,"dissolved_ch4",2.65e-06,NA,NA,"shallow","mol ch4 L-1",NA
+1031,"31",1,"dissolved_n2o",9.81e-09,NA,NA,"shallow","mol n2o L-1",NA
 1032,"14",1,"co2_sat_ratio",0.224740765548282,NA,NA,"shallow","dimensionless",NA
 1032,"14",1,"ch4_sat_ratio",48.5311988339492,NA,NA,"shallow","dimensionless",NA
 1032,"14",1,"n2o_sat_ratio",0.706759939459113,NA,NA,"shallow","dimensionless",NA
-1032,"14",1,"dissolved_co2",2.09e-05,NA,NA,"shallow","mol co2 L-1",NA
-1032,"14",1,"dissolved_ch4",8.84e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1032,"14",1,"dissolved_n2o",3.87e-08,NA,NA,"shallow","mol n2o L-1",NA
+1032,"14",1,"dissolved_co2",2.79e-06,NA,NA,"shallow","mol co2 L-1",NA
+1032,"14",1,"dissolved_ch4",1.18e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1032,"14",1,"dissolved_n2o",5.16e-09,NA,NA,"shallow","mol n2o L-1",NA
 1032,"16",1,"co2_sat_ratio",1.1677250411113,NA,NA,"shallow","dimensionless",NA
 1032,"16",1,"ch4_sat_ratio",41.9289374743264,NA,NA,"shallow","dimensionless",NA
 1032,"16",1,"n2o_sat_ratio",0.98022453005675,NA,NA,"shallow","dimensionless",NA
-1032,"16",1,"dissolved_co2",0.000109,NA,NA,"shallow","mol co2 L-1",NA
-1032,"16",1,"dissolved_ch4",7.66e-07,NA,NA,"shallow","mol ch4 L-1",NA
-1032,"16",1,"dissolved_n2o",5.39e-08,NA,NA,"shallow","mol n2o L-1",NA
+1032,"16",1,"dissolved_co2",1.46e-05,NA,NA,"shallow","mol co2 L-1",NA
+1032,"16",1,"dissolved_ch4",1.02e-07,NA,NA,"shallow","mol ch4 L-1",NA
+1032,"16",1,"dissolved_n2o",7.19e-09,NA,NA,"shallow","mol n2o L-1",NA

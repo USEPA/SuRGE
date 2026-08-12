@@ -1,14 +1,187 @@
 # BACKGROUND----
 ## Dissolved gas
 # Data file "7_site_data.csv" in the SuRGE data paper package
-# contains deep and shallow n2o, but is missing the 2016 data. 
+# contains deep and shallow n2o, but is missing the 2016 data. The
+# 2016 dissolved gas numbers in eqAreaData were calculated in the 
+# mulitressurvey RStudio project using the wrong BP. Below we strip
+# those data from eqAreaData and recalculate. The corrected values
+# are added to data file "7_site_data.csv" in writeDataFiles.R.
 
 ## k600
 # Data file "4_emission_rate_points.csv" contains k600, but not for 2016.
-# We did not include n2o_ebullition or trap gas data in the data paper 
-# files. 
+# Will calculate below and write to data file 4 in writeDataFiles.R.
+
+## n2o ebullition
+# Not included in data paper files. n2o_ebullition in the dat object
+# (surge repo) was calculated using (ebullitionMassFluxFunction.R) which 
+# permutes missing N2O ppm values from other sites in the lake, or if no 
+# other data from the lake, it uses the mean  of all trap samples in the 
+# project. Here we will recalculate n2o_ebullition using the trap_n2o_ppm 
+# values in the trap_gas data frame. 
+
+## trap gas composition
+# Not included in data paper files. Will retrieve 2016 data from eqAreaData.
+# The SuRGE gas trap data are in gc_lakeid_agg.
+
+## new files
+# will write a new file "n2o_ebullition_trap_gas.csv" with the trap gas 
+# composition and n2o_ebullition for all sites with trap gas data. This will
+# be used in n2o_ebullition RStudio project.
+
+ 
 
 
+
+# MODIFY N2O EBULLITION FUNCTION----
+# modify the mass.rate function to use the trap_n2o_ppm values in the trap_gas data frame
+# Function for calculating mass flux rate--                  
+mass.rate.n2o <- function(X1, choice1){
+  # extract trap gas n2o
+  trap_n2o.ppm <- X1 %>%
+    pull(trap_n2o_ppm)
+  
+  # barometric pressure needed: n=PV/RT
+  bp <- ifelse(is.na(mean(X1$atm_pressure, na.rm=TRUE)),
+               1,
+               mean(X1$atm_pressure, na.rm=TRUE)/760)
+  
+  # temperature needed
+  gas.temp <- ifelse(is.na(X1$air_temperature),
+                     273.15 + 20, # assume 20C if not measured
+                     273.15 + X1$air_temperature)
+  
+  # convert 1mL to moles
+  mL.to.mmoles <- ((bp*0.001)/(0.082058 * gas.temp)) * 1000      #1mL = 0.001L; *1000 to convt to mmol       
+  
+  # convert mmoles to mg
+  if(choice1 == "n2o") {mg.gas <- mL.to.mmoles * 44 * (trap_n2o.ppm/1000000)}  #44mg/mmole
+  
+  # calculate rate
+  mass.flux.rate <- mg.gas * X1$eb_ml_hr_m2 #bubble rate in mg ch4-co2-n2o /hour/m2
+  
+  # return mass flux rate in mg ch4-co2-n2o /hour/m2
+  mass.flux.rate
+}
+
+# we need trap_n2o_ppm, eb_ml_hr_m2, atm_pressure, and air_temperature to 
+# recalculate n2o_ebullition. We also want the trap composition data in the df.
+
+# N2O EBULLITION AND TRAP GAS COMPOSITION DATA----
+## 2016 DATA----
+# for 2016 we can pull these input data from eqAreaData
+load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaData
+
+dat_2016_n2o <- left_join(
+  eqAreaData, air_temp_2016
+) %>%  
+  as_tibble() %>%
+  janitor::clean_names() %>%
+  filter(
+    # remove extra Acton Lake observations
+    !(lake_name %in% c("Acton Lake Aug", "Acton Lake July", "Acton Lake Oct")),
+    # only sampled sites
+    eval_status == "sampled",
+    # only sites with n2o concentration and volumetric eb data
+    # 1 site with N2O but not volumetric eb, weird.
+    !is.na(trap_n2o_ppm), 
+    !is.na(eb_ml_hr_m2) 
+  ) %>% 
+  select(
+    lake_name, site_id, visit, # identifiers
+    eb_ml_hr_m2, # volumetric ebullition
+    br_prssr, # barometric pressure (mm Hg)
+    air_temp, air_temp_units,
+    contains("trap"), -contains("extn"),
+    -trap_deply_dt_tm, -trap_rtrv_dt_tm 
+  ) %>%
+  rename(
+    atm_pressure = br_prssr, # (mm Hg)
+    air_temperature = air_temp,
+    air_temperature_units = air_temp_units
+  ) %>%
+  mutate(
+    # identifiers
+    visit = 1,
+    site_id = as.numeric(gsub(".*?([0-9]+).*", "\\1", site_id)),
+    site_id = as.character(site_id),
+    across(everything(), ~ifelse(is.nan(.x), NA, .x))
+  ) %>%
+  # convert lake_name to lake_id
+  left_join(
+    lake.list.2016 %>% select(lake_id, eval_status_code_comment), 
+    by = c("lake_name" = "eval_status_code_comment")
+  ) %>%
+  # restrict to fields present in SuRGE data
+  select(-lake_name) %>%
+  # move lake_id, site_id, and vist to first columns
+  relocate(lake_id, site_id, visit, contains("trap_n2o"))
+
+janitor::get_dupes(dat_2016_n2o, lake_id, site_id, visit) # no duplicates
+dim(dat_2016_n2o) # 236
+
+
+
+## SURGE DATA----
+# for the surge data, we can pull this from the eb_data object
+dat_surge_n2o <- eb_data %>%
+  # some records with no data outside identifiers, these
+  # probably reflect unsampled sites. Also have sites with no N2O
+  # data. Maybe bad standard curve or sample volume too small for analyses.
+  # remove these
+  filter(!is.na(n2o_ppm)) %>% 
+  # we also have 5 cases of n2o_ppm == 0. Replace these with min reported value
+  # excluding 0 from the calculation of min, but then replacing 0 with min value.
+  # probably need to consider N2O MDL
+  mutate(
+    n2o_ppm = case_when(
+      n2o_ppm == 0 ~ min(n2o_ppm[n2o_ppm != 0], na.rm = TRUE),
+      TRUE ~ n2o_ppm
+    )
+    ) %>%
+  select(
+    -sample_depth_m, -type,
+         -contains("trap")
+  ) %>%
+  # deal with lacustrine etc from Missouri river
+  mutate( # move transitional, lacustrine, riverine from lake_id to site_id
+    site_id = case_when(grepl("lacustrine", lake_id) ~ paste0(site_id, "_lacustrine"),
+                        grepl("transitional", lake_id) ~ paste0(site_id, "_transitional"),
+                        grepl("riverine", lake_id) ~ paste0(site_id, "_riverine"),
+                        TRUE ~ as.character(site_id)),
+    # remove transitional, lacustrine, riverine from lake_id
+    # retain character class initially, then convert to numeric.
+    lake_id = case_when(lake_id %in% c("69_lacustrine", "69_riverine", "69_transitional") ~ "69",
+                        lake_id %in% c("70_lacustrine", "70_riverine", "70_transitional") ~ "70",
+                        TRUE ~ lake_id),
+    lake_id = as.numeric(lake_id)) %>%
+  # append "trap_" to all columns except lake_id, site_id, visit, atm_pressure, and air_temperature
+  # air_temperature and eb_ml_hr_m2
+  rename_with(
+    ~paste0("trap_", .), 
+    -c(lake_id, site_id, visit, atm_pressure, air_temperature, eb_ml_hr_m2)
+    ) 
+
+janitor::get_dupes(dat_surge_n2o, lake_id, site_id, visit) # no dups
+dim(dat_surge_n2o) # 775
+
+
+## BIND DATA AND RECALCULATE N2O EBULLITION----
+dat_n2o <- bind_rows(dat_2016_n2o, dat_surge_n2o) %>%
+  mutate(
+    n2o_ebullition = mass.rate.n2o(., choice1 = "n2o")
+  ) %>%
+  mutate(
+    n2o_ebullition_units = "mg n2o m-2 h-1"
+  ) %>%
+  select(
+    -eb_ml_hr_m2, 
+    -atm_pressure, 
+    -air_temperature,
+    -air_temperature_units
+    )
+
+janitor::get_dupes(dat_n2o, lake_id, site_id, visit) # no dups
+dim(dat_n2o) # 1011
 
 # 2016 DISSOLVED GAS AND K DATA----
 # Inadvertently omitted from data paper files. 
@@ -17,13 +190,31 @@
 # Dissolved ch4, dissolved co2, shallow water temperature are needed to 
 # calculate k600
 
-load(paste0(userPath, "data/CIN/2016_survey/eqAreaData.RData")) # loads eqAreaData
+# The dissolved gas concentrations were calculated using wrong barometric
+# pressure units in the 2016 study. Recalculation requires:
+
+# barometric pressure (kPa) == BrPrssr (check units)
+# headspace N2O concentration == dissolved_n2o.ppm
+# air N2O == air_n2o.ppm
+# source N2O = 0 # used helium
+# headspace equilibration temperature == Tmp_C_S same as lake water
+# water volume == "H2O_vol"
+# headspace volume == "HeVol"
+
 
 
 eqAreaData <- eqAreaData %>%
+  tibble %>%
   mutate(
     baro =  BrPrssr * (101.325 / 760) # mm Hg to KPa 
-  )
+  ) %>%
+  # eliminate results from original dissolved gas concentrations
+  # in the mulitressurvey R Studio project where the wrong BP
+  # units were used.
+  select(
+    -c(dissolved.ch4, dissolved.co2, dissolved.n2o,
+       sat.ch4, sat.co2, sat.n2o)
+    )
 
 dat_2016_dissolved <- with(
   eqAreaData, 
@@ -150,6 +341,13 @@ janitor::get_dupes(dat_2016_dissolved, lake_id, site_id, visit) # no duplicates
 dim(dat_2016_dissolved) # 62, 2 sites per lake.
 
 
+
+# WRITE DATA----
+# data file 1: n2o ebullition and trap gas composition
+write_csv(
+  dat_n2o, 
+  "output/n2o_ebullition_trap_gas.csv"
+  )
 
 
 
