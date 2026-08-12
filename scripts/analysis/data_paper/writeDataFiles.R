@@ -716,6 +716,12 @@ emission_rate_points_data_paper <- left_join(
                             TRUE ~ lake_id),
         lake_id = as.numeric(lake_id))
     ) %>% # close left join
+  # update k_600 values (currently NA) for 2016 data
+  rows_update(
+    dat_2016_dissolved %>% 
+      select(lake_id, site_id, visit, contains("_600")),
+    by = c("lake_id", "site_id", "visit")
+  ) %>%
   # remove "best" from diffusion variable
   rename_with(.cols = contains("best"), ~sub(pattern = "_best", replacement = "", x = .)) %>%
   # enforce decimal points
@@ -932,7 +938,7 @@ write.csv(x = depth_profiles_dictionary,
 # d.	site_id
 # e.	visit
 # f. chemistry
-# h.	Dissolved gas not ready
+
 
 site_data <- 
   bind_rows(
@@ -1042,8 +1048,45 @@ site_data <-
                    # breaking pattern is final _
                    names_pattern = "(.+)_(.+)") %>%
       mutate(sample_depth = "shallow") %>%
-      drop_na(value) # omit record if no value reported
-  ) %>%
+      drop_na(value), # omit record if no value reported
+    
+    
+    # 2016 DISSOLVED GAS DATA
+    # inadvertently excluded from dat_2016
+    # see gather_n2o_ebulltion_data.R for curation of dat_2016_dissolved
+    dat_2016_dissolved %>%
+      select(
+        lake_id, site_id, visit,
+        contains("_sat_ratio_shallow"),
+        contains("dissolved_co2_shallow"),
+        contains("dissolved_ch4_shallow"),
+        contains("dissolved_n2o_shallow")
+      ) %>%
+      mutate(
+        sample_depth = "shallow"
+      ) %>%
+      rename_with(
+        ~gsub("_shallow", "", .),
+        everything()
+        ) %>%
+      rename_with(
+        ~paste0(., "_value"),
+        where(is.numeric) & !c(lake_id, visit)
+      ) %>%
+      pivot_longer(
+        -c(lake_id, site_id, visit, sample_depth),
+        # anything to left of pattern is "name"
+        # every matching group to right creates new value column
+        names_to = c("name", ".value"),
+        # breaking pattern is final _
+        names_pattern = "(.+)_(.+)"
+        ) %>% # close pivot_longer
+      mutate(
+        flags = NA,
+        comment = NA
+        )
+    ) %>% # close bind_rows
+
   # ADD DETECTION LIMITS
   # 1. add lab and year, needed for join with DL data
   left_join(rbind(lake.list, lake.list.2016) %>% # joins by lake_id and visit

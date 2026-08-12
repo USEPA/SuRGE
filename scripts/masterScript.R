@@ -87,6 +87,9 @@ source("scripts/analysis/sonde_criteria.R") # edits dat object to remove unreaso
 # Project shapefiles
 source("scripts/analysis/writeSuRGElakesToGpkg.R")
 
+# Compile 2016 dissolved gas and k
+source("scripts/analysis/gather_n2o_ebulltion_data.R")
+
 # Manuscripts
 source("scripts/analysis/data_paper/writeDataFiles.R")
 
