@@ -1,12 +1,15 @@
 # BACKGROUND----
 ## Dissolved gas
 # Data file "7_site_data.csv" in the SuRGE data paper package
-# contains deep and shallow n2o, but is missing the 2016 data. 
+# contains deep and shallow n2o, but is missing the 2016 data. The
+# 2016 dissolved gas numbers in eqAreaData were calculated in the 
+# mulitressurvey RStudio project using the wrong BP. Below we strip
+# those data from eqAreaData and recalculate. The corrected values
+# are added to data file "7_site_data.csv" in writeDataFiles.R.
 
 ## k600
 # Data file "4_emission_rate_points.csv" contains k600, but not for 2016.
-# We did not include n2o_ebullition or trap gas data in the data paper 
-# files. 
+# Will calculate below and write to data file 4 in writeDataFiles.R.
 
 ## n2o ebullition
 # Not included in data paper files. n2o_ebullition in the dat object
@@ -22,10 +25,10 @@
 
 ## new files
 # will write a new file "n2o_ebullition_trap_gas.csv" with the trap gas 
-# composition and n2o_ebullition for all sites with trap gas data.
+# composition and n2o_ebullition for all sites with trap gas data. This will
+# be used in n2o_ebullition RStudio project.
 
-# Will write a second file containing the 2016 dissolved gas data (n2o, 
-# ch4, and co2) and k600. k600 will be recalculated below. 
+ 
 
 
 
@@ -201,9 +204,17 @@ dim(dat_n2o) # 1011
 
 
 eqAreaData <- eqAreaData %>%
+  tibble %>%
   mutate(
     baro =  BrPrssr * (101.325 / 760) # mm Hg to KPa 
-  )
+  ) %>%
+  # eliminate results from original dissolved gas concentrations
+  # in the mulitressurvey R Studio project where the wrong BP
+  # units were used.
+  select(
+    -c(dissolved.ch4, dissolved.co2, dissolved.n2o,
+       sat.ch4, sat.co2, sat.n2o)
+    )
 
 dat_2016_dissolved <- with(
   eqAreaData, 
@@ -336,12 +347,6 @@ dim(dat_2016_dissolved) # 62, 2 sites per lake.
 write_csv(
   dat_n2o, 
   "output/n2o_ebullition_trap_gas.csv"
-  )
-
-# data file 2: 2016 dissolved gas and k600
-write_csv(
-  dat_2016_dissolved,
-  "output/2016_dissolved_gas_k600.csv"
   )
 
 
