@@ -88,7 +88,7 @@ dat_2016_n2o <- left_join(
   ) %>% 
   select(
     lake_name, site_id, visit, # identifiers
-    eb_ml_hr_m2, # volumetric ebullition
+    tt_trp_vl, eb_ml_hr_m2, # volumetric ebullition and total gas recovered
     br_prssr, # barometric pressure (mm Hg)
     air_temp, air_temp_units,
     contains("trap"), -contains("extn"),
@@ -97,7 +97,8 @@ dat_2016_n2o <- left_join(
   rename(
     atm_pressure = br_prssr, # (mm Hg)
     air_temperature = air_temp,
-    air_temperature_units = air_temp_units
+    air_temperature_units = air_temp_units,
+    trap_volume = tt_trp_vl
   ) %>%
   mutate(
     # identifiers
@@ -140,7 +141,8 @@ dat_surge_n2o <- eb_data %>%
     ) %>%
   select(
     -sample_depth_m, -type,
-         -contains("trap")
+         -contains("trap"),
+    trap_volume # retain trap volume
   ) %>%
   # deal with lacustrine etc from Missouri river
   mutate( # move transitional, lacustrine, riverine from lake_id to site_id
